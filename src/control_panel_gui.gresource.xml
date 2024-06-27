@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/org/gnome/controlpanelgui">
+    <file preprocess="xml-stripblanks">ui/window.ui</file>
+    <file preprocess="xml-stripblanks">ui/vm_row.ui</file>
+    <file preprocess="xml-stripblanks">ui/audio_settings.ui</file>
+    <file preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
+    <file>styles/style.css</file>
+    <!-- Icons -->
+    <file>icons/ghaf_logo.svg</file>
+    <file>icons/icon_admin.png</file>
+    <file>icons/icon_app_chrome.svg</file>
+    <file>icons/icon_app_pdf.svg</file>
+    <file>icons/icon_app_whatsapp.svg</file>
+    <file>icons/icon_security.svg</file>
+    <file>icons/icon_wifi.svg</file>
+    <file>icons/icon_clock.svg</file>
+    <file>icons/icon_region_location.svg</file>
+    <file>icons/icon_monitor.svg</file>
+    <file>icons/icon_mouse.svg</file>
+    <file>icons/icon_keyboard.svg</file>
+    <file>icons/icon_audio.svg</file>
+    <file>icons/security_well.svg</file>
+    <file>icons/security_attention.svg</file>
+    <file>icons/security_alert.svg</file>
+  </gresource>
+</gresources>

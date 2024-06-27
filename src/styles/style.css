@@ -1,0 +1,303 @@
+/*
+:root {
+    --bg-color-1: #1D1D1D;
+    --bg-color-2: #2B2B2B;
+    --bg-color-3: #353535;
+
+    --accent-color: #F15025;
+}
+*/
+header-bar {
+  background-color: #FFFFFF;
+}
+
+button.header-button/*:active?*/ {
+  background-color: #F15025;
+  color: #FFFFFF;
+}
+
+button.header-button:hover {
+  background-color: #1D1D1D;
+  color: #FFFFFF;
+}
+
+button.header-button:disabled {
+  background-color: #1B1B1B;
+  color: #FFFFFF;
+}
+
+label {
+  font-size: 14px;
+  color: #FFFFFF;
+}
+
+label.vm-name {
+  font-size: 16px;
+  /*font-weight: bold;*/
+  color: #FFFFFF;
+}
+
+label.title {
+  font-size: 16px;
+  /*font-weight: bold;*/
+  color: #FFFFFF;
+}
+
+separator {
+  color: #FFFFFF;
+  margin: 10px;
+}
+
+box.container {
+  background-color: #2B2B2B;
+}
+
+box.info-box {
+  background-color: #353535;
+}
+
+listview {
+  background-color: #2B2B2B;
+}
+
+/* VMRow styling */
+row {
+  background-color: #1D1D1D;
+  border: 1px solid #353535;
+  border-radius: 3px;
+  margin: 5px;
+}
+
+row:active {
+  background-color: #2B2B2B;
+  border: 1px solid #353535;
+  border-radius: 3px;
+  margin: 5px;
+}
+
+row:hover {
+  background-color: #2B2B2B;
+  border: 1px solid #353535;
+  border-radius: 3px;
+  margin: 5px;
+}
+
+row:focus {
+  background-color: #2B2B2B;
+  border: 1px solid #353535;
+  border-radius: 3px;
+  margin: 5px;
+}
+
+/*
+row {
+  background-color: #2B2B2B;
+}
+
+box.vm-row {
+  background-color: #1D1D1D;
+  border: 1px solid #353535;
+  border-radius: 3px;
+}
+
+box.vm-row:active {
+  background-color: magenta;
+  border: 1px solid #353535;
+  border-radius: 3px;
+}
+
+box.vm-row:disabled {
+  background-color: red;
+  border: 1px solid #353535;
+  border-radius: 3px;
+}
+
+box.vm-row:checked {
+  background-color: green;
+  border: 1px solid #353535;
+  border-radius: 3px;
+}
+
+box.vm-row:indeterminate {
+  background-color: green;
+  border: 1px solid #353535;
+  border-radius: 3px;
+}
+
+box.vm-row:hover {
+  background-color: #2B2B2B;
+  border: 1px solid #353535;
+  border-radius: 3px;
+}
+
+box.vm-row:focus {
+  background-color: #2B2B2B;
+  border: 1px solid #353535;
+  border-radius: 3px;
+}
+*/
+
+/* Settings List styling */
+.settings_list {
+  background-color: #1D1D1D;
+}
+
+.settings-row {
+  background-color: #1D1D1D;
+  border: 0;
+  margin: 0;
+}
+
+.settings-row:active {
+  background-color: #1D1D1D;
+  border: 0;
+  margin: 0;
+}
+
+.settings-row:hover {
+  background-color: #2B2B2B;
+  border: 0;
+  margin: 0;
+}
+
+.settings-row:focus {
+  background-color: #2B2B2B;
+  border: 0;
+  margin: 0;
+}
+
+.settings-row > box.header {
+  background-color: #1D1D1D;
+}
+
+.settings-row:active > box.header {
+  background-color: #2B2B2B;
+}
+
+.settings-row:focus > box.header {
+  background-color: #2B2B2B;
+}
+
+.settings-row:hover > box.header {
+  background-color: #2B2B2B;
+}
+
+.settings-row > box.title {
+  background-color: #1D1D1D;
+}
+
+.settings-row:active > box.title {
+  background-color: #2B2B2B;
+}
+
+.settings-row:focus > box.title {
+  background-color: #2B2B2B;
+}
+
+.settings-row:hover > box.title {
+  background-color: #2B2B2B;
+}
+
+.settings-row > * > * > label.title {
+  color: #FFFFFF;
+}
+
+.settings-row:active > * > * > label.title {
+  color: #FFFFFF;
+}
+
+.settings-row:focus > * > * > label.title {
+  color: #F15025;
+}
+
+.settings-row:hover > * > * > label.title {
+  color: #FFFFFF;
+}
+
+.settings-row:hover:focus > * > * > label.title {
+  color: #F15025;
+}
+/* Settings AdwActionRow styling end*/
+
+/* TODO: inner box.header and box.title with label */
+
+/* VMRow styling end */
+
+
+/*Dropdown styling*/
+.dropdown-button {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+}
+
+.dropdown-button > button {
+  background-color: #353535;
+  border: 1px solid #2B2B2B;
+  border-radius: 2px;
+  margin: 0;
+}
+
+.dropdown-button > button  > box {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+}
+
+.dropdown-button > button  > box > * > row {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+}
+
+.dropdown-button > popover > contents {
+  background-color: #353535;
+  border: 1px solid #2B2B2B;
+  border-radius: 2px;
+  margin: 0;
+}
+
+.dropdown-button > popover > contents > * > * > listview {
+  background-color: #353535;
+}
+
+.dropdown-button > popover > contents > * > * > * > row {
+  background-color: #353535;
+}
+
+.dropdown-button > popover > contents > * > * > * > row:hover {
+  background-color: #2B2B2B;
+}
+
+.dropdown-button > popover > contents > * > * > * > row:focus {
+  background-color: #2B2B2B;
+}
+
+/*Scale slider styling*/
+scale {
+  /*background-color: lightblue;*/
+  padding: 1px;
+}
+
+scale > trough {
+  /*min-height: 10px;*/
+  background-color: #F15025;
+}
+
+scale > trough > fill {
+  background-color: #FFFFFF;
+}
+
+scale > trough > highlight {
+  background-color: #F15025;
+}
+
+scale > trough > slider {
+  background-color: #FFFFFF;
+  /*min-width: 12px;
+  min-height: 12px;*/
+}
+
+scale > value {
+  color: #FFFFFF;
+}

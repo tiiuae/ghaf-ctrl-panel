@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="AudioSettings" parent="GtkBox">
+    <!--<style><class name="vm-row"/></style>-->
+    <property name="visible">True</property>
+    <property name="orientation">vertical</property>
+    <property name="can_focus">false</property>
+    <property name="vexpand">true</property>
+    <property name="hexpand">true</property>
+    <property name="margin-start">10</property>
+    <property name="margin-end">10</property>
+    <property name="margin-top">10</property>
+    <property name="margin-bottom">10</property>
+    <property name="spacing">10</property>
+    <child>
+      <object class="GtkLabel">
+      <style><class name="title"/></style>
+      <property name="halign">start</property>
+      <property name="label">Audio Settings</property>
+      <property name="margin-start">0</property>
+      <property name="margin-end">0</property>
+      <property name="margin-top">10</property>
+      <property name="margin-bottom">10</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkLabel">
+      <property name="halign">start</property>
+      <property name="margin-start">10</property>
+      <property name="label">Choose microphone</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkDropDown" id="mic_switch">
+      <style><class name="dropdown-button"/></style>
+      <signal name="notify::selected" handler="on_mic_changed" swapped="true"/>
+      <property name="halign">start</property>
+      <property name="valign">center</property>
+      <property name="width-request">220</property>
+      <property name="height-request">30</property>
+      <property name="model">
+        <object class="GtkStringList">
+          <items>
+            <item translatable="yes">Mic1</item>
+            <item translatable="yes">Mic2</item>
+          </items>
+        </object>
+      </property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkScale" id="mic_volume">
+      <signal name="value-changed" handler="on_mic_volume_changed" swapped="false"/>
+      <property name="orientation">horizontal</property>
+      <property name="halign">start</property>
+      <property name="valign">center</property>
+      <property name="width-request">220</property>
+      <property name="height-request">30</property>
+      <property name="adjustment">
+        <object class="GtkAdjustment">
+        <property name="lower">0</property>
+        <property name="upper">100</property>
+        <property name="step_increment">1</property>
+        <property name="page_increment">10</property>
+        <property name="value">50</property>
+        </object>
+      </property>
+      <property name="draw_value">true</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkLabel">
+      <property name="halign">start</property>
+      <property name="margin-start">10</property>
+      <property name="margin-top">10</property>
+      <property name="label">Choose speakers</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkDropDown" id="speaker_switch">
+      <style><class name="dropdown-button"/></style>
+      <signal name="notify::selected" handler="on_speaker_changed" swapped="true"/>
+      <property name="halign">start</property>
+      <property name="valign">center</property>
+      <property name="width-request">220</property>
+      <property name="height-request">30</property>
+      <property name="model">
+        <object class="GtkStringList">
+          <items>
+            <item translatable="yes">Speaker1</item>
+            <item translatable="yes">Speaker2</item>
+          </items>
+        </object>
+      </property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkScale" id="speaker_volume">
+      <signal name="value-changed" handler="on_speaker_volume_changed" swapped="false"/>
+      <property name="orientation">horizontal</property>
+      <property name="halign">start</property>
+      <property name="valign">center</property>
+      <property name="width-request">220</property>
+      <property name="height-request">30</property>
+      <property name="adjustment">
+        <object class="GtkAdjustment">
+        <property name="lower">0</property>
+        <property name="upper">100</property>
+        <property name="step_increment">1</property>
+        <property name="page_increment">10</property>
+        <property name="value">50</property>
+        </object>
+      </property>
+      <property name="draw_value">true</property>
+      </object>
+    </child>
+  </template>
+</interface>
+
+<!--<object class="GtkDropDown">
+        <property name="halign">start</property>
+        <property name="valign">CENTER</property>
+        <property name="width-request">220</property>
+        <property name="height-request">30</property>
+        <property name="model">
+          <object class="GtkStringList">
+            <items>
+              <item translatable="yes">Pause</item>
+              <item translatable="yes">Restart</item>
+              <item translatable="yes">Shutdown</item>
+            </items>
+          </object>
+        </property>
+        </object>-->
+        <!--<object class="GtkMenuButton" id="dropdown_button">
+          <property name="visible">True</property>
+          <property name="halign">START</property>
+          <property name="valign">CENTER</property>
+          <property name="label">Status</property>
+          <child>
+            <object class="GtkPopoverMenu" id="popover_menu">
+              <property name="visible">True</property>
+              <child>
+                <object class="GtkBox">
+                  <property name="orientation">vertical</property>
+                  <child>
+                    <object class="GtkButton" id="run_button">
+                      <property name="label">Run</property>
+                    </object>
+                  </child>
+                  <child>
+                    <object class="GtkButton" id="pause_button">
+                      <property name="label">Pause</property>
+                    </object>
+                  </child>
+                  <child>
+                    <object class="GtkButton" id="stop_button">
+                      <property name="label">Stop</property>
+                    </object>
+                  </child>
+                </object>
+              </child>
+            </object>
+          </child>
+        </object>-->

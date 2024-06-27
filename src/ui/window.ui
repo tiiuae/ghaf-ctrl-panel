@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="Adw" version="1.0"/>
+  <template class="ControlPanelGuiWindow" parent="AdwApplicationWindow">
+    <property name="default-width">800</property>
+    <property name="default-height">600</property>
+    <child>
+      <object class="AdwToolbarView">
+        <child type="top">
+          <object class="AdwHeaderBar" id="header_bar">
+            <child type="end">
+              <object class="GtkMenuButton" id="header_menu_button">
+              <property name="primary">True</property>
+              <property name="icon-name">open-menu-symbolic</property>
+              <property name="tooltip-text" translatable="yes">Menu</property>
+              <property name="menu-model">primary_menu</property>
+              </object>
+            </child>
+            <child type="end">
+              <object class="GtkButton" id="settings_view_button">
+              <style><class name="header-button"/></style>
+              <property name="label">Settings</property>
+              <signal name="clicked" handler="switch_to_settings_view" swapped="true"/>
+              </object>
+            </child>
+            <child type="end">
+              <object class="GtkButton" id="vm_view_button">
+              <style><class name="header-button"/></style>
+              <property name="label">Virtual machines</property>
+              <signal name="clicked" handler="switch_to_vm_view" swapped="true"/>
+              </object>
+            </child>
+          </object>
+        </child>
+          <child><!-- Outer box child -->
+            <object class="GtkBox" id="outer_box">
+            <property name="orientation">vertical</property>
+            <style><class name="container"/></style>
+              <child>
+                <object class="GtkBox" id="control_box">
+                <property name="orientation">horizontal</property>
+                <style><class name="container"/></style>
+                <property name="margin-start">10</property>
+                <property name="margin-end">10</property>
+                <property name="margin-top">10</property>
+                <property name="margin-bottom">10</property>
+                  <child>
+                    <object class="GtkImage" id="ghaf_logo">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="resource">/org/gnome/controlpanelgui/icons/ghaf_logo.svg</property>
+                    <property name="width-request">50</property>
+                    <property name="height-request">50</property>
+                    </object>
+                  </child>
+                </object>
+              </child>
+              <child>
+                <object class="GtkStack" id="stack">
+                  <child> <!--VM view child -->
+                    <object class="GtkStackPage"> <!-- 1st stack child /page -->
+                      <property name="name">vm_view</property>
+                      <property name="child">
+                        <object class="GtkBox" id="vm_main_box"> <!-- Main box object -->
+                          <property name="name">vm_view</property>-
+                          <style><class name="container"/></style>
+                          <property name="orientation">horizontal</property>
+                          <child>
+                            <object class="GtkBox" id="vm_box">
+                            <style><class name="container"/></style>
+                            <property name="orientation">vertical</property>
+                            <property name="margin-start">10</property>
+                            <property name="margin-end">10</property>
+                            <property name="margin-top">10</property>
+                            <property name="margin-bottom">10</property>
+                              <child>
+                                <object class="GtkListView" id="vm_list_view">
+                                  <property name="margin-start">10</property>
+                                  <property name="margin-end">0</property>
+                                  <property name="margin-top">0</property>
+                                  <property name="margin-bottom">0</property>
+                                  <property name="width-request">300</property>
+                                  <!--<property name="show-separators">true</property>-->
+                                  <style><class name="vm-list"/></style>
+                                </object>
+                              </child>
+                            </object> <!-- VM box object (list of VM's)-->
+                          </child>
+                          <child>
+                            <object class="GtkBox" id="vm_details_box">
+                            <style><class name="info-box"/></style>
+                              <property name="orientation">vertical</property>
+                              <property name="vexpand">true</property>
+                              <property name="hexpand">true</property>
+                              <property name="margin-start">10</property>
+                              <property name="margin-end">10</property>
+                              <property name="margin-top">10</property>
+                              <property name="margin-bottom">10</property>
+                              <!--<property name="spacing">10</property>-->
+                              <child>
+                                <object class="GtkLabel" id="vm_name_label">
+                                <property name="label">VM info</property>
+                                <style><class name="vm-name"/></style>
+                                <property name="margin-start">10</property>
+                                <property name="margin-end">10</property>
+                                <property name="margin-top">10</property>
+                                <property name="margin-bottom">10</property>
+                                <property name="halign">start</property>
+                                </object>
+                              </child>
+                              <child>
+                                <object class="GtkLabel" id="vm_details_label">
+                                <property name="label">VM details</property>
+                                <property name="margin-start">10</property>
+                                <property name="margin-end">10</property>
+                                <property name="margin-top">10</property>
+                                <property name="margin-bottom">10</property>
+                                <property name="halign">start</property>
+                                </object>
+                              </child>
+                              <child>
+                                <object class="GtkBox" id="vm_security_box">
+                                <style><class name="info-box"/></style>
+                                <property name="orientation">horizontal</property>
+                                <property name="vexpand">false</property>
+                                <property name="hexpand">true</property>
+                                <property name="margin-start">10</property>
+                                <property name="margin-end">10</property>
+                                <property name="margin-top">10</property>
+                                <property name="margin-bottom">10</property>
+                                  <child>
+                                    <object class="GtkImage">
+                                      <property name="visible">True</property>
+                                      <property name="can_focus">False</property>
+                                      <property name="resource">/org/gnome/controlpanelgui/icons/security_well.svg</property>
+                                      <property name="width-request">16</property>
+                                      <property name="height-request">20</property>
+                                    </object>
+                                  </child>
+                                  <child>
+                                    <object class="GtkLabel" id="vm_security_label">
+                                    <property name="label">This VM is secure!</property>
+                                    <property name="margin-start">10</property>
+                                    <property name="margin-end">10</property>
+                                    <property name="margin-top">10</property>
+                                    <property name="margin-bottom">10</property>
+                                    <property name="halign">start</property>
+                                    </object>
+                                  </child>
+                                </object>
+                              </child>
+                              <child>
+                                <object class="GtkSeparator"/>
+                              </child>
+                              <child>
+                                <object class="GtkBox" id="vm_control_box">
+                                <style><class name="info-box"/></style>
+                                <property name="orientation">vertical</property>
+                                <property name="vexpand">false</property>
+                                <property name="hexpand">true</property>
+                                <property name="margin-start">10</property>
+                                <property name="margin-end">10</property>
+                                <property name="margin-top">10</property>
+                                <property name="margin-bottom">10</property>
+                                  <child>
+                                    <object class="GtkLabel" id="vm_control_label">
+                                    <property name="label">VM controls</property>
+                                    <style><class name="title"/></style>
+                                    <property name="margin-start">0</property>
+                                    <property name="margin-end">10</property>
+                                    <property name="margin-top">10</property>
+                                    <property name="margin-bottom">10</property>
+                                    <property name="halign">start</property>
+                                    </object>
+                                  </child>
+                                  <child>
+                                    <!-- Application-wide actions are needed for this widget
+                                    <object class="GtkMenuButton" id="action_menu_button">
+                                      <property name="visible">true</property>
+                                      <property name="halign">start</property>
+                                      <property name="width-request">220</property>
+                                      <property name="height-request">30</property>
+                                      <property name="label">Action</property>
+                                      <property name="menu-model">vm-action-menu</property>
+                                    </object>
+                                    -->
+
+                                    <object class="GtkDropDown" id="vm_action_menu_button">
+                                    <style><class name="dropdown-button"/></style>
+                                    <signal name="notify::selected" handler="on_vm_action_selected" swapped="true"/>
+                                    <property name="halign">start</property>
+                                    <property name="valign">center</property>
+                                    <property name="width-request">220</property>
+                                    <property name="height-request">30</property>
+                                    <property name="model">
+                                      <object class="GtkStringList">
+                                        <items>
+                                          <item translatable="yes">Run</item>
+                                          <item translatable="yes">Pause</item>
+                                          <item translatable="yes">Restart</item>
+                                          <item translatable="yes">Shutdown</item>
+                                        </items>
+                                      </object>
+                                    </property>
+                                    </object>
+
+                                  </child>
+                                </object>
+                              </child>
+                              <child>
+                                <object class="AudioSettings" id="audio_settings_box">
+                                </object>
+                              </child>
+                            </object> <!-- Info box object -->
+                          </child>
+                        </object> <!-- Main box object -->
+                      </property> <!-- 1st page child property-->
+                    </object> <!-- 1st stack child /page -->
+                  </child> <!-- 1st stack child /page -->
+                  <child> <!-- Settings child -->
+                    <object class="GtkStackPage">
+                      <property name="name">settings_view</property>
+                      <property name="child">
+                        <object class="GtkBox" id="settings_main_box"> <!-- Settings box object -->
+                          <property name="name">settings_view</property>
+                          <style><class name="container"/></style>
+                          <property name="orientation">horizontal</property>
+                          <child>
+                            <object class="GtkBox" id="settings_list_outer_box">
+                            <style><class name="container"/></style>
+                            <property name="orientation">vertical</property>
+                            <property name="margin-start">0</property>
+                            <property name="margin-end">10</property>
+                            <property name="margin-top">0</property>
+                            <property name="margin-bottom">10</property>
+                              <child>
+                                <object class="GtkListBox" id="settings_list_box">
+                                  <style><class name="settings_list"/></style>
+                                  <signal name="row_selected" handler="on_settings_row_selected" swapped="true"/>
+                                  <property name="margin-start">10</property>
+                                  <property name="margin-end">10</property>
+                                  <property name="margin-top">10</property>
+                                  <property name="margin-bottom">10</property>
+                                <property name="width-request">300</property>
+                                <style><class name="list-box"/></style>
+                                    <child>
+                                      <object class="AdwActionRow">
+                                        <style><class name="settings-row"/></style>
+                                        <property name="title">Admin</property>
+                                        <child type="prefix">
+                                          <object class="GtkImage">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="resource">/org/gnome/controlpanelgui/icons/icon_admin.png</property>
+                                            <property name="width-request">24</property>
+                                            <property name="height-request">24</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="AdwActionRow">
+                                        <style><class name="settings-row"/></style>
+                                        <property name="title">Information</property>
+                                        <child type="prefix">
+                                          <object class="GtkImage">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="resource">/org/gnome/controlpanelgui/icons/icon_admin.png</property>
+                                            <property name="width-request">24</property>
+                                            <property name="height-request">24</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="AdwActionRow">
+                                        <style><class name="settings-row"/></style>
+                                        <property name="title">Security</property>
+                                        <child type="prefix">
+                                          <object class="GtkImage">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="resource">/org/gnome/controlpanelgui/icons/icon_security.svg</property>
+                                            <property name="width-request">24</property>
+                                            <property name="height-request">24</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  <child>
+                                      <object class="AdwActionRow">
+                                        <style><class name="settings-row"/></style>
+                                        <property name="title">Wifi</property>
+                                        <child type="prefix">
+                                          <object class="GtkImage">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="resource">/org/gnome/controlpanelgui/icons/icon_wifi.svg</property>
+                                            <property name="width-request">24</property>
+                                            <property name="height-request">24</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                  </child>
+                                  <child>
+                                      <object class="AdwActionRow">
+                                        <style><class name="settings-row"/></style>
+                                        <property name="title">Keyboard</property>
+                                        <child type="prefix">
+                                          <object class="GtkImage">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="resource">/org/gnome/controlpanelgui/icons/icon_keyboard.svg</property>
+                                            <property name="width-request">24</property>
+                                            <property name="height-request">24</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                  </child>
+                                  <child>
+                                      <object class="AdwActionRow">
+                                        <style><class name="settings-row"/></style>
+                                        <property name="title">Mouse</property>
+                                        <child type="prefix">
+                                          <object class="GtkImage">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="resource">/org/gnome/controlpanelgui/icons/icon_mouse.svg</property>
+                                            <property name="width-request">24</property>
+                                            <property name="height-request">24</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                  </child>
+                                  <child>
+                                      <object class="AdwActionRow">
+                                        <style><class name="settings-row"/></style>
+                                        <property name="title">Display</property>
+                                        <child type="prefix">
+                                          <object class="GtkImage">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="resource">/org/gnome/controlpanelgui/icons/icon_monitor.svg</property>
+                                            <property name="width-request">24</property>
+                                            <property name="height-request">24</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                  </child>
+                                  <child>
+                                      <object class="AdwActionRow">
+                                        <style><class name="settings-row"/></style>
+                                        <property name="title">Audio</property>
+                                        <child type="prefix">
+                                          <object class="GtkImage">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="resource">/org/gnome/controlpanelgui/icons/icon_audio.svg</property>
+                                            <property name="width-request">24</property>
+                                            <property name="height-request">24</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                  </child>
+                                  <child>
+                                      <object class="AdwActionRow">
+                                        <style><class name="settings-row"/></style>
+                                        <property name="title">Date &amp;amp; Time</property>
+                                        <child type="prefix">
+                                          <object class="GtkImage">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="resource">/org/gnome/controlpanelgui/icons/icon_clock.svg</property>
+                                            <property name="width-request">24</property>
+                                            <property name="height-request">24</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                  </child>
+                                  <child>
+                                      <object class="AdwActionRow">
+                                        <style><class name="settings-row"/></style>
+                                        <property name="title">Region &amp;amp; Language</property>
+                                        <child type="prefix">
+                                          <object class="GtkImage">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="resource">/org/gnome/controlpanelgui/icons/icon_region_location.svg</property>
+                                            <property name="width-request">24</property>
+                                            <property name="height-request">24</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                  </child>
+                                </object>
+                              </child>
+                            </object> <!-- List of settings -->
+                          </child>
+                          <child>
+                            <object class="GtkBox" id="settings_details_box">
+                              <style><class name="info-box"/></style>
+                              <property name="orientation">vertical</property>
+                              <property name="vexpand">true</property>
+                              <property name="hexpand">true</property>
+                              <property name="margin-start">10</property>
+                              <property name="margin-end">10</property>
+                              <property name="margin-top">10</property>
+                              <property name="margin-bottom">10</property>
+                              <child>
+                                <object class="GtkLabel" id="details_label">
+                                <property name="label">Settings details</property>
+                                  <property name="margin-start">10</property>
+                                  <property name="margin-end">10</property>
+                                  <property name="margin-top">10</property>
+                                  <property name="margin-bottom">10</property>
+                                  <property name="halign">start</property>
+                                </object>
+                              </child>
+                            </object> <!-- Settings details box object -->
+                          </child>
+                        </object> <!-- Settings box object -->
+                      </property>
+                    </object>
+                  </child> <!-- Settings view child -->
+                </object> <!-- Stack box object -->
+              </child>
+            </object> <!-- Outer box object -->
+        </child>
+      </object> <!-- AdwToolbarView -->
+    </child>
+  </template>
+  <menu id="primary_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Preferences</attribute>
+        <attribute name="action">app.preferences</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Keyboard Shortcuts</attribute>
+        <attribute name="action">win.show-help-overlay</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_About Controlpanerust</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>

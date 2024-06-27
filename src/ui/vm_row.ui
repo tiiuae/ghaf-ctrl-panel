@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="VMRow" parent="GtkBox">
+    <style><class name="vm-row"/></style>
+    <property name="orientation">horizontal</property>
+    <property name="can_focus">true</property>
+    <property name="vexpand">true</property>
+    <property name="hexpand">true</property>
+    <property name="spacing">5</property>
+    <child>
+      <object class="GtkImage" id="vm_icon">
+          <property name="visible">True</property>
+          <property name="can_focus">False</property>
+          <property name="resource">/org/gnome/controlpanelgui/icons/ghaf_logo.svg</property>
+          <property name="margin-start">5</property>
+          <property name="margin-end">0</property>
+          <property name="margin-top">5</property>
+          <property name="margin-bottom">5</property>
+          <property name="width-request">30</property>
+          <property name="height-request">30</property>
+          <property name="halign">start</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox" id="text_box">
+        <property name="orientation">vertical</property>
+        <property name="margin-start">0</property>
+        <property name="margin-end">10</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">10</property>
+        <property name="vexpand">false</property>
+        <property name="hexpand">true</property>
+        <property name="halign">start</property>
+        <child>
+          <object class="GtkLabel" id="title_label">
+            <property name="halign">start</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="subtitle_label">
+            <property name="halign">start</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImage" id="security_icon">
+          <property name="visible">True</property>
+          <property name="can_focus">False</property>
+          <property name="resource">/org/gnome/controlpanelgui/icons/security_alert.svg</property>
+          <property name="margin-start">10</property>
+          <property name="margin-end">10</property>
+          <property name="margin-top">5</property>
+          <property name="margin-bottom">5</property>
+          <property name="width-request">16</property>
+          <property name="height-request">20</property>
+          <property name="halign">end</property>
+      </object>
+    </child>
+  </template>
+</interface>
