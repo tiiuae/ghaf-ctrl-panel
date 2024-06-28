@@ -16,6 +16,5 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .compile(&["proto/admin.proto"], &["admin"])
         .unwrap();
 
-    println!("OK!!!");
     Ok(())
 }

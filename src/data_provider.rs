@@ -5,6 +5,7 @@ use glib::subclass::prelude::*;
 
 use crate::vm_gobject::VMGObject;
 
+//to communicate with admin service and get data
 pub mod admin {
     tonic::include_proto!("admin");
 }
