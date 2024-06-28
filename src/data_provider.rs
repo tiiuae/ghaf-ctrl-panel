@@ -25,6 +25,7 @@ pub mod imp {
             vec.push(VMGObject::new("VM1".to_string(), String::from("This is the file.pdf")));
             vec.push(VMGObject::new("VM2".to_string(), String::from("Google Chrome")));
             init_store.extend_from_slice(&vec);
+
             Self {
                 store: RefCell::new(init_store),
                 status: false,

@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::cell::{Ref, RefCell};
 use gtk::prelude::*;
 use gio::prelude::*;
 use adw::subclass::prelude::*;
@@ -44,8 +44,6 @@ mod imp {
         #[template_child]
         pub audio_settings_box: TemplateChild<AudioSettings>,
 
-        pub vm_rows: RefCell<Option<gio::ListStore>>,
-
         pub menu_model: Menu,
 
         #[template_child]
@@ -82,10 +80,13 @@ mod imp {
         #[template_callback]
         fn switch_to_vm_view(&self) {
             self.stack.set_visible_child_name("vm_view");
+    
         }
         #[template_callback]
         fn switch_to_settings_view(&self) {
             self.stack.set_visible_child_name("settings_view");
+            //test
+            //self.data_provider.add_vm(VMGObject::new("VM4".to_string(), String::from("Test")));
         }
 
         #[template_callback]
@@ -161,26 +162,19 @@ impl ControlPanelGuiWindow {
         */
     }
 
-    fn vm_rows(&self) -> gio::ListStore {
-    // Get state
-    self.imp()
-        .vm_rows
-        .borrow()
-        .clone()
-        .expect("Could not get current tasks.")
+    fn vm_rows(&self) -> Ref<gio::ListStore> {
+        // Get state
+        self.imp().data_provider.get_store_ref()
     }
 
     fn setup_vm_rows(&self) {
         // Create new model
-        let model = self.imp().data_provider.get_store_copy();
+        let model = self.vm_rows();
 
         let count = model.n_items();//save count before model will be consumpted
 
-        // Get state and set model
-        self.imp().vm_rows.replace(Some(model));//model consumpted!
-
         // Wrap model with selection and pass it to the list view
-        let selection_model = SingleSelection::new(Some(self.vm_rows()));
+        let selection_model = SingleSelection::new(Some(model.clone()));//???
         // Connect to the selection-changed signal
         selection_model.connect_selection_changed(
             glib::clone!(@strong self as window => move |selection_model, _, _| {
@@ -198,6 +192,7 @@ impl ControlPanelGuiWindow {
             })
         );
         self.imp().vm_list_view.set_model(Some(&selection_model));
+
         //set default selection to 1st item
         selection_model.set_selected(0);
         selection_model.selection_changed(0u32, count);

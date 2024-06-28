@@ -11,7 +11,10 @@ header-bar {
   background-color: #FFFFFF;
 }
 
-button.header-button/*:active?*/ {
+button.header-button
+
+/*:active?*/
+  {
   background-color: #F15025;
   color: #FFFFFF;
 }
@@ -89,54 +92,6 @@ row:focus {
   margin: 5px;
 }
 
-/*
-row {
-  background-color: #2B2B2B;
-}
-
-box.vm-row {
-  background-color: #1D1D1D;
-  border: 1px solid #353535;
-  border-radius: 3px;
-}
-
-box.vm-row:active {
-  background-color: magenta;
-  border: 1px solid #353535;
-  border-radius: 3px;
-}
-
-box.vm-row:disabled {
-  background-color: red;
-  border: 1px solid #353535;
-  border-radius: 3px;
-}
-
-box.vm-row:checked {
-  background-color: green;
-  border: 1px solid #353535;
-  border-radius: 3px;
-}
-
-box.vm-row:indeterminate {
-  background-color: green;
-  border: 1px solid #353535;
-  border-radius: 3px;
-}
-
-box.vm-row:hover {
-  background-color: #2B2B2B;
-  border: 1px solid #353535;
-  border-radius: 3px;
-}
-
-box.vm-row:focus {
-  background-color: #2B2B2B;
-  border: 1px solid #353535;
-  border-radius: 3px;
-}
-*/
-
 /* Settings List styling */
 .settings_list {
   background-color: #1D1D1D;
@@ -166,57 +121,58 @@ box.vm-row:focus {
   margin: 0;
 }
 
-.settings-row > box.header {
+.settings-row>box.header {
   background-color: #1D1D1D;
 }
 
-.settings-row:active > box.header {
+.settings-row:active>box.header {
   background-color: #2B2B2B;
 }
 
-.settings-row:focus > box.header {
+.settings-row:focus>box.header {
   background-color: #2B2B2B;
 }
 
-.settings-row:hover > box.header {
+.settings-row:hover>box.header {
   background-color: #2B2B2B;
 }
 
-.settings-row > box.title {
+.settings-row>box.title {
   background-color: #1D1D1D;
 }
 
-.settings-row:active > box.title {
+.settings-row:active>box.title {
   background-color: #2B2B2B;
 }
 
-.settings-row:focus > box.title {
+.settings-row:focus>box.title {
   background-color: #2B2B2B;
 }
 
-.settings-row:hover > box.title {
+.settings-row:hover>box.title {
   background-color: #2B2B2B;
 }
 
-.settings-row > * > * > label.title {
+.settings-row>*>*>label.title {
   color: #FFFFFF;
 }
 
-.settings-row:active > * > * > label.title {
+.settings-row:active>*>*>label.title {
   color: #FFFFFF;
 }
 
-.settings-row:focus > * > * > label.title {
+.settings-row:focus>*>*>label.title {
   color: #F15025;
 }
 
-.settings-row:hover > * > * > label.title {
+.settings-row:hover>*>*>label.title {
   color: #FFFFFF;
 }
 
-.settings-row:hover:focus > * > * > label.title {
+.settings-row:hover:focus>*>*>label.title {
   color: #F15025;
 }
+
 /* Settings AdwActionRow styling end*/
 
 /* TODO: inner box.header and box.title with label */
@@ -231,45 +187,45 @@ box.vm-row:focus {
   margin: 0;
 }
 
-.dropdown-button > button {
+.dropdown-button>button {
   background-color: #353535;
   border: 1px solid #2B2B2B;
   border-radius: 2px;
   margin: 0;
 }
 
-.dropdown-button > button  > box {
+.dropdown-button>button>box {
   background-color: #353535;
   border: 0;
   margin: 0;
 }
 
-.dropdown-button > button  > box > * > row {
+.dropdown-button>button>box>*>row {
   background-color: #353535;
   border: 0;
   margin: 0;
 }
 
-.dropdown-button > popover > contents {
+.dropdown-button>popover>contents {
   background-color: #353535;
   border: 1px solid #2B2B2B;
   border-radius: 2px;
   margin: 0;
 }
 
-.dropdown-button > popover > contents > * > * > listview {
+.dropdown-button>popover>contents>*>*>listview {
   background-color: #353535;
 }
 
-.dropdown-button > popover > contents > * > * > * > row {
+.dropdown-button>popover>contents>*>*>*>row {
   background-color: #353535;
 }
 
-.dropdown-button > popover > contents > * > * > * > row:hover {
+.dropdown-button>popover>contents>*>*>*>row:hover {
   background-color: #2B2B2B;
 }
 
-.dropdown-button > popover > contents > * > * > * > row:focus {
+.dropdown-button>popover>contents>*>*>*>row:focus {
   background-color: #2B2B2B;
 }
 
@@ -279,25 +235,25 @@ scale {
   padding: 1px;
 }
 
-scale > trough {
+scale>trough {
   /*min-height: 10px;*/
   background-color: #F15025;
 }
 
-scale > trough > fill {
+scale>trough>fill {
   background-color: #FFFFFF;
 }
 
-scale > trough > highlight {
+scale>trough>highlight {
   background-color: #F15025;
 }
 
-scale > trough > slider {
+scale>trough>slider {
   background-color: #FFFFFF;
   /*min-width: 12px;
   min-height: 12px;*/
 }
 
-scale > value {
+scale>value {
   color: #FFFFFF;
 }
