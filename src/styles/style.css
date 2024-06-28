@@ -29,7 +29,7 @@ button.header-button:disabled {
   color: #FFFFFF;
 }
 
-label {
+label.normal-text {
   font-size: 14px;
   color: #FFFFFF;
 }
@@ -153,23 +153,23 @@ row:focus {
   background-color: #2B2B2B;
 }
 
-.settings-row>*>*>label.title {
+.settings-row>*>*>label {
   color: #FFFFFF;
 }
 
-.settings-row:active>*>*>label.title {
+.settings-row:active>*>*>label {
   color: #FFFFFF;
 }
 
-.settings-row:focus>*>*>label.title {
+.settings-row:focus>*>*>label {
   color: #F15025;
 }
 
-.settings-row:hover>*>*>label.title {
+.settings-row:hover>*>*>label {
   color: #FFFFFF;
 }
 
-.settings-row:hover:focus>*>*>label.title {
+.settings-row:hover:focus>*>*>label {
   color: #F15025;
 }
 
@@ -185,6 +185,10 @@ row:focus {
   background-color: #353535;
   border: 0;
   margin: 0;
+}
+
+.dropdown-button>button.toggle {
+  color: #FFFFFF;
 }
 
 .dropdown-button>button {
@@ -206,6 +210,10 @@ row:focus {
   margin: 0;
 }
 
+.dropdown-button>button>box>*>row>*>label {
+  color: #FFFFFF;
+}
+
 .dropdown-button>popover>contents {
   background-color: #353535;
   border: 1px solid #2B2B2B;
@@ -219,6 +227,10 @@ row:focus {
 
 .dropdown-button>popover>contents>*>*>*>row {
   background-color: #353535;
+}
+
+.dropdown-button>popover>contents>*>*>*>row>*>label {
+  color: #FFFFFF;
 }
 
 .dropdown-button>popover>contents>*>*>*>row:hover {

@@ -111,6 +111,7 @@
                               </child>
                               <child>
                                 <object class="GtkLabel" id="vm_details_label">
+                                <style><class name="normal-text"/></style>
                                 <property name="label">VM details</property>
                                 <property name="margin-start">10</property>
                                 <property name="margin-end">10</property>
@@ -140,6 +141,7 @@
                                   </child>
                                   <child>
                                     <object class="GtkLabel" id="vm_security_label">
+                                    <style><class name="normal-text"/></style>
                                     <property name="label">This VM is secure!</property>
                                     <property name="margin-start">10</property>
                                     <property name="margin-end">10</property>
