@@ -83,9 +83,18 @@ row:hover {
   border: 1px solid #353535;
   border-radius: 3px;
   margin: 5px;
+  box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.3);
+  /* horizontal offset, vertical offset, blur radius, color */
 }
 
 row:focus {
+  background-color: #2B2B2B;
+  border: 1px solid #353535;
+  border-radius: 3px;
+  margin: 5px;
+}
+
+row:selected {
   background-color: #2B2B2B;
   border: 1px solid #353535;
   border-radius: 3px;
@@ -121,6 +130,12 @@ row:focus {
   margin: 0;
 }
 
+.settings-row:selected {
+  background-color: #2B2B2B;
+  border: 0;
+  margin: 0;
+}
+
 .settings-row>box.header {
   background-color: #1D1D1D;
 }
@@ -137,6 +152,10 @@ row:focus {
   background-color: #2B2B2B;
 }
 
+.settings-row:selected>box.header {
+  background-color: #2B2B2B;
+}
+
 .settings-row>box.title {
   background-color: #1D1D1D;
 }
@@ -150,6 +169,10 @@ row:focus {
 }
 
 .settings-row:hover>box.title {
+  background-color: #2B2B2B;
+}
+
+.settings-row:selected>box.title {
   background-color: #2B2B2B;
 }
 
@@ -173,12 +196,13 @@ row:focus {
   color: #F15025;
 }
 
-/* Settings AdwActionRow styling end*/
+.settings-row:hover:selected>*>*>label {
+  color: #F15025;
+}
 
-/* TODO: inner box.header and box.title with label */
-
-/* VMRow styling end */
-
+.settings-row:selected>*>*>label {
+  color: #F15025;
+}
 
 /*Dropdown styling*/
 .dropdown-button {
