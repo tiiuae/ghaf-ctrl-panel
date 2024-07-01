@@ -5,6 +5,11 @@ use glib::subclass::prelude::*;
 
 use crate::vm_gobject::VMGObject;
 
+use tonic::{Request, Response, Status};
+
+use admin::admin_service_client::{AdminServiceClient};
+use admin::{ApplicationRequest, ApplicationResponse, UnitStatus};
+
 //to communicate with admin service and get data
 pub mod admin {
     tonic::include_proto!("admin");
@@ -48,6 +53,11 @@ pub mod imp {
         pub fn add_vm(&self, vm: VMGObject) {
             let mut store = self.store.borrow_mut();
             store.append(&vm);
+        }
+
+        pub fn test_request(&self) {
+            println!("Test request...");
+            //call client::app_request() !!!
         }
     }
 

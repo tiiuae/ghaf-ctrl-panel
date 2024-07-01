@@ -2,6 +2,7 @@
 name = "control_panel_gui"
 version = "0.1.0"
 edition = "2021"
+default-run = "ctrl-panel"
 
 [dependencies]
 gettext-rs = { version = "0.7", features = ["gettext-system"] }
@@ -17,3 +18,15 @@ tonic-reflection = {version="0.11.0"}
 [build-dependencies]
 glib-build-tools = "0.19"
 tonic-build = "0.11"
+
+[[bin]]
+name = "test-server"
+path = "src/test-server.rs"
+
+[[bin]]
+name = "test-client"
+path = "src/client.rs"
+
+[[bin]]
+name = "ctrl-panel"
+path = "src/main.rs"

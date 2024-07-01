@@ -45,6 +45,7 @@ message Empty {
 
 service AdminService {
     rpc RegisterService(RegistryRequest) returns (RegistryResponse) {}
+    rpc ApplicationStatus(ApplicationRequest) returns (UnitStatus) {}
     rpc StartApplication(ApplicationRequest) returns (ApplicationResponse) {}
     rpc PauseApplication(ApplicationRequest) returns (ApplicationResponse) {}
     rpc ResumeApplication(ApplicationRequest) returns (ApplicationResponse) {}

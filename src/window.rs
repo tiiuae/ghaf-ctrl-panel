@@ -22,6 +22,8 @@ mod imp {
         #[template_child]
         pub header_menu_button: TemplateChild<gtk::MenuButton>,
         #[template_child]
+        pub update_button: TemplateChild<gtk::Button>,
+        #[template_child]
         pub vm_view_button: TemplateChild<gtk::Button>,
         #[template_child]
         pub settings_view_button: TemplateChild<gtk::Button>,
@@ -78,6 +80,11 @@ mod imp {
     #[gtk::template_callbacks]
     impl ControlPanelGuiWindow {
         #[template_callback]
+        fn on_update_clicked(&self) {
+            println!("Info update requested");
+    
+        }
+        #[template_callback]
         fn switch_to_vm_view(&self) {
             self.stack.set_visible_child_name("vm_view");
     
@@ -85,8 +92,6 @@ mod imp {
         #[template_callback]
         fn switch_to_settings_view(&self) {
             self.stack.set_visible_child_name("settings_view");
-            //test
-            //self.data_provider.add_vm(VMGObject::new("VM4".to_string(), String::from("Test")));
         }
 
         #[template_callback]
@@ -143,6 +148,7 @@ impl ControlPanelGuiWindow {
 
     fn init(&self) {
         let imp = imp::ControlPanelGuiWindow::from_instance(self);
+
         /*
         // Connect signals here
         //Tab button signals

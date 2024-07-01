@@ -18,17 +18,10 @@
               </object>
             </child>
             <child type="end">
-              <object class="GtkButton" id="settings_view_button">
+              <object class="GtkButton" id="update_button">
               <style><class name="header-button"/></style>
-              <property name="label">Settings</property>
-              <signal name="clicked" handler="switch_to_settings_view" swapped="true"/>
-              </object>
-            </child>
-            <child type="end">
-              <object class="GtkButton" id="vm_view_button">
-              <style><class name="header-button"/></style>
-              <property name="label">Virtual machines</property>
-              <signal name="clicked" handler="switch_to_vm_view" swapped="true"/>
+              <property name="label">Update info</property>
+              <signal name="clicked" handler="on_update_clicked" swapped="true"/>
               </object>
             </child>
           </object>
@@ -36,6 +29,8 @@
           <child><!-- Outer box child -->
             <object class="GtkBox" id="outer_box">
             <property name="orientation">vertical</property>
+            <property name="hexpand">true</property>
+            <property name="vexpand">true</property>
             <style><class name="container"/></style>
               <child>
                 <object class="GtkBox" id="control_box">
@@ -45,13 +40,47 @@
                 <property name="margin-end">10</property>
                 <property name="margin-top">10</property>
                 <property name="margin-bottom">10</property>
+                <property name="hexpand">true</property>
+                <property name="vexpand">false</property>
+                <property name="spacing">10</property>
                   <child>
                     <object class="GtkImage" id="ghaf_logo">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="visible">true</property>
+                    <property name="can_focus">false</property>
                     <property name="resource">/org/gnome/controlpanelgui/icons/ghaf_logo.svg</property>
                     <property name="width-request">50</property>
                     <property name="height-request">50</property>
+                    <property name="halign">start</property>
+                    </object>
+                  </child>
+                  <child>
+                    <object class="GtkBox">
+                        <property name="orientation">horizontal</property>
+                        <property name="hexpand">true</property>
+                    </object>
+                  </child>
+                  <child>
+                    <object class="GtkButton" id="vm_view_button">
+                    <style><class name="header-button"/></style>
+                    <property name="label">Virtual machines</property>
+                    <property name="halign">end</property>
+                    <property name="valign">center</property>
+                    <property name="width-request">220</property>
+                    <property name="height-request">30</property>
+                    <property name="vexpand">false</property>
+                    <signal name="clicked" handler="switch_to_vm_view" swapped="true"/>
+                    </object>
+                  </child>
+                  <child>
+                    <object class="GtkButton" id="settings_view_button">
+                    <style><class name="header-button"/></style>
+                    <property name="label">Settings</property>
+                    <property name="halign">end</property>
+                    <property name="valign">center</property>
+                    <property name="width-request">220</property>
+                    <property name="height-request">30</property>
+                    <property name="vexpand">false</property>
+                    <signal name="clicked" handler="switch_to_settings_view" swapped="true"/>
                     </object>
                   </child>
                 </object>
