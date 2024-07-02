@@ -6,6 +6,7 @@ mod vm_gobject;
 mod audio_settings;
 mod data_provider;
 mod security_icon;
+mod client;
 
 use self::application::ControlPanelGuiApplication;
 use self::window::ControlPanelGuiWindow;

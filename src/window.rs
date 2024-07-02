@@ -3,7 +3,6 @@ use gtk::prelude::*;
 use gio::prelude::*;
 use adw::subclass::prelude::*;
 use gtk::{gio, glib, CompositeTemplate, ListView, SingleSelection, SignalListItemFactory, ListItem, DropDown};
-use gio::Menu;
 
 use crate::data_provider::imp::DataProvider;
 use crate::vm_gobject::VMGObject;
@@ -46,8 +45,6 @@ mod imp {
         #[template_child]
         pub audio_settings_box: TemplateChild<AudioSettings>,
 
-        pub menu_model: Menu,
-
         #[template_child]
         pub settings_main_box: TemplateChild<gtk::Box>,
         #[template_child]
@@ -82,6 +79,7 @@ mod imp {
         #[template_callback]
         fn on_update_clicked(&self) {
             println!("Info update requested");
+            self.data_provider.test_request();
     
         }
         #[template_callback]

@@ -70,7 +70,7 @@ impl VMRow {
         glib::Object::builder().build()
     }
 
-    pub fn setData(&self) {
+    pub fn set_data(&self) {
         println!("{}", self.imp().name);//access the struct's field'
     }
 

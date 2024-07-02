@@ -2,19 +2,11 @@ use std::cell::{Ref, RefMut, RefCell};
 use gtk::prelude::*;
 use gtk::{self, gio, glib};
 use gio::ListStore;
-use glib::subclass::prelude::*;
+use std::thread;
+use std::sync::mpsc::{self, Sender, Receiver};
 
 use crate::vm_gobject::VMGObject;
-
-use tonic::{Request, Response, Status};
-
-use admin::admin_service_client::{AdminServiceClient};
-use admin::{ApplicationRequest, ApplicationResponse, UnitStatus};
-
-//to communicate with admin service and get data
-pub mod admin {
-    tonic::include_proto!("admin");
-}
+use crate::client::client::*;
 
 pub mod imp {
     use super::*;
@@ -23,6 +15,7 @@ pub mod imp {
     pub struct DataProvider {
         pub store: RefCell<ListStore>,
         pub status: bool,
+        pub req_tx: Sender<ClientServiceRequest>,
     }
 
     impl DataProvider {
@@ -32,6 +25,7 @@ pub mod imp {
             Self {
                 store: RefCell::new(init_store),
                 status: false,
+                req_tx: Self::make_client_thread(),
             }
         }
 
@@ -42,6 +36,18 @@ pub mod imp {
             vec.push(VMGObject::new("VM2".to_string(), String::from("Google Chrome")));
             init_store.extend_from_slice(&vec);
             return init_store;
+        }
+
+        fn make_client_thread() -> Sender<ClientServiceRequest> {
+            let (request_tx, request_rx): (Sender<ClientServiceRequest>, Receiver<ClientServiceRequest>) = mpsc::channel();
+            //let (response_tx, response_rx): (Sender<ClientServiceResponse>, Receiver<ClientServiceResponse>) = mpsc::channel();
+            let endpoint = String::from("http://[::1]:50051");
+
+            thread::spawn(move || {
+                client_service_thread(endpoint, request_rx/*, response_tx*/);
+            });
+
+            request_tx
         }
 
         pub fn get_store_copy(&self) -> ListStore {
@@ -63,24 +69,18 @@ pub mod imp {
 
         pub fn test_request(&self) {
             println!("Test request...");
-            //call client::regisrty() !!!
-            //call client::app_request() !!!
-        }
+            self.req_tx.send(ClientServiceRequest::AppRequest).unwrap();
 
-        //needs separate thread?
-        async fn app_request() -> Result<(), Box<dyn std::error::Error>> {
-            //beter create and move it to another thread?
-            let mut client = AdminServiceClient::connect("http://[::1]:50051").await?;
-        
-            let request = tonic::Request::new(ApplicationRequest {
-                app_name: "Test".into(),
-            });
-        
-            let response = client.application_status(request).await?;
-        
-            println!("RESPONSE={:?}", response);
-            Ok(())
-        }        
+            /* Receive and handle the response
+            if let Ok(response) = response_rx.recv() {
+                match response {
+                    ClientServiceResponse::AppResponse(result) => match result {
+                        Ok(msg) => println!("{}", msg),
+                        Err(e) => eprintln!("Error: {}", e),
+                    },
+                }
+            }*/
+        }       
     }
 
     impl Default for DataProvider {
