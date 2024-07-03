@@ -79,7 +79,7 @@ mod imp {
         #[template_callback]
         fn on_update_clicked(&self) {
             println!("Info update requested");
-            self.data_provider.test_request();
+            self.data_provider.update_request();
     
         }
         #[template_callback]

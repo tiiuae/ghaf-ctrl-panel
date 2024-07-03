@@ -40,6 +40,10 @@ message ApplicationResponse {
     string AppStatus = 2;
 }
 
+message ApplicationList {
+    repeated UnitStatus Applications = 1;
+}
+
 message Empty {
 }
 
@@ -52,4 +56,5 @@ service AdminService {
     rpc StopApplication(ApplicationRequest) returns (ApplicationResponse) {}
     rpc Poweroff(Empty) returns (Empty) {}
     rpc Reboot(Empty) returns (Empty) {}
+    rpc ListApplications(Empty) returns (ApplicationList) {}
 }

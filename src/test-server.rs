@@ -1,9 +1,9 @@
+use std::result::Result;
 use tonic::{transport::Server, Request, Response, Status};
 
 use admin::admin_service_server::{AdminService, AdminServiceServer};
-use admin::{RegistryRequest, RegistryResponse, ApplicationRequest, ApplicationResponse, UnitStatus, Empty};
+use admin::{RegistryRequest, RegistryResponse, ApplicationRequest, ApplicationResponse, UnitStatus, Empty, ApplicationList,};
 
-//to communicate with admin service and get data
 pub mod admin {
     tonic::include_proto!("admin");
 }
@@ -15,40 +15,40 @@ pub struct MyAdminService {}
 impl AdminService for MyAdminService {
     async fn register_service(
         &self,
-        request: tonic::Request<RegistryRequest>,
-    ) -> std::result::Result<tonic::Response<RegistryResponse>, tonic::Status> {
+        request: Request<RegistryRequest>,
+    ) -> Result<Response<RegistryResponse>, Status> {
         let resp = RegistryResponse::default();
         Ok(Response::new(resp))
     }
 
     async fn start_application(
         &self,
-        request: tonic::Request<ApplicationRequest>,
-    ) -> std::result::Result<tonic::Response<ApplicationResponse>, tonic::Status> {
+        request: Request<ApplicationRequest>,
+    ) -> Result<Response<ApplicationResponse>, Status> {
         let resp = ApplicationResponse::default();
         Ok(Response::new(resp))
     }
 
     async fn pause_application(
         &self,
-        request: tonic::Request<ApplicationRequest>,
-    ) -> std::result::Result<tonic::Response<ApplicationResponse>, tonic::Status> {
+        request: Request<ApplicationRequest>,
+    ) -> Result<Response<ApplicationResponse>, Status> {
         let resp = ApplicationResponse::default();
         Ok(Response::new(resp))
     }
 
     async fn resume_application(
         &self,
-        request: tonic::Request<ApplicationRequest>,
-    ) -> std::result::Result<tonic::Response<ApplicationResponse>, tonic::Status> {
+        request: Request<ApplicationRequest>,
+    ) -> Result<Response<ApplicationResponse>, Status> {
         let resp = ApplicationResponse::default();
         Ok(Response::new(resp))
     }
 
     async fn stop_application(
         &self,
-        request: tonic::Request<ApplicationRequest>,
-    ) -> std::result::Result<tonic::Response<ApplicationResponse>, tonic::Status> {
+        request: Request<ApplicationRequest>,
+    ) -> Result<Response<ApplicationResponse>, Status> {
         let resp = ApplicationResponse::default();
         Ok(Response::new(resp))
     }
@@ -67,23 +67,47 @@ impl AdminService for MyAdminService {
             path: String::from("test"),
         };
 
-        Ok(Response::new(reply)) // Send back our formatted greeting
+        Ok(Response::new(reply)) // Send back
     }
 
     async fn poweroff(
         &self,
-        request: tonic::Request<Empty>,
-    ) -> std::result::Result<tonic::Response<Empty>, tonic::Status> {
+        request: Request<Empty>,
+    ) -> Result<Response<Empty>, Status> {
         let resp = Empty::default();
         Ok(Response::new(resp))
     }
 
     async fn reboot(
         &self,
-        request: tonic::Request<Empty>,
-    ) -> std::result::Result<tonic::Response<Empty>, tonic::Status> {
+        request: Request<Empty>,
+    ) -> Result<Response<Empty>, Status> {
         let resp = Empty::default();
         Ok(Response::new(resp))
+    }
+
+    async fn list_applications(
+        &self,
+        request: Request<Empty>,
+    ) -> Result<Response<ApplicationList>, Status,> {
+        let apps = vec![
+            UnitStatus {
+                name: "VM1".to_string(),
+                description: "This is file.pdf!".to_string(),
+                load_state: "Loaded".to_string(),
+                active_state: "active".to_string(),
+                path: "".to_string(),
+            },
+            UnitStatus {
+                name: "VM2".to_string(),
+                description: "Google Chrome".to_string(),
+                load_state: "Loaded".to_string(),
+                active_state: "active".to_string(),
+                path: "".to_string(),
+            },
+        ];
+
+        Ok(Response::new(ApplicationList {applications: apps,}))
     }
 
 }

@@ -7,25 +7,29 @@ use std::sync::mpsc::{self, Sender, Receiver};
 
 use crate::vm_gobject::VMGObject;
 use crate::client::client::*;
+use crate::client::admin::ApplicationRequest;
 
 pub mod imp {
     use super::*;
 
-    #[derive(Debug, Clone)]
+    #[derive(Debug)]
     pub struct DataProvider {
         pub store: RefCell<ListStore>,
         pub status: bool,
-        pub req_tx: Sender<ClientServiceRequest>,
+        pub request_sender: Sender<ClientServiceRequest>,
+        pub response_receiver: Receiver<ClientServiceResponse>,
     }
 
     impl DataProvider {
         pub fn new() -> Self {
             let init_store = Self::fill_by_mock_data();
+            let (request_tx, response_rx): (Sender<ClientServiceRequest>, Receiver<ClientServiceResponse>) = Self::make_client_thread();
 
             Self {
                 store: RefCell::new(init_store),
                 status: false,
-                req_tx: Self::make_client_thread(),
+                request_sender: request_tx,
+                response_receiver: response_rx,
             }
         }
 
@@ -38,16 +42,16 @@ pub mod imp {
             return init_store;
         }
 
-        fn make_client_thread() -> Sender<ClientServiceRequest> {
+        fn make_client_thread() -> (Sender<ClientServiceRequest>, Receiver<ClientServiceResponse>) {
             let (request_tx, request_rx): (Sender<ClientServiceRequest>, Receiver<ClientServiceRequest>) = mpsc::channel();
-            //let (response_tx, response_rx): (Sender<ClientServiceResponse>, Receiver<ClientServiceResponse>) = mpsc::channel();
+            let (response_tx, response_rx): (Sender<ClientServiceResponse>, Receiver<ClientServiceResponse>) = mpsc::channel();
             let endpoint = String::from("http://[::1]:50051");
 
             thread::spawn(move || {
-                client_service_thread(endpoint, request_rx/*, response_tx*/);
+                client_service_thread(endpoint, request_rx, response_tx);
             });
 
-            request_tx
+            (request_tx, response_rx)
         }
 
         pub fn get_store_copy(&self) -> ListStore {
@@ -67,11 +71,11 @@ pub mod imp {
             store.append(&vm);
         }
 
-        pub fn test_request(&self) {
+        pub fn update_request(&self) {
             println!("Test request...");
-            self.req_tx.send(ClientServiceRequest::AppRequest).unwrap();
+            self.request_sender.send(ClientServiceRequest::AppList()).expect("Send error");
 
-            /* Receive and handle the response
+            /* Receive and handle the response. It blocks the main thread!!!
             if let Ok(response) = response_rx.recv() {
                 match response {
                     ClientServiceResponse::AppResponse(result) => match result {
