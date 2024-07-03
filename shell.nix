@@ -1,5 +1,6 @@
-{ pkgs ? import <nixpkgs> {} }:
-
+# Copyright 2024 TII (SSRC) and the Ghaf contributors
+# SPDX-License-Identifier: Apache-2.0
+{pkgs ? import <nixpkgs> {}}:
 pkgs.mkShell {
   buildInputs = [
     pkgs.glib
@@ -10,6 +11,7 @@ pkgs.mkShell {
     pkgs.rustc
     pkgs.cargo
     pkgs.protoc-gen-tonic
+    pkgs.protobuf
   ];
 
   shellHook = ''
