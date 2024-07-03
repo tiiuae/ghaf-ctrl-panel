@@ -232,6 +232,13 @@ row:selected {
   background-color: #353535;
   border: 0;
   margin: 0;
+  box-shadow: 0;
+}
+
+.dropdown-button>button>box>*>row:hover {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
 }
 
 .dropdown-button>button>box>*>row>*>label {
@@ -251,18 +258,31 @@ row:selected {
 
 .dropdown-button>popover>contents>*>*>*>row {
   background-color: #353535;
+  border: 0;
+  margin: 0;
+  box-shadow: 0;
 }
 
-.dropdown-button>popover>contents>*>*>*>row>*>label {
-  color: #FFFFFF;
+.dropdown-button>popover>contents>*>*>*>row:selected {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
 }
 
 .dropdown-button>popover>contents>*>*>*>row:hover {
   background-color: #2B2B2B;
+  border: 0;
+  margin: 0;
 }
 
 .dropdown-button>popover>contents>*>*>*>row:focus {
   background-color: #2B2B2B;
+  border: 0;
+  margin: 0;
+}
+
+.dropdown-button>popover>contents>*>*>*>row>*>label {
+  color: #FFFFFF;
 }
 
 /*Scale slider styling*/

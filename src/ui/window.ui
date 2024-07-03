@@ -117,138 +117,14 @@
                             </object> <!-- VM box object (list of VM's)-->
                           </child>
                           <child>
-                            <object class="GtkBox" id="vm_details_box">
-                            <style><class name="info-box"/></style>
-                              <property name="orientation">vertical</property>
-                              <property name="vexpand">true</property>
-                              <property name="hexpand">true</property>
-                              <property name="margin-start">10</property>
-                              <property name="margin-end">10</property>
-                              <property name="margin-top">10</property>
-                              <property name="margin-bottom">10</property>
-                              <!--<property name="spacing">10</property>-->
-                              <child>
-                                <object class="GtkLabel" id="vm_name_label">
-                                <property name="label">VM info</property>
-                                <style><class name="vm-name"/></style>
-                                <property name="margin-start">10</property>
-                                <property name="margin-end">10</property>
-                                <property name="margin-top">10</property>
-                                <property name="margin-bottom">10</property>
-                                <property name="halign">start</property>
-                                </object>
-                              </child>
-                              <child>
-                                <object class="GtkLabel" id="vm_details_label">
-                                <style><class name="normal-text"/></style>
-                                <property name="label">VM details</property>
-                                <property name="margin-start">10</property>
-                                <property name="margin-end">10</property>
-                                <property name="margin-top">10</property>
-                                <property name="margin-bottom">10</property>
-                                <property name="halign">start</property>
-                                </object>
-                              </child>
-                              <child>
-                                <object class="GtkBox" id="vm_security_box">
-                                <style><class name="info-box"/></style>
-                                <property name="orientation">horizontal</property>
-                                <property name="vexpand">false</property>
-                                <property name="hexpand">true</property>
-                                <property name="margin-start">10</property>
-                                <property name="margin-end">10</property>
-                                <property name="margin-top">10</property>
-                                <property name="margin-bottom">10</property>
-                                  <child>
-                                    <object class="GtkImage">
-                                      <property name="visible">True</property>
-                                      <property name="can_focus">False</property>
-                                      <property name="resource">/org/gnome/controlpanelgui/icons/security_well.svg</property>
-                                      <property name="width-request">16</property>
-                                      <property name="height-request">20</property>
-                                    </object>
-                                  </child>
-                                  <child>
-                                    <object class="GtkLabel" id="vm_security_label">
-                                    <style><class name="normal-text"/></style>
-                                    <property name="label">This VM is secure!</property>
-                                    <property name="margin-start">10</property>
-                                    <property name="margin-end">10</property>
-                                    <property name="margin-top">10</property>
-                                    <property name="margin-bottom">10</property>
-                                    <property name="halign">start</property>
-                                    </object>
-                                  </child>
-                                </object>
-                              </child>
-                              <child>
-                                <object class="GtkSeparator"/>
-                              </child>
-                              <child>
-                                <object class="GtkBox" id="vm_control_box">
-                                <style><class name="info-box"/></style>
-                                <property name="orientation">vertical</property>
-                                <property name="vexpand">false</property>
-                                <property name="hexpand">true</property>
-                                <property name="margin-start">10</property>
-                                <property name="margin-end">10</property>
-                                <property name="margin-top">10</property>
-                                <property name="margin-bottom">10</property>
-                                  <child>
-                                    <object class="GtkLabel" id="vm_control_label">
-                                    <property name="label">VM controls</property>
-                                    <style><class name="title"/></style>
-                                    <property name="margin-start">0</property>
-                                    <property name="margin-end">10</property>
-                                    <property name="margin-top">10</property>
-                                    <property name="margin-bottom">10</property>
-                                    <property name="halign">start</property>
-                                    </object>
-                                  </child>
-                                  <child>
-                                    <!-- Application-wide actions are needed for this widget
-                                    <object class="GtkMenuButton" id="action_menu_button">
-                                      <property name="visible">true</property>
-                                      <property name="halign">start</property>
-                                      <property name="width-request">220</property>
-                                      <property name="height-request">30</property>
-                                      <property name="label">Action</property>
-                                      <property name="menu-model">vm-action-menu</property>
-                                    </object>
-                                    -->
-
-                                    <object class="GtkDropDown" id="vm_action_menu_button">
-                                    <style><class name="dropdown-button"/></style>
-                                    <signal name="notify::selected" handler="on_vm_action_selected" swapped="true"/>
-                                    <property name="halign">start</property>
-                                    <property name="valign">center</property>
-                                    <property name="width-request">220</property>
-                                    <property name="height-request">30</property>
-                                    <property name="model">
-                                      <object class="GtkStringList">
-                                        <items>
-                                          <item translatable="yes">Run</item>
-                                          <item translatable="yes">Pause</item>
-                                          <item translatable="yes">Restart</item>
-                                          <item translatable="yes">Shutdown</item>
-                                        </items>
-                                      </object>
-                                    </property>
-                                    </object>
-
-                                  </child>
-                                </object>
-                              </child>
-                              <child>
-                                <object class="AudioSettings" id="audio_settings_box">
-                                </object>
-                              </child>
-                            </object> <!-- Info box object -->
+                            <object class="VMSettings" id="vm_settings_box">
+                            </object> <!-- Settings box object -->
                           </child>
                         </object> <!-- Main box object -->
                       </property> <!-- 1st page child property-->
                     </object> <!-- 1st stack child /page -->
                   </child> <!-- 1st stack child /page -->
+                  <!-- 2nd page -->
                   <child> <!-- Settings child -->
                     <object class="GtkStackPage">
                       <property name="name">settings_view</property>

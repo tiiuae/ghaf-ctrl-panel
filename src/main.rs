@@ -3,6 +3,7 @@ mod application;
 mod window;
 mod vm_row;
 mod vm_gobject;
+mod vm_settings;
 mod audio_settings;
 mod data_provider;
 mod security_icon;

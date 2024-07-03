@@ -7,6 +7,7 @@ use gtk::{gio, glib, CompositeTemplate, ListView, SingleSelection, SignalListIte
 use crate::data_provider::imp::DataProvider;
 use crate::vm_gobject::VMGObject;
 use crate::vm_row::VMRow;
+use crate::vm_settings::VMSettings;
 use crate::audio_settings::AudioSettings;
 
 mod imp {
@@ -35,15 +36,9 @@ mod imp {
         #[template_child]
         pub vm_main_box: TemplateChild<gtk::Box>,
         #[template_child]
-        pub vm_name_label: TemplateChild<gtk::Label>,
-         #[template_child]
-        pub vm_details_label: TemplateChild<gtk::Label>,
-        #[template_child]
         pub vm_list_view: TemplateChild<ListView>,
         #[template_child]
-        pub vm_action_menu_button: TemplateChild<DropDown>,
-        #[template_child]
-        pub audio_settings_box: TemplateChild<AudioSettings>,
+        pub vm_settings_box: TemplateChild<VMSettings>,
 
         #[template_child]
         pub settings_main_box: TemplateChild<gtk::Box>,
@@ -78,7 +73,6 @@ mod imp {
     impl ControlPanelGuiWindow {
         #[template_callback]
         fn on_update_clicked(&self) {
-            println!("Info update requested");
             self.data_provider.update_request();
     
         }
@@ -90,11 +84,6 @@ mod imp {
         #[template_callback]
         fn switch_to_settings_view(&self) {
             self.stack.set_visible_child_name("settings_view");
-        }
-
-        #[template_callback]
-        fn on_vm_action_selected(&self) {
-            println!("Action selected!");
         }
 
         #[template_callback]
@@ -255,26 +244,7 @@ impl ControlPanelGuiWindow {
     }
 
     fn set_vm_details(&self, vm_obj: &VMGObject) {
-        let title: Option<String> = vm_obj.property("name");
-        let subtitle: Option<String> = vm_obj.property("details");
-        match (title, subtitle) {
-            (Some(title), Some(subtitle)) => {
-                self.imp().vm_name_label.set_text(&format!("{title}"));
-                self.imp().vm_details_label.set_text(&format!("{subtitle}"));
-            },
-            (Some(title), None) => {
-                self.imp().vm_name_label.set_text(&format!("{title}"));
-                self.imp().vm_details_label.set_text("(None)");
-            },
-            (None, Some(subtitle)) => {
-                self.imp().vm_name_label.set_text("(None)");
-                self.imp().vm_details_label.set_text(&format!("{subtitle}"));
-            },
-            (None, None) => {
-                self.imp().vm_name_label.set_text("(None)");
-                self.imp().vm_details_label.set_text("(None)");
-            },
-        }
+        self.imp().vm_settings_box.bind(vm_obj);
     }
 
     //pub fn update_vm_list(&self, list: &Vec<VMObject>) {

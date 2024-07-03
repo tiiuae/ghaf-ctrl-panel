@@ -96,14 +96,14 @@ impl AdminService for MyAdminService {
                 description: "This is file.pdf!".to_string(),
                 load_state: "Loaded".to_string(),
                 active_state: "active".to_string(),
-                path: "".to_string(),
+                path: "/test/path".to_string(),
             },
             UnitStatus {
                 name: "VM2".to_string(),
                 description: "Google Chrome".to_string(),
                 load_state: "Loaded".to_string(),
                 active_state: "active".to_string(),
-                path: "".to_string(),
+                path: "/test/path2".to_string(),
             },
         ];
 

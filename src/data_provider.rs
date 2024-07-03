@@ -72,7 +72,7 @@ pub mod imp {
         }
 
         pub fn update_request(&self) {
-            println!("Test request...");
+            println!("Update request...");
             self.request_sender.send(ClientServiceRequest::AppList()).expect("Send error");
 
             /* Receive and handle the response. It blocks the main thread!!!

@@ -95,6 +95,7 @@ impl VMRow {
         // Save binding
         bindings.push(subtitle_binding);
 
+        //block was left here as example
         /*/ Bind `task_object.completed` to `task_row.content_label.attributes`
         let content_label_binding = task_object
             .bind_property("completed", &content_label, "attributes")

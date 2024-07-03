@@ -2,6 +2,7 @@ use std::sync::{Arc, Mutex};
 use std::error::Error;
 use std::thread;
 use std::sync::mpsc::{self, Sender, Receiver};
+use tokio::time::{sleep, Duration};
 use tonic::{transport::Server, transport::Channel, Request, Response, Status};
 
 use admin::admin_service_client::{AdminServiceClient};
@@ -54,7 +55,18 @@ pub mod client {
     
     pub fn client_service_thread(endpoint: String, request_receiver: Receiver<ClientServiceRequest>, response_sender: Sender<ClientServiceResponse>) {
         tokio::runtime::Runtime::new().unwrap().block_on(async move {
-            let mut client_service = client::ClientService::new(endpoint).await.unwrap();
+            let mut client_service = loop {
+                match client::ClientService::new(endpoint.clone()).await {
+                    Ok(service) => {
+                        println!("Client service created, connection established!");
+                        break service;
+                    }
+                    Err(e) => {
+                        eprintln!("Error creating client service: {}. Retrying in 5 seconds...", e);
+                        sleep(Duration::from_secs(5)).await;
+                    }
+                }
+            };
     
             while let Ok(request) = request_receiver.recv() {
                 match request {
