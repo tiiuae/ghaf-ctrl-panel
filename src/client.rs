@@ -25,6 +25,27 @@ pub mod client {
             let client = AdminServiceClient::connect(endpoint).await?;
             Ok(Self { admin_client: client })
         }
+
+        pub async fn try_new(endpoint: String) -> Result<Self, Box<dyn Error>> {
+            let mut client_service = loop {
+                match client::ClientService::new(endpoint.clone()).await {
+                    Ok(service) => {
+                        println!("Client service created, connection established!");
+                        break service;
+                    }
+                    Err(e) => {
+                        eprintln!("Error creating client service: {}. Retrying in 5 seconds...", e);
+                        sleep(Duration::from_secs(5)).await;
+                    }
+                }
+            };
+            Ok(client_service)
+        }
+
+        pub async fn reconnect(&mut self, endpoint: String) -> Result<(), Box<dyn Error>> {
+            self.admin_client = AdminServiceClient::connect(endpoint).await?;
+            Ok(())
+        }
     
         pub async fn application_status_request(&mut self, app_request: ApplicationRequest) -> Result<Response<UnitStatus>, Status> {
             let request = Request::new(app_request);
@@ -68,6 +89,7 @@ pub mod client {
                 }
             };
     
+            //reconnect when send error occurs!
             while let Ok(request) = request_receiver.recv() {
                 match request {
                     ClientServiceRequest::Register(registry_request) => {
