@@ -4,6 +4,7 @@ use gtk::{self, gio, glib};
 use gio::ListStore;
 use std::thread;
 use std::sync::mpsc::{self, Sender, Receiver};
+use glib::clone;
 
 use crate::vm_gobject::VMGObject;
 use crate::client::client::*;
@@ -31,6 +32,10 @@ pub mod imp {
                 request_sender: request_tx,
                 response_receiver: response_rx,
             }
+        }
+
+        pub fn establish_connection(&self) {
+
         }
 
         fn fill_by_mock_data() -> ListStore {
@@ -75,15 +80,27 @@ pub mod imp {
             println!("Update request...");
             self.request_sender.send(ClientServiceRequest::AppList()).expect("Send error");
 
-            /* Receive and handle the response. It blocks the main thread!!!
-            if let Ok(response) = response_rx.recv() {
+            //blocks main thread!
+            while let Ok(response) = self.response_receiver.recv() {
                 match response {
-                    ClientServiceResponse::AppResponse(result) => match result {
-                        Ok(msg) => println!("{}", msg),
-                        Err(e) => eprintln!("Error: {}", e),
+                    ClientServiceResponse::AppList(app_list) => {
+                        println!("List: {:?}", app_list.applications);
+                        break;
                     },
+                    _ => todo!(),
                 }
-            }*/
+            }
+
+            /*let response_receiver = &self.response_receiver;
+            glib::spawn_future_local(async move {
+                while let Ok(response) = response_receiver.recv() {
+                    match response {
+                        ClientServiceResponse::AppList(app_list) => {
+                            println!("List: {:?}", app_list.applications)
+                        }
+                    }
+                }
+            });*/
         }       
     }
 

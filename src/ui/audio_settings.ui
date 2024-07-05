@@ -52,7 +52,7 @@
     </child>
     <child>
       <object class="GtkScale" id="mic_volume">
-      <signal name="value-changed" handler="on_mic_volume_changed" swapped="false"/>
+      <signal name="value-changed" handler="on_mic_volume_changed" swapped="true"/>
       <property name="orientation">horizontal</property>
       <property name="halign">start</property>
       <property name="valign">center</property>
@@ -99,7 +99,7 @@
     </child>
     <child>
       <object class="GtkScale" id="speaker_volume">
-      <signal name="value-changed" handler="on_speaker_volume_changed" swapped="false"/>
+      <signal name="value-changed" handler="on_speaker_volume_changed" swapped="true"/>
       <property name="orientation">horizontal</property>
       <property name="halign">start</property>
       <property name="valign">center</property>

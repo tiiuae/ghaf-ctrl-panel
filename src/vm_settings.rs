@@ -54,6 +54,16 @@ mod imp {
             println!("Action changed!");
             //send message to client mod via channel in DataProvider
         }
+        #[template_callback]
+        fn on_mic_volume_changed(&self, value: f64) {
+            println!("Mic volume: {}", value);
+            //send message to client mod via channel in DataProvider
+        }
+        #[template_callback]
+        fn on_speaker_volume_changed(&self, value: f64) {
+            println!("Speaker volume: {}", value);
+            //send message to client mod via channel in DataProvider
+        }
     }//end #[gtk::template_callbacks]
 
     impl ObjectImpl for VMSettings {}

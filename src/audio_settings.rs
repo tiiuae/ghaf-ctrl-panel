@@ -1,8 +1,10 @@
 use std::cell::RefCell;
+use std::sync::OnceLock;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, DropDown, Scale};
-use glib::Binding;
+use glib::{Binding, Properties};
+use glib::subclass::Signal;
 
 mod imp {
     use super::*;
@@ -15,7 +17,11 @@ mod imp {
         #[template_child]
         pub mic_switch: TemplateChild<DropDown>,
         #[template_child]
+        pub mic_volume: TemplateChild<Scale>,
+        #[template_child]
         pub speaker_switch: TemplateChild<DropDown>,
+        #[template_child]
+        pub speaker_volume: TemplateChild<Scale>,
 
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
@@ -42,24 +48,47 @@ mod imp {
         #[template_callback]
         fn on_mic_changed(&self) {
             println!("Mic changed!");
+            //self.obj().emit_by_name::<()>("mic-changed", &[&value]);
         }
         #[template_callback]
         fn on_speaker_changed(&self) {
             println!("Speaker changed!");
+            //self.obj().emit_by_name::<()>("speaker-changed", &[&value]);
         }
         #[template_callback]
-        fn on_mic_volume_changed(scale: &Scale) {
+        fn on_mic_volume_changed(&self, scale: &Scale) {
             let value = scale.value();
-            println!("mic volume: {value}");
+            self.obj().emit_by_name::<()>("mic-volume-changed", &[&value]);
         }
         #[template_callback]
-        fn on_speaker_volume_changed(scale: &Scale) {
+        fn on_speaker_volume_changed(&self, scale: &Scale) {
             let value = scale.value();
-            println!("Speaker volume: {value}");
+            self.obj().emit_by_name::<()>("speaker-volume-changed", &[&value]);
         }
     }//end #[gtk::template_callbacks]
 
-    impl ObjectImpl for AudioSettings {}
+    impl ObjectImpl for AudioSettings {
+        fn signals() -> &'static [Signal] {
+            static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
+            SIGNALS.get_or_init(|| {
+                vec![
+                    Signal::builder("mic-changed")
+                    .param_types([i32::static_type()])
+                    .build(),
+                    Signal::builder("speaker-changed")
+                    .param_types([i32::static_type()])
+                    .build(),
+                    Signal::builder("mic-volume-changed")
+                    .param_types([f64::static_type()])
+                    .build(),
+                    Signal::builder("speaker-volume-changed")
+                    .param_types([f64::static_type()])
+                    .build()
+                    ]
+            })
+        }
+    }
+
     impl WidgetImpl for AudioSettings {}
     impl BoxImpl for AudioSettings {}
 }
