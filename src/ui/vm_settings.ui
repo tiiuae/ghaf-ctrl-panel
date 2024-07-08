@@ -125,6 +125,8 @@
       </child>
       <child>
         <object class="AudioSettings" id="audio_settings_box">
+        <signal name="mic-changed" handler="on_mic_changed" swapped="true"/>
+        <signal name="speaker-changed" handler="on_speaker_changed" swapped="true"/>
         <signal name="mic-volume-changed" handler="on_mic_volume_changed" swapped="true"/>
         <signal name="speaker-volume-changed" handler="on_speaker_volume_changed" swapped="true"/>
         </object>

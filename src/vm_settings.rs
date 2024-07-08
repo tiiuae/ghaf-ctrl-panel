@@ -55,6 +55,16 @@ mod imp {
             //send message to client mod via channel in DataProvider
         }
         #[template_callback]
+        fn on_mic_changed(&self, value: u32) {
+            println!("Mic changed: {}", value);
+            //send message to client mod via channel in DataProvider
+        }
+        #[template_callback]
+        fn on_speaker_changed(&self, value: u32) {
+            println!("Speaker changed: {}", value);
+            //send message to client mod via channel in DataProvider
+        }
+        #[template_callback]
         fn on_mic_volume_changed(&self, value: f64) {
             println!("Mic volume: {}", value);
             //send message to client mod via channel in DataProvider

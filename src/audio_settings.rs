@@ -47,13 +47,16 @@ mod imp {
     impl AudioSettings {
         #[template_callback]
         fn on_mic_changed(&self) {
-            println!("Mic changed!");
-            //self.obj().emit_by_name::<()>("mic-changed", &[&value]);
+            let value = self.mic_switch.selected();
+            //or selected_item() to get object and cast to string
+            println!("Mic changed! {}", value);
+            self.obj().emit_by_name::<()>("mic-changed", &[&value]);
         }
         #[template_callback]
         fn on_speaker_changed(&self) {
-            println!("Speaker changed!");
-            //self.obj().emit_by_name::<()>("speaker-changed", &[&value]);
+            let value = self.speaker_switch.selected();
+            println!("Speaker changed! {}", value);
+            self.obj().emit_by_name::<()>("speaker-changed", &[&value]);
         }
         #[template_callback]
         fn on_mic_volume_changed(&self, scale: &Scale) {
@@ -73,10 +76,10 @@ mod imp {
             SIGNALS.get_or_init(|| {
                 vec![
                     Signal::builder("mic-changed")
-                    .param_types([i32::static_type()])
+                    .param_types([u32::static_type()])
                     .build(),
                     Signal::builder("speaker-changed")
-                    .param_types([i32::static_type()])
+                    .param_types([u32::static_type()])
                     .build(),
                     Signal::builder("mic-volume-changed")
                     .param_types([f64::static_type()])
