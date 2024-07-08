@@ -74,7 +74,6 @@ mod imp {
         #[template_callback]
         fn on_update_clicked(&self) {
             self.data_provider.update_request();
-    
         }
         #[template_callback]
         fn switch_to_vm_view(&self) {

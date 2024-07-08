@@ -13,7 +13,7 @@
       <!--<property name="spacing">10</property>-->
       <child>
         <object class="GtkLabel" id="vm_name_label">
-        <property name="label">VM info</property>
+        <property name="label">No VM info</property>
         <style><class name="vm-name"/></style>
         <property name="margin-start">10</property>
         <property name="margin-end">10</property>
@@ -25,7 +25,7 @@
       <child>
         <object class="GtkLabel" id="vm_details_label">
         <style><class name="normal-text"/></style>
-        <property name="label">VM details</property>
+        <property name="label">No VM details</property>
         <property name="margin-start">10</property>
         <property name="margin-end">10</property>
         <property name="margin-top">10</property>

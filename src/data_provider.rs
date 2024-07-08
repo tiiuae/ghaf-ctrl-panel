@@ -23,7 +23,7 @@ pub mod imp {
 
     impl DataProvider {
         pub fn new() -> Self {
-            let init_store = Self::fill_by_mock_data();
+            let init_store = ListStore::new::<VMGObject>();//Self::fill_by_mock_data();
             let (request_tx, response_rx): (Sender<ClientServiceRequest>, Receiver<ClientServiceResponse>) = Self::make_client_thread();
 
             Self {
@@ -85,6 +85,12 @@ pub mod imp {
                 match response {
                     ClientServiceResponse::AppList(app_list) => {
                         println!("List: {:?}", app_list.applications);
+                        let mut store = self.store.borrow_mut();
+                        store.remove_all();
+                        let mut vec: Vec<VMGObject> = Vec::new();
+                        for app in app_list.applications {
+                            store.append(&VMGObject::new(app.name, app.description));
+                        }
                         break;
                     },
                     _ => todo!(),
