@@ -154,19 +154,15 @@ impl ControlPanelGuiWindow {
         */
     }
 
-    fn vm_rows(&self) -> Ref<gio::ListStore> {
-        // Get state
-        self.imp().data_provider.get_store_ref()
-    }
-
     fn setup_vm_rows(&self) {
         // Create new model
-        let model = self.vm_rows();
+        //ListStore doc: "GLib type: GObject with reference counted clone semantics."
+        let model = self.imp().data_provider.get_store();
 
         let count = model.n_items();//save count before model will be consumpted
 
         // Wrap model with selection and pass it to the list view
-        let selection_model = SingleSelection::new(Some(model.clone()));//???
+        let selection_model = SingleSelection::new(Some(model));
         // Connect to the selection-changed signal
         selection_model.connect_selection_changed(
             glib::clone!(@strong self as window => move |selection_model, _, _| {

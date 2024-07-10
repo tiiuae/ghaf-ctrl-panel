@@ -13,12 +13,15 @@ use crate::client::admin::ApplicationRequest;
 pub mod imp {
     use super::*;
 
+    //Idea: put all vm data to separate struct 
+    //wrap this struct: Arc<Mutex<Data>>
+    //put atomic ref to client's thread
     #[derive(Debug)]
     pub struct DataProvider {
-        pub store: RefCell<ListStore>,
+        pub store: Arc<Mutex<ListStore>>,
         pub status: bool,
         pub request_sender: Sender<ClientServiceRequest>,
-        pub response_receiver: Receiver<ClientServiceResponse>,
+        pub response_receiver: Arc<Receiver<ClientServiceResponse>>,
     }
 
     impl DataProvider {
@@ -27,10 +30,10 @@ pub mod imp {
             let (request_tx, response_rx): (Sender<ClientServiceRequest>, Receiver<ClientServiceResponse>) = Self::make_client_thread();
 
             Self {
-                store: RefCell::new(init_store),
+                store: Arc::new(Mutex::new(init_store)),
                 status: false,
                 request_sender: request_tx,
-                response_receiver: response_rx,
+                response_receiver: Arc::new(response_rx),
             }
         }
 
@@ -59,57 +62,38 @@ pub mod imp {
             (request_tx, response_rx)
         }
 
-        pub fn get_store_copy(&self) -> ListStore {
-            self.store.borrow().clone()
+        pub fn get_store(&self) -> ListStore {
+            self.store.lock().unwrap().clone()
         }
 
-        pub fn get_store_ref(&self) -> Ref<ListStore> {
-            self.store.borrow()
-        }
-
-        pub fn get_store_mut_ref(&self) -> RefMut<ListStore> {
-            self.store.borrow_mut()
+        pub fn get_store_ref(&self) -> Arc<Mutex<ListStore>> {
+            self.store.clone()
         }
 
         pub fn add_vm(&self, vm: VMGObject) {
-            let mut store = self.store.borrow_mut();
+            let mut store = self.store.lock().unwrap();
             store.append(&vm);
         }
 
         pub fn update_request(&self) {
             println!("Update request...");
+            //send request
             self.request_sender.send(ClientServiceRequest::AppList()).expect("Send error");
-
-            //blocks main thread!
-            while let Ok(response) = self.response_receiver.recv() {
-                match response {
-                    ClientServiceResponse::AppList(app_list) => {
-                        println!("List: {:?}", app_list.applications);
-                        let mut store = self.store.borrow_mut();
-                        store.remove_all();
-                        let mut vec: Vec<VMGObject> = Vec::new();
-                        for app in app_list.applications {
-                            store.append(&VMGObject::new(app.name, app.description));
-                        }
-                        break;
-                    },
-                    _ => todo!(),
-                }
-            }//*/
-
-            /*
-            let response_receiver = Arc::new(self.response_receiver);//tokio::sunc::mpsc::channel is needed
-            let mut store = self.store.borrow_mut();
+            
+            //get response
+            let response_receiver = Arc::clone(&self.response_receiver);
+            let mut store = Arc::clone(&self.store);
+            //tokio::runtime::Runtime::new().unwrap().spawn ?
             glib::spawn_future_local(async move {
                 while let Ok(response) = response_receiver.recv() {
                     match response {
                         ClientServiceResponse::AppList(app_list) => {
-                            println!("List: {:?}", app_list.applications);
-                            
-                            store.remove_all();
+                            println!("Arc! List: {:?}", app_list.applications);
+                            let mut store_inner = store.lock().unwrap();
+                            store_inner.remove_all();
                             let mut vec: Vec<VMGObject> = Vec::new();
                             for app in app_list.applications {
-                                store.append(&VMGObject::new(app.name, app.description));
+                                store_inner.append(&VMGObject::new(app.name, app.description));
                             }
                             break;
                         },
@@ -117,7 +101,6 @@ pub mod imp {
                     }
                 }
             });
-            */
         }
         
         pub fn response_callback(response: ClientServiceResponse) {

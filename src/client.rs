@@ -91,7 +91,7 @@ pub mod client {
                 }
             };
     
-            //reconnect when send error occurs!
+            //TODO: reconnect when send error occurs!
             while let Ok(request) = request_receiver.recv() {
                 match request {
                     ClientServiceRequest::Register(registry_request) => {
@@ -109,7 +109,6 @@ pub mod client {
                             Ok(value) => response_sender.send(ClientServiceResponse::AppList(value.into_inner())).expect("Send error"),//callback(ClientServiceResponse::AppList(value.into_inner())),
                             Err(e) => println!("App list error!"),
                         }
-                        //fill ListStore
                     }
                     ClientServiceRequest::AppStatus(app_request) => {
                         let response = client_service.admin_client.application_status(Request::new(app_request)).await;
