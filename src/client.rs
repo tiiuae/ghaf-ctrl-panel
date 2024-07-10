@@ -14,7 +14,7 @@ pub mod admin {
 
 pub mod client {
     use super::*;
-
+    
     pub struct ClientService {
         admin_client: AdminServiceClient<Channel>,
         //+Arc to VMGobject's ListStore?
@@ -74,7 +74,9 @@ pub mod client {
         Empty(),
     }
     
-    pub fn client_service_thread(endpoint: String, request_receiver: Receiver<ClientServiceRequest>, response_sender: Sender<ClientServiceResponse>) {
+    pub fn client_service_thread<F>(endpoint: String, request_receiver: Receiver<ClientServiceRequest>, response_sender: Sender<ClientServiceResponse>, callback: F) 
+    where F: Fn(ClientServiceResponse),
+    {
         tokio::runtime::Runtime::new().unwrap().block_on(async move {
             let mut client_service = loop {
                 match client::ClientService::new(endpoint.clone()).await {
@@ -104,7 +106,7 @@ pub mod client {
                         let response = client_service.admin_client.list_applications(Request::new(Empty{})).await;
                         println!("RESPONSE={:?}", response);
                         match response {
-                            Ok(value) => response_sender.send(ClientServiceResponse::AppList(value.into_inner())).expect("Send error"),
+                            Ok(value) => response_sender.send(ClientServiceResponse::AppList(value.into_inner())).expect("Send error"),//callback(ClientServiceResponse::AppList(value.into_inner())),
                             Err(e) => println!("App list error!"),
                         }
                         //fill ListStore

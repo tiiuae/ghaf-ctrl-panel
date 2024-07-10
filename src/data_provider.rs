@@ -3,7 +3,7 @@ use gtk::prelude::*;
 use gtk::{self, gio, glib};
 use gio::ListStore;
 use std::thread;
-use std::sync::mpsc::{self, Sender, Receiver};
+use std::sync::{Arc, Mutex, mpsc::{self, Sender, Receiver}};
 use glib::clone;
 
 use crate::vm_gobject::VMGObject;
@@ -53,7 +53,7 @@ pub mod imp {
             let endpoint = String::from("http://[::1]:50051");
 
             thread::spawn(move || {
-                client_service_thread(endpoint, request_rx, response_tx);
+                client_service_thread(endpoint, request_rx, response_tx, Self::response_callback);
             });
 
             (request_tx, response_rx)
@@ -95,19 +95,40 @@ pub mod imp {
                     },
                     _ => todo!(),
                 }
-            }
+            }//*/
 
-            /*let response_receiver = &self.response_receiver;
+            /*
+            let response_receiver = Arc::new(self.response_receiver);//tokio::sunc::mpsc::channel is needed
+            let mut store = self.store.borrow_mut();
             glib::spawn_future_local(async move {
                 while let Ok(response) = response_receiver.recv() {
                     match response {
                         ClientServiceResponse::AppList(app_list) => {
-                            println!("List: {:?}", app_list.applications)
-                        }
+                            println!("List: {:?}", app_list.applications);
+                            
+                            store.remove_all();
+                            let mut vec: Vec<VMGObject> = Vec::new();
+                            for app in app_list.applications {
+                                store.append(&VMGObject::new(app.name, app.description));
+                            }
+                            break;
+                        },
+                        _ => todo!(),
                     }
                 }
-            });*/
-        }       
+            });
+            */
+        }
+        
+        pub fn response_callback(response: ClientServiceResponse) {
+            match response {
+                ClientServiceResponse::AppList(app_list) => {
+                    println!("Callback! List: {:?}", app_list.applications);
+                    
+                },
+                _ => todo!(),
+            }
+        }
     }
 
     impl Default for DataProvider {
