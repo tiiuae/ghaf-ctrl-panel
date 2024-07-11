@@ -20,20 +20,27 @@
         inherit (pkgs) lib;
 
         craneLib = crane.mkLib pkgs;
-        src = craneLib.cleanCargoSource ./.;
+        # FIXME: disable source cleaning, at the moment it give more problems than benefits
+        #src = craneLib.cleanCargoSource ./.;
+        src = ./.;
 
         # Common arguments can be set here to avoid repeating them later
         commonArgs = {
           inherit src;
           strictDeps = true;
-
+        
+          nativeBuildInputs = [
+             pkgs.pkg-config
+             pkgs.glib
+             pkgs.protobuf
+          ];
           buildInputs = [
             # Add additional build inputs here
              pkgs.glib
+             pkgs.cairo
+             pkgs.pango
              pkgs.gtk4
              pkgs.libadwaita
-             pkgs.pkg-config
-             pkgs.protobuf
           ] ++ lib.optionals pkgs.stdenv.isDarwin [
             # Additional darwin specific inputs can be set here
             pkgs.libiconv
@@ -51,6 +58,9 @@
         # artifacts from above.
         my-crate = craneLib.buildPackage (commonArgs // {
           inherit cargoArtifacts;
+          postUnpack = ''
+            find .
+          '';
         });
       in
       {
