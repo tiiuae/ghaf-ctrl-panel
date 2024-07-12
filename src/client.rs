@@ -8,6 +8,9 @@ use tonic::{transport::Server, transport::Channel, Request, Response, Status};
 use admin::admin_service_client::{AdminServiceClient};
 use admin::{RegistryRequest, RegistryResponse, ApplicationRequest, ApplicationResponse, UnitStatus, ApplicationList, Empty};
 
+// Just a crate import test
+use givc_client::AdminClient;
+
 pub mod admin {
     tonic::include_proto!("admin");
 }
