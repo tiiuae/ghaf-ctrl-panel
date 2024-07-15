@@ -1,11 +1,12 @@
 use std::cell::RefCell;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Label, DropDown, Scale};
-use glib::Binding;
+use gtk::{glib, CompositeTemplate, Label, DropDown, Scale, Image};
+use glib::{Binding, ToValue};
 
 use crate::vm_gobject::VMGObject;
 use crate::audio_settings::AudioSettings;
+use crate::security_icon::SecurityIcon;
 
 mod imp {
     use super::*;
@@ -19,6 +20,10 @@ mod imp {
         pub vm_name_label: TemplateChild<Label>,
         #[template_child]
         pub vm_details_label: TemplateChild<Label>,
+        #[template_child]
+        pub security_icon: TemplateChild<Image>,
+        #[template_child]
+        pub security_label: TemplateChild<Label>,
         #[template_child]
         pub vm_action_menu_button: TemplateChild<DropDown>,
         #[template_child]
@@ -112,6 +117,8 @@ impl VMSettings {
         //make new
         let name = self.imp().vm_name_label.get();
         let details = self.imp().vm_details_label.get();
+        let security_icon = self.imp().security_icon.get();
+        let security_label = self.imp().security_label.get();
         let mut bindings = self.imp().bindings.borrow_mut();
 
 
@@ -130,24 +137,32 @@ impl VMSettings {
         // Save binding
         bindings.push(details_binding);
 
-        //block was left here as example!
-        /*/ Bind `task_object.completed` to `task_row.content_label.attributes`
-        let content_label_binding = task_object
-            .bind_property("completed", &content_label, "attributes")
+        let security_icon_binding = vm_object
+            .bind_property("trust-level", &security_icon, "resource")
             .sync_create()
-            .transform_to(|_, active| {
-                let attribute_list = AttrList::new();
-                if active {
-                    // If "active" is true, content of the label will be strikethrough
-                    let attribute = AttrInt::new_strikethrough(true);
-                    attribute_list.insert(attribute);
-                }
-                Some(attribute_list.to_value())
+            .transform_to(move |_, value: &glib::Value| {
+                let trust_level = value.get::<u8>().unwrap_or(0);
+                Some(glib::Value::from(SecurityIcon::new(trust_level).0))
             })
             .build();
         // Save binding
-        bindings.push(content_label_binding);
-        */
+        bindings.push(security_icon_binding);
+
+        let security_label_binding = vm_object
+            .bind_property("trust-level", &security_label, "label")
+            .sync_create()
+            .transform_to(move |_, value: &glib::Value| {
+                let trust_level = value.get::<u8>().unwrap_or(0);
+                match trust_level {//make struct like for icon?
+                    0 => Some(glib::Value::from("Secure!")),
+                    1 => Some(glib::Value::from("Security warning!")),
+                    2 => Some(glib::Value::from("Security alert!")),
+                    _ => Some(glib::Value::from("Secure!")),
+                }
+            })
+            .build();
+        // Save binding
+        bindings.push(security_label_binding);
     }
 
     pub fn unbind(&self) {

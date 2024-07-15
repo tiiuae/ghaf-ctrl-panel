@@ -8,6 +8,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "control_panel_gui.gresource",
     );
 
+    //test-server needs this
     let proto = "proto/admin.proto";
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());

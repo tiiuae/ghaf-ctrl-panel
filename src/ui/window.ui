@@ -318,6 +318,7 @@
                               <child>
                                 <object class="GtkLabel" id="details_label">
                                 <property name="label">Settings details</property>
+                                <style><class name="title"/></style>
                                   <property name="margin-start">10</property>
                                   <property name="margin-end">10</property>
                                   <property name="margin-top">10</property>

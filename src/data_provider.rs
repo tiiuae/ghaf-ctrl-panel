@@ -8,26 +8,23 @@ use glib::clone;
 
 use crate::vm_gobject::VMGObject;
 use crate::client::client::*;
-use crate::client::admin::ApplicationRequest;
+use givc_client::client::{QueryResult, Event};
 
 pub mod imp {
     use super::*;
 
-    //Idea: put all vm data to separate struct 
-    //wrap this struct: Arc<Mutex<Data>>
-    //put atomic ref to client's thread
     #[derive(Debug)]
     pub struct DataProvider {
         pub store: Arc<Mutex<ListStore>>,
         pub status: bool,
         pub request_sender: Sender<ClientServiceRequest>,
-        pub response_receiver: Arc<Receiver<ClientServiceResponse>>,
+        pub response_receiver: Arc<Receiver<Event>>,
     }
 
     impl DataProvider {
         pub fn new() -> Self {
-            let init_store = ListStore::new::<VMGObject>();//Self::fill_by_mock_data();
-            let (request_tx, response_rx): (Sender<ClientServiceRequest>, Receiver<ClientServiceResponse>) = Self::make_client_thread();
+            let init_store = Self::fill_by_mock_data();//ListStore::new::<VMGObject>();//Self::fill_by_mock_data();
+            let (request_tx, response_rx): (Sender<ClientServiceRequest>, Receiver<Event>) = Self::make_client_thread();
 
             Self {
                 store: Arc::new(Mutex::new(init_store)),
@@ -44,15 +41,15 @@ pub mod imp {
         fn fill_by_mock_data() -> ListStore {
             let init_store = ListStore::new::<VMGObject>();
             let mut vec: Vec<VMGObject> = Vec::new();
-            vec.push(VMGObject::new("VM1".to_string(), String::from("This is the file.pdf")));
-            vec.push(VMGObject::new("VM2".to_string(), String::from("Google Chrome")));
+            vec.push(VMGObject::new("VM1".to_string(), String::from("This is the file.pdf"), 0, 2));
+            vec.push(VMGObject::new("VM2".to_string(), String::from("Google Chrome"), 0, 0));
             init_store.extend_from_slice(&vec);
             return init_store;
         }
 
-        fn make_client_thread() -> (Sender<ClientServiceRequest>, Receiver<ClientServiceResponse>) {
+        fn make_client_thread() -> (Sender<ClientServiceRequest>, Receiver<Event>) {
             let (request_tx, request_rx): (Sender<ClientServiceRequest>, Receiver<ClientServiceRequest>) = mpsc::channel();
-            let (response_tx, response_rx): (Sender<ClientServiceResponse>, Receiver<ClientServiceResponse>) = mpsc::channel();
+            let (response_tx, response_rx): (Sender<Event>, Receiver<Event>) = mpsc::channel();
             let endpoint = String::from("http://[::1]:50051");
 
             thread::spawn(move || {
@@ -77,7 +74,7 @@ pub mod imp {
 
         pub fn update_request(&self) {
             println!("Update request...");
-            //send request
+            //send request (can block)
             self.request_sender.send(ClientServiceRequest::AppList()).expect("Send error");
             
             //get response
@@ -87,29 +84,38 @@ pub mod imp {
             glib::spawn_future_local(async move {
                 while let Ok(response) = response_receiver.recv() {
                     match response {
-                        ClientServiceResponse::AppList(app_list) => {
-                            println!("Arc! List: {:?}", app_list.applications);
-                            let mut store_inner = store.lock().unwrap();
+                        Event::ListUpdate(app_list) => {
+                            println!("List: {:?}", app_list);
+                            /*let mut store_inner = store.lock().unwrap();
                             store_inner.remove_all();
-                            let mut vec: Vec<VMGObject> = Vec::new();
-                            for app in app_list.applications {
+                            for app in app_list {
                                 store_inner.append(&VMGObject::new(app.name, app.description));
-                            }
+                            }*/
                             break;
                         },
-                        _ => todo!(),
+                        Event::UnitStatusChanged(status) => {
+                            println!("Status: {:?}", status);
+                        },
+                        Event::UnitShutdown(info) => {
+                            println!("Shutdown info: {}", info);
+                        },
                     }
                 }
             });
         }
         
-        pub fn response_callback(response: ClientServiceResponse) {
+        pub fn response_callback(response: Event) {
             match response {
-                ClientServiceResponse::AppList(app_list) => {
-                    println!("Callback! List: {:?}", app_list.applications);
+                Event::ListUpdate(app_list) => {
+                    println!("Callback! List: {:?}", app_list);
                     
                 },
-                _ => todo!(),
+                Event::UnitStatusChanged(status) => {
+                    println!("Status: {:?}", status);
+                },
+                Event::UnitShutdown(info) => {
+                    println!("Shutdown info: {}", info);
+                },
             }
         }
     }

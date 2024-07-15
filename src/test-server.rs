@@ -4,6 +4,10 @@ use tonic::{transport::Server, Request, Response, Status};
 use admin::admin_service_server::{AdminService, AdminServiceServer};
 use admin::{RegistryRequest, RegistryResponse, ApplicationRequest, ApplicationResponse, UnitStatus, Empty, ApplicationList,};
 
+//update protocol first
+//use givc_common::pb::admin::admin_service_server::{AdminService, AdminServiceServer};
+//use givc_common::pb::admin::{RegistryRequest, RegistryResponse, ApplicationRequest, ApplicationResponse, UnitStatus, Empty, ApplicationList,};
+
 pub mod admin {
     tonic::include_proto!("admin");
 }

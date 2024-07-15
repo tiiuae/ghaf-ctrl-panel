@@ -1,34 +1,39 @@
 use std::sync::{Arc, Mutex};
 use std::error::Error;
 use std::thread;
+use std::net::SocketAddr;
 use std::sync::mpsc::{self, Sender, Receiver};
 use tokio::time::{sleep, Duration};
-use tonic::{transport::Server, transport::Channel, Request, Response, Status};
 
-use admin::admin_service_client::{AdminServiceClient};
-use admin::{RegistryRequest, RegistryResponse, ApplicationRequest, ApplicationResponse, UnitStatus, ApplicationList, Empty};
-
-// Just a crate import test
-use givc_client::AdminClient;
-
-pub mod admin {
-    tonic::include_proto!("admin");
-}
+use givc_client::{self, AdminClient, client::QueryResult, client::Event};
+use givc_client::endpoint::{EndpointConfig, TlsConfig};
+use givc_common::pb::TransportConfig;
+use givc_common::types::*;
 
 pub mod client {
     use super::*;
     
     pub struct ClientService {
-        admin_client: AdminServiceClient<Channel>,
-        //+Arc to VMGobject's ListStore?
+        admin_client: AdminClient,
     }
     
     impl ClientService {
-        pub async fn new(endpoint: String) -> Result<Self, Box<dyn Error>> {
-            let client = AdminServiceClient::connect(endpoint).await?;
-            Ok(Self { admin_client: client })
+        pub async fn connect(addr: String, port: u16) -> Result<Self, Box<dyn Error>> {
+            let admin_cfg = EndpointConfig {
+                transport: EndpointEntry {
+                    address: addr,
+                    port: port,
+                    protocol: "bogus".into(),
+                },
+                tls: None, // No TLS in cli at the moment
+            };
+
+            let client = AdminClient::new(admin_cfg);
+
+            Ok(Self {admin_client: client})
         }
 
+        /*
         pub async fn try_new(endpoint: String) -> Result<Self, Box<dyn Error>> {
             let mut client_service = loop {
                 match client::ClientService::new(endpoint.clone()).await {
@@ -46,45 +51,38 @@ pub mod client {
         }
 
         pub async fn reconnect(&mut self, endpoint: String) -> Result<(), Box<dyn Error>> {
-            self.admin_client = AdminServiceClient::connect(endpoint).await?;
+            self.admin_client = AdminClient::connect(endpoint).await?;
             Ok(())
         }
-    
-        pub async fn application_status_request(&mut self, app_request: ApplicationRequest) -> Result<Response<UnitStatus>, Status> {
+        
+        pub async fn application_list_request(&mut self) -> Result<Response<UnitStatus>, Status> {
             let request = Request::new(app_request);
     
-            let response = self.admin_client.application_status(request).await?;
+            let response = self.admin_client.query_list(request).await?;
     
             println!("RESPONSE={:?}", response);
             Ok(response)
         }
+        */
     }
 
     pub enum ClientServiceRequest {
-        Register(RegistryRequest),
+        Register(),
         AppList(),
-        AppStatus(ApplicationRequest),
-        StartApp(ApplicationRequest),
-        PauseApp(ApplicationRequest),
-        StopApp(ApplicationRequest),
-    }
-
-    pub enum ClientServiceResponse {
-        Register(RegistryResponse),
-        AppList(ApplicationList),
-        AppStatus(ApplicationResponse),
-        Status(UnitStatus),
-        Empty(),
+        AppStatus(String),
+        StartApp(String),
+        PauseApp(String),
+        StopApp(String),
     }
     
-    pub fn client_service_thread<F>(endpoint: String, request_receiver: Receiver<ClientServiceRequest>, response_sender: Sender<ClientServiceResponse>, callback: F) 
-    where F: Fn(ClientServiceResponse),
+    pub fn client_service_thread<F>(endpoint: String, request_receiver: Receiver<ClientServiceRequest>, response_sender: Sender<Event>, callback: F) 
+    where F: Fn(Event),
     {
         tokio::runtime::Runtime::new().unwrap().block_on(async move {
             let mut client_service = loop {
-                match client::ClientService::new(endpoint.clone()).await {
+                match client::ClientService::connect(String::from("http://[::1]"), 50051).await {
                     Ok(service) => {
-                        println!("Client service created, connection established!");
+                        println!("Client service created, connection established!");//send connected event!
                         break service;
                     }
                     Err(e) => {
@@ -97,53 +95,53 @@ pub mod client {
             //TODO: reconnect when send error occurs!
             while let Ok(request) = request_receiver.recv() {
                 match request {
-                    ClientServiceRequest::Register(registry_request) => {
-                        let response = client_service.admin_client.register_service(Request::new(registry_request)).await;
+                    ClientServiceRequest::Register() => {
+                        /*let response = client_service.admin_client.register_service(Request::new(registry_request)).await;
                         println!("RESPONSE={:?}", response);
                         match response {
                             Ok(value) => response_sender.send(ClientServiceResponse::Register(value.into_inner())).expect("Send error"),
                             Err(e) => println!("Registering error!"),
-                        }
+                        }*/
                     }
                     ClientServiceRequest::AppList() => {
-                        let response = client_service.admin_client.list_applications(Request::new(Empty{})).await;
+                        let response = client_service.admin_client.query_list().await;
                         println!("RESPONSE={:?}", response);
                         match response {
-                            Ok(value) => response_sender.send(ClientServiceResponse::AppList(value.into_inner())).expect("Send error"),//callback(ClientServiceResponse::AppList(value.into_inner())),
+                            Ok(value) => response_sender.send(Event::ListUpdate(value)).expect("Send error"),//callback(ClientServiceResponse::AppList(value.into_inner())),
                             Err(e) => println!("App list error!"),
                         }
                     }
-                    ClientServiceRequest::AppStatus(app_request) => {
-                        let response = client_service.admin_client.application_status(Request::new(app_request)).await;
+                    ClientServiceRequest::AppStatus(app_name) => {
+                        /*let response = client_service.admin_client.application_status(Request::new(app_request)).await;
                         println!("RESPONSE={:?}", response);
                         match response {
                             Ok(value) => response_sender.send(ClientServiceResponse::Status(value.into_inner())).expect("Send error"),
                             Err(e) => println!("App status error!"),
-                        }
+                        }*/
                     }
-                    ClientServiceRequest::StartApp(app_request) => {
-                        let response = client_service.admin_client.start_application(Request::new(app_request)).await;
+                    ClientServiceRequest::StartApp(app_name) => {
+                        /*let response = client_service.admin_client.start_application(Request::new(app_request)).await;
                         println!("RESPONSE={:?}", response);
                         match response {
                             Ok(value) => response_sender.send(ClientServiceResponse::AppStatus(value.into_inner())).expect("Send error"),
                             Err(e) => println!("start app error!"),
-                        }
+                        }*/
                     }
-                    ClientServiceRequest::PauseApp(app_request) => {
-                        let response = client_service.admin_client.pause_application(Request::new(app_request)).await;
+                    ClientServiceRequest::PauseApp(app_name) => {
+                        /*let response = client_service.admin_client.pause_application(Request::new(app_request)).await;
                         println!("RESPONSE={:?}", response);
                         match response {
                             Ok(value) => response_sender.send(ClientServiceResponse::AppStatus(value.into_inner())).expect("Send error"),
                             Err(e) => println!("pause error!"),
-                        }
+                        }*/
                     }
-                    ClientServiceRequest::StopApp(app_request) => {
-                        let response = client_service.admin_client.stop_application(Request::new(app_request)).await;
+                    ClientServiceRequest::StopApp(app_name) => {
+                        /*let response = client_service.admin_client.stop_application(Request::new(app_request)).await;
                         println!("RESPONSE={:?}", response);
                         match response {
                             Ok(value) => response_sender.send(ClientServiceResponse::AppStatus(value.into_inner())).expect("Send error"),
                             Err(e) => println!("stop error!"),
-                        }
+                        }*/
                     }
                 }
             }
@@ -153,7 +151,7 @@ pub mod client {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut admin_client = client::ClientService::new("http://[::1]:50051".to_string()).await?;
-    admin_client.application_status_request(ApplicationRequest {app_name: "Test".into(),}).await?;
+    //let mut admin_client = client::ClientService::new("http://[::1]:50051".to_string()).await?;
+    //admin_client.application_status_request(ApplicationRequest {app_name: "Test".into(),}).await?;
     Ok(())
 }

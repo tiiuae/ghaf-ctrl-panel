@@ -90,7 +90,7 @@ mod imp {
             if let Some(action_row) = row.downcast_ref::<adw::ActionRow>() {
                 let title: Option<String> = action_row.property("title");
                 if let Some(title) = title {
-                    self.details_label.set_text(&format!("{title} settings will be here"));
+                    self.details_label.set_text(&title);
                 } else {
                     self.details_label.set_text("(No title)");
                 }

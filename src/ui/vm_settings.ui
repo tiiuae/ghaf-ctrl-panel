@@ -44,16 +44,16 @@
         <property name="margin-top">10</property>
         <property name="margin-bottom">10</property>
           <child>
-            <object class="GtkImage">
+            <object class="GtkImage" id="security_icon">
               <property name="visible">True</property>
               <property name="can_focus">False</property>
-              <property name="resource">/org/gnome/controlpanelgui/icons/security_well.svg</property>
+              <!--<property name="resource">/org/gnome/controlpanelgui/icons/security_well.svg</property>-->
               <property name="width-request">16</property>
               <property name="height-request">20</property>
             </object>
           </child>
           <child>
-            <object class="GtkLabel" id="vm_security_label">
+            <object class="GtkLabel" id="security_label">
             <style><class name="normal-text"/></style>
             <property name="label">This VM is secure!</property>
             <property name="margin-start">10</property>

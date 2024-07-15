@@ -1,12 +1,11 @@
 use std::cell::RefCell;
 use gtk::prelude::*;
-//use adw::prelude::*;
-//use adw::ActionRow;
-use gtk::subclass::prelude::*;//gtk <-> adw
+use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate};
 use glib::Binding;
 
 use crate::vm_gobject::VMGObject;
+use crate::security_icon::SecurityIcon;
 
 mod imp {
     use super::*;
@@ -33,7 +32,7 @@ mod imp {
     impl ObjectSubclass for VMRow {
         const NAME: &'static str = "VMRow";
         type Type = super::VMRow;
-        type ParentType = gtk::Box;//adw::ActionRow;
+        type ParentType = gtk::Box;
 
         fn class_init(klass: &mut Self::Class) {
                 klass.bind_template();
@@ -47,15 +46,11 @@ mod imp {
     impl ObjectImpl for VMRow {}
     impl WidgetImpl for VMRow {}
     impl BoxImpl for VMRow {}
-    //impl ListBoxRowImpl for VMRow {}
-    //impl PreferencesRowImpl for VMRow {}
-    //impl ActionRowImpl for VMRow {}
 }
 
 glib::wrapper! {
 pub struct VMRow(ObjectSubclass<imp::VMRow>)
-    @extends gtk::Widget, gtk::Box;//, gtk::ListBoxRow, adw::PreferencesRow, adw::ActionRow;
-    //@implements gtk::Accessible, gtk::Buildable; ???
+    @extends gtk::Widget, gtk::Box;
 }
 
 impl Default for VMRow {
@@ -70,13 +65,10 @@ impl VMRow {
         glib::Object::builder().build()
     }
 
-    pub fn set_data(&self) {
-        println!("{}", self.imp().name);//access the struct's field'
-    }
-
     pub fn bind(&self, vm_object: &VMGObject) {
         let title = self.imp().title_label.get();
         let subtitle = self.imp().subtitle_label.get();
+        let security_icon = self.imp().security_icon.get();
         let mut bindings = self.imp().bindings.borrow_mut();
 
 
@@ -94,6 +86,17 @@ impl VMRow {
             .build();
         // Save binding
         bindings.push(subtitle_binding);
+
+        let security_binding = vm_object
+            .bind_property("trust-level", &security_icon, "resource")
+            .sync_create()
+            .transform_to(move |_, value: &glib::Value| {
+                let trust_level = value.get::<u8>().unwrap_or(0);
+                Some(glib::Value::from(SecurityIcon::new(trust_level).0))
+            })
+            .build();
+        // Save binding
+        bindings.push(security_binding);
 
         //block was left here as example
         /*/ Bind `task_object.completed` to `task_row.content_label.attributes`
