@@ -9,6 +9,7 @@ use crate::vm_gobject::VMGObject;
 use crate::vm_row::VMRow;
 use crate::vm_settings::VMSettings;
 use crate::audio_settings::AudioSettings;
+use crate::settings::Settings;
 
 mod imp {
     use super::*;
@@ -41,11 +42,7 @@ mod imp {
         pub vm_settings_box: TemplateChild<VMSettings>,
 
         #[template_child]
-        pub settings_main_box: TemplateChild<gtk::Box>,
-        #[template_child]
-        pub settings_list_box: TemplateChild<gtk::ListBox>,
-        #[template_child]
-        pub details_label: TemplateChild<gtk::Label>,
+        pub settings_box: TemplateChild<Settings>,
 
         pub data_provider: DataProvider,
     }
@@ -83,20 +80,6 @@ mod imp {
         #[template_callback]
         fn switch_to_settings_view(&self) {
             self.stack.set_visible_child_name("settings_view");
-        }
-
-        #[template_callback]
-        fn on_settings_row_selected(&self, row: &gtk::ListBoxRow) {
-            if let Some(action_row) = row.downcast_ref::<adw::ActionRow>() {
-                let title: Option<String> = action_row.property("title");
-                if let Some(title) = title {
-                    self.details_label.set_text(&title);
-                } else {
-                    self.details_label.set_text("(No title)");
-                }
-            } else {
-                self.details_label.set_text("(Invalid row type)");
-            }
         }
     }//end #[gtk::template_callbacks]
 

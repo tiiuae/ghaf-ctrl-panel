@@ -5,6 +5,8 @@ mod vm_row;
 mod vm_gobject;
 mod vm_settings;
 mod audio_settings;
+mod settings;
+mod settings_gobject;
 mod data_provider;
 mod security_icon;
 mod client;

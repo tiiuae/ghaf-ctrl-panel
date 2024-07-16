@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="Settings" parent="GtkBox">
+    <style><class name="container"/></style>
+    <property name="orientation">horizontal</property>
+    <child>
+    <object class="GtkBox" id="settings_list_outer_box">
+    <style><class name="container"/></style>
+    <property name="orientation">vertical</property>
+    <property name="margin-start">0</property>
+    <property name="margin-end">10</property>
+    <property name="margin-top">0</property>
+    <property name="margin-bottom">10</property>
+        <child>
+        <object class="GtkListBox" id="settings_list_box">
+            <style><class name="settings_list"/></style>
+            <signal name="row_selected" handler="on_settings_row_selected" swapped="true"/>
+            <property name="margin-start">10</property>
+            <property name="margin-end">10</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
+        <property name="width-request">300</property>
+        <style><class name="list-box"/></style>
+            <child>
+                <object class="AdwActionRow">
+                <style><class name="settings-row"/></style>
+                <property name="title">Admin</property>
+                <child type="prefix">
+                    <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="resource">/org/gnome/controlpanelgui/icons/icon_admin.png</property>
+                    <property name="width-request">24</property>
+                    <property name="height-request">24</property>
+                    </object>
+                </child>
+                </object>
+            </child>
+            <child>
+                <object class="AdwActionRow">
+                <style><class name="settings-row"/></style>
+                <property name="title">Information</property>
+                <child type="prefix">
+                    <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="resource">/org/gnome/controlpanelgui/icons/icon_admin.png</property>
+                    <property name="width-request">24</property>
+                    <property name="height-request">24</property>
+                    </object>
+                </child>
+                </object>
+            </child>
+            <child>
+                <object class="AdwActionRow">
+                <style><class name="settings-row"/></style>
+                <property name="title">Security</property>
+                <child type="prefix">
+                    <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="resource">/org/gnome/controlpanelgui/icons/icon_security.svg</property>
+                    <property name="width-request">24</property>
+                    <property name="height-request">24</property>
+                    </object>
+                </child>
+                </object>
+            </child>
+            <child>
+                <object class="AdwActionRow">
+                <style><class name="settings-row"/></style>
+                <property name="title">Wifi</property>
+                <child type="prefix">
+                    <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="resource">/org/gnome/controlpanelgui/icons/icon_wifi.svg</property>
+                    <property name="width-request">24</property>
+                    <property name="height-request">24</property>
+                    </object>
+                </child>
+                </object>
+            </child>
+            <child>
+                <object class="AdwActionRow">
+                <style><class name="settings-row"/></style>
+                <property name="title">Keyboard</property>
+                <child type="prefix">
+                    <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="resource">/org/gnome/controlpanelgui/icons/icon_keyboard.svg</property>
+                    <property name="width-request">24</property>
+                    <property name="height-request">24</property>
+                    </object>
+                </child>
+                </object>
+            </child>
+            <child>
+                <object class="AdwActionRow">
+                <style><class name="settings-row"/></style>
+                <property name="title">Mouse</property>
+                <child type="prefix">
+                    <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="resource">/org/gnome/controlpanelgui/icons/icon_mouse.svg</property>
+                    <property name="width-request">24</property>
+                    <property name="height-request">24</property>
+                    </object>
+                </child>
+                </object>
+            </child>
+            <child>
+                <object class="AdwActionRow">
+                <style><class name="settings-row"/></style>
+                <property name="title">Display</property>
+                <child type="prefix">
+                    <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="resource">/org/gnome/controlpanelgui/icons/icon_monitor.svg</property>
+                    <property name="width-request">24</property>
+                    <property name="height-request">24</property>
+                    </object>
+                </child>
+                </object>
+            </child>
+            <child>
+                <object class="AdwActionRow">
+                <style><class name="settings-row"/></style>
+                <property name="title">Audio</property>
+                <child type="prefix">
+                    <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="resource">/org/gnome/controlpanelgui/icons/icon_audio.svg</property>
+                    <property name="width-request">24</property>
+                    <property name="height-request">24</property>
+                    </object>
+                </child>
+                </object>
+            </child>
+            <child>
+                <object class="AdwActionRow">
+                <style><class name="settings-row"/></style>
+                <property name="title">Date &amp;amp; Time</property>
+                <child type="prefix">
+                    <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="resource">/org/gnome/controlpanelgui/icons/icon_clock.svg</property>
+                    <property name="width-request">24</property>
+                    <property name="height-request">24</property>
+                    </object>
+                </child>
+                </object>
+            </child>
+            <child>
+                <object class="AdwActionRow">
+                <style><class name="settings-row"/></style>
+                <property name="title">Region &amp;amp; Language</property>
+                <child type="prefix">
+                    <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="resource">/org/gnome/controlpanelgui/icons/icon_region_location.svg</property>
+                    <property name="width-request">24</property>
+                    <property name="height-request">24</property>
+                    </object>
+                </child>
+                </object>
+            </child>
+        </object>
+        </child>
+    </object> <!-- List of settings -->
+    </child>
+    <child>
+    <object class="GtkBox" id="settings_details_box">
+        <style><class name="info-box"/></style>
+        <property name="orientation">vertical</property>
+        <property name="vexpand">true</property>
+        <property name="hexpand">true</property>
+        <property name="margin-start">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">10</property>
+        <child>
+        <object class="GtkLabel" id="details_label">
+        <property name="label">Settings details</property>
+        <style><class name="title"/></style>
+            <property name="margin-start">10</property>
+            <property name="margin-end">10</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
+            <property name="halign">start</property>
+        </object>
+        </child>
+      </object> <!-- Settings details box object -->
+    </child>
+  </template>
+</interface>
