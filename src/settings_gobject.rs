@@ -4,8 +4,6 @@ use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::glib::subclass::prelude::*;
 
-//use chrono::DateTime;
-
 mod imp {
     use super::*;
 
@@ -14,7 +12,8 @@ mod imp {
         pub memory_usage: u32,
         pub cpu_load: u32,
         pub network_load: u32,
-        //pub date_time: DateTime<Tz>,
+        pub date: u32,//?
+        pub time: i64,//in sec
         pub wifi_on: bool,
         pub wifi_name: String,
     }
@@ -25,7 +24,7 @@ mod imp {
         #[property(name = "memory-usage", get, set, type = u32, member = memory_usage)]
         #[property(name = "cpu-load", get, set, type = u32, member = cpu_load)]
         #[property(name = "network-load", get, set, type = u32, member = network_load)]
-        //#[property(name = "date-time", get, set, type = DateTime<Tz>, member = date_time)]
+        #[property(name = "time", get, set, type = i64, member = time)]
         #[property(name = "wifi-on", get, set, type = bool, member = wifi_on)]
         #[property(name = "wifi-name", get, set, type = String, member = wifi_name)]
         pub data: RefCell<SettingsData>,

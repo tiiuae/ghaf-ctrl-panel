@@ -2,7 +2,7 @@ use std::cell::{Ref, RefCell};
 use gtk::prelude::*;
 use gio::prelude::*;
 use adw::subclass::prelude::*;
-use gtk::{gio, glib, CompositeTemplate, ListView, SingleSelection, SignalListItemFactory, ListItem, DropDown};
+use gtk::{gio, glib, CompositeTemplate, Stack, Image, Button, MenuButton, Box, ListView, SingleSelection, SignalListItemFactory, ListItem,};
 
 use crate::data_provider::imp::DataProvider;
 use crate::vm_gobject::VMGObject;
@@ -21,21 +21,21 @@ mod imp {
         #[template_child]
         pub header_bar: TemplateChild<adw::HeaderBar>,
         #[template_child]
-        pub header_menu_button: TemplateChild<gtk::MenuButton>,
+        pub header_menu_button: TemplateChild<MenuButton>,
         #[template_child]
-        pub update_button: TemplateChild<gtk::Button>,
+        pub update_button: TemplateChild<Button>,
         #[template_child]
-        pub vm_view_button: TemplateChild<gtk::Button>,
+        pub vm_view_button: TemplateChild<Button>,
         #[template_child]
-        pub settings_view_button: TemplateChild<gtk::Button>,
+        pub settings_view_button: TemplateChild<Button>,
         #[template_child]
-        pub ghaf_logo: TemplateChild<gtk::Image>,
+        pub ghaf_logo: TemplateChild<Image>,
 
         #[template_child]
-        pub stack: TemplateChild<gtk::Stack>,
+        pub stack: TemplateChild<Stack>,
 
         #[template_child]
-        pub vm_main_box: TemplateChild<gtk::Box>,
+        pub vm_main_box: TemplateChild<Box>,
         #[template_child]
         pub vm_list_view: TemplateChild<ListView>,
         #[template_child]
@@ -116,9 +116,9 @@ impl ControlPanelGuiWindow {
     }
 
     fn init(&self) {
+        /* //Block was left here as signal connection example
         let imp = imp::ControlPanelGuiWindow::from_instance(self);
 
-        /*
         // Connect signals here
         //Tab button signals
         imp.vm_view_button.connect_clicked(glib::clone!(@strong self as window => move |_| {
@@ -224,7 +224,4 @@ impl ControlPanelGuiWindow {
     fn set_vm_details(&self, vm_obj: &VMGObject) {
         self.imp().vm_settings_box.bind(vm_obj);
     }
-
-    //pub fn update_vm_list(&self, list: &Vec<VMObject>) {
-    //}
 }

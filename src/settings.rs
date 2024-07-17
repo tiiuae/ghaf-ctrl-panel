@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, ListBox, Label};
+use gtk::{glib, CompositeTemplate, Stack, ListBox, Label};
 use glib::{Binding, ToValue};
 
 //use crate::vm_gobject::VMGObject; will be uesd in the future
@@ -17,7 +17,7 @@ mod imp {
         #[template_child]
         pub settings_list_box: TemplateChild<ListBox>,
         #[template_child]
-        pub details_label: TemplateChild<Label>,
+        pub stack: TemplateChild<Stack>,
 
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
@@ -44,19 +44,28 @@ mod imp {
         #[template_callback]
         fn on_settings_row_selected(&self, row: &gtk::ListBoxRow) {
             if let Some(action_row) = row.downcast_ref::<adw::ActionRow>() {
-                let title: Option<String> = action_row.property("title");
-                if let Some(title) = title {
-                    self.details_label.set_text(&title);
+                let name: Option<String> = action_row.property("name");
+                if let Some(name) = name {
+                    self.stack.set_visible_child_name(&name);
                 } else {
-                    self.details_label.set_text("(No title)");
+                    println!("(No title)");
                 }
             } else {
-                self.details_label.set_text("(Invalid row type)");
+                println!("(Invalid row type)");
             }
         }
     }//end #[gtk::template_callbacks]
 
-    impl ObjectImpl for Settings {}
+    impl ObjectImpl for Settings {
+        fn constructed(&self) {
+            // Call "constructed" on parent
+            self.parent_constructed();
+
+            // Setup
+            let obj = self.obj();
+            obj.init();
+        }
+    }
     impl WidgetImpl for Settings {}
     impl BoxImpl for Settings {}
 }
@@ -76,12 +85,17 @@ impl Settings {
     pub fn new() -> Self {
         glib::Object::builder().build()
     }
+    pub fn init(&self) {
+        if let Some(row) = self.imp().settings_list_box.row_at_index(0) {
+            self.imp().settings_list_box.select_row(Some(&row));
+        }
+    }
 
-    /*pub fn bind(&self, settings_object: &SettingsGObject) {
+    pub fn bind(&self, settings_object: &SettingsGObject) {
         //unbind previous ones
         self.unbind();
         //make new
-    }*/
+    }
 
     pub fn unbind(&self) {
         // Unbind all stored bindings
