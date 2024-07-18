@@ -20,8 +20,8 @@
             <child type="end">
               <object class="GtkButton" id="update_button">
               <style><class name="header-button"/></style>
-              <property name="label">Update info</property>
-              <signal name="clicked" handler="on_update_clicked" swapped="true"/>
+              <property name="label">Reconnect</property>
+              <signal name="clicked" handler="on_reconnect_clicked" swapped="true"/>
               </object>
             </child>
           </object>

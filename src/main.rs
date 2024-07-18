@@ -9,7 +9,6 @@ mod settings;
 mod settings_gobject;
 mod data_provider;
 mod security_icon;
-mod client;
 
 use self::application::ControlPanelGuiApplication;
 use self::window::ControlPanelGuiWindow;

@@ -4,7 +4,7 @@ use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::glib::subclass::prelude::*;
 
-mod imp {
+pub mod imp {
     use super::*;
 
     #[derive(Default)]
@@ -44,6 +44,12 @@ mod imp {
 
 glib::wrapper! {
     pub struct SettingsGObject(ObjectSubclass<imp::SettingsGObject>);
+}
+
+impl Default for SettingsGObject {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl SettingsGObject {

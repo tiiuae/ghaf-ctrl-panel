@@ -2,9 +2,7 @@ use std::cell::RefCell;
 use gtk::glib::{self, Object, Properties};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::glib::subclass::prelude::*;
 
-use crate::security_icon::SecurityIcon;
 //use givc_client::client::{VMStatus, TrustLevel}; cannot be used as property
 
 mod imp {

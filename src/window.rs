@@ -1,6 +1,7 @@
+
 use std::cell::{Ref, RefCell};
+//use std::rc::Rc;
 use gtk::prelude::*;
-use gio::prelude::*;
 use adw::subclass::prelude::*;
 use gtk::{gio, glib, CompositeTemplate, Stack, Image, Button, MenuButton, Box, ListView, SingleSelection, SignalListItemFactory, ListItem,};
 
@@ -8,7 +9,6 @@ use crate::data_provider::imp::DataProvider;
 use crate::vm_gobject::VMGObject;
 use crate::vm_row::VMRow;
 use crate::vm_settings::VMSettings;
-use crate::audio_settings::AudioSettings;
 use crate::settings::Settings;
 
 mod imp {
@@ -44,7 +44,7 @@ mod imp {
         #[template_child]
         pub settings_box: TemplateChild<Settings>,
 
-        pub data_provider: DataProvider,
+        pub data_provider: RefCell<DataProvider>,//may be usefull in the future to call methods with &mut self
     }
 
     #[glib::object_subclass]
@@ -69,8 +69,8 @@ mod imp {
     #[gtk::template_callbacks]
     impl ControlPanelGuiWindow {
         #[template_callback]
-        fn on_update_clicked(&self) {
-            self.data_provider.update_request();
+        fn on_reconnect_clicked(&self) {
+            self.data_provider.borrow().reconnect();
         }
         #[template_callback]
         fn switch_to_vm_view(&self) {
@@ -92,6 +92,10 @@ mod imp {
             let obj = self.obj();
             obj.setup_vm_rows();
             obj.setup_factory();
+        }
+
+        fn dispose(&self) {
+            println!("Window destroyed!");
         }
     }
 
@@ -116,6 +120,12 @@ impl ControlPanelGuiWindow {
     }
 
     fn init(&self) {
+        self.set_destroy_with_parent(true);
+
+        self.connect_destroy(glib::clone!(@strong self as window => move |_| {
+            println!("Connect destroy");
+            //drop(data_provider);
+        }));
         /* //Block was left here as signal connection example
         let imp = imp::ControlPanelGuiWindow::from_instance(self);
 
@@ -140,7 +150,7 @@ impl ControlPanelGuiWindow {
     fn setup_vm_rows(&self) {
         // Create new model
         //ListStore doc: "GLib type: GObject with reference counted clone semantics."
-        let model = self.imp().data_provider.get_store();
+        let model = self.imp().data_provider.borrow().get_store();
 
         let count = model.n_items();//save count before model will be consumpted
 

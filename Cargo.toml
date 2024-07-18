@@ -26,9 +26,5 @@ name = "test-server"
 path = "src/test-server.rs"
 
 [[bin]]
-name = "test-client"
-path = "src/client.rs"
-
-[[bin]]
 name = "ctrl-panel"
 path = "src/main.rs"
