@@ -30,11 +30,12 @@ pub mod imp {
     pub enum EventExtended {
         InitialList(Vec<QueryResult>),
         InnerEvent(Event),
+        BreakLoop,
     }
 
     impl DataProvider {
         pub fn new() -> Self {
-            let init_store = ListStore::new::<VMGObject>();//Self::fill_by_mock_data();
+            let init_store = Self::fill_by_mock_data();//ListStore::new::<VMGObject>();
 
             Self {
                 store: Arc::new(Mutex::new(init_store)),
@@ -70,6 +71,8 @@ pub mod imp {
                             break;
                         }
                     }
+
+                    let _ = event_tx.send(EventExtended::BreakLoop);
                 });
             });
 
@@ -84,6 +87,7 @@ pub mod imp {
                             store_inner.remove_all();
                             for vm in list {
                                 store_inner.append(&VMGObject::new(vm.name, vm.description, 0, 0));
+                                //TODO: add convert functions for other fields!
                             }
                         },
                         EventExtended::InnerEvent(event) =>
@@ -94,6 +98,10 @@ pub mod imp {
                             Event::UnitShutdown(info) => {
                                 println!("Shutdown info: {}", info);
                             },
+                        },
+                        EventExtended::BreakLoop => {
+                            println!("BreakLoop event received");
+                            break;
                         }
                     }
                 }
@@ -131,6 +139,7 @@ pub mod imp {
         }
 
         pub fn disconnect(&self) {
+            println!("Disconnect request...");
             self.stop_signal.store(true, Ordering::SeqCst);
             if let Some(handle) = self.handle.borrow_mut().take() {
                 handle.join().unwrap();

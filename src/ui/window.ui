@@ -18,10 +18,10 @@
               </object>
             </child>
             <child type="end">
-              <object class="GtkButton" id="update_button">
+              <object class="GtkButton" id="reconnect_button">
               <style><class name="header-button"/></style>
               <property name="label">Reconnect</property>
-              <signal name="clicked" handler="on_reconnect_clicked" swapped="true"/>
+              <!--<signal name="clicked" handler="on_reconnect_clicked" swapped="true"/>-->
               </object>
             </child>
           </object>

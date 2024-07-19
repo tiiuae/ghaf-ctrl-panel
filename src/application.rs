@@ -1,18 +1,20 @@
 
+use std::cell::{Ref, RefCell};
+use std::rc::Rc;
 use gtk::prelude::*;
 use adw::subclass::prelude::*;
 use gtk::{gio, glib, gdk};
 use gtk::CssProvider;
 
 use crate::ControlPanelGuiWindow;
-//use crate::data_provider::imp::DataProvider;
+use crate::data_provider::imp::DataProvider;
 
 mod imp {
     use super::*;
 
     #[derive(Debug, Default)]
     pub struct ControlPanelGuiApplication {
-        //pub dataProvider: DataProvider,
+        pub data_provider: Rc<RefCell<DataProvider>>,
     }
 
     #[glib::object_subclass]
@@ -28,6 +30,12 @@ mod imp {
             let obj = self.obj();
             obj.setup_gactions();
             obj.set_accels_for_action("app.quit", &["<primary>q"]);
+        }
+
+        fn dispose(&self) {
+            println!("App obj destroyed!");
+            self.data_provider.borrow().disconnect();
+            drop(self.data_provider.clone());
         }
     }
 
@@ -51,10 +59,6 @@ mod imp {
             // Ask the window manager/compositor to present the window
             window.present();
         }
-
-        //fn startup(&self) {
-        //    println!("StartUp!");
-        //}
     }
 
     impl GtkApplicationImpl for ControlPanelGuiApplication {}
@@ -90,7 +94,7 @@ impl ControlPanelGuiApplication {
 
     fn setup_gactions(&self) {
         let quit_action = gio::ActionEntry::builder("quit")
-            .activate(move |app: &Self, _, _| app.quit())
+            .activate(move |app: &Self, _, _| app.clean_n_quit())
             .build();
         let about_action = gio::ActionEntry::builder("about")
             .activate(move |app: &Self, _, _| app.show_about())
@@ -110,5 +114,23 @@ impl ControlPanelGuiApplication {
             .build();
 
         about.present();
+    }
+
+    pub fn reconnect(&self) {
+        self.imp().data_provider.borrow().reconnect()
+    }
+
+    pub fn disconnect(&self) {
+        self.imp().data_provider.borrow().disconnect()
+    }
+
+    pub fn get_store(&self) -> gio::ListStore{
+        self.imp().data_provider.borrow().get_store()
+    }
+
+    pub fn clean_n_quit(&self) {
+        self.imp().data_provider.borrow().disconnect();
+        drop(self.imp().data_provider.borrow());
+        self.quit();
     }
 }

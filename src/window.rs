@@ -1,10 +1,11 @@
 
 use std::cell::{Ref, RefCell};
-//use std::rc::Rc;
+use std::rc::Rc;
 use gtk::prelude::*;
 use adw::subclass::prelude::*;
 use gtk::{gio, glib, CompositeTemplate, Stack, Image, Button, MenuButton, Box, ListView, SingleSelection, SignalListItemFactory, ListItem,};
 
+use crate::application::ControlPanelGuiApplication;
 use crate::data_provider::imp::DataProvider;
 use crate::vm_gobject::VMGObject;
 use crate::vm_row::VMRow;
@@ -23,7 +24,7 @@ mod imp {
         #[template_child]
         pub header_menu_button: TemplateChild<MenuButton>,
         #[template_child]
-        pub update_button: TemplateChild<Button>,
+        pub reconnect_button: TemplateChild<Button>,
         #[template_child]
         pub vm_view_button: TemplateChild<Button>,
         #[template_child]
@@ -44,7 +45,7 @@ mod imp {
         #[template_child]
         pub settings_box: TemplateChild<Settings>,
 
-        pub data_provider: RefCell<DataProvider>,//may be usefull in the future to call methods with &mut self
+        //pub data_provider: RefCell<DataProvider>,//RefCell can be usefull to call methods with &mut self
     }
 
     #[glib::object_subclass]
@@ -69,10 +70,6 @@ mod imp {
     #[gtk::template_callbacks]
     impl ControlPanelGuiWindow {
         #[template_callback]
-        fn on_reconnect_clicked(&self) {
-            self.data_provider.borrow().reconnect();
-        }
-        #[template_callback]
         fn switch_to_vm_view(&self) {
             self.stack.set_visible_child_name("vm_view");
     
@@ -87,11 +84,6 @@ mod imp {
         fn constructed(&self) {
             // Call "constructed" on parent
             self.parent_constructed();
-
-            // Setup
-            let obj = self.obj();
-            obj.setup_vm_rows();
-            obj.setup_factory();
         }
 
         fn dispose(&self) {
@@ -122,35 +114,38 @@ impl ControlPanelGuiWindow {
     fn init(&self) {
         self.set_destroy_with_parent(true);
 
+        self.connect_close_request(glib::clone!(@strong self as window => move |_| {
+            println!("Delete event");    
+            let app = window.get_app_ref();
+            app.clean_n_quit();
+            glib::Propagation::Stop // Returning Stop allows the window to be destroyed
+        }));
+
         self.connect_destroy(glib::clone!(@strong self as window => move |_| {
             println!("Connect destroy");
             //drop(data_provider);
         }));
-        /* //Block was left here as signal connection example
-        let imp = imp::ControlPanelGuiWindow::from_instance(self);
 
-        // Connect signals here
-        //Tab button signals
-        imp.vm_view_button.connect_clicked(glib::clone!(@strong self as window => move |_| {
-            window.switch_to_vm_view();
+        self.setup_vm_rows();
+        self.setup_factory();
+
+        let imp = imp::ControlPanelGuiWindow::from_obj(self);
+        imp.reconnect_button.connect_clicked(glib::clone!(@strong self as window => move |_| {   
+            let app = window.get_app_ref();
+            app.reconnect();
         }));
-        imp.settings_view_button.connect_clicked(glib::clone!(@strong self as window => move |_| {
-            window.switch_to_settings_view();
-        }));
-        // List box signals
-        imp.list_box.connect_row_selected(glib::clone!(@strong self as window => move |_, row| {
-            window.on_vm_list_row_selected(row);
-        }));
-        imp.settings_list_box.connect_row_selected(glib::clone!(@strong self as window => move |_, row| {
-            window.on_settings_list_row_selected(row);
-        }));
-        */
+    }
+
+    #[inline(always)]
+    fn get_app_ref(&self) -> Rc<ControlPanelGuiApplication> {
+        let binding = self.application().expect("Failed to get application");     
+        binding.downcast_ref::<ControlPanelGuiApplication>().expect("ControlPanelGuiApplication is expected!").clone().into()
     }
 
     fn setup_vm_rows(&self) {
-        // Create new model
-        //ListStore doc: "GLib type: GObject with reference counted clone semantics."
-        let model = self.imp().data_provider.borrow().get_store();
+        let app = self.get_app_ref();
+
+        let model = app.get_store();//ListStore doc: "GLib type: GObject with reference counted clone semantics."
 
         let count = model.n_items();//save count before model will be consumpted
 
