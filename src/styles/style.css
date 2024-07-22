@@ -313,3 +313,40 @@ scale>trough>slider {
 scale>value {
   color: #FFFFFF;
 }
+
+/*Progress bar styling */
+/*green: #5AC379, red: #FF2E00*/
+progressbar {
+  background-color: rgba(0, 0, 0, 0.0);
+  /*?*/
+  min-height: 20px;
+  border-radius: 2px;
+}
+
+progressbar>trough {
+  background-color: #FFFFFF;
+  min-height: 20px;
+  border-radius: 2px;
+  margin: 0;
+}
+
+progressbar>trough>progress {
+  background-color: #5AC379;
+  min-height: 20px;
+  border-radius: 2px;
+  margin: 0;
+}
+
+.progress-below-80>trough>progress {
+  background-color: #5AC379;
+  min-height: 20px;
+  border-radius: 2px;
+  margin: 0;
+}
+
+.progress-above-80>trough>progress {
+  background-color: #FF2E00;
+  min-height: 20px;
+  border-radius: 2px;
+  margin: 0;
+}

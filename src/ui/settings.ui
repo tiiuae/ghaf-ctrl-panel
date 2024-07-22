@@ -219,20 +219,12 @@
                     <object class="GtkStackPage">
                         <property name="name">info</property>
                         <property name="child">
-                            <object class="GtkLabel">
-                            <property name="label">Information</property>
-                            <style><class name="title"/></style>
-                                <property name="margin-start">10</property>
-                                <property name="margin-end">10</property>
-                                <property name="margin-top">10</property>
-                                <property name="margin-bottom">10</property>
-                                <property name="halign">start</property>
-                                <property name="valign">start</property>
+                            <object class="InfoSettingsPage" id="info_settings_page">
                             </object>
                         </property>
                     </object>
                 </child>
-                <child> <!-- Information view child -->
+                <child> <!-- Security view child -->
                     <object class="GtkStackPage">
                         <property name="name">security</property>
                         <property name="child">
@@ -249,7 +241,7 @@
                         </property>
                     </object>
                 </child>
-                <child> <!-- Information view child -->
+                <child> <!-- Wifi view child -->
                     <object class="GtkStackPage">
                         <property name="name">wifi</property>
                         <property name="child">
@@ -266,7 +258,7 @@
                         </property>
                     </object>
                 </child>
-                <child> <!-- Information view child -->
+                <child> <!-- Keyboard view child -->
                     <object class="GtkStackPage">
                         <property name="name">keyboard</property>
                         <property name="child">
@@ -283,7 +275,7 @@
                         </property>
                     </object>
                 </child>
-                <child> <!-- Information view child -->
+                <child> <!-- Mouse view child -->
                     <object class="GtkStackPage">
                         <property name="name">mouse</property>
                         <property name="child">
@@ -300,7 +292,7 @@
                         </property>
                     </object>
                 </child>
-                <child> <!-- Information view child -->
+                <child> <!-- Display view child -->
                     <object class="GtkStackPage">
                         <property name="name">display</property>
                         <property name="child">
@@ -317,15 +309,15 @@
                         </property>
                     </object>
                 </child>
-                <child> <!-- Information view child -->
+                <child> <!-- Audio view child -->
                     <object class="GtkStackPage">
                         <property name="name">audio</property>
                         <property name="child">
-                            <object class="AudioSettings"></object>
+                            <object class="AudioSettings" id="audio_settings_page"></object>
                         </property>
                     </object>
                 </child>
-                <child> <!-- Information view child -->
+                <child> <!-- Date&Time view child -->
                     <object class="GtkStackPage">
                         <property name="name">date_time</property>
                         <property name="child">
@@ -342,7 +334,7 @@
                         </property>
                     </object>
                 </child>
-                <child> <!-- Information view child -->
+                <child> <!-- Region&Language view child -->
                     <object class="GtkStackPage">
                         <property name="name">region</property>
                         <property name="child">

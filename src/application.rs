@@ -35,7 +35,7 @@ mod imp {
         fn dispose(&self) {
             println!("App obj destroyed!");
             self.data_provider.borrow().disconnect();
-            drop(self.data_provider.clone());
+            drop(self.data_provider.borrow());
         }
     }
 

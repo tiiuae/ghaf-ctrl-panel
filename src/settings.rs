@@ -5,8 +5,9 @@ use gtk::{glib, CompositeTemplate, Stack, ListBox, Label};
 use glib::{Binding, ToValue};
 
 //use crate::vm_gobject::VMGObject; will be uesd in the future
-//use crate::audio_settings::AudioSettings;
+use crate::audio_settings::AudioSettings;
 use crate::settings_gobject::SettingsGObject;
+use crate::info_settings_page::InfoSettingsPage;
 
 mod imp {
     use super::*;
@@ -18,6 +19,11 @@ mod imp {
         pub settings_list_box: TemplateChild<ListBox>,
         #[template_child]
         pub stack: TemplateChild<Stack>,
+        #[template_child]
+        pub info_settings_page: TemplateChild<InfoSettingsPage>,
+        #[template_child]
+        pub audio_settings_page: TemplateChild<AudioSettings>,
+
 
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,

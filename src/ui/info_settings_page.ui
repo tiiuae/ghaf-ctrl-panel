@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="InfoSettingsPage" parent="GtkBox">
+    <style><class name="info-box"/></style>
+      <property name="orientation">vertical</property>
+      <property name="vexpand">true</property>
+      <property name="hexpand">true</property>
+      <property name="margin-start">10</property>
+      <property name="margin-end">10</property>
+      <property name="margin-top">10</property>
+      <property name="margin-bottom">10</property>
+      <!--<property name="spacing">10</property>-->
+      <child>
+        <object class="GtkLabel">
+        <property name="label">Information</property>
+        <style><class name="title"/></style>
+        <property name="margin-start">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">10</property>
+        <property name="halign">start</property>
+        </object>
+      </child>
+      <!-- Progress bars box-->
+      <child>
+        <object class="GtkBox" id="resources_info_box">
+        <style><class name="info-box"/></style>
+        <property name="orientation">vertical</property>
+        <property name="vexpand">false</property>
+        <property name="hexpand">true</property>
+        <property name="margin-start">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">10</property>
+          <child>
+            <object class="GtkLabel" id="memory_label">
+            <style><class name="normal-text"/></style>
+            <property name="label">Memory usage:</property>
+            <property name="margin-start">10</property>
+            <property name="margin-end">10</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
+            <property name="halign">start</property>
+            </object>
+          </child>
+          <child>
+            <object class="GtkProgressBar" id="memory_bar">
+              <property name="visible">True</property>
+              <property name="can_focus">False</property>
+              <property name="width-request">320</property>
+              <property name="height-request">20</property>
+            </object>
+          </child>
+          <child>
+            <object class="GtkLabel" id="cpu_label">
+            <style><class name="normal-text"/></style>
+            <property name="label">CPU usage:</property>
+            <property name="margin-start">10</property>
+            <property name="margin-end">10</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
+            <property name="halign">start</property>
+            </object>
+          </child>
+          <child>
+            <object class="GtkProgressBar" id="cpu_bar">
+              <property name="visible">True</property>
+              <property name="can_focus">False</property>
+              <property name="width-request">320</property>
+              <property name="height-request">20</property>
+            </object>
+          </child>
+          <child>
+            <object class="GtkLabel" id="network_label">
+            <style><class name="normal-text"/></style>
+            <property name="label">Network usage:</property>
+            <property name="margin-start">10</property>
+            <property name="margin-end">10</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
+            <property name="halign">start</property>
+            </object>
+          </child>
+          <child>
+            <object class="GtkProgressBar" id="network_bar">
+              <property name="visible">True</property>
+              <property name="can_focus">False</property>
+              <property name="width-request">320</property>
+              <property name="height-request">20</property>
+            </object>
+          </child>
+        </object>
+      </child>
+      <child>
+        <object class="GtkSeparator"/>
+      </child>
+  </template>
+</interface>

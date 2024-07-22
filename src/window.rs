@@ -115,15 +115,14 @@ impl ControlPanelGuiWindow {
         self.set_destroy_with_parent(true);
 
         self.connect_close_request(glib::clone!(@strong self as window => move |_| {
-            println!("Delete event");    
+            println!("Close window request");    
             let app = window.get_app_ref();
             app.clean_n_quit();
             glib::Propagation::Stop // Returning Stop allows the window to be destroyed
         }));
 
         self.connect_destroy(glib::clone!(@strong self as window => move |_| {
-            println!("Connect destroy");
-            //drop(data_provider);
+            println!("Destroy window");
         }));
 
         self.setup_vm_rows();
