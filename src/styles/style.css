@@ -11,10 +11,7 @@ header-bar {
   background-color: #FFFFFF;
 }
 
-button.header-button
-
-/*:active?*/
-  {
+button.header-button {
   background-color: #F15025;
   color: #FFFFFF;
 }
@@ -59,8 +56,12 @@ box.info-box {
   background-color: #353535;
 }
 
-listview {
+.vm-list-main {
   background-color: #2B2B2B;
+}
+
+.vm-list-info-page {
+  background-color: #353535;
 }
 
 /* VMRow styling */
@@ -99,6 +100,112 @@ row:selected {
   border: 1px solid #353535;
   border-radius: 3px;
   margin: 5px;
+}
+
+/* VMRow on Info page*/
+.vm-row-2 {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+  box-shadow: 0 0 0 0;
+}
+
+.vm-row-2:active {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+  box-shadow: 0 0 0 0;
+}
+
+.vm-row-2:hover {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+  box-shadow: 0 0 0 0;
+}
+
+.vm-row-2:focus {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+  box-shadow: 0 0 0 0;
+}
+
+.vm-row-2:selected {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+  box-shadow: 0 0 0 0;
+}
+
+.vm-row-2>box.header {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+  box-shadow: 0 0 0 0;
+}
+
+.vm-row-2:active>box.header {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+  box-shadow: 0 0 0 0;
+}
+
+.vm-row-2:focus>box.header {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+  box-shadow: 0 0 0 0;
+}
+
+.vm-row-2:hover>box.header {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+  box-shadow: 0 0 0 0;
+}
+
+.vm-row-2:selected>box.header {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+  box-shadow: 0 0 0 0;
+}
+
+.vm-row-2>box.title {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+  box-shadow: 0 0 0 0;
+}
+
+.vm-row-2:active>box.title {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+  box-shadow: 0 0 0 0;
+}
+
+.vm-row-2:focus>box.title {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+  box-shadow: 0 0 0 0;
+}
+
+.vm-row-2:hover>box.title {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+  box-shadow: 0 0 0 0;
+}
+
+.vm-row-2:selected>box.title {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+  box-shadow: 0 0 0 0;
 }
 
 /* Settings List styling */

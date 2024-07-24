@@ -3,8 +3,9 @@ use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, Stack, ListBox, Label};
 use glib::{Binding, ToValue};
+use gtk::gio::ListStore;
 
-//use crate::vm_gobject::VMGObject; will be uesd in the future
+//use crate::vm_gobject::VMGObject; will be used in the future
 use crate::audio_settings::AudioSettings;
 use crate::settings_gobject::SettingsGObject;
 use crate::info_settings_page::InfoSettingsPage;
@@ -24,6 +25,7 @@ mod imp {
         #[template_child]
         pub audio_settings_page: TemplateChild<AudioSettings>,
 
+        //pub vm_model: RefCell<ListStore>,
 
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
@@ -90,6 +92,10 @@ impl Default for Settings {
 impl Settings {
     pub fn new() -> Self {
         glib::Object::builder().build()
+    }
+
+    pub fn set_vm_model(&self, model: ListStore) {
+        self.imp().info_settings_page.set_vm_model(model.clone());
     }
     pub fn init(&self) {
         if let Some(row) = self.imp().settings_list_box.row_at_index(0) {

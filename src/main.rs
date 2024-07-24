@@ -2,6 +2,7 @@
 mod application;
 mod window;
 mod vm_row;
+mod vm_row_2;
 mod vm_gobject;
 mod vm_settings;
 mod audio_settings;

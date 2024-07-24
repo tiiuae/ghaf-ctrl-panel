@@ -2,7 +2,6 @@
 <interface>
   <requires lib="gtk" version="4.0"/>
   <template class="VMRow" parent="GtkBox">
-    <style><class name="vm-row"/></style>
     <property name="orientation">horizontal</property>
     <property name="can_focus">true</property>
     <property name="vexpand">true</property>

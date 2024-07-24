@@ -95,5 +95,27 @@
       <child>
         <object class="GtkSeparator"/>
       </child>
+      <child>
+        <object class="GtkLabel">
+        <style><class name="normal-text"/></style>
+        <property name="label">Running systems:</property>
+        <property name="margin-start">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">10</property>
+        <property name="halign">start</property>
+        </object>
+      </child>
+      <child>
+        <object class="GtkListView" id="vm_list_view">
+          <!--<property name="can_focus">true</property>-->
+          <property name="margin-start">10</property>
+          <property name="margin-end">0</property>
+          <property name="margin-top">0</property>
+          <property name="margin-bottom">0</property>
+          <property name="width-request">300</property>
+          <style><class name="vm-list-info-page"/></style>
+        </object>
+      </child>
   </template>
 </interface>

@@ -133,6 +133,8 @@ impl ControlPanelGuiWindow {
 
         let model = app.get_store();//ListStore doc: "GLib type: GObject with reference counted clone semantics."
 
+        self.imp().settings_box.set_vm_model(model.clone());
+
         let count = model.n_items();//save count before model will be consumpted
 
         // Wrap model with selection and pass it to the list view
@@ -198,14 +200,14 @@ impl ControlPanelGuiWindow {
         // Tell factory how to unbind `VMRow` from `VMGObject`
         factory.connect_unbind(move |_, list_item| {
             // Get `VMRow` from `ListItem`
-            let task_row = list_item
+            let vm_row = list_item
                 .downcast_ref::<ListItem>()
                 .expect("Needs to be ListItem")
                 .child()
                 .and_downcast::<VMRow>()
-                .expect("The child has to be a `TaskRow`.");
+                .expect("The child has to be a `VMRow`.");
 
-            task_row.unbind();
+            vm_row.unbind();
         });
 
         // Set the factory of the list view

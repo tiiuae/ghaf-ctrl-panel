@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="VMRow2" parent="GtkBox">
+    <style><class name="vm-row-2"/></style>
+    <property name="orientation">horizontal</property>
+    <property name="can_focus">true</property>
+    <property name="vexpand">true</property>
+    <property name="hexpand">true</property>
+    <property name="spacing">10</property>
+    <child>
+      <object class="GtkLabel" id="title_label">
+        <style><class name="normal-text"/></style>
+        <property name="halign">start</property>
+        <property name="margin-start">10</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkLabel" id="subtitle_label">
+        <style><class name="normal-text"/></style>
+        <property name="halign">start</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox"><!-- Placeholder -->
+        <property name="vexpand">true</property>
+        <property name="hexpand">true</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkDropDown" id="vm_action_menu_button">
+        <style><class name="dropdown-button"/></style>
+        <!--<signal name="notify::selected" handler="on_vm_action_selected" swapped="true"/>-->
+        <property name="halign">end</property>
+        <property name="valign">center</property>
+        <property name="width-request">130</property>
+        <property name="height-request">20</property>
+        <property name="model">
+          <object class="GtkStringList">
+            <items>
+              <item translatable="yes">Pause</item>
+              <item translatable="yes">Restart</item>
+              <item translatable="yes">Shutdown</item>
+            </items>
+          </object>
+        </property>
+      </object>
+    </child>
+  </template>
+</interface>
