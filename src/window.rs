@@ -1,12 +1,9 @@
-
-use std::cell::{Ref, RefCell};
 use std::rc::Rc;
 use gtk::prelude::*;
 use adw::subclass::prelude::*;
 use gtk::{gio, glib, CompositeTemplate, Stack, Image, Button, MenuButton, Box, ListView, SingleSelection, SignalListItemFactory, ListItem,};
 
 use crate::application::ControlPanelGuiApplication;
-use crate::data_provider::imp::DataProvider;
 use crate::vm_gobject::VMGObject;
 use crate::vm_row::VMRow;
 use crate::vm_settings::VMSettings;
@@ -23,8 +20,6 @@ mod imp {
         pub header_bar: TemplateChild<adw::HeaderBar>,
         #[template_child]
         pub header_menu_button: TemplateChild<MenuButton>,
-        #[template_child]
-        pub reconnect_button: TemplateChild<Button>,
         #[template_child]
         pub vm_view_button: TemplateChild<Button>,
         #[template_child]
@@ -44,8 +39,6 @@ mod imp {
 
         #[template_child]
         pub settings_box: TemplateChild<Settings>,
-
-        //pub data_provider: RefCell<DataProvider>,//RefCell can be usefull to call methods with &mut self
     }
 
     #[glib::object_subclass]
@@ -127,12 +120,6 @@ impl ControlPanelGuiWindow {
 
         self.setup_vm_rows();
         self.setup_factory();
-
-        let imp = imp::ControlPanelGuiWindow::from_obj(self);
-        imp.reconnect_button.connect_clicked(glib::clone!(@strong self as window => move |_| {   
-            let app = window.get_app_ref();
-            app.reconnect();
-        }));
     }
 
     #[inline(always)]

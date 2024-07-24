@@ -30,6 +30,7 @@ mod imp {
             let obj = self.obj();
             obj.setup_gactions();
             obj.set_accels_for_action("app.quit", &["<primary>q"]);
+            obj.set_accels_for_action("app.reconnect", &["<primary>r"]);
         }
 
         fn dispose(&self) {
@@ -93,13 +94,16 @@ impl ControlPanelGuiApplication {
     }
 
     fn setup_gactions(&self) {
+        let reconnect_action = gio::ActionEntry::builder("reconnect")
+            .activate(move |app: &Self, _, _| app.reconnect())
+            .build();
         let quit_action = gio::ActionEntry::builder("quit")
             .activate(move |app: &Self, _, _| app.clean_n_quit())
             .build();
         let about_action = gio::ActionEntry::builder("about")
             .activate(move |app: &Self, _, _| app.show_about())
             .build();
-        self.add_action_entries([quit_action, about_action]);
+        self.add_action_entries([reconnect_action, quit_action, about_action]);
     }
 
     fn show_about(&self) {

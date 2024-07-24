@@ -17,13 +17,6 @@
               <property name="menu-model">primary_menu</property>
               </object>
             </child>
-            <child type="end">
-              <object class="GtkButton" id="reconnect_button">
-              <style><class name="header-button"/></style>
-              <property name="label">Reconnect</property>
-              <!--<signal name="clicked" handler="on_reconnect_clicked" swapped="true"/>-->
-              </object>
-            </child>
           </object>
         </child>
           <child><!-- Outer box child -->
@@ -141,6 +134,10 @@
   </template>
   <menu id="primary_menu">
     <section>
+      <item>
+        <attribute name="label" translatable="yes">Reconnect</attribute>
+        <attribute name="action">app.reconnect</attribute>
+      </item>
       <item>
         <attribute name="label" translatable="yes">_Preferences</attribute>
         <attribute name="action">app.preferences</attribute>
