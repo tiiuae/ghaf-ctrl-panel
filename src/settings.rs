@@ -9,6 +9,7 @@ use gtk::gio::ListStore;
 use crate::audio_settings::AudioSettings;
 use crate::settings_gobject::SettingsGObject;
 use crate::info_settings_page::InfoSettingsPage;
+use crate::security_settings_page::SecuritySettingsPage;
 
 mod imp {
     use super::*;
@@ -22,6 +23,8 @@ mod imp {
         pub stack: TemplateChild<Stack>,
         #[template_child]
         pub info_settings_page: TemplateChild<InfoSettingsPage>,
+        #[template_child]
+        pub security_settings_page: TemplateChild<SecuritySettingsPage>,
         #[template_child]
         pub audio_settings_page: TemplateChild<AudioSettings>,
 
