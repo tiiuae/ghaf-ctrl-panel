@@ -1,8 +1,9 @@
 use std::cell::RefCell;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Label, Button};
+use gtk::{glib, CompositeTemplate, Switch, Image};
 use glib::{Binding, ToValue};
+//use gtk::gio::ListStore; will be needed for list of available networks
 
 use crate::settings_gobject::SettingsGObject;
 
@@ -10,26 +11,30 @@ mod imp {
     use super::*;
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/security_settings_page.ui")]
-    pub struct SecuritySettingsPage {
+    #[template(resource = "/org/gnome/controlpanelgui/ui/wifi_settings_page.ui")]
+    pub struct WifiSettingsPage {
         #[template_child]
-        pub verify_button: TemplateChild<Button>,
+        pub switch: TemplateChild<Switch>,
         #[template_child]
-        pub password_reset_button: TemplateChild<Button>,
+        pub state_indicator: TemplateChild<Image>,
+        #[template_child]
+        pub security_indicator: TemplateChild<Image>,
+        #[template_child]
+        pub signal_indicator: TemplateChild<Image>,
 
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for SecuritySettingsPage {
-        const NAME: &'static str = "SecuritySettingsPage";
-        type Type = super::SecuritySettingsPage;
+    impl ObjectSubclass for WifiSettingsPage {
+        const NAME: &'static str = "WifiSettingsPage";
+        type Type = super::WifiSettingsPage;
         type ParentType = gtk::Box;
 
         fn class_init(klass: &mut Self::Class) {
                 klass.bind_template();
-                //klass.bind_template_callbacks();
+                klass.bind_template_callbacks();
         }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -37,15 +42,16 @@ mod imp {
         }
     }
 
-    /*#[gtk::template_callbacks]
-    impl SecuritySettingsPage {
+    #[gtk::template_callbacks]
+    impl WifiSettingsPage {
         #[template_callback]
-        fn on_row_selected(&self, row: &gtk::ListBoxRow) {
-            
+        fn on_switch_state_changed(&self, value: bool) -> bool {
+            println!("Wifi switched: {}", value);
+            false//propagate event futher
         }
-    }*///end #[gtk::template_callbacks]
+    }//end #[gtk::template_callbacks]
 
-    impl ObjectImpl for SecuritySettingsPage {
+    impl ObjectImpl for WifiSettingsPage {
         fn constructed(&self) {
             // Call "constructed" on parent
             self.parent_constructed();
@@ -55,22 +61,22 @@ mod imp {
             obj.init();
         }
     }
-    impl WidgetImpl for SecuritySettingsPage {}
-    impl BoxImpl for SecuritySettingsPage {}
+    impl WidgetImpl for WifiSettingsPage {}
+    impl BoxImpl for WifiSettingsPage {}
 }
 
 glib::wrapper! {
-pub struct SecuritySettingsPage(ObjectSubclass<imp::SecuritySettingsPage>)
+pub struct WifiSettingsPage(ObjectSubclass<imp::WifiSettingsPage>)
     @extends gtk::Widget, gtk::Box;
 }
 
-impl Default for SecuritySettingsPage {
+impl Default for WifiSettingsPage {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl SecuritySettingsPage {
+impl WifiSettingsPage {
     pub fn new() -> Self {
         glib::Object::builder().build()
     }
@@ -91,4 +97,3 @@ impl SecuritySettingsPage {
         }
     }
 }
-

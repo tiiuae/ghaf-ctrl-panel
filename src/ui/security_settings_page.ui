@@ -27,7 +27,6 @@
       <property name="orientation">vertical</property>
       <property name="vexpand">false</property>
       <property name="hexpand">true</property>
-      <property name="margin-end">10</property>
       <property name="margin-top">10</property>
       <property name="margin-bottom">10</property>
         <child>
@@ -35,7 +34,6 @@
           <property name="orientation">horizontal</property>
           <property name="vexpand">false</property>
           <property name="hexpand">true</property>
-          <property name="margin-end">10</property>
           <property name="margin-top">10</property>
           <property name="margin-bottom">10</property>
             <child>
@@ -66,7 +64,6 @@
           <property name="orientation">horizontal</property>
           <property name="vexpand">false</property>
           <property name="hexpand">true</property>
-          <property name="margin-end">10</property>
           <property name="margin-top">10</property>
           <property name="margin-bottom">10</property>
             <child>

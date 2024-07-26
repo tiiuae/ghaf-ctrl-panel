@@ -516,3 +516,17 @@ progressbar>trough>progress {
   border-radius: 5px;
   color: lightgray;
 }
+
+switch {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #FFFFFF;
+  min-width: 30px;
+  min-height: 16px;
+}
+
+switch:checked {
+  background-color: #5AC379;
+  color: #FFFFFF;
+  min-width: 30px;
+  min-height: 16px;
+}
