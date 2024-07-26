@@ -8,7 +8,7 @@
     <property name="can_focus">false</property>
     <property name="vexpand">true</property>
     <property name="hexpand">true</property>
-    <property name="margin-start">10</property>
+    <property name="margin-start">20</property>
     <property name="margin-end">10</property>
     <property name="margin-top">10</property>
     <property name="margin-bottom">10</property>
@@ -28,7 +28,6 @@
       <object class="GtkLabel">
       <style><class name="normal-text"/></style>
       <property name="halign">start</property>
-      <property name="margin-start">10</property>
       <property name="label">Choose microphone</property>
       </object>
     </child>
@@ -74,7 +73,6 @@
       <object class="GtkLabel">
       <style><class name="normal-text"/></style>
       <property name="halign">start</property>
-      <property name="margin-start">10</property>
       <property name="margin-top">10</property>
       <property name="label">Choose speakers</property>
       </object>

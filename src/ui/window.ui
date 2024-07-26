@@ -54,7 +54,7 @@
                   </child>
                   <child>
                     <object class="GtkButton" id="vm_view_button">
-                    <style><class name="header-button"/></style>
+                    <style><class name="header-button-chosen"/></style>
                     <property name="label">Virtual machines</property>
                     <property name="halign">end</property>
                     <property name="valign">center</property>

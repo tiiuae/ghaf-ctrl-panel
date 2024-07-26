@@ -30,6 +30,27 @@ button.header-button:disabled {
   color: #FFFFFF;
 }
 
+button.header-button-chosen {
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 5px;
+  color: #FFFFFF;
+}
+
+button.header-button-chosen:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 5px;
+  color: #FFFFFF;
+}
+
+button.header-button-chosen:disabled {
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 5px;
+  color: #FFFFFF;
+}
+
 label.normal-text {
   font-size: 14px;
   color: #FFFFFF;
@@ -343,7 +364,7 @@ row:selected {
   background-color: #353535;
   border: 0;
   margin: 0;
-  box-shadow: 0;
+  box-shadow: 0 0 0 0;
 }
 
 .dropdown-button>button>box>*>row:hover {
@@ -371,11 +392,11 @@ row:selected {
   background-color: #353535;
   border: 0;
   margin: 0;
-  box-shadow: 0;
+  box-shadow: 0 0 0 0;
 }
 
 .dropdown-button>popover>contents>*>*>*>row:selected {
-  background-color: #353535;
+  background-color: #2B2B2B;
   border: 0;
   margin: 0;
 }
@@ -386,8 +407,20 @@ row:selected {
   margin: 0;
 }
 
-.dropdown-button>popover>contents>*>*>*>row:focus {
+.dropdown-button>popover>contents>*>*>*>row:selected:hover {
   background-color: #2B2B2B;
+  border: 0;
+  margin: 0;
+}
+
+.dropdown-button>popover>contents>*>*>*>row:selected:focus {
+  background-color: #2B2B2B;
+  border: 0;
+  margin: 0;
+}
+
+.dropdown-button>popover>contents>*>*>*>row:focus {
+  background-color: #353535;
   border: 0;
   margin: 0;
 }

@@ -6,7 +6,7 @@
     <property name="orientation">vertical</property>
     <property name="vexpand">true</property>
     <property name="hexpand">true</property>
-    <property name="margin-start">10</property>
+    <property name="margin-start">20</property>
     <property name="margin-end">10</property>
     <property name="margin-top">10</property>
     <property name="margin-bottom">10</property>
@@ -15,7 +15,6 @@
       <object class="GtkLabel">
       <property name="label">Security</property>
       <style><class name="title"/></style>
-      <property name="margin-start">10</property>
       <property name="margin-end">10</property>
       <property name="margin-top">10</property>
       <property name="margin-bottom">10</property>
@@ -28,7 +27,6 @@
       <property name="orientation">vertical</property>
       <property name="vexpand">false</property>
       <property name="hexpand">true</property>
-      <property name="margin-start">10</property>
       <property name="margin-end">10</property>
       <property name="margin-top">10</property>
       <property name="margin-bottom">10</property>
@@ -37,7 +35,6 @@
           <property name="orientation">horizontal</property>
           <property name="vexpand">false</property>
           <property name="hexpand">true</property>
-          <property name="margin-start">10</property>
           <property name="margin-end">10</property>
           <property name="margin-top">10</property>
           <property name="margin-bottom">10</property>
@@ -69,7 +66,6 @@
           <property name="orientation">horizontal</property>
           <property name="vexpand">false</property>
           <property name="hexpand">true</property>
-          <property name="margin-start">10</property>
           <property name="margin-end">10</property>
           <property name="margin-top">10</property>
           <property name="margin-bottom">10</property>

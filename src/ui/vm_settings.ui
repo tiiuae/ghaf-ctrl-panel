@@ -15,7 +15,7 @@
         <object class="GtkLabel" id="vm_name_label">
         <property name="label">No VM info</property>
         <style><class name="vm-name"/></style>
-        <property name="margin-start">10</property>
+        <property name="margin-start">20</property>
         <property name="margin-end">10</property>
         <property name="margin-top">10</property>
         <property name="margin-bottom">10</property>
@@ -26,7 +26,7 @@
         <object class="GtkLabel" id="vm_details_label">
         <style><class name="normal-text"/></style>
         <property name="label">No VM details</property>
-        <property name="margin-start">10</property>
+        <property name="margin-start">20</property>
         <property name="margin-end">10</property>
         <property name="margin-top">10</property>
         <property name="margin-bottom">10</property>
@@ -39,7 +39,7 @@
         <property name="orientation">horizontal</property>
         <property name="vexpand">false</property>
         <property name="hexpand">true</property>
-        <property name="margin-start">10</property>
+        <property name="margin-start">20</property>
         <property name="margin-end">10</property>
         <property name="margin-top">10</property>
         <property name="margin-bottom">10</property>
@@ -56,7 +56,7 @@
             <object class="GtkLabel" id="security_label">
             <style><class name="normal-text"/></style>
             <property name="label">This VM is secure!</property>
-            <property name="margin-start">10</property>
+            <property name="margin-start">20</property>
             <property name="margin-end">10</property>
             <property name="margin-top">10</property>
             <property name="margin-bottom">10</property>
@@ -66,7 +66,9 @@
         </object>
       </child>
       <child>
-        <object class="GtkSeparator"/>
+        <object class="GtkSeparator">
+        <property name="margin-start">10</property>
+        </object>
       </child>
       <child>
         <object class="GtkBox" id="vm_control_box">
@@ -74,7 +76,7 @@
         <property name="orientation">vertical</property>
         <property name="vexpand">false</property>
         <property name="hexpand">true</property>
-        <property name="margin-start">10</property>
+        <property name="margin-start">20</property>
         <property name="margin-end">10</property>
         <property name="margin-top">10</property>
         <property name="margin-bottom">10</property>

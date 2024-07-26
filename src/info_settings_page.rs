@@ -94,6 +94,7 @@ impl InfoSettingsPage {
     }
 
     fn setup_vm_rows(&self, model: ListStore) {
+        //TODO: filter by status
         let count = model.n_items();//save count before model will be consumpted
 
         // Wrap model with selection and pass it to the list view

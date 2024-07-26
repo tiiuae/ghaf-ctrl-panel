@@ -65,11 +65,22 @@ mod imp {
         #[template_callback]
         fn switch_to_vm_view(&self) {
             self.stack.set_visible_child_name("vm_view");
+            //change style
+            //a bit awkward way, but Gtk's radio button is not suitable
+            self.vm_view_button.style_context().remove_class("header-button");
+            self.vm_view_button.style_context().add_class("header-button-chosen");
+            self.settings_view_button.style_context().remove_class("header-button-chosen");
+            self.settings_view_button.style_context().add_class("header-button");
     
         }
         #[template_callback]
         fn switch_to_settings_view(&self) {
             self.stack.set_visible_child_name("settings_view");
+            //change style
+            self.vm_view_button.style_context().remove_class("header-button-chosen");
+            self.vm_view_button.style_context().add_class("header-button");
+            self.settings_view_button.style_context().remove_class("header-button");
+            self.settings_view_button.style_context().add_class("header-button-chosen");
         }
     }//end #[gtk::template_callbacks]
 
