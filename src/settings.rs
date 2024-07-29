@@ -11,6 +11,7 @@ use crate::settings_gobject::SettingsGObject;
 use crate::info_settings_page::InfoSettingsPage;
 use crate::security_settings_page::SecuritySettingsPage;
 use crate::wifi_settings_page::WifiSettingsPage;
+use crate::mouse_settings_page::MouseSettingsPage;
 
 mod imp {
     use super::*;
@@ -28,6 +29,8 @@ mod imp {
         pub security_settings_page: TemplateChild<SecuritySettingsPage>,
         #[template_child]
         pub wifi_settings_page: TemplateChild<WifiSettingsPage>,
+        #[template_child]
+        pub mouse_settings_page: TemplateChild<MouseSettingsPage>,
         #[template_child]
         pub audio_settings_page: TemplateChild<AudioSettings>,
 

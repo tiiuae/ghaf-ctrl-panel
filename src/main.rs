@@ -13,6 +13,7 @@ mod security_icon;
 mod info_settings_page;
 mod security_settings_page;
 mod wifi_settings_page;
+mod mouse_settings_page;
 
 use self::application::ControlPanelGuiApplication;
 use self::window::ControlPanelGuiWindow;
