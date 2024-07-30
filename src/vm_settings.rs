@@ -61,18 +61,24 @@ mod imp {
             let vm_name = self.vm_name_label.label();
             println!("Start {vm_name}");
             //send message to client mod via channel in DataProvider
+            //and close menu
+            self.popover_menu.popdown();
         }
         #[template_callback]
         fn on_vm_shutdown_clicked(&self) {
             let vm_name = self.vm_name_label.label();
             println!("Shutdown {vm_name}");
             //send message to client mod via channel in DataProvider
+            //and close menu
+            self.popover_menu.popdown();
         }
         #[template_callback]
         fn on_vm_pause_clicked(&self) {
             let vm_name = self.vm_name_label.label();
             println!("Pause {vm_name}");
             //send message to client mod via channel in DataProvider
+            //and close menu
+            self.popover_menu.popdown();
         }
         #[template_callback]
         fn on_mic_changed(&self, value: u32) {

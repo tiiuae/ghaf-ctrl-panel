@@ -74,19 +74,19 @@ separator {
 }
 
 box.container {
-  background-color: #2B2B2B;
+  background-color: #1D1D1D;
 }
 
 box.info-box {
-  background-color: #353535;
-}
-
-.vm-list-main {
   background-color: #2B2B2B;
 }
 
+.vm-list-main {
+  background-color: #1D1D1D;
+}
+
 .vm-list-info-page {
-  background-color: #353535;
+  background-color: #2B2B2B;
 }
 
 /* VMRow styling */
@@ -531,14 +531,19 @@ switch:checked {
   min-height: 16px;
 }
 
-.menu-button {
+/*Dropdown menu button*/
+.menu-button>button {
   background-color: #353535;
+  border: 1px solid #2B2B2B;
   color: white;
+  border-radius: 2px;
 }
 
-.menu-button:toggle {
-  background-color: #2B2B2B;
+.menu-button>button:hover {
+  background-color: #353535;
+  border: 1px solid #2B2B2B;
   color: white;
+  border-radius: 2px;
 }
 
 .menu-button.text-button {
@@ -547,6 +552,7 @@ switch:checked {
 
 .menu-button>popover {
   margin: -10px;
+  padding: 0px;
 }
 
 .menu-button>popover>contents {
@@ -554,6 +560,7 @@ switch:checked {
   border: 1px solid #2B2B2B;
   border-radius: 2px;
   margin: 0;
+  padding: 0px;
 }
 
 .menu-button>popover>arrow {
@@ -567,65 +574,19 @@ switch:checked {
 /*Buttons inside popover*/
 .popover-button {
   background-color: #353535;
-  border-radius: 5px;
   color: #FFFFFF;
+  border-radius: 0px;
+  padding-left: 10px;
 }
 
 .popover-button:hover {
-  background-color: #1D1D1D;
-  border-radius: 5px;
+  background-color: #2B2B2B;
   color: #FFFFFF;
+  border-radius: 0px;
 }
 
 .popover-button:disabled {
   background-color: #353535;
-  border-radius: 5px;
-  color: #FFFFFF;
+  color: grey;
+  border-radius: 0px;
 }
-
-/*
-.menu-button>popover>contents>*>*>listview {
-  background-color: #353535;
-}
-
-.menu-button>popover>contents>*>*>*>row {
-  background-color: #353535;
-  border: 0;
-  margin: 0;
-  box-shadow: 0 0 0 0;
-}
-
-.menu-button>popover>contents>*>*>*>row:selected {
-  background-color: #2B2B2B;
-  border: 0;
-  margin: 0;
-}
-
-.menu-button>popover>contents>*>*>*>row:hover {
-  background-color: #2B2B2B;
-  border: 0;
-  margin: 0;
-}
-
-.menu-button>popover>contents>*>*>*>row:selected:hover {
-  background-color: #2B2B2B;
-  border: 0;
-  margin: 0;
-}
-
-.menu-button>popover>contents>*>*>*>row:selected:focus {
-  background-color: #2B2B2B;
-  border: 0;
-  margin: 0;
-}
-
-.menu-button>popover>contents>*>*>*>row:focus {
-  background-color: #353535;
-  border: 0;
-  margin: 0;
-}
-
-.menu-button>popover>contents>*>*>*>row>*>label {
-  color: #FFFFFF;
-}
-  */

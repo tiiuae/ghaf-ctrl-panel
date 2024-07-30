@@ -128,8 +128,15 @@
           <style><class name="popover-button"/></style>
           <property name="vexpand">false</property>
           <property name="hexpand">true</property>
-            <property name="label">Run</property>
             <property name="halign">start</property>
+            <property name="width-request">220</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">start</property>
+                <property name="label">Run</property>
+                <property name="visible">1</property>
+              </object>
+            </child>
           </object>
         </child>
         <child>
@@ -138,8 +145,15 @@
           <style><class name="popover-button"/></style>
           <property name="vexpand">false</property>
           <property name="hexpand">true</property>
-            <property name="label">Pause</property>
             <property name="halign">start</property>
+            <property name="width-request">220</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">start</property>
+                <property name="label">Pause</property>
+                <property name="visible">1</property>
+              </object>
+            </child>
           </object>
         </child>
         <child>
@@ -148,8 +162,15 @@
           <style><class name="popover-button"/></style>
           <property name="vexpand">false</property>
           <property name="hexpand">true</property>
-            <property name="label">Shutdown</property>
-            <property name="halign">start</property>
+          <property name="halign">start</property>
+          <property name="width-request">220</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">start</property>
+                <property name="label">Shutdown</property>
+                <property name="visible">1</property>
+              </object>
+            </child>
           </object>
         </child>
       </object>
