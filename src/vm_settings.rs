@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Label, DropDown, Scale, Image};
+use gtk::{glib, CompositeTemplate, Label, DropDown, Scale, Image, MenuButton, Popover};
 use glib::{Binding, ToValue};
 
 use crate::vm_gobject::VMGObject;
@@ -25,9 +25,11 @@ mod imp {
         #[template_child]
         pub security_label: TemplateChild<Label>,
         #[template_child]
-        pub vm_action_menu_button: TemplateChild<DropDown>,
-        #[template_child]
         pub audio_settings_box: TemplateChild<AudioSettings>,
+        #[template_child]
+        pub vm_action_menu_button: TemplateChild<MenuButton>,
+        #[template_child]
+        pub popover_menu: TemplateChild<Popover>,
 
         //current VMGObject ref
         //vm_object: &VMGObject,
@@ -55,8 +57,21 @@ mod imp {
     #[gtk::template_callbacks]
     impl VMSettings {
         #[template_callback]
-        fn on_vm_action_selected(&self) {
-            println!("Action changed!");
+        fn on_vm_start_clicked(&self) {
+            let vm_name = self.vm_name_label.label();
+            println!("Start {vm_name}");
+            //send message to client mod via channel in DataProvider
+        }
+        #[template_callback]
+        fn on_vm_shutdown_clicked(&self) {
+            let vm_name = self.vm_name_label.label();
+            println!("Shutdown {vm_name}");
+            //send message to client mod via channel in DataProvider
+        }
+        #[template_callback]
+        fn on_vm_pause_clicked(&self) {
+            let vm_name = self.vm_name_label.label();
+            println!("Pause {vm_name}");
             //send message to client mod via channel in DataProvider
         }
         #[template_callback]

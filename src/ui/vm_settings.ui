@@ -92,36 +92,16 @@
             </object>
           </child>
           <child>
-            <!-- Application-wide actions are needed for this widget
-            <object class="GtkMenuButton" id="action_menu_button">
-              <property name="visible">true</property>
-              <property name="halign">start</property>
-              <property name="width-request">220</property>
-              <property name="height-request">30</property>
-              <property name="label">Action</property>
-              <property name="menu-model">vm-action-menu</property>
-            </object>
-            -->
-
-            <object class="GtkDropDown" id="vm_action_menu_button">
-            <style><class name="dropdown-button"/></style>
-            <signal name="notify::selected" handler="on_vm_action_selected" swapped="true"/>
+            <object class="GtkMenuButton" id="vm_action_menu_button">
+            <style><class name="menu-button"/></style>
+            <property name="visible">true</property>
+            <property name="direction">GTK_ARROW_DOWN</property>
             <property name="halign">start</property>
-            <property name="valign">center</property>
             <property name="width-request">220</property>
             <property name="height-request">30</property>
-            <property name="model">
-              <object class="GtkStringList">
-                <items>
-                  <item translatable="yes">Run</item>
-                  <item translatable="yes">Pause</item>
-                  <item translatable="yes">Restart</item>
-                  <item translatable="yes">Shutdown</item>
-                </items>
-              </object>
-            </property>
+            <property name="label">Action</property>
+            <property name="popover">popover_menu</property>
             </object>
-
           </child>
         </object>
       </child>
@@ -134,4 +114,78 @@
         </object>
       </child>
   </template>
+  <object class="GtkPopover" id="popover_menu">
+  <property name="width-request">220</property>
+    <child>
+      <object class="GtkBox">
+      <style><class name="info-box"/></style>
+      <property name="vexpand">false</property>
+      <property name="hexpand">true</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkButton" id="start_button">
+          <signal name="clicked" handler="on_vm_start_clicked" swapped="true"/>
+          <style><class name="popover-button"/></style>
+          <property name="vexpand">false</property>
+          <property name="hexpand">true</property>
+            <property name="label">Run</property>
+            <property name="halign">start</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="pause_button">
+          <signal name="clicked" handler="on_vm_pause_clicked" swapped="true"/>
+          <style><class name="popover-button"/></style>
+          <property name="vexpand">false</property>
+          <property name="hexpand">true</property>
+            <property name="label">Pause</property>
+            <property name="halign">start</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="shutdown_button">
+          <signal name="clicked" handler="on_vm_shutdown_clicked" swapped="true"/>
+          <style><class name="popover-button"/></style>
+          <property name="vexpand">false</property>
+          <property name="hexpand">true</property>
+            <property name="label">Shutdown</property>
+            <property name="halign">start</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
 </interface>
+
+<!--<child>
+  <object class="GtkDropDown" id="vm_action_menu_button">
+  <style><class name="dropdown-button"/></style>
+  <signal name="notify::selected" handler="on_vm_action_selected" swapped="true"/>
+  <property name="halign">start</property>
+  <property name="valign">center</property>
+  <property name="width-request">220</property>
+  <property name="height-request">30</property>
+  <property name="model">
+    <object class="GtkStringList">
+      <items>
+        <item translatable="yes">Run</item>
+        <item translatable="yes">Pause</item>
+        <item translatable="yes">Restart</item>
+        <item translatable="yes">Shutdown</item>
+      </items>
+    </object>
+  </property>
+  </object>
+</child>-->
+
+<!-- Application-wide actions are needed for this widget-->
+<!--<child>
+  <object class="GtkMenuButton" id="action_menu_button">
+    <property name="visible">true</property>
+    <property name="halign">start</property>
+    <property name="width-request">220</property>
+    <property name="height-request">30</property>
+    <property name="label">Action</property>
+    <property name="menu-model">vm-action-menu</property>
+  </object>
+</child>-->

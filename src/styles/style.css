@@ -530,3 +530,102 @@ switch:checked {
   min-width: 30px;
   min-height: 16px;
 }
+
+.menu-button {
+  background-color: #353535;
+  color: white;
+}
+
+.menu-button:toggle {
+  background-color: #2B2B2B;
+  color: white;
+}
+
+.menu-button.text-button {
+  color: #FFFFFF;
+}
+
+.menu-button>popover {
+  margin: -10px;
+}
+
+.menu-button>popover>contents {
+  background-color: #353535;
+  border: 1px solid #2B2B2B;
+  border-radius: 2px;
+  margin: 0;
+}
+
+.menu-button>popover>arrow {
+  background-color: rgba(0, 0, 0, 0.0);
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+
+/*Buttons inside popover*/
+.popover-button {
+  background-color: #353535;
+  border-radius: 5px;
+  color: #FFFFFF;
+}
+
+.popover-button:hover {
+  background-color: #1D1D1D;
+  border-radius: 5px;
+  color: #FFFFFF;
+}
+
+.popover-button:disabled {
+  background-color: #353535;
+  border-radius: 5px;
+  color: #FFFFFF;
+}
+
+/*
+.menu-button>popover>contents>*>*>listview {
+  background-color: #353535;
+}
+
+.menu-button>popover>contents>*>*>*>row {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+  box-shadow: 0 0 0 0;
+}
+
+.menu-button>popover>contents>*>*>*>row:selected {
+  background-color: #2B2B2B;
+  border: 0;
+  margin: 0;
+}
+
+.menu-button>popover>contents>*>*>*>row:hover {
+  background-color: #2B2B2B;
+  border: 0;
+  margin: 0;
+}
+
+.menu-button>popover>contents>*>*>*>row:selected:hover {
+  background-color: #2B2B2B;
+  border: 0;
+  margin: 0;
+}
+
+.menu-button>popover>contents>*>*>*>row:selected:focus {
+  background-color: #2B2B2B;
+  border: 0;
+  margin: 0;
+}
+
+.menu-button>popover>contents>*>*>*>row:focus {
+  background-color: #353535;
+  border: 0;
+  margin: 0;
+}
+
+.menu-button>popover>contents>*>*>*>row>*>label {
+  color: #FFFFFF;
+}
+  */
