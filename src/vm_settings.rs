@@ -1,8 +1,10 @@
 use std::cell::RefCell;
+use std::sync::OnceLock;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, Label, DropDown, Scale, Image, MenuButton, Popover};
 use glib::{Binding, ToValue};
+use glib::subclass::Signal;
 
 use crate::vm_gobject::VMGObject;
 use crate::audio_settings::AudioSettings;
@@ -59,41 +61,34 @@ mod imp {
         #[template_callback]
         fn on_vm_start_clicked(&self) {
             let vm_name = self.vm_name_label.label();
-            println!("Start {vm_name}");
-            //send message to client mod via channel in DataProvider
+            //emit signal
+            self.obj().emit_by_name::<()>("vm-start", &[&vm_name]);
             //and close menu
             self.popover_menu.popdown();
         }
         #[template_callback]
         fn on_vm_shutdown_clicked(&self) {
             let vm_name = self.vm_name_label.label();
-            println!("Shutdown {vm_name}");
-            //send message to client mod via channel in DataProvider
-            //and close menu
+            self.obj().emit_by_name::<()>("vm-shutdown", &[&vm_name]);
             self.popover_menu.popdown();
         }
         #[template_callback]
         fn on_vm_pause_clicked(&self) {
             let vm_name = self.vm_name_label.label();
-            println!("Pause {vm_name}");
-            //send message to client mod via channel in DataProvider
-            //and close menu
+            self.obj().emit_by_name::<()>("vm-pause", &[&vm_name]);
             self.popover_menu.popdown();
         }
         #[template_callback]
         fn on_mic_changed(&self, value: u32) {
             println!("Mic changed: {}", value);
-            //send message to client mod via channel in DataProvider
         }
         #[template_callback]
         fn on_speaker_changed(&self, value: u32) {
             println!("Speaker changed: {}", value);
-            //send message to client mod via channel in DataProvider
         }
         #[template_callback]
         fn on_mic_volume_changed(&self, value: f64) {
             println!("Mic volume: {}", value);
-            //send message to client mod via channel in DataProvider
         }
         #[template_callback]
         fn on_speaker_volume_changed(&self, value: f64) {
@@ -102,7 +97,36 @@ mod imp {
         }
     }//end #[gtk::template_callbacks]
 
-    impl ObjectImpl for VMSettings {}
+    impl ObjectImpl for VMSettings {
+        fn signals() -> &'static [Signal] {
+            static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
+            SIGNALS.get_or_init(|| {
+                vec![
+                    Signal::builder("vm-start")
+                    .param_types([String::static_type()])
+                    .build(),
+                    Signal::builder("vm-pause")
+                    .param_types([String::static_type()])
+                    .build(),
+                    Signal::builder("vm-shutdown")
+                    .param_types([String::static_type()])
+                    .build(),
+                    Signal::builder("vm-mic-changed")
+                    .param_types([u32::static_type()])
+                    .build(),
+                    Signal::builder("vm-speaker-changed")
+                    .param_types([u32::static_type()])
+                    .build(),
+                    Signal::builder("vm-mic-volume-changed")
+                    .param_types([f64::static_type()])
+                    .build(),
+                    Signal::builder("vm-speaker-volume-changed")
+                    .param_types([f64::static_type()])
+                    .build()
+                    ]
+            })
+        }
+    }
     impl WidgetImpl for VMSettings {}
     impl BoxImpl for VMSettings {}
 }
@@ -123,13 +147,9 @@ impl VMSettings {
         glib::Object::builder().build()
     }
 
-    /*pub fn set_data_provider(&self, data_provider: &DataProvider) {
-
-    }
-
-    pub fn set_current_vm_object(&self, _vm_object: &VMGObject) {
+    /*pub fn set_current_vm_object(&self, _vm_object: &VMGObject) {
         vm_object = _vm_object;
-        //bind? or set all values?
+        //bind or set all values?
     }*/
 
     pub fn bind(&self, vm_object: &VMGObject) {

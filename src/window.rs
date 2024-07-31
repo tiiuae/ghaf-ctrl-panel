@@ -82,6 +82,22 @@ mod imp {
             self.settings_view_button.style_context().remove_class("header-button");
             self.settings_view_button.style_context().add_class("header-button-chosen");
         }
+
+        #[template_callback]
+        fn on_vm_start(&self, name: String) {
+            let app = self.obj().get_app_ref();
+            app.start_vm(name);
+        }
+        #[template_callback]
+        fn on_vm_pause(&self, name: String) {
+            let app = self.obj().get_app_ref();
+            app.pause_vm(name);
+        }
+        #[template_callback]
+        fn on_vm_shutdown(&self, name: String) {
+            let app = self.obj().get_app_ref();
+            app.shutdown_vm(name);
+        }
     }//end #[gtk::template_callbacks]
 
     impl ObjectImpl for ControlPanelGuiWindow {
@@ -103,7 +119,8 @@ mod imp {
 
 glib::wrapper! {
     pub struct ControlPanelGuiWindow(ObjectSubclass<imp::ControlPanelGuiWindow>)
-        @extends gtk::Widget, gtk::Window, gtk::ApplicationWindow, adw::ApplicationWindow,        @implements gio::ActionGroup, gio::ActionMap;
+        @extends gtk::Widget, gtk::Window, gtk::ApplicationWindow, adw::ApplicationWindow,
+        @implements gio::ActionGroup, gio::ActionMap;
 }
 
 impl ControlPanelGuiWindow {

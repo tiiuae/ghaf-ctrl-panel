@@ -110,6 +110,9 @@
                           </child>
                           <child>
                             <object class="VMSettings" id="vm_settings_box">
+                            <signal name="vm-start" handler="on_vm_start" swapped="true"/>
+                            <signal name="vm-pause" handler="on_vm_pause" swapped="true"/>
+                            <signal name="vm-shutdown" handler="on_vm_shutdown" swapped="true"/>
                             </object> <!-- Settings box object -->
                           </child>
                         </object> <!-- Main box object -->

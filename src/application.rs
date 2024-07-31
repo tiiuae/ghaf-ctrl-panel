@@ -132,20 +132,29 @@ impl ControlPanelGuiApplication {
         self.imp().data_provider.borrow().get_store()
     }
 
-    pub fn start_vm(&self, vm_name: &String) {
+    pub fn start_vm(&self, vm_name: String) {
         println!("Start VM {vm_name}");
+        self.imp().data_provider.borrow().start_vm(vm_name);
     }
 
-    pub fn pause_vm(&self, vm_name: &String) {
+    pub fn pause_vm(&self, vm_name: String) {
         println!("Pause VM {vm_name}");
+        self.imp().data_provider.borrow().pause_vm(vm_name);
     }
 
-    pub fn shutdown_vm(&self, vm_name: &String) {
+    pub fn resume_vm(&self, vm_name: String) {
+        println!("Resume VM {vm_name}");
+        self.imp().data_provider.borrow().resume_vm(vm_name);
+    }
+
+    pub fn shutdown_vm(&self, vm_name: String) {
         println!("Shutdown VM {vm_name}");
+        self.imp().data_provider.borrow().shutdown_vm(vm_name);
     }
 
-    pub fn restart_vm(&self, vm_name: &String) {
+    pub fn restart_vm(&self, vm_name: String) {
         println!("Restart VM {vm_name}");
+        self.imp().data_provider.borrow().restart_vm(vm_name);
     }
 
     pub fn clean_n_quit(&self) {

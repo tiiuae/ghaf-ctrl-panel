@@ -57,14 +57,12 @@ pub mod imp {
 
             let handle = thread::spawn(move || {
                 Runtime::new().unwrap().block_on(async move {
-                    let Ok(result) = admin_client.watch().await else {todo!()};
-                    let list = result.initial;
+                    let Ok(result) = admin_client.watch().await else {println!("Watch call error"); return};
+                    let list = result.initial.clone();
                     let _ = event_tx.send(EventExtended::InitialList(list));
 
-                    let channel = result.channel;
-
                     while !stop_signal.load(Ordering::SeqCst) {
-                        if let Ok(event) = channel.recv().await {
+                        if let Ok(event) = result.channel.recv().await {
                             let _ = event_tx.send(EventExtended::InnerEvent(event));
                         } else {
                             println!("Error received from client lib!");
@@ -96,7 +94,10 @@ pub mod imp {
                                 println!("Status: {:?}", status);
                             },
                             Event::UnitShutdown(info) => {
-                                println!("Shutdown info: {}", info);
+                                println!("Shutdown info: {:?}", info);
+                            },
+                            Event::UnitRegistered(_) => {
+                                println!("Unit registered");
                             },
                         },
                         EventExtended::BreakLoop => {
@@ -145,6 +146,60 @@ pub mod imp {
                 handle.join().unwrap();
             }
             println!("Client thread stopped!");
+        }
+
+        pub fn start_vm(&self, name: String) {
+            let admin_client = self.admin_client.clone();
+            Runtime::new().unwrap().spawn(async move {//or block_on?
+                if let Err(error) = admin_client.start(name).await {
+                    println!("Start request error {error}");
+                }
+                else {
+                    println!("Start request sent");
+                };
+            });
+        }
+
+        pub fn pause_vm(&self, name: String) {
+            let admin_client = self.admin_client.clone();
+            Runtime::new().unwrap().spawn(async move {
+                if let Err(error) = admin_client.pause(name).await {
+                    println!("Pause request error {error}");
+                }
+                else {
+                    println!("Pause request sent");
+                };
+            });
+        }
+
+        pub fn resume_vm(&self, name: String) {
+            let admin_client = self.admin_client.clone();
+            Runtime::new().unwrap().spawn(async move {
+                if let Err(error) = admin_client.resume(name).await {
+                    println!("Resume request error {error}");
+                }
+                else {
+                    println!("Resume request sent");
+                };
+            });
+        }
+
+        pub fn shutdown_vm(&self, name: String) {
+            let admin_client = self.admin_client.clone();
+            Runtime::new().unwrap().spawn(async move {
+                if let Err(error) = admin_client.stop(name).await {
+                    println!("Stop request error {error}");
+                }
+                else {
+                    println!("Stop request sent");
+                };
+            });
+        }
+
+        pub fn restart_vm(&self, name: String) {
+            todo!();
+            //no restart in admin client
+            //self.admin_client.restart(name);
         }
     }
 
