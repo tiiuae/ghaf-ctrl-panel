@@ -167,7 +167,7 @@ impl ControlPanelGuiWindow {
 
         // Wrap model with selection and pass it to the list view
         let selection_model = SingleSelection::new(Some(model));
-        // Connect to the selection-changed signal
+        // Connect to the selection-changed and items-changed signals
         selection_model.connect_selection_changed(
             glib::clone!(@strong self as window => move |selection_model, _, _| {
                 if let Some(selected_item) = selection_model.selected_item() {
@@ -183,6 +183,19 @@ impl ControlPanelGuiWindow {
                 }
             })
         );
+        selection_model.connect_items_changed(
+            glib::clone!(@strong self as window => move |selection_model, position, removed, added| {
+                println!("Items changed at position {}, removed: {}, added: {}", position, removed, added);
+                if let Some(selected_item) = selection_model.selected_item() {
+                    if let Some(vm_obj) = selected_item.downcast_ref::<VMGObject>() {
+                        window.set_vm_details(&vm_obj);
+                    }
+                } else {
+                    println!("No item selected");
+                }
+            })
+        );
+        
         self.imp().vm_list_view.set_model(Some(&selection_model));
 
         //set default selection to 1st item
