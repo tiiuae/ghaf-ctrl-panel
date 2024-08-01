@@ -3,7 +3,7 @@ use gtk::{self, gio, glib};
 use gio::ListStore;
 use std::thread::{self, JoinHandle};
 use std::sync::{Arc, Mutex, mpsc::{self, Sender, Receiver}, atomic::{AtomicBool, Ordering}};
-//use tokio::time::{sleep, Duration};
+use tokio::time::{sleep, Duration};
 use tokio::runtime::Runtime;
 
 use givc_client::{self, AdminClient, client::QueryResult, client::Event};
@@ -41,7 +41,7 @@ pub mod imp {
                 store: Arc::new(Mutex::new(init_store)),
                 settings: Arc::new(Mutex::new(SettingsGObject::default())),
                 status: false,
-                admin_client: Arc::new(AdminClient::new(String::from("http://[::1]"), 50051, None)),
+                admin_client: Arc::new(AdminClient::new(String::from("127.0.0.1"), 9000, None)),//String::from("http://[::1]"), 50051,
                 handle: RefCell::new(None),
                 stop_signal: Arc::new(AtomicBool::new(false)),
             }
@@ -61,15 +61,18 @@ pub mod imp {
                     let list = result.initial.clone();
                     let _ = event_tx.send(EventExtended::InitialList(list));
 
-                    while !stop_signal.load(Ordering::SeqCst) {
-                        if let Ok(event) = result.channel.recv().await {
+                    while !(stop_signal.load(Ordering::SeqCst)) {
+                        if let Ok(event) = result.channel.try_recv() {//await blocks thread until data comes!
                             let _ = event_tx.send(EventExtended::InnerEvent(event));
                         } else {
                             println!("Error received from client lib!");
-                            break;
+                            //break;
                         }
+                        println!("Loop is working...");
+                        sleep(Duration::new(3,0)).await;
                     }
 
+                    println!("BreakLoop");
                     let _ = event_tx.send(EventExtended::BreakLoop);
                 });
             });
@@ -144,6 +147,7 @@ pub mod imp {
             self.stop_signal.store(true, Ordering::SeqCst);
             if let Some(handle) = self.handle.borrow_mut().take() {
                 handle.join().unwrap();
+                //drop(self.admin_client.clone());
             }
             println!("Client thread stopped!");
         }
