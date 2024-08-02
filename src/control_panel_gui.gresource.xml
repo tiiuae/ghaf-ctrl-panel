@@ -12,6 +12,7 @@
     <file preprocess="xml-stripblanks">ui/wifi_settings_page.ui</file>
     <file preprocess="xml-stripblanks">ui/mouse_settings_page.ui</file>
     <file preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
+    <file preprocess="xml-stripblanks">ui/connection_config.ui</file>
     <file>styles/style.css</file>
     <!-- Icons -->
     <file>icons/ghaf_logo.svg</file>

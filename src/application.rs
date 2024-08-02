@@ -5,9 +5,11 @@ use gtk::prelude::*;
 use adw::subclass::prelude::*;
 use gtk::{gio, glib, gdk};
 use gtk::CssProvider;
+use gtk::glib::closure_local;
 
 use crate::ControlPanelGuiWindow;
 use crate::data_provider::imp::DataProvider;
+use crate::connection_config::ConnectionConfig;
 
 mod imp {
     use super::*;
@@ -97,20 +99,43 @@ impl ControlPanelGuiApplication {
         let reconnect_action = gio::ActionEntry::builder("reconnect")
             .activate(move |app: &Self, _, _| app.reconnect())
             .build();
+        let show_config_action = gio::ActionEntry::builder("show-config")
+            .activate(move |app: &Self, _, _| app.show_config())
+            .build();
         let quit_action = gio::ActionEntry::builder("quit")
             .activate(move |app: &Self, _, _| app.clean_n_quit())
             .build();
         let about_action = gio::ActionEntry::builder("about")
             .activate(move |app: &Self, _, _| app.show_about())
             .build();
-        self.add_action_entries([reconnect_action, quit_action, about_action]);
+        self.add_action_entries([reconnect_action, show_config_action, quit_action, about_action]);
+    }
+
+    pub fn show_config(&self) {
+        let window = self.active_window().unwrap();
+        let config = ConnectionConfig::new();
+        config.set_transient_for(Some(&window));
+        config.set_modal(true);
+
+        let app = self.clone();
+
+        config.connect_closure(
+            "new-config-aplied",
+            false,
+            closure_local!(move |addr: String, port: u32| {
+                println!("Addr {addr}, port {port}");
+                app.imp().data_provider.borrow().set_connection_config(addr, port);
+            }),
+        );
+
+        config.present();
     }
 
     fn show_about(&self) {
         let window = self.active_window().unwrap();
         let about = adw::AboutWindow::builder()
             .transient_for(&window)
-            .application_name("control_panel_gui")
+            .application_name("Ghaf Control panel")
             .application_icon("org.gnome.controlpanelgui")
             .developer_name("dmitry")
             .developers(vec!["dmitry"])
@@ -121,11 +146,11 @@ impl ControlPanelGuiApplication {
     }
 
     pub fn reconnect(&self) {
-        self.imp().data_provider.borrow().reconnect()
+        self.imp().data_provider.borrow().reconnect();
     }
 
     pub fn disconnect(&self) {
-        self.imp().data_provider.borrow().disconnect()
+        self.imp().data_provider.borrow().disconnect();
     }
 
     pub fn get_store(&self) -> gio::ListStore{

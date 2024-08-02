@@ -69,7 +69,7 @@ pub mod imp {
                             //break;
                         }
                         println!("Loop is working...");
-                        sleep(Duration::new(3,0)).await;
+                        sleep(Duration::new(2,0)).await;
                     }
 
                     println!("BreakLoop");
@@ -133,6 +133,10 @@ pub mod imp {
         pub fn add_vm(&self, vm: VMGObject) {
             let store = self.store.lock().unwrap();
             store.append(&vm);
+        }
+
+        pub fn set_connection_config(&self, addr: String, port: u32) {
+            //TODO: reconnect with new addr & port
         }
 
         pub fn reconnect(&self) {

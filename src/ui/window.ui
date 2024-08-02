@@ -142,6 +142,10 @@
         <attribute name="action">app.reconnect</attribute>
       </item>
       <item>
+        <attribute name="label" translatable="yes">Connection configuration</attribute>
+        <attribute name="action">app.show-config</attribute>
+      </item>
+      <item>
         <attribute name="label" translatable="yes">_Preferences</attribute>
         <attribute name="action">app.preferences</attribute>
       </item>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <requires lib="gtk" version="4.0"/>
+    <template class="ConnectionConfig" parent="GtkWindow">
+    <property name="title">Connection configuration</property>
+    <property name="width-request">350</property>
+    <property name="height-request">150</property>
+    <child>
+      <object class="GtkBox">
+      <property name="orientation">vertical</property>
+      <property name="margin_top">10</property>
+      <property name="margin_bottom">10</property>
+      <property name="margin_start">10</property>
+      <property name="margin_end">10</property>
+      <property name="spacing">10</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label">Address:</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkEntry" id="address_entry">
+                <property name="placeholder_text">Enter address</property>
+              </object>
+            </child>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label">Port:</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkEntry" id="port_entry">
+                <property name="placeholder_text">Enter port</property>
+              </object>
+            </child>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkButton" id="apply_button">
+              <signal name="clicked" handler="on_apply_clicked" swapped="true"/>
+                <property name="label">Apply</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="cancel_button">
+              <signal name="clicked" handler="on_cancel_clicked" swapped="true"/>
+                <property name="label">Cancel</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

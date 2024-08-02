@@ -1,6 +1,7 @@
 
 mod application;
 mod window;
+mod connection_config;
 mod vm_row;
 mod vm_row_2;
 mod vm_gobject;
