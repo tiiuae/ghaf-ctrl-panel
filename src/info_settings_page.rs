@@ -1,8 +1,8 @@
 use std::cell::RefCell;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Label, ProgressBar, ListView, SingleSelection, SignalListItemFactory, ListItem};
-use glib::{Binding, ToValue};
+use gtk::{glib, CompositeTemplate, ProgressBar, ListView, SingleSelection, SignalListItemFactory, ListItem, CustomFilter, FilterListModel};
+use glib::{Binding, ToValue, Object};
 use gtk::gio::ListStore;
 
 use crate::vm_gobject::VMGObject;
@@ -94,11 +94,20 @@ impl InfoSettingsPage {
     }
 
     fn setup_vm_rows(&self, model: ListStore) {
-        //TODO: filter by status
         let count = model.n_items();//save count before model will be consumpted
 
+        //Set filter: only Running VM's
+        let filter_model = FilterListModel::new(Some(model), Some(CustomFilter::new(|item: &Object| {
+            if let Some(vm_obj) = item.downcast_ref::<VMGObject>() {
+                if vm_obj.status() == 0 {
+                    return true;
+                }
+            }
+            false
+        })));
+
         // Wrap model with selection and pass it to the list view
-        let selection_model = SingleSelection::new(Some(model));
+        let selection_model = SingleSelection::new(Some(filter_model));
         // Connect to the selection-changed signal
         selection_model.connect_selection_changed(
             glib::clone!(@strong self as window => move |selection_model, _, _| {

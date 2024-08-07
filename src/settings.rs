@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Stack, ListBox, Label};
+use gtk::{glib, CompositeTemplate, Stack, ListBox};
 use glib::{Binding, ToValue};
 use gtk::gio::ListStore;
 

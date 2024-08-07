@@ -52,7 +52,7 @@ impl VMGObject {
             .build()
     }
 
-    pub fn is_equal_to(&self, other: VMGObject) -> bool {
+    pub fn is_equal_to(&self, other: &VMGObject) -> bool {
         self.name() == other.name()
     }
 

@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::sync::OnceLock;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Label, DropDown, Scale, Image, MenuButton, Popover};
+use gtk::{glib, CompositeTemplate, Label, Image, MenuButton, Popover};
 use glib::{Binding, ToValue};
 use glib::subclass::Signal;
 

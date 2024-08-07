@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Label, Button};
+use gtk::{glib, CompositeTemplate, Button};
 use glib::{Binding, ToValue};
 
 use crate::settings_gobject::SettingsGObject;
