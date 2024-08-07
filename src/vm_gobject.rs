@@ -3,7 +3,7 @@ use gtk::glib::{self, Object, Properties};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
-//use givc_client::client::{VMStatus, TrustLevel}; cannot be used as property
+use givc_common::query::{QueryResult, VMStatus, TrustLevel}; //cannot be used as property!
 
 mod imp {
     use super::*;
@@ -43,12 +43,38 @@ glib::wrapper! {
 }
 
 impl VMGObject {
-    pub fn new(name: String, details: String, status: u8, trust_level: u8) -> Self {
+    pub fn new(name: String, details: String, status: VMStatus, trust_level: TrustLevel) -> Self {
         Object::builder()
             .property("name", name)
             .property("details", details)
-            .property("status", status)
-            .property("trust-level", trust_level)
+            .property("status", Self::status_u8(status))
+            .property("trust-level", Self::trust_level_u8(trust_level))
             .build()
+    }
+
+    pub fn is_equal_to(&self, other: VMGObject) -> bool {
+        self.name() == other.name()
+    }
+
+    pub fn update(&self, query_result: QueryResult) {
+        self.set_property("details", query_result.description);
+        self.set_property("status", Self::status_u8(query_result.status));
+        self.set_property("trust-level", Self::trust_level_u8(query_result.trust_level));
+    }
+
+    fn trust_level_u8(value: TrustLevel) -> u8 {
+        match value {
+            TrustLevel::Secure => 0,
+            TrustLevel::Warning => 1,
+            TrustLevel::NotSecure => 2,
+        }
+    }
+
+    fn status_u8(value: VMStatus) -> u8 {
+        match value {
+            VMStatus::Running => 0,
+            VMStatus::PoweredOff => 1,
+            VMStatus::Paused => 2,
+        }
     }
 }

@@ -2,11 +2,12 @@ use std::cell::{Ref, RefMut, RefCell};
 use gtk::{self, gio, glib};
 use gio::ListStore;
 use std::thread::{self, JoinHandle};
-use std::sync::{Arc, Mutex, mpsc::{self, Sender, Receiver}, atomic::{AtomicBool, Ordering}};
+use std::sync::{Arc, Mutex, RwLock, mpsc::{self, Sender, Receiver}, atomic::{AtomicBool, Ordering}};
 use tokio::time::{sleep, Duration};
 use tokio::runtime::Runtime;
 
-use givc_client::{self, AdminClient, client::QueryResult, client::Event};
+use givc_client::{self, AdminClient};
+use givc_common::query::{QueryResult, Event, VMStatus, TrustLevel};
 //use givc_client::endpoint::{EndpointConfig, TlsConfig};
 //use givc_common::types::*;
 
@@ -41,7 +42,8 @@ pub mod imp {
                 store: Arc::new(Mutex::new(init_store)),
                 settings: Arc::new(Mutex::new(SettingsGObject::default())),
                 status: false,
-                admin_client: Arc::new(AdminClient::new(String::from("127.0.0.1"), 9000, None)),//String::from("http://[::1]"), 50051,
+                admin_client: Arc::new(AdminClient::new(String::from("127.0.0.1"), 9000, None)),
+                //String::from("http://[::1]"), 50051,
                 handle: RefCell::new(None),
                 stop_signal: Arc::new(AtomicBool::new(false)),
             }
@@ -68,7 +70,7 @@ pub mod imp {
                             println!("Error received from client lib!");
                             //break;
                         }
-                        println!("Loop is working...");
+                        println!("Waiting for data...");
                         sleep(Duration::new(2,0)).await;
                     }
 
@@ -87,20 +89,31 @@ pub mod imp {
                             let store_inner = store.lock().unwrap();
                             store_inner.remove_all();
                             for vm in list {
-                                store_inner.append(&VMGObject::new(vm.name, vm.description, 0, 0));
+                                store_inner.append(&VMGObject::new(vm.name, vm.description, vm.status, vm.trust_level));
                                 //TODO: add convert functions for other fields!
                             }
                         },
                         EventExtended::InnerEvent(event) =>
                         match event {
-                            Event::UnitStatusChanged(status) => {
-                                println!("Status: {:?}", status);
+                            Event::UnitStatusChanged(result) => {
+                                println!("Status: {:?}", result);
+                                let store_inner = store.lock().unwrap().clone();
+                                //for some reason func is not found
+                                /*store_inner.find_with_equal_func(|item| {
+                                    let obj = item.downcast_ref::<VMGObject>().unwrap();
+                                    if obj.name() == result.name {
+                                        obj.update(result);
+                                        true // Return true if the item is found and updated
+                                    } else {
+                                        false // Continue searching otherwise
+                                    }
+                                });*/
                             },
-                            Event::UnitShutdown(info) => {
-                                println!("Shutdown info: {:?}", info);
+                            Event::UnitShutdown(result) => {
+                                println!("Shutdown info: {:?}", result);
                             },
-                            Event::UnitRegistered(_) => {
-                                println!("Unit registered");
+                            Event::UnitRegistered(result) => {
+                                println!("Unit registered {:?}", result);
                             },
                         },
                         EventExtended::BreakLoop => {
@@ -116,8 +129,8 @@ pub mod imp {
         fn fill_by_mock_data() -> ListStore {
             let init_store = ListStore::new::<VMGObject>();
             let mut vec: Vec<VMGObject> = Vec::new();
-            vec.push(VMGObject::new("VM1".to_string(), String::from("This is the file.pdf"), 0, 2));
-            vec.push(VMGObject::new("VM2".to_string(), String::from("Google Chrome"), 0, 0));
+            vec.push(VMGObject::new("VM1".to_string(), String::from("This is the file.pdf"), VMStatus::Running, TrustLevel::NotSecure));
+            vec.push(VMGObject::new("VM2".to_string(), String::from("Google Chrome"), VMStatus::Running, TrustLevel::Secure));
             init_store.extend_from_slice(&vec);
             return init_store;
         }
@@ -137,6 +150,10 @@ pub mod imp {
 
         pub fn set_connection_config(&self, addr: String, port: u32) {
             //TODO: reconnect with new addr & port
+            //admin_client should be wrapped by smth (RwLock?)
+            //let admin_client_obj = self.admin_client.lock().unwrap();
+            //*admin_client_obj = AdminClient::new(addr, port.try_into().unwrap(), None);
+            //self.reconnect();
         }
 
         pub fn reconnect(&self) {
@@ -152,8 +169,8 @@ pub mod imp {
             if let Some(handle) = self.handle.borrow_mut().take() {
                 handle.join().unwrap();
                 //drop(self.admin_client.clone());
+                println!("Client thread stopped!");
             }
-            println!("Client thread stopped!");
         }
 
         pub fn start_vm(&self, name: String) {
