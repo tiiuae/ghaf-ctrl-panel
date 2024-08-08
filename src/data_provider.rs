@@ -1,5 +1,5 @@
 use std::cell::{Ref, RefMut, RefCell};
-use gtk::{self, gio, glib};
+use gtk::{self, gio, glib, prelude::*};
 use gio::ListStore;
 use std::thread::{self, JoinHandle};
 use std::sync::{Arc, Mutex, RwLock, mpsc::{self, Sender, Receiver}, atomic::{AtomicBool, Ordering}};
@@ -97,7 +97,16 @@ pub mod imp {
                         match event {
                             Event::UnitStatusChanged(result) => {
                                 println!("Status: {:?}", result);
-                                let store_inner = store.lock().unwrap().clone();
+                                let store_inner = store.lock().unwrap();
+                                for i in 0..store_inner.n_items() {
+                                    if let Some(item) = store_inner.item(0) {
+                                        let obj = item.downcast_ref::<VMGObject>().unwrap();
+                                        if obj.name() == result.name {
+                                            obj.update(result);
+                                            break;
+                                        }
+                                    }
+                                }
                                 //for some reason func is not found
                                 /*store_inner.find_with_equal_func(|item| {
                                     let obj = item.downcast_ref::<VMGObject>().unwrap();
