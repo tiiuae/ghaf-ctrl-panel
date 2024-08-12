@@ -1,8 +1,10 @@
 use std::cell::RefCell;
+use std::sync::OnceLock;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate};
+use gtk::{glib, CompositeTemplate, Label, MenuButton, Popover};
 use glib::Binding;
+use glib::subclass::Signal;
 
 use crate::vm_gobject::VMGObject;
 use crate::security_icon::SecurityIcon;
@@ -16,9 +18,13 @@ mod imp {
         pub name: String,
 
         #[template_child]
-        pub title_label: TemplateChild<gtk::Label>,
+        pub title_label: TemplateChild<Label>,
         #[template_child]
-        pub subtitle_label: TemplateChild<gtk::Label>,
+        pub subtitle_label: TemplateChild<Label>,
+        #[template_child]
+        pub vm_action_menu_button: TemplateChild<MenuButton>,
+        #[template_child]
+        pub popover_menu: TemplateChild<Popover>,
 
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
@@ -32,7 +38,7 @@ mod imp {
 
         fn class_init(klass: &mut Self::Class) {
                 klass.bind_template();
-                //klass.bind_template_callbacks(); !!!
+                klass.bind_template_callbacks();
             }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -40,7 +46,48 @@ mod imp {
         }
     }
 
-    impl ObjectImpl for VMRow2 {}
+    #[gtk::template_callbacks]
+    impl VMRow2 {
+        #[template_callback]
+        fn on_vm_restart_clicked(&self) {
+            let vm_name = self.name.clone();
+            //emit signal
+            self.obj().emit_by_name::<()>("vm-restart", &[&vm_name]);
+            //and close menu
+            self.popover_menu.popdown();
+        }
+        #[template_callback]
+        fn on_vm_shutdown_clicked(&self) {
+            let vm_name = self.name.clone();
+            self.obj().emit_by_name::<()>("vm-shutdown", &[&vm_name]);
+            self.popover_menu.popdown();
+        }
+        #[template_callback]
+        fn on_vm_pause_clicked(&self) {
+            let vm_name = self.name.clone();
+            self.obj().emit_by_name::<()>("vm-pause", &[&vm_name]);
+            self.popover_menu.popdown();
+        }
+    }//end #[gtk::template_callbacks]
+
+    impl ObjectImpl for VMRow2 {
+        fn signals() -> &'static [Signal] {
+            static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
+            SIGNALS.get_or_init(|| {
+                vec![
+                    Signal::builder("vm-restart")
+                    .param_types([String::static_type()])
+                    .build(),
+                    Signal::builder("vm-pause")
+                    .param_types([String::static_type()])
+                    .build(),
+                    Signal::builder("vm-shutdown")
+                    .param_types([String::static_type()])
+                    .build()
+                    ]
+            })
+        }
+    }
     impl WidgetImpl for VMRow2 {}
     impl BoxImpl for VMRow2 {}
 }

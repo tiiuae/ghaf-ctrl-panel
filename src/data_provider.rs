@@ -68,7 +68,6 @@ pub mod imp {
                             let _ = event_tx.send(EventExtended::InnerEvent(event));
                         } else {
                             println!("Error received from client lib!");
-                            //break;
                         }
                         println!("Waiting for data...");
                         sleep(Duration::new(2,0)).await;
@@ -90,7 +89,6 @@ pub mod imp {
                             store_inner.remove_all();
                             for vm in list {
                                 store_inner.append(&VMGObject::new(vm.name, vm.description, vm.status, vm.trust_level));
-                                //TODO: add convert functions for other fields!
                             }
                         },
                         EventExtended::InnerEvent(event) =>
@@ -160,6 +158,7 @@ pub mod imp {
         pub fn set_connection_config(&self, addr: String, port: u32) {
             //TODO: reconnect with new addr & port
             //admin_client should be wrapped by smth (RwLock?)
+            //or provide function to do it
             //let admin_client_obj = self.admin_client.lock().unwrap();
             //*admin_client_obj = AdminClient::new(addr, port.try_into().unwrap(), None);
             //self.reconnect();
@@ -232,7 +231,7 @@ pub mod imp {
 
         pub fn restart_vm(&self, name: String) {
             todo!();
-            //no restart in admin client
+            //no restart in admin_client
             //self.admin_client.restart(name);
         }
     }
