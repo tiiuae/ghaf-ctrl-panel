@@ -1,13 +1,14 @@
 use std::cell::RefCell;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, ProgressBar, ListView, SingleSelection, SignalListItemFactory, ListItem, CustomFilter, FilterListModel};
+use gtk::{glib, CompositeTemplate, ProgressBar, ListView, NoSelection, SignalListItemFactory, ListItem, CustomFilter, FilterListModel};
 use glib::{Binding, ToValue, Object};
 use gtk::gio::ListStore;
 
 use crate::vm_gobject::VMGObject;
 use crate::vm_row_2::VMRow2;
 use crate::settings_gobject::SettingsGObject;
+use givc_common::query::VMStatus;
 
 mod imp {
     use super::*;
@@ -94,40 +95,19 @@ impl InfoSettingsPage {
     }
 
     fn setup_vm_rows(&self, model: ListStore) {
-        let count = model.n_items();//save count before model will be consumpted
-
         //Set filter: only Running VM's
         let filter_model = FilterListModel::new(Some(model), Some(CustomFilter::new(|item: &Object| {
             if let Some(vm_obj) = item.downcast_ref::<VMGObject>() {
-                if vm_obj.status() == 0 {
+                if vm_obj.status() == VMGObject::status_u8(VMStatus::Running) {
                     return true;
                 }
             }
             false
         })));
 
-        // Wrap model with selection and pass it to the list view
-        let selection_model = SingleSelection::new(Some(filter_model));
-        // Connect to the selection-changed signal
-        selection_model.connect_selection_changed(
-            glib::clone!(@strong self as window => move |selection_model, _, _| {
-                if let Some(selected_item) = selection_model.selected_item() {
-                    println!("Selected: {}", selection_model.selected());
-                    /*if let Some(vm_obj) = selected_item.downcast_ref::<VMGObject>() {//???
-                        let title: Option<String> = vm_obj.property("name");
-                        let subtitle: Option<String> = vm_obj.property("details");
-                        println!("Property {}, {}", title.unwrap(), subtitle.unwrap());
-                    }*/
-                } else {
-                    println!("No item selected");
-                }
-            })
-        );
+        // Wrap model with no selection and pass it to the list view
+        let selection_model = NoSelection::new(Some(filter_model));
         self.imp().vm_list_view.set_model(Some(&selection_model));
-
-        //set default selection to 1st item
-        selection_model.set_selected(0);
-        selection_model.selection_changed(0u32, count);
     }
 
     fn setup_factory(&self) {

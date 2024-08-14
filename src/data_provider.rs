@@ -138,6 +138,7 @@ pub mod imp {
             let mut vec: Vec<VMGObject> = Vec::new();
             vec.push(VMGObject::new("VM1".to_string(), String::from("This is the file.pdf"), VMStatus::Running, TrustLevel::NotSecure));
             vec.push(VMGObject::new("VM2".to_string(), String::from("Google Chrome"), VMStatus::Paused, TrustLevel::Secure));
+            vec.push(VMGObject::new("VM3".to_string(), String::from("AppFlowy"), VMStatus::Running, TrustLevel::Secure));
             init_store.extend_from_slice(&vec);
             return init_store;
         }

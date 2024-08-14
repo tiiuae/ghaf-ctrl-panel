@@ -71,7 +71,7 @@ mod imp {
                 vec![
                     Signal::builder("new-config-applied")
                     .param_types([String::static_type(), u32::static_type()])
-                    .build(),
+                    .build()
                     ]
             })
         }

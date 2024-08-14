@@ -62,7 +62,7 @@ impl VMGObject {
         self.set_property("trust-level", Self::trust_level_u8(query_result.trust_level));
     }
 
-    fn trust_level_u8(value: TrustLevel) -> u8 {
+    pub fn trust_level_u8(value: TrustLevel) -> u8 {
         match value {
             TrustLevel::Secure => 0,
             TrustLevel::Warning => 1,
@@ -70,7 +70,7 @@ impl VMGObject {
         }
     }
 
-    fn status_u8(value: VMStatus) -> u8 {
+    pub fn status_u8(value: VMStatus) -> u8 {
         match value {
             VMStatus::Running => 0,
             VMStatus::PoweredOff => 1,

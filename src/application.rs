@@ -119,13 +119,17 @@ impl ControlPanelGuiApplication {
 
         let app = self.clone();
 
-        config.connect_closure(
-            "new-config-aplied",
+        config.connect_local(
+            "new-config-applied",
             false,
-            closure_local!(move |addr: String, port: u32| {
+            move |values| {
+                //the value[0] is self
+                let addr = values[1].get::<String>().unwrap();
+                let port = values[2].get::<u32>().unwrap();
                 println!("Addr {addr}, port {port}");
                 app.imp().data_provider.borrow().set_connection_config(addr, port);
-            }),
+                None
+            },
         );
 
         config.present();
