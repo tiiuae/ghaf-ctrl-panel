@@ -90,21 +90,21 @@ box.info-box {
 }
 
 /* VMRow styling */
-row {
+.vm-list-main>row {
   background-color: #1D1D1D;
   border: 1px solid #353535;
   border-radius: 3px;
   margin: 5px;
 }
 
-row:active {
+.vm-list-main>row:active {
   background-color: #2B2B2B;
   border: 1px solid #353535;
   border-radius: 3px;
   margin: 5px;
 }
 
-row:hover {
+.vm-list-main>row:hover {
   background-color: #2B2B2B;
   border: 1px solid #353535;
   border-radius: 3px;
@@ -113,14 +113,14 @@ row:hover {
   /* horizontal offset, vertical offset, blur radius, color */
 }
 
-row:focus {
+.vm-list-main>row:focus {
   background-color: #2B2B2B;
   border: 1px solid #353535;
   border-radius: 3px;
   margin: 5px;
 }
 
-row:selected {
+.vm-list-main>row:selected {
   background-color: #2B2B2B;
   border: 1px solid #353535;
   border-radius: 3px;
@@ -128,106 +128,43 @@ row:selected {
 }
 
 /* VMRow on Info page*/
+.running-vm-list>row {
+  background-color: #2B2B2B;
+  border: 0;
+  margin: 0;
+  box-shadow: 0 0 0 0;
+}
+
 .vm-row-2 {
-  background-color: #353535;
+  background-color: #2B2B2B;
   border: 0;
   margin: 0;
   box-shadow: 0 0 0 0;
 }
 
 .vm-row-2:active {
-  background-color: #353535;
+  background-color: #2B2B2B;
   border: 0;
   margin: 0;
   box-shadow: 0 0 0 0;
 }
 
 .vm-row-2:hover {
-  background-color: #353535;
+  background-color: #2B2B2B;
   border: 0;
   margin: 0;
   box-shadow: 0 0 0 0;
 }
 
 .vm-row-2:focus {
-  background-color: #353535;
+  background-color: #2B2B2B;
   border: 0;
   margin: 0;
   box-shadow: 0 0 0 0;
 }
 
 .vm-row-2:selected {
-  background-color: #353535;
-  border: 0;
-  margin: 0;
-  box-shadow: 0 0 0 0;
-}
-
-.vm-row-2>box.header {
-  background-color: #353535;
-  border: 0;
-  margin: 0;
-  box-shadow: 0 0 0 0;
-}
-
-.vm-row-2:active>box.header {
-  background-color: #353535;
-  border: 0;
-  margin: 0;
-  box-shadow: 0 0 0 0;
-}
-
-.vm-row-2:focus>box.header {
-  background-color: #353535;
-  border: 0;
-  margin: 0;
-  box-shadow: 0 0 0 0;
-}
-
-.vm-row-2:hover>box.header {
-  background-color: #353535;
-  border: 0;
-  margin: 0;
-  box-shadow: 0 0 0 0;
-}
-
-.vm-row-2:selected>box.header {
-  background-color: #353535;
-  border: 0;
-  margin: 0;
-  box-shadow: 0 0 0 0;
-}
-
-.vm-row-2>box.title {
-  background-color: #353535;
-  border: 0;
-  margin: 0;
-  box-shadow: 0 0 0 0;
-}
-
-.vm-row-2:active>box.title {
-  background-color: #353535;
-  border: 0;
-  margin: 0;
-  box-shadow: 0 0 0 0;
-}
-
-.vm-row-2:focus>box.title {
-  background-color: #353535;
-  border: 0;
-  margin: 0;
-  box-shadow: 0 0 0 0;
-}
-
-.vm-row-2:hover>box.title {
-  background-color: #353535;
-  border: 0;
-  margin: 0;
-  box-shadow: 0 0 0 0;
-}
-
-.vm-row-2:selected>box.title {
-  background-color: #353535;
+  background-color: #2B2B2B;
   border: 0;
   margin: 0;
   box-shadow: 0 0 0 0;

@@ -5,7 +5,6 @@ use gtk::prelude::*;
 use adw::subclass::prelude::*;
 use gtk::{gio, glib, gdk};
 use gtk::CssProvider;
-use gtk::glib::closure_local;
 
 use crate::ControlPanelGuiWindow;
 use crate::data_provider::imp::DataProvider;
