@@ -8,6 +8,7 @@ use crate::vm_gobject::VMGObject;
 use crate::vm_row::VMRow;
 use crate::vm_settings::VMSettings;
 use crate::settings::Settings;
+use crate::vm_control_action::VMControlAction;
 
 mod imp {
     use super::*;
@@ -84,19 +85,9 @@ mod imp {
         }
 
         #[template_callback]
-        fn on_vm_start(&self, name: String) {
+        fn on_vm_control_action(&self, action: VMControlAction, name: String) {
             let app = self.obj().get_app_ref();
-            app.start_vm(name);
-        }
-        #[template_callback]
-        fn on_vm_pause(&self, name: String) {
-            let app = self.obj().get_app_ref();
-            app.pause_vm(name);
-        }
-        #[template_callback]
-        fn on_vm_shutdown(&self, name: String) {
-            let app = self.obj().get_app_ref();
-            app.shutdown_vm(name);
+            app.control_vm(action, name);
         }
     }//end #[gtk::template_callbacks]
 

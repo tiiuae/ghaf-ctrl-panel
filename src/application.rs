@@ -9,6 +9,7 @@ use gtk::CssProvider;
 use crate::ControlPanelGuiWindow;
 use crate::data_provider::imp::DataProvider;
 use crate::connection_config::ConnectionConfig;
+use crate::vm_control_action::VMControlAction;
 
 mod imp {
     use super::*;
@@ -160,29 +161,15 @@ impl ControlPanelGuiApplication {
         self.imp().data_provider.borrow().get_store()
     }
 
-    pub fn start_vm(&self, vm_name: String) {
-        println!("Start VM {vm_name}");
-        self.imp().data_provider.borrow().start_vm(vm_name);
-    }
-
-    pub fn pause_vm(&self, vm_name: String) {
-        println!("Pause VM {vm_name}");
-        self.imp().data_provider.borrow().pause_vm(vm_name);
-    }
-
-    pub fn resume_vm(&self, vm_name: String) {
-        println!("Resume VM {vm_name}");
-        self.imp().data_provider.borrow().resume_vm(vm_name);
-    }
-
-    pub fn shutdown_vm(&self, vm_name: String) {
-        println!("Shutdown VM {vm_name}");
-        self.imp().data_provider.borrow().shutdown_vm(vm_name);
-    }
-
-    pub fn restart_vm(&self, vm_name: String) {
-        println!("Restart VM {vm_name}");
-        self.imp().data_provider.borrow().restart_vm(vm_name);
+    pub fn control_vm(&self, action: VMControlAction, vm_name: String) {
+        println!("Control VM {vm_name}, {:?}", action);
+        match action {
+            VMControlAction::Start => self.imp().data_provider.borrow().start_vm(vm_name),
+            VMControlAction::Restart => self.imp().data_provider.borrow().restart_vm(vm_name),
+            VMControlAction::Pause => self.imp().data_provider.borrow().pause_vm(vm_name),
+            VMControlAction::Resume => self.imp().data_provider.borrow().resume_vm(vm_name),
+            VMControlAction::Shutdown => self.imp().data_provider.borrow().shutdown_vm(vm_name),
+        }
     }
 
     pub fn clean_n_quit(&self) {

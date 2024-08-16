@@ -8,6 +8,7 @@ use glib::subclass::Signal;
 
 use crate::vm_gobject::VMGObject;
 use crate::security_icon::SecurityIcon;
+use crate::vm_control_action::VMControlAction;
 
 mod imp {
     use super::*;
@@ -15,8 +16,6 @@ mod imp {
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/vm_row_2.ui")]
     pub struct VMRow2 {
-        pub name: String,
-
         #[template_child]
         pub title_label: TemplateChild<Label>,
         #[template_child]
@@ -50,22 +49,22 @@ mod imp {
     impl VMRow2 {
         #[template_callback]
         fn on_vm_restart_clicked(&self) {
-            let vm_name = self.name.clone();
+            let vm_name = self.title_label.label();
             //emit signal
-            self.obj().emit_by_name::<()>("vm-restart", &[&vm_name]);
+            self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Restart, &vm_name]);
             //and close menu
             self.popover_menu.popdown();
         }
         #[template_callback]
         fn on_vm_shutdown_clicked(&self) {
-            let vm_name = self.name.clone();
-            self.obj().emit_by_name::<()>("vm-shutdown", &[&vm_name]);
+            let vm_name = self.title_label.label();
+            self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Shutdown, &vm_name]);
             self.popover_menu.popdown();
         }
         #[template_callback]
         fn on_vm_pause_clicked(&self) {
-            let vm_name = self.name.clone();
-            self.obj().emit_by_name::<()>("vm-pause", &[&vm_name]);
+            let vm_name = self.title_label.label();
+            self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Pause, &vm_name]);
             self.popover_menu.popdown();
         }
     }//end #[gtk::template_callbacks]
@@ -75,15 +74,9 @@ mod imp {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
             SIGNALS.get_or_init(|| {
                 vec![
-                    Signal::builder("vm-restart")
-                    .param_types([String::static_type()])
+                    Signal::builder("vm-control-action")
+                    .param_types([VMControlAction::static_type(), String::static_type()])
                     .build(),
-                    Signal::builder("vm-pause")
-                    .param_types([String::static_type()])
-                    .build(),
-                    Signal::builder("vm-shutdown")
-                    .param_types([String::static_type()])
-                    .build()
                     ]
             })
         }

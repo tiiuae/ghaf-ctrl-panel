@@ -9,6 +9,7 @@ use glib::subclass::Signal;
 use crate::vm_gobject::VMGObject;
 use crate::audio_settings::AudioSettings;
 use crate::security_icon::SecurityIcon;
+use crate::vm_control_action::VMControlAction;
 
 mod imp {
     use super::*;
@@ -64,20 +65,20 @@ mod imp {
         fn on_vm_start_clicked(&self) {
             let vm_name = self.vm_name_label.label();
             //emit signal
-            self.obj().emit_by_name::<()>("vm-start", &[&vm_name]);
+            self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Start, &vm_name]);
             //and close menu
             self.popover_menu.popdown();
         }
         #[template_callback]
         fn on_vm_shutdown_clicked(&self) {
             let vm_name = self.vm_name_label.label();
-            self.obj().emit_by_name::<()>("vm-shutdown", &[&vm_name]);
+            self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Shutdown, &vm_name]);
             self.popover_menu.popdown();
         }
         #[template_callback]
         fn on_vm_pause_clicked(&self) {
             let vm_name = self.vm_name_label.label();
-            self.obj().emit_by_name::<()>("vm-pause", &[&vm_name]);
+            self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Pause, &vm_name]);
             self.popover_menu.popdown();
         }
         #[template_callback]
@@ -104,14 +105,8 @@ mod imp {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
             SIGNALS.get_or_init(|| {
                 vec![
-                    Signal::builder("vm-start")
-                    .param_types([String::static_type()])
-                    .build(),
-                    Signal::builder("vm-pause")
-                    .param_types([String::static_type()])
-                    .build(),
-                    Signal::builder("vm-shutdown")
-                    .param_types([String::static_type()])
+                    Signal::builder("vm-control-action")
+                    .param_types([VMControlAction::static_type(), String::static_type()])
                     .build(),
                     Signal::builder("vm-mic-changed")
                     .param_types([u32::static_type()])

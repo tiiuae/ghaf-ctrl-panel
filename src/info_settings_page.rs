@@ -1,14 +1,17 @@
 use std::cell::RefCell;
+use std::sync::OnceLock;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, ProgressBar, ListView, NoSelection, SignalListItemFactory, ListItem, CustomFilter, FilterListModel};
 use glib::{Binding, ToValue, Object};
 use gtk::gio::ListStore;
+use glib::subclass::Signal;
 
 use crate::vm_gobject::VMGObject;
 use crate::vm_row_2::VMRow2;
 use crate::settings_gobject::SettingsGObject;
 use givc_common::query::VMStatus;
+use crate::vm_control_action::VMControlAction;
 
 mod imp {
     use super::*;
@@ -45,14 +48,6 @@ mod imp {
         }
     }
 
-    /*#[gtk::template_callbacks]
-    impl InfoSettingsPage {
-        #[template_callback]
-        fn on_row_selected(&self, row: &gtk::ListBoxRow) {
-            
-        }
-    }*///end #[gtk::template_callbacks]
-
     impl ObjectImpl for InfoSettingsPage {
         fn constructed(&self) {
             // Call "constructed" on parent
@@ -61,6 +56,16 @@ mod imp {
             // Setup
             let obj = self.obj();
             obj.init();
+        }
+        fn signals() -> &'static [Signal] {
+            static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
+            SIGNALS.get_or_init(|| {
+                vec![
+                    Signal::builder("vm-control-action")
+                    .param_types([VMControlAction::static_type(), String::static_type()])
+                    .build(),
+                    ]
+            })
         }
     }
     impl WidgetImpl for InfoSettingsPage {}
@@ -95,7 +100,7 @@ impl InfoSettingsPage {
     }
 
     fn setup_vm_rows(&self, model: ListStore) {
-        //Set filter: only Running VM's
+        //Set filter: only running VM's
         let filter_model = FilterListModel::new(Some(model), Some(CustomFilter::new(|item: &Object| {
             if let Some(vm_obj) = item.downcast_ref::<VMGObject>() {
                 if vm_obj.status() == VMGObject::status_u8(VMStatus::Running) {
@@ -113,11 +118,26 @@ impl InfoSettingsPage {
     fn setup_factory(&self) {
         // Create a new factory
         let factory = SignalListItemFactory::new();
-
+        
+        let this = self.clone();
         // Create an empty `VMRow2` during setup
         factory.connect_setup(move |_, list_item| {
             // Create `VMRow2`
             let vm_row = VMRow2::new();
+            //connect signals
+            let widget = this.clone();
+            vm_row.connect_local(
+                "vm-control-action",
+                false,
+                move |values| {
+                    //the value[0] is self
+                    let vm_action = values[1].get::<VMControlAction>().unwrap();
+                    let vm_name = values[2].get::<String>().unwrap();
+                    widget.emit_by_name::<()>("vm-control-action", &[&vm_action, &vm_name]);
+                    None
+                },
+            );
+            
             list_item
                 .downcast_ref::<ListItem>()
                 .expect("Needs to be ListItem")

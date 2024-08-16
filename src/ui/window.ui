@@ -110,9 +110,7 @@
                           </child>
                           <child>
                             <object class="VMSettings" id="vm_settings_box">
-                            <signal name="vm-start" handler="on_vm_start" swapped="true"/>
-                            <signal name="vm-pause" handler="on_vm_pause" swapped="true"/>
-                            <signal name="vm-shutdown" handler="on_vm_shutdown" swapped="true"/>
+                            <signal name="vm-control-action" handler="on_vm_control_action" swapped="true"/>
                             </object> <!-- Settings box object -->
                           </child>
                         </object> <!-- Main box object -->
@@ -124,7 +122,9 @@
                     <object class="GtkStackPage">
                       <property name="name">settings_view</property>
                       <property name="child">
-                        <object class="Settings" id="settings_box"></object>
+                        <object class="Settings" id="settings_box">
+                        <signal name="vm-control-action" handler="on_vm_control_action" swapped="true"/>
+                        </object>
                       </property>
                     </object>
                   </child> <!-- Settings view child -->

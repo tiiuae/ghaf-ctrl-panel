@@ -1,9 +1,11 @@
 use std::cell::RefCell;
+use std::sync::OnceLock;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, Stack, ListBox};
 use glib::{Binding, ToValue};
 use gtk::gio::ListStore;
+use glib::subclass::Signal;
 
 //use crate::vm_gobject::VMGObject; will be used in the future
 use crate::audio_settings::AudioSettings;
@@ -12,6 +14,7 @@ use crate::info_settings_page::InfoSettingsPage;
 use crate::security_settings_page::SecuritySettingsPage;
 use crate::wifi_settings_page::WifiSettingsPage;
 use crate::mouse_settings_page::MouseSettingsPage;
+use crate::vm_control_action::VMControlAction;
 
 mod imp {
     use super::*;
@@ -82,6 +85,16 @@ mod imp {
             let obj = self.obj();
             obj.init();
         }
+        fn signals() -> &'static [Signal] {
+            static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
+            SIGNALS.get_or_init(|| {
+                vec![
+                    Signal::builder("vm-control-action")
+                    .param_types([VMControlAction::static_type(), String::static_type()])
+                    .build(),
+                    ]
+            })
+        }
     }
     impl WidgetImpl for Settings {}
     impl BoxImpl for Settings {}
@@ -107,6 +120,19 @@ impl Settings {
         self.imp().info_settings_page.set_vm_model(model.clone());
     }
     pub fn init(&self) {
+        let this = self.clone();
+        self.imp().info_settings_page.connect_local(
+            "vm-control-action",
+            false,
+            move |values| {
+                //the value[0] is self
+                let vm_action = values[1].get::<VMControlAction>().unwrap();
+                let vm_name = values[2].get::<String>().unwrap();
+                this.emit_by_name::<()>("vm-control-action", &[&vm_action, &vm_name]);
+                None
+            },
+        );
+
         if let Some(row) = self.imp().settings_list_box.row_at_index(0) {
             self.imp().settings_list_box.select_row(Some(&row));
         }

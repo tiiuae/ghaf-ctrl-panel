@@ -118,6 +118,16 @@ pub mod imp {
                             },
                             Event::UnitShutdown(result) => {
                                 println!("Shutdown info: {:?}", result);
+                                let store_inner = store.lock().unwrap();
+                                for i in 0..store_inner.n_items() {
+                                    if let Some(item) = store_inner.item(0) {
+                                        let obj = item.downcast_ref::<VMGObject>().unwrap();
+                                        if obj.name() == result.name {
+                                            obj.update(result);
+                                            break;
+                                        }
+                                    }
+                                }
                             },
                             Event::UnitRegistered(result) => {
                                 println!("Unit registered {:?}", result);
