@@ -23,12 +23,23 @@
         </object>
       </child>
       <child>
+        <object class="GtkLabel" id="vm_status_label">
+        <style><class name="normal-text"/></style>
+        <property name="label">No status</property>
+        <property name="margin-start">20</property>
+        <property name="margin-end">10</property>
+        <property name="margin-top">0</property>
+        <property name="margin-bottom">10</property>
+        <property name="halign">start</property>
+        </object>
+      </child>
+      <child>
         <object class="GtkLabel" id="vm_details_label">
         <style><class name="normal-text"/></style>
         <property name="label">No VM details</property>
         <property name="margin-start">20</property>
         <property name="margin-end">10</property>
-        <property name="margin-top">10</property>
+        <property name="margin-top">0</property>
         <property name="margin-bottom">10</property>
         <property name="halign">start</property>
         </object>
@@ -177,36 +188,3 @@
     </child>
   </object>
 </interface>
-
-<!--<child>
-  <object class="GtkDropDown" id="vm_action_menu_button">
-  <style><class name="dropdown-button"/></style>
-  <signal name="notify::selected" handler="on_vm_action_selected" swapped="true"/>
-  <property name="halign">start</property>
-  <property name="valign">center</property>
-  <property name="width-request">220</property>
-  <property name="height-request">30</property>
-  <property name="model">
-    <object class="GtkStringList">
-      <items>
-        <item translatable="yes">Run</item>
-        <item translatable="yes">Pause</item>
-        <item translatable="yes">Restart</item>
-        <item translatable="yes">Shutdown</item>
-      </items>
-    </object>
-  </property>
-  </object>
-</child>-->
-
-<!-- Application-wide actions are needed for this widget-->
-<!--<child>
-  <object class="GtkMenuButton" id="action_menu_button">
-    <property name="visible">true</property>
-    <property name="halign">start</property>
-    <property name="width-request">220</property>
-    <property name="height-request">30</property>
-    <property name="label">Action</property>
-    <property name="menu-model">vm-action-menu</property>
-  </object>
-</child>-->

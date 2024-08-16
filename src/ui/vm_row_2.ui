@@ -33,7 +33,7 @@
         <property name="visible">true</property>
         <property name="direction">GTK_ARROW_DOWN</property>
         <property name="halign">start</property>
-        <property name="width-request">220</property>
+        <property name="width-request">140</property>
         <property name="height-request">30</property>
         <property name="label">Action</property>
         <property name="popover">popover_menu</property>
@@ -41,7 +41,7 @@
     </child>
   </template>
   <object class="GtkPopover" id="popover_menu">
-  <property name="width-request">220</property>
+  <property name="width-request">140</property>
     <child>
       <object class="GtkBox">
       <style><class name="info-box"/></style>
@@ -55,7 +55,7 @@
           <property name="vexpand">false</property>
           <property name="hexpand">true</property>
             <property name="halign">start</property>
-            <property name="width-request">220</property>
+            <property name="width-request">140</property>
             <child>
               <object class="GtkLabel">
                 <property name="halign">start</property>
@@ -72,7 +72,7 @@
           <property name="vexpand">false</property>
           <property name="hexpand">true</property>
             <property name="halign">start</property>
-            <property name="width-request">220</property>
+            <property name="width-request">140</property>
             <child>
               <object class="GtkLabel">
                 <property name="halign">start</property>
@@ -89,7 +89,7 @@
           <property name="vexpand">false</property>
           <property name="hexpand">true</property>
           <property name="halign">start</property>
-          <property name="width-request">220</property>
+          <property name="width-request">140</property>
             <child>
               <object class="GtkLabel">
                 <property name="halign">start</property>

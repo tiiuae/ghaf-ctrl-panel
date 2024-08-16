@@ -21,6 +21,8 @@ mod imp {
         #[template_child]
         pub vm_name_label: TemplateChild<Label>,
         #[template_child]
+        pub vm_status_label: TemplateChild<Label>,
+        #[template_child]
         pub vm_details_label: TemplateChild<Label>,
         #[template_child]
         pub security_icon: TemplateChild<Image>,
@@ -157,6 +159,7 @@ impl VMSettings {
         self.unbind();
         //make new
         let name = self.imp().vm_name_label.get();
+        let status = self.imp().vm_status_label.get();
         let details = self.imp().vm_details_label.get();
         let security_icon = self.imp().security_icon.get();
         let security_label = self.imp().security_label.get();
@@ -170,6 +173,22 @@ impl VMSettings {
             .build();
         // Save binding
         bindings.push(name_binding);
+
+        let status_binding = vm_object
+            .bind_property("status", &status, "label")
+            .sync_create()
+            .transform_to(move |_, value: &glib::Value| {
+                let status = value.get::<u8>().unwrap_or(0);
+                match status {//make struct like for icon?
+                    0 => Some(glib::Value::from("Running")),
+                    1 => Some(glib::Value::from("Powered off")),
+                    2 => Some(glib::Value::from("Paused")),
+                    _ => Some(glib::Value::from("Powered off")),
+                }
+            })
+            .build();
+        // Save binding
+        bindings.push(status_binding);
 
         let details_binding = vm_object
             .bind_property("details", &details, "label")
