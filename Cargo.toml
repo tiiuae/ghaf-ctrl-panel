@@ -23,9 +23,5 @@ glib-build-tools = "0.19"
 tonic-build = "0.11"
 
 [[bin]]
-name = "test-server"
-path = "src/test-server.rs"
-
-[[bin]]
 name = "ctrl-panel"
 path = "src/main.rs"
