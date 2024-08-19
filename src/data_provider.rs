@@ -97,7 +97,7 @@ pub mod imp {
                                 println!("Status: {:?}", result);
                                 let store_inner = store.lock().unwrap();
                                 for i in 0..store_inner.n_items() {
-                                    if let Some(item) = store_inner.item(0) {
+                                    if let Some(item) = store_inner.item(i) {
                                         let obj = item.downcast_ref::<VMGObject>().unwrap();
                                         if obj.name() == result.name {
                                             obj.update(result);
@@ -120,7 +120,7 @@ pub mod imp {
                                 println!("Shutdown info: {:?}", result);
                                 let store_inner = store.lock().unwrap();
                                 for i in 0..store_inner.n_items() {
-                                    if let Some(item) = store_inner.item(0) {
+                                    if let Some(item) = store_inner.item(i) {
                                         let obj = item.downcast_ref::<VMGObject>().unwrap();
                                         if obj.name() == result.name {
                                             obj.update(result);
@@ -241,7 +241,7 @@ pub mod imp {
         }
 
         pub fn restart_vm(&self, name: String) {
-            todo!();
+            println!("Restart is not implemented on client lib!");
             //no restart in admin_client
             //self.admin_client.restart(name);
         }

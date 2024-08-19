@@ -4,6 +4,7 @@ use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
 use givc_common::query::{QueryResult, VMStatus, TrustLevel}; //cannot be used as property!
+//use crate::trust_level::TrustLevel as MyTrustLevel;//type is no recognised in #property
 
 mod imp {
     use super::*;
@@ -14,6 +15,7 @@ mod imp {
         pub details: String,
         pub status: u8,
         pub trust_level: u8,
+        //pub my_trust_level: MyTrustLevel,
     }
 
     #[derive(Default, Properties)]
@@ -23,6 +25,7 @@ mod imp {
         #[property(name = "details", get, set, type = String, member = details)]
         #[property(name = "status", get, set, type = u8, member = status)]
         #[property(name = "trust-level", get, set, type = u8, member = trust_level)]
+        //#[property(name = "my-trust-level", get, set, type = MyTrustLevel, member = my_trust_level)]
         pub data: RefCell<VMData>,
     }
 
