@@ -17,6 +17,7 @@ mod wifi_settings_page;
 mod mouse_settings_page;
 mod vm_control_action;
 mod trust_level;
+mod add_network_popup;
 
 use self::application::ControlPanelGuiApplication;
 use self::window::ControlPanelGuiWindow;

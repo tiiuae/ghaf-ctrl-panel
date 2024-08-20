@@ -527,3 +527,22 @@ switch:checked {
   color: grey;
   border-radius: 0px;
 }
+
+/*Popup*/
+.settings-popup {
+  background-color: #1D1D1D;
+  border-radius: 6px;
+  border: 1px solid rgba(117, 117, 117, 0.5);
+  padding: 0px;
+}
+
+/*Entry*/
+entry {
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 2px;
+}
+
+entry>text {
+  color: #FFFFFF;
+}

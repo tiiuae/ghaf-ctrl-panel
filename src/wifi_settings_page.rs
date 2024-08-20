@@ -6,6 +6,7 @@ use glib::{Binding, ToValue};
 //use gtk::gio::ListStore; will be needed for list of available networks
 
 use crate::settings_gobject::SettingsGObject;
+use crate::add_network_popup::AddNetworkPopup;
 
 mod imp {
     use super::*;
@@ -48,6 +49,14 @@ mod imp {
         fn on_switch_state_changed(&self, value: bool) -> bool {
             println!("Wifi switched: {}", value);
             false//propagate event futher
+        }
+        #[template_callback]
+        fn on_add_clicked(&self) {
+            //let window = self.active_window().unwrap();
+            let popup = AddNetworkPopup::new();
+            //popup.set_transient_for(Some(&window));
+            //popup.set_modal(true);
+            popup.present();
         }
     }//end #[gtk::template_callbacks]
 
