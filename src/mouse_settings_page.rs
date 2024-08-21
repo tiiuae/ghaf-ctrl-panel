@@ -72,7 +72,7 @@ mod imp {
                     Signal::builder("mouse-speed-changed")
                     .param_types([f64::static_type()])
                     .build(),
-                    Signal::builder("mouse-button-changed")
+                    Signal::builder("mouse-buttons-changed")
                     .param_types([bool::static_type()])
                     .build(),
                     ]

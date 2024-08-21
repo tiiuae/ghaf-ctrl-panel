@@ -7,8 +7,9 @@
     --accent-color: #F15025;
 }
 */
-header-bar {
-  background-color: #FFFFFF;
+
+.adw-header-bar>windowhandle>box>*>label {
+  color: #1D1D1D;
 }
 
 /*Header buttons*/
@@ -109,7 +110,7 @@ box.info-box {
   border: 1px solid #353535;
   border-radius: 3px;
   margin: 5px;
-  box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 4px 6px 8px rgba(0, 0, 0, 0.3);
   /* horizontal offset, vertical offset, blur radius, color */
 }
 

@@ -3,12 +3,15 @@
   <requires lib="gtk" version="4.0"/>
   <requires lib="Adw" version="1.0"/>
   <template class="ControlPanelGuiWindow" parent="AdwApplicationWindow">
+  <property name="title">Ghaf Control panel</property>
     <property name="default-width">800</property>
     <property name="default-height">600</property>
+    <style><class name="main-window"/></style>
     <child>
       <object class="AdwToolbarView">
         <child type="top">
           <object class="AdwHeaderBar" id="header_bar">
+          <style><class name="adw-header-bar"/></style>
             <child type="end">
               <object class="GtkMenuButton" id="header_menu_button">
               <property name="primary">True</property>

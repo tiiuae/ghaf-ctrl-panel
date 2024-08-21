@@ -2,11 +2,13 @@
 <interface>
     <requires lib="gtk" version="4.0"/>
     <template class="ConnectionConfig" parent="GtkWindow">
-    <property name="title">Connection configuration</property>
-    <property name="width-request">350</property>
+    <property name="decorated">false</property>
+    <property name="width-request">320</property>
     <property name="height-request">150</property>
+    <style><class name="settings-popup"/></style>
     <child>
       <object class="GtkBox">
+      <style><class name="container"/></style>
       <property name="orientation">vertical</property>
       <property name="margin_top">10</property>
       <property name="margin_bottom">10</property>
@@ -20,6 +22,9 @@
             <child>
               <object class="GtkLabel">
                 <property name="label">Address:</property>
+                <style><class name="normal-text"/></style>
+                <property name="width-request">100</property>
+                <property name="halign">start</property>
               </object>
             </child>
             <child>
@@ -37,6 +42,9 @@
             <child>
               <object class="GtkLabel">
                 <property name="label">Port:</property>
+                <style><class name="normal-text"/></style>
+                <property name="width-request">100</property>
+                <property name="halign">start</property>
               </object>
             </child>
             <child>
@@ -55,12 +63,14 @@
               <object class="GtkButton" id="apply_button">
               <signal name="clicked" handler="on_apply_clicked" swapped="true"/>
                 <property name="label">Apply</property>
+                <style><class name="settings-button"/></style>
               </object>
             </child>
             <child>
               <object class="GtkButton" id="cancel_button">
               <signal name="clicked" handler="on_cancel_clicked" swapped="true"/>
                 <property name="label">Cancel</property>
+                <style><class name="settings-button"/></style>
               </object>
             </child>
           </object>
