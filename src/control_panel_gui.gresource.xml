@@ -17,7 +17,7 @@
     <file>styles/style.css</file>
     <!-- Icons -->
     <file>icons/ghaf_logo.svg</file>
-    <file>icons/icon_admin.png</file>
+    <file>icons/icon_admin.svg</file>
     <file>icons/icon_app_chrome.svg</file>
     <file>icons/icon_app_pdf.svg</file>
     <file>icons/icon_app_whatsapp.svg</file>
@@ -33,5 +33,8 @@
     <file>icons/security_attention.svg</file>
     <file>icons/security_alert.svg</file>
     <file>icons/icon_lock.svg</file>
+    <file>icons/icon_arrow.svg</file>
+    <file>icons/icon_close.svg</file>
+    <file>icons/icon_download.svg</file>
   </gresource>
 </gresources>

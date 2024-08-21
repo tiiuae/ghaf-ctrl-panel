@@ -31,7 +31,7 @@
                     <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="resource">/org/gnome/controlpanelgui/icons/icon_admin.png</property>
+                    <property name="resource">/org/gnome/controlpanelgui/icons/icon_admin.svg</property>
                     <property name="width-request">24</property>
                     <property name="height-request">24</property>
                     </object>
@@ -47,7 +47,7 @@
                     <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="resource">/org/gnome/controlpanelgui/icons/icon_admin.png</property>
+                    <property name="resource">/org/gnome/controlpanelgui/icons/icon_admin.svg</property>
                     <property name="width-request">24</property>
                     <property name="height-request">24</property>
                     </object>
