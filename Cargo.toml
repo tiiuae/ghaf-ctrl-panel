@@ -15,8 +15,8 @@ tokio = {version = "1.0", features = ["rt-multi-thread", "time", "macros"]}
 tokio-stream = "0.1"
 tonic = {version="0.11.0", features = ["tls"]}
 
-givc-client = { git = "https://github.com/avnik/ghaf-givc", branch = "avnik/rust-proto-take-2" }
-givc-common = { git = "https://github.com/avnik/ghaf-givc", branch = "avnik/rust-proto-take-2" }
+givc-client = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main" }
+givc-common = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main" }
 
 [build-dependencies]
 glib-build-tools = "0.19"

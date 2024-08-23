@@ -1,6 +1,3 @@
-use std::env;
-use std::path::PathBuf;
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     glib_build_tools::compile_resources(
         &["src/"],
