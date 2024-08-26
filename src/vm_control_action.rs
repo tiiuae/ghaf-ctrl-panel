@@ -1,6 +1,6 @@
 use gtk::glib;
 use gtk::prelude::*;
-use glib::{value::{FromValue, ToValue, Value}, Type};//ParamSpec, ParamSpecInt, ParamFlags, Enum, ValueDelegate
+use glib::{value::{FromValue, ToValue, Value}, Type};
 
 #[derive(Debug, Clone, Copy)]
 #[repr(u8)]

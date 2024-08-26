@@ -195,7 +195,8 @@ pub mod imp {
         pub fn start_vm(&self, name: String) {
             let admin_client = self.admin_client.clone();
             Runtime::new().unwrap().spawn(async move {//or block_on?
-                if let Err(error) = admin_client.start(name).await {
+                //there is now app name
+                if let Err(error) = admin_client.start(String::from(""), Some(name)).await {
                     println!("Start request error {error}");
                 }
                 else {
