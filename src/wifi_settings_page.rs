@@ -1,8 +1,10 @@
 use std::cell::RefCell;
+use std::sync::OnceLock;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, Switch, Image};
 use glib::{Binding, ToValue};
+use crate::glib::subclass::Signal;
 //use gtk::gio::ListStore; will be needed for list of available networks
 
 use crate::settings_gobject::SettingsGObject;
@@ -52,11 +54,7 @@ mod imp {
         }
         #[template_callback]
         fn on_add_clicked(&self) {
-            //let window = self.active_window().unwrap();
-            let popup = AddNetworkPopup::new();
-            //popup.set_transient_for(Some(&window));
-            //popup.set_modal(true);
-            popup.present();
+            self.obj().emit_by_name::<()>("show-add-network-popup", &[]);
         }
     }//end #[gtk::template_callbacks]
 
@@ -68,6 +66,15 @@ mod imp {
             // Setup
             let obj = self.obj();
             obj.init();
+        }
+        fn signals() -> &'static [Signal] {
+            static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
+            SIGNALS.get_or_init(|| {
+                vec![
+                    Signal::builder("show-add-network-popup")
+                    .build(),
+                    ]
+            })
         }
     }
     impl WidgetImpl for WifiSettingsPage {}

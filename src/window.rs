@@ -2,6 +2,7 @@ use std::rc::Rc;
 use gtk::prelude::*;
 use adw::subclass::prelude::*;
 use gtk::{gio, glib, CompositeTemplate, Stack, Image, Button, MenuButton, Box, ListView, SingleSelection, SignalListItemFactory, ListItem,};
+use glib::Variant;
 
 use crate::application::ControlPanelGuiApplication;
 use crate::vm_gobject::VMGObject;
@@ -9,6 +10,7 @@ use crate::vm_row::VMRow;
 use crate::vm_settings::VMSettings;
 use crate::settings::Settings;
 use crate::vm_control_action::VMControlAction;
+use crate::settings_action::SettingsAction;
 
 mod imp {
     use super::*;
@@ -88,6 +90,11 @@ mod imp {
         fn on_vm_control_action(&self, action: VMControlAction, name: String) {
             let app = self.obj().get_app_ref();
             app.control_vm(action, name);
+        }
+        #[template_callback]
+        fn on_settings_action(&self, action: SettingsAction, value: Variant) {
+            let app = self.obj().get_app_ref();
+            app.perform_setting_action(action, value);
         }
     }//end #[gtk::template_callbacks]
 

@@ -5,11 +5,14 @@ use gtk::prelude::*;
 use adw::subclass::prelude::*;
 use gtk::{gio, glib, gdk};
 use gtk::CssProvider;
+use glib::Variant;
 
 use crate::ControlPanelGuiWindow;
 use crate::data_provider::imp::DataProvider;
 use crate::connection_config::ConnectionConfig;
 use crate::vm_control_action::VMControlAction;
+use crate::settings_action::SettingsAction;
+use crate::add_network_popup::AddNetworkPopup;
 
 mod imp {
     use super::*;
@@ -170,6 +173,42 @@ impl ControlPanelGuiApplication {
             VMControlAction::Resume => self.imp().data_provider.borrow().resume_vm(vm_name),
             VMControlAction::Shutdown => self.imp().data_provider.borrow().shutdown_vm(vm_name),
         }
+    }
+
+    pub fn perform_setting_action(&self, action: SettingsAction, value: Variant) {
+        match action {
+            SettingsAction::AddNetwork => todo!(),
+            SettingsAction::RemoveNetwork => todo!(),
+            SettingsAction::RegionNLanguage => todo!(),
+            SettingsAction::DateNTime => todo!(),
+            SettingsAction::MouseSpeed => todo!(),
+            SettingsAction::KeyboardLayout => todo!(),
+            SettingsAction::Speaker => todo!(),
+            SettingsAction::SpeakerVolume => todo!(),
+            SettingsAction::Mic => todo!(),
+            SettingsAction::MicVolume => todo!(),
+            SettingsAction::ShowAddNetworkPopup => {
+                let app = self.clone();
+                let window = self.active_window().unwrap();
+                let popup = AddNetworkPopup::new();
+                popup.set_transient_for(Some(&window));
+                popup.set_modal(true);
+                popup.connect_local(
+                    "new-network",
+                    false,
+                    move |values| {
+                        //the value[0] is self
+                        let name = values[1].get::<String>().unwrap();
+                        let security = values[2].get::<String>().unwrap();
+                        let password = values[3].get::<String>().unwrap();
+                        println!("New network: {name}, {security}, {password}");
+                        app.imp().data_provider.borrow().add_network(name, security, password);
+                        None
+                    },
+                );
+                popup.present();
+            }
+        };
     }
 
     pub fn clean_n_quit(&self) {

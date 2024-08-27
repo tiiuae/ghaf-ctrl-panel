@@ -238,6 +238,7 @@
                         <property name="name">wifi</property>
                         <property name="child">
                             <object class="WifiSettingsPage" id="wifi_settings_page">
+                            <signal name="show-add-network-popup" handler="on_show_add_network_popup" swapped="true"/>
                             </object>
                         </property>
                     </object>

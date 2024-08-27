@@ -246,6 +246,10 @@ pub mod imp {
             //no restart in admin_client
             //self.admin_client.restart(name);
         }
+
+        pub fn add_network(&self, name: String, security: String, password: String) {
+            println!("Not yet implemented!");
+        }
     }
 
     impl Default for DataProvider {

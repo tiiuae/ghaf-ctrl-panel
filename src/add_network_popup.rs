@@ -55,7 +55,6 @@ mod imp {
             let name = self.name_entry.text().to_string();
             let sec = self.security_entry.text().to_string();
             let passwd = self.password_entry.text().to_string();
-            println!("Save clicked: {name}, {passwd}, {sec}");
             self.obj().emit_by_name::<()>("new-network", &[&name, &sec, &passwd]);
         }
         #[template_callback]

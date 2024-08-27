@@ -3,7 +3,7 @@ use std::sync::OnceLock;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, Stack, ListBox};
-use glib::{Binding, ToValue};
+use glib::{Binding, ToValue, Variant};
 use gtk::gio::ListStore;
 use glib::subclass::Signal;
 
@@ -15,6 +15,7 @@ use crate::security_settings_page::SecuritySettingsPage;
 use crate::wifi_settings_page::WifiSettingsPage;
 use crate::mouse_settings_page::MouseSettingsPage;
 use crate::vm_control_action::VMControlAction;
+use crate::settings_action::SettingsAction;
 
 mod imp {
     use super::*;
@@ -74,6 +75,12 @@ mod imp {
                 println!("(Invalid row type)");
             }
         }
+        #[template_callback]
+        fn on_show_add_network_popup(&self) {
+            let action = SettingsAction::ShowAddNetworkPopup;
+            let empty = Variant::from(None::<()>.as_ref());
+            self.obj().emit_by_name::<()>("settings-action", &[&action, &empty]);
+        }
     }//end #[gtk::template_callbacks]
 
     impl ObjectImpl for Settings {
@@ -91,6 +98,9 @@ mod imp {
                 vec![
                     Signal::builder("vm-control-action")
                     .param_types([VMControlAction::static_type(), String::static_type()])
+                    .build(),
+                    Signal::builder("settings-action")
+                    .param_types([SettingsAction::static_type(), Variant::static_type()])
                     .build(),
                     ]
             })

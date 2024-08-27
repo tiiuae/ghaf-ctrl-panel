@@ -18,6 +18,7 @@ mod mouse_settings_page;
 mod vm_control_action;
 mod trust_level;
 mod add_network_popup;
+mod settings_action;
 
 use self::application::ControlPanelGuiApplication;
 use self::window::ControlPanelGuiWindow;
