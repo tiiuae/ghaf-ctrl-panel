@@ -3,7 +3,7 @@ use std::sync::OnceLock;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, ProgressBar, ListView, NoSelection, SignalListItemFactory, ListItem, CustomFilter, FilterListModel};
-use glib::{Binding, ToValue, Object};
+use glib::{Binding, Object};
 use gtk::gio::ListStore;
 use glib::subclass::Signal;
 

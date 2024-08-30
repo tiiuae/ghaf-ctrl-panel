@@ -7,7 +7,6 @@ use glib::Binding;
 use glib::subclass::Signal;
 
 use crate::vm_gobject::VMGObject;
-use crate::security_icon::SecurityIcon;
 use crate::vm_control_action::VMControlAction;
 
 mod imp {

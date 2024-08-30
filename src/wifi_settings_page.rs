@@ -3,7 +3,7 @@ use std::sync::OnceLock;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, Switch, Image};
-use glib::{Binding, ToValue};
+use glib::Binding;
 use crate::glib::subclass::Signal;
 //use gtk::gio::ListStore; will be needed for list of available networks
 

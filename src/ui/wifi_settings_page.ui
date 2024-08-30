@@ -140,9 +140,9 @@
         <child>
           <object class="GtkButton">
           <style><class name="settings-button"/></style>
-          <property name="label">+ Add network</property>
+          <property name="label">+  Add network</property>
           <signal name="clicked" handler="on_add_clicked" swapped="true"/>
-          <property name="width-request">220</property>
+          <property name="width-request">150</property>
           <property name="height-request">30</property>
           <property name="vexpand">false</property>
           <property name="hexpand">false</property>

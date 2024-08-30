@@ -547,3 +547,47 @@ entry {
 entry>text {
   color: #FFFFFF;
 }
+
+/*Tab widget (GtkNotebook)*/
+.tab-widget {
+  background-color: #2B2B2B;
+  border: 0;
+}
+
+.tab-widget>stack {
+  background-color: #2B2B2B;
+  border: 0;
+}
+
+.tab-widget>stack>box {
+  background-color: #2B2B2B;
+}
+
+.tab-widget>header>tabs {
+  background-color: #2B2B2B;
+}
+
+.tab-widget>header>tabs>tab {
+  background-color: #2B2B2B;
+  margin-right: 20px;
+}
+
+/* The standard appearance complies with the one defined in Figma
+.tab-widget>header>tabs>tab:checked {
+  background-color: #2B2B2B;
+  margin-right: 20px;
+  background-image: none;
+  box-shadow: inset 0 -2px 0 #F15025;
+}
+
+.tab-widget>header>tabs>tab:hover {
+  background-color: #2B2B2B;
+  margin-right: 20px;
+  background-image: none;
+  box-shadow: inset 0 -2px 0 rgba(255, 255, 255, 0.09);
+}
+*/
+
+.tab-widget>header>tabs>tab>label {
+  color: #FFFFFF;
+}

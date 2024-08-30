@@ -3,7 +3,7 @@ use std::sync::OnceLock;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, Switch, Scale};
-use glib::{Binding, ToValue};
+use glib::Binding;
 use glib::subclass::Signal;
 
 use crate::settings_gobject::SettingsGObject;

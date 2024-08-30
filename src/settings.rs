@@ -3,13 +3,14 @@ use std::sync::OnceLock;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, Stack, ListBox};
-use glib::{Binding, ToValue, Variant};
+use glib::{Binding, Variant};
 use gtk::gio::ListStore;
 use glib::subclass::Signal;
 
 //use crate::vm_gobject::VMGObject; will be used in the future
 use crate::audio_settings::AudioSettings;
 use crate::settings_gobject::SettingsGObject;
+use crate::admin_settings_page::AdminSettingsPage;
 use crate::info_settings_page::InfoSettingsPage;
 use crate::security_settings_page::SecuritySettingsPage;
 use crate::wifi_settings_page::WifiSettingsPage;
@@ -27,6 +28,8 @@ mod imp {
         pub settings_list_box: TemplateChild<ListBox>,
         #[template_child]
         pub stack: TemplateChild<Stack>,
+        #[template_child]
+        pub admin_settings_page: TemplateChild<AdminSettingsPage>,
         #[template_child]
         pub info_settings_page: TemplateChild<InfoSettingsPage>,
         #[template_child]

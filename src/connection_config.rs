@@ -3,7 +3,7 @@ use std::sync::OnceLock;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{gio, glib, CompositeTemplate, Entry, Button};
-use glib::{Binding, ToValue};
+use glib::Binding;
 use glib::subclass::Signal;
 
 mod imp {

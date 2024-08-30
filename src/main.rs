@@ -11,6 +11,7 @@ mod settings;
 mod settings_gobject;
 mod data_provider;
 mod security_icon;
+mod admin_settings_page;
 mod info_settings_page;
 mod security_settings_page;
 mod wifi_settings_page;

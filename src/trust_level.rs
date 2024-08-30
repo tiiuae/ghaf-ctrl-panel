@@ -27,7 +27,7 @@ impl Default for TrustLevel {
             0 => TrustLevel::Secure,
             1 => TrustLevel::Warning,
             2 => TrustLevel::NotSecure,
-            _ => TrustLevel::NotSecure, // or handle as needed
+            _ => TrustLevel::NotSecure,
         }
     }
 }
