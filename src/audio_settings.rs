@@ -2,14 +2,15 @@ use std::cell::RefCell;
 use std::sync::OnceLock;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, DropDown, Scale};
+use gtk::{glib, CompositeTemplate, Box, DropDown, Scale};
 use glib::{Binding, Properties};
 use glib::subclass::Signal;
 
 mod imp {
     use super::*;
 
-    #[derive(Default, CompositeTemplate)]
+    #[derive(Default, CompositeTemplate, Properties)]
+    #[properties(wrapper_type = super::AudioSettings)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/audio_settings.ui")]
     pub struct AudioSettings {
         pub name: String,
@@ -22,6 +23,11 @@ mod imp {
         pub speaker_switch: TemplateChild<DropDown>,
         #[template_child]
         pub speaker_volume: TemplateChild<Scale>,
+        #[template_child]
+        pub footer: TemplateChild<Box>,
+
+        #[property(name = "footer-visible", get, set, type = bool)]
+        footer_visible: RefCell<bool>,
 
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
@@ -68,9 +74,34 @@ mod imp {
             let value = scale.value();
             self.obj().emit_by_name::<()>("speaker-volume-changed", &[&value]);
         }
+        #[template_callback]
+        fn on_reset_clicked(&self) {
+            println!("Reset to defaults!");
+            self.obj().emit_by_name::<()>("set-defaults", &[]);
+        }
+        #[template_callback]
+        fn on_save_clicked(&self) {
+            println!("Apply new!");
+            let mic = self.mic_switch.selected();
+            let speaker = self.speaker_switch.selected();
+            let mic_volume = self.mic_volume.value();
+            let speaker_volume = self.speaker_volume.value();
+            self.obj().emit_by_name::<()>("apply-new", &[&mic, &speaker, &mic_volume, &speaker_volume]);
+        }
     }//end #[gtk::template_callbacks]
 
+    #[glib::derived_properties]
     impl ObjectImpl for AudioSettings {
+        fn constructed(&self) {
+            self.parent_constructed();
+    
+            // After the object is constructed, bind the footer visibilty property
+            let obj = self.obj();
+            obj.bind_property("footer-visible", &self.footer.get(), "visible")
+                .flags(glib::BindingFlags::DEFAULT)
+                .build();
+        }
+
         fn signals() -> &'static [Signal] {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
             SIGNALS.get_or_init(|| {
@@ -86,7 +117,12 @@ mod imp {
                     .build(),
                     Signal::builder("speaker-volume-changed")
                     .param_types([f64::static_type()])
-                    .build()
+                    .build(),
+                    Signal::builder("set-defaults")
+                    .build(),
+                    Signal::builder("apply-new")
+                    .param_types([u32::static_type(), u32::static_type(), f64::static_type(), f64::static_type()])
+                    .build(),
                     ]
             })
         }

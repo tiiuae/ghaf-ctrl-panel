@@ -282,7 +282,9 @@
                     <object class="GtkStackPage">
                         <property name="name">audio</property>
                         <property name="child">
-                            <object class="AudioSettings" id="audio_settings_page"></object>
+                            <object class="AudioSettings" id="audio_settings_page">
+                            <property name="footer-visible">true</property>
+                            </object>
                         </property>
                     </object>
                 </child>

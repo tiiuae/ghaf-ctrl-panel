@@ -115,5 +115,48 @@
       <property name="draw_value">true</property>
       </object>
     </child>
+    <child>
+      <object class="GtkBox">
+      <property name="vexpand">true</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox" id="footer">
+      <property name="orientation">vertical</property>
+      <property name="valign">end</property>
+        <child>
+          <object class="GtkSeparator">
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+          <property name="orientation">horizontal</property>
+            <child>
+              <object class="GtkButton">
+              <property name="label">Reset to defaults</property>
+              <signal name="clicked" handler="on_reset_clicked" swapped="true"/>
+              <style><class name="settings-button"/></style>
+              <property name="width-request">140</property>
+              <property name="height-request">30</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+              <property name="hexpand">true</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton">
+              <property name="label">Save</property>
+              <signal name="clicked" handler="on_save_clicked" swapped="true"/>
+              <style><class name="settings-button"/></style>
+              <property name="width-request">60</property>
+              <property name="height-request">30</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
   </template>
 </interface>

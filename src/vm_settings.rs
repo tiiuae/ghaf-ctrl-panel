@@ -3,7 +3,7 @@ use std::sync::OnceLock;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, Label, Image, MenuButton, Popover};
-use glib::{Binding, ToValue};
+use glib::Binding;
 use glib::subclass::Signal;
 
 use crate::vm_gobject::VMGObject;
