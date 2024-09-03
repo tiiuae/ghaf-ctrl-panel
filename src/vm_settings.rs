@@ -24,6 +24,8 @@ mod imp {
         #[template_child]
         pub vm_status_label: TemplateChild<Label>,
         #[template_child]
+        pub vm_status_icon: TemplateChild<Image>,
+        #[template_child]
         pub vm_details_label: TemplateChild<Label>,
         #[template_child]
         pub security_icon: TemplateChild<Image>,
@@ -155,6 +157,7 @@ impl VMSettings {
         //make new
         let name = self.imp().vm_name_label.get();
         let status = self.imp().vm_status_label.get();
+        let status_icon = self.imp().vm_status_icon.get();
         let details = self.imp().vm_details_label.get();
         let security_icon = self.imp().security_icon.get();
         let security_label = self.imp().security_label.get();
@@ -184,6 +187,22 @@ impl VMSettings {
             .build();
         // Save binding
         bindings.push(status_binding);
+
+        let status_icon_binding = vm_object
+            .bind_property("status", &status_icon, "resource")
+            .sync_create()
+            .transform_to(move |_, value: &glib::Value| {
+                let status = value.get::<u8>().unwrap_or(0);
+                match status {//make struct like for icon?
+                    0 => Some(glib::Value::from("/org/gnome/controlpanelgui/icons/ellipse_green.svg")),
+                    1 => Some(glib::Value::from("/org/gnome/controlpanelgui/icons/ellipse_red.svg")),
+                    2 => Some(glib::Value::from("/org/gnome/controlpanelgui/icons/ellipse_yellow.svg")),
+                    _ => Some(glib::Value::from("/org/gnome/controlpanelgui/icons/ellipse_red.svg")),
+                }
+            })
+            .build();
+        // Save binding
+        bindings.push(status_icon_binding);
 
         let details_binding = vm_object
             .bind_property("details", &details, "label")

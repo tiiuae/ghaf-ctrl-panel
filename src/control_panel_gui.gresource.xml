@@ -37,5 +37,8 @@
     <file>icons/icon_arrow.svg</file>
     <file>icons/icon_close.svg</file>
     <file>icons/icon_download.svg</file>
+    <file>icons/ellipse_green.svg</file>
+    <file>icons/ellipse_yellow.svg</file>
+    <file>icons/ellipse_red.svg</file>
   </gresource>
 </gresources>
