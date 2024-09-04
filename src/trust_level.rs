@@ -19,6 +19,13 @@ impl Default for TrustLevel {
     }
 }
 
+/*impl StaticType for TrustLevel {
+    fn static_type() -> Type {
+        u8::static_type()
+    }
+}*/
+
+
 /*unsafe impl<'a> FromValue<'a> for TrustLevel {
     type Checker = glib::value::GenericValueTypeChecker<Self>;
 

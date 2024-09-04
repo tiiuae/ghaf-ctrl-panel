@@ -103,7 +103,7 @@ impl InfoSettingsPage {
         //Set filter: only running VM's
         let filter_model = FilterListModel::new(Some(model), Some(CustomFilter::new(|item: &Object| {
             if let Some(vm_obj) = item.downcast_ref::<VMGObject>() {
-                if vm_obj.status() == VMGObject::status_u8(VMStatus::Running) {
+                if vm_obj.status() == (VMStatus::Running as u8) {
                     return true;
                 }
             }
