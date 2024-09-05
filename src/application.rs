@@ -207,6 +207,8 @@ impl ControlPanelGuiApplication {
                     },
                 );
                 popup.present();
+            },
+            SettingsAction::ShowAddKeyboardPopup => {
             }
         };
     }

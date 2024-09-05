@@ -10,6 +10,7 @@
     <file preprocess="xml-stripblanks">ui/info_settings_page.ui</file>
     <file preprocess="xml-stripblanks">ui/security_settings_page.ui</file>
     <file preprocess="xml-stripblanks">ui/wifi_settings_page.ui</file>
+    <file preprocess="xml-stripblanks">ui/keyboard_settings_page.ui</file>
     <file preprocess="xml-stripblanks">ui/mouse_settings_page.ui</file>
     <file preprocess="xml-stripblanks">ui/admin_settings_page.ui</file>
     <file preprocess="xml-stripblanks">gtk/help-overlay.ui</file>

@@ -14,6 +14,7 @@ use crate::admin_settings_page::AdminSettingsPage;
 use crate::info_settings_page::InfoSettingsPage;
 use crate::security_settings_page::SecuritySettingsPage;
 use crate::wifi_settings_page::WifiSettingsPage;
+use crate::keyboard_settings_page::KeyboardSettingsPage;
 use crate::mouse_settings_page::MouseSettingsPage;
 use crate::vm_control_action::VMControlAction;
 use crate::settings_action::SettingsAction;
@@ -36,6 +37,8 @@ mod imp {
         pub security_settings_page: TemplateChild<SecuritySettingsPage>,
         #[template_child]
         pub wifi_settings_page: TemplateChild<WifiSettingsPage>,
+        #[template_child]
+        pub keyboard_settings_page: TemplateChild<KeyboardSettingsPage>,
         #[template_child]
         pub mouse_settings_page: TemplateChild<MouseSettingsPage>,
         #[template_child]
@@ -81,6 +84,12 @@ mod imp {
         #[template_callback]
         fn on_show_add_network_popup(&self) {
             let action = SettingsAction::ShowAddNetworkPopup;
+            let empty = Variant::from(None::<()>.as_ref());
+            self.obj().emit_by_name::<()>("settings-action", &[&action, &empty]);
+        }
+        #[template_callback]
+        fn on_show_add_new_keyboard_popup(&self) {
+            let action = SettingsAction::ShowAddKeyboardPopup;
             let empty = Variant::from(None::<()>.as_ref());
             self.obj().emit_by_name::<()>("settings-action", &[&action, &empty]);
         }

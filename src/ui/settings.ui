@@ -239,15 +239,8 @@
                     <object class="GtkStackPage">
                         <property name="name">keyboard</property>
                         <property name="child">
-                            <object class="GtkLabel">
-                            <property name="label">Keyboard</property>
-                            <style><class name="title"/></style>
-                                <property name="margin-start">10</property>
-                                <property name="margin-end">10</property>
-                                <property name="margin-top">10</property>
-                                <property name="margin-bottom">10</property>
-                                <property name="halign">start</property>
-                                <property name="valign">start</property>
+                            <object class="KeyboardSettingsPage" id="keyboard_settings_page">
+                            <signal name="show-add-new-keyboard-popup" handler="on_show_add_new_keyboard_popup" swapped="true"/>
                             </object>
                         </property>
                     </object>

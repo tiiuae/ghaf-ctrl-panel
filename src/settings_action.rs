@@ -16,6 +16,7 @@ pub enum SettingsAction {
     Mic = 8,
     MicVolume = 9,
     ShowAddNetworkPopup = 10,
+    ShowAddKeyboardPopup = 11,
 }
 
 impl StaticType for SettingsAction {
@@ -40,6 +41,7 @@ unsafe impl FromValue<'_> for SettingsAction {
             8 => SettingsAction::Mic,
             9 => SettingsAction::MicVolume,
             10 => SettingsAction::ShowAddNetworkPopup,
+            11 => SettingsAction::ShowAddKeyboardPopup,
             _ => panic!("Invalid SettingsAction value"),
         }
     }
@@ -59,6 +61,7 @@ impl ToValue for SettingsAction {
             SettingsAction::Mic => 8u8,
             SettingsAction::MicVolume => 9u8,
             SettingsAction::ShowAddNetworkPopup => 10u8,
+            SettingsAction::ShowAddKeyboardPopup => 11u8,
         };
         v.to_value()
     }
