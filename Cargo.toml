@@ -9,6 +9,7 @@ gettext-rs = { version = "0.7", features = ["gettext-system"] }
 gtk = { version = "0.7", package = "gtk4" }
 adw = { version = "0.5", package = "libadwaita", features = ["v1_4"] }
 gio = { version = "0.20.0", features = ["v2_74"] }
+clap = { version = "4.4", features = ["derive"] }
 
 prost = "0.12"
 tokio = {version = "1.0", features = ["rt-multi-thread", "time", "macros"]}

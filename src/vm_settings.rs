@@ -132,7 +132,8 @@ mod imp {
 
 glib::wrapper! {
 pub struct VMSettings(ObjectSubclass<imp::VMSettings>)
-    @extends gtk::Widget, gtk::Box;
+    @extends gtk::Widget, gtk::Box,
+    @implements gtk::Buildable, gtk::ConstraintTarget;
 }
 
 impl Default for VMSettings {

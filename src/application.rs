@@ -64,6 +64,8 @@ mod imp {
 
             // Ask the window manager/compositor to present the window
             window.present();
+            //connect on start
+            application.imp().data_provider.borrow().establish_connection();
         }
     }
 
@@ -78,11 +80,16 @@ glib::wrapper! {
 }
 
 impl ControlPanelGuiApplication {
-    pub fn new(application_id: &str, flags: &gio::ApplicationFlags) -> Self {
-        glib::Object::builder()
+    pub fn new(application_id: &str, flags: &gio::ApplicationFlags, address: String, port: u16) -> Self {
+        let app: Self = glib::Object::builder()
             .property("application-id", application_id)
             .property("flags", flags)
-            .build()
+            .build();
+
+        let data_provider_ref = app.imp().data_provider.clone();
+        data_provider_ref.replace_with(|_|DataProvider::new(address, port));
+
+        app
     }
 
     fn load_css(&self) {
@@ -130,7 +137,9 @@ impl ControlPanelGuiApplication {
                 let addr = values[1].get::<String>().unwrap();
                 let port = values[2].get::<u32>().unwrap();
                 println!("Addr {addr}, port {port}");
-                app.imp().data_provider.borrow().set_connection_config(addr, port);
+                let data_provider_ref = app.imp().data_provider.clone();
+                data_provider_ref.replace_with(|_|DataProvider::new(addr, port as u16));
+                data_provider_ref.borrow().establish_connection();
                 None
             },
         );
@@ -152,12 +161,9 @@ impl ControlPanelGuiApplication {
         about.present();
     }
 
+    //reconnect with the same config (addr:port)
     pub fn reconnect(&self) {
         self.imp().data_provider.borrow().reconnect();
-    }
-
-    pub fn disconnect(&self) {
-        self.imp().data_provider.borrow().disconnect();
     }
 
     pub fn get_store(&self) -> gio::ListStore{

@@ -23,7 +23,7 @@ pub mod imp {
         pub settings: Arc<Mutex<SettingsGObject>>,
         pub status: bool,
         pub admin_client: Arc<AdminClient>,
-        pub handle: RefCell<Option<JoinHandle<()>>>,
+        handle: RefCell<Option<JoinHandle<()>>>,
         stop_signal: Arc<AtomicBool>,
     }
 
@@ -35,15 +35,14 @@ pub mod imp {
     }
 
     impl DataProvider {
-        pub fn new() -> Self {
-            let init_store = Self::fill_by_mock_data();//ListStore::new::<VMGObject>();
+        pub fn new(address: String, port: u16) -> Self {
+            let init_store = ListStore::new::<VMGObject>();//Self::fill_by_mock_data();
 
             Self {
                 store: Arc::new(Mutex::new(init_store)),
                 settings: Arc::new(Mutex::new(SettingsGObject::default())),
                 status: false,
-                admin_client: Arc::new(AdminClient::new(String::from("127.0.0.1"), 9000, None)),
-                //String::from("http://[::1]"), 50051,
+                admin_client: Arc::new(AdminClient::new(address, port, None)),
                 handle: RefCell::new(None),
                 stop_signal: Arc::new(AtomicBool::new(false)),
             }
@@ -131,6 +130,8 @@ pub mod imp {
                             },
                             Event::UnitRegistered(result) => {
                                 println!("Unit registered {:?}", result);
+                                let store_inner = store.lock().unwrap();
+                                store_inner.append(&VMGObject::new(result.name, result.description, result.status, result.trust_level));
                             },
                         },
                         EventExtended::BreakLoop => {
@@ -164,15 +165,6 @@ pub mod imp {
         pub fn add_vm(&self, vm: VMGObject) {
             let store = self.store.lock().unwrap();
             store.append(&vm);
-        }
-
-        pub fn set_connection_config(&self, addr: String, port: u32) {
-            //TODO: reconnect with new addr & port
-            //admin_client should be wrapped by smth (RwLock?)
-            //or provide function to do it
-            //let admin_client_obj = self.admin_client.lock().unwrap();
-            //*admin_client_obj = AdminClient::new(addr, port.try_into().unwrap(), None);
-            //self.reconnect();
         }
 
         pub fn reconnect(&self) {
@@ -254,7 +246,7 @@ pub mod imp {
 
     impl Default for DataProvider {
         fn default() -> Self {
-            Self::new()
+            Self::new(String::from("127.0.0.1"), 9000)
         }
     }
 

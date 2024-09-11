@@ -199,6 +199,23 @@ impl ControlPanelGuiWindow {
         //set default selection to 1st item
         selection_model.set_selected(0);
         selection_model.selection_changed(0u32, count);
+
+        self.bind_vm_settings_box_visibility();
+    }
+
+    fn bind_vm_settings_box_visibility(&self) {
+        let imp = self.imp();
+        let vm_settings_box = imp.vm_settings_box.clone().upcast::<gtk::Widget>();
+        if let Some(model) = imp.vm_list_view.model() {
+            model
+            .bind_property("n_items", &vm_settings_box, "visible")
+            .sync_create()
+            .transform_to(move |_, value: &glib::Value| {
+                let count = value.get::<u32>().unwrap_or(0);
+                Some(glib::Value::from(count != 0))
+            })
+            .build();
+        }
     }
 
     fn setup_factory(&self) {

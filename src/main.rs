@@ -24,12 +24,40 @@ mod settings_action;
 
 use self::application::ControlPanelGuiApplication;
 use self::window::ControlPanelGuiWindow;
+use clap::Parser;
 
 use gtk::{gio, glib};
 use gtk::prelude::*;
 
-fn main() -> glib::ExitCode {
+#[derive(Parser, Debug)]
+#[command(name = "ctrl-panel")]
+#[command(about = "Ghaf Control panel", long_about = None)]
+struct Args {
+    #[arg(long)]
+    addr: Option<String>,
+    #[arg(long)]
+    port: Option<u16>,
+}
+
+fn main() /*-> glib::ExitCode*/ {
     //std::env::set_var("RUST_BACKTRACE", "full");
+
+    // Parse the command-line arguments
+    let args = Args::parse();
+
+    let addr = if let Some(addr) = args.addr {
+        addr
+    }
+    else {
+        String::from("127.0.0.1")
+    };
+
+    let port = if let Some(port) = args.port {
+        port
+    }
+    else {
+        9000 
+    };
 
     // Load resources
     gio::resources_register_include!("control_panel_gui.gresource")
@@ -38,11 +66,13 @@ fn main() -> glib::ExitCode {
     // Create a new GtkApplication. The application manages our main loop,
     // application windows, integration with the window manager/compositor, and
     // desktop features such as file opening and single-instance applications.
-    let app = ControlPanelGuiApplication::new("org.gnome.controlpanelgui", &gio::ApplicationFlags::empty());
+    let app = ControlPanelGuiApplication::new("org.gnome.controlpanelgui", &gio::ApplicationFlags::empty(), addr, port);
 
     // Run the application. This function will block until the application
     // exits. Upon return, we have our exit code to return to the shell. (This
     // is the code you see when you do `echo $?` after running a command in a
     // terminal.
-    app.run()
+    //put empty array as args, cause we need our ones to be processed
+    let empty: Vec<String> = vec![];
+    app.run_with_args(&empty);
 }
