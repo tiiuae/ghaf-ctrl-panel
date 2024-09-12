@@ -3,7 +3,7 @@ use gtk::{self, gio, glib, prelude::*};
 use gio::ListStore;
 use std::thread::{self, JoinHandle};
 use std::sync::{Arc, Mutex, RwLock, mpsc::{self, Sender, Receiver}, atomic::{AtomicBool, Ordering}};
-use tokio::time::{sleep, Duration};
+use tokio::time::{sleep, Duration, timeout};
 use tokio::runtime::Runtime;
 
 use givc_client::{self, AdminClient};
@@ -49,6 +49,7 @@ pub mod imp {
         }
 
         pub fn establish_connection(&self) {
+            println!("Establishing connection, call watch method...");
             let admin_client = self.admin_client.clone();
             let store = self.store.clone();
             let stop_signal = self.stop_signal.clone();
@@ -58,12 +59,17 @@ pub mod imp {
 
             let handle = thread::spawn(move || {
                 Runtime::new().unwrap().block_on(async move {
-                    let Ok(result) = admin_client.watch().await else {println!("Watch call error"); return};
+                    //let Ok(result) = admin_client.watch().await else {println!("Watch call error"); return};
+
+                    //Await with timeout
+                    let timeout_duration = Duration::from_secs(5);
+                    let Ok(Ok(result)) = timeout(timeout_duration, admin_client.watch()).await else {println!("Watch call timeout/error"); return};
+
                     let list = result.initial.clone();
                     let _ = event_tx.send(EventExtended::InitialList(list));
 
                     while !(stop_signal.load(Ordering::SeqCst)) {
-                        if let Ok(event) = result.channel.try_recv() {//await blocks thread until data comes!
+                        if let Ok(event) = result.channel.try_recv() {
                             let _ = event_tx.send(EventExtended::InnerEvent(event));
                         } else {
                             println!("Error received from client lib!");
