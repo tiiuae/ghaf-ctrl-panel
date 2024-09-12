@@ -136,7 +136,7 @@ impl ControlPanelGuiApplication {
                 //the value[0] is self
                 let addr = values[1].get::<String>().unwrap();
                 let port = values[2].get::<u32>().unwrap();
-                println!("Addr {addr}, port {port}");
+                println!("New config applied: address {addr}, port {port}");
                 let data_provider_ref = app.imp().data_provider.clone();
                 data_provider_ref.replace_with(|_|DataProvider::new(addr, port as u16));
                 data_provider_ref.borrow().establish_connection();

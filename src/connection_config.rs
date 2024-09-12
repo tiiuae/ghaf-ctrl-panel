@@ -46,7 +46,6 @@ mod imp {
         #[template_callback]
         fn on_apply_clicked(&self) {
             let (addr, port) = self.obj().get_config();
-            println!("Apply clicked {addr}:{port}");
             self.obj().emit_by_name::<()>("new-config-applied", &[&addr, &port]);
         }
         #[template_callback]

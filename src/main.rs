@@ -49,7 +49,7 @@ fn main() /*-> glib::ExitCode*/ {
         addr
     }
     else {
-        String::from("127.0.0.1")
+        String::from("192.168.100.1")
     };
 
     let port = if let Some(port) = args.port {

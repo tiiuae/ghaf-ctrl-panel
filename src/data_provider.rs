@@ -252,7 +252,7 @@ pub mod imp {
 
     impl Default for DataProvider {
         fn default() -> Self {
-            Self::new(String::from("127.0.0.1"), 9000)
+            Self::new(String::from("192.168.100.10"), 9000)
         }
     }
 
