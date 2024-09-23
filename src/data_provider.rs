@@ -22,7 +22,7 @@ pub mod imp {
         pub store: Arc<Mutex<ListStore>>,
         pub settings: Arc<Mutex<SettingsGObject>>,
         pub status: bool,
-        pub admin_client: Arc<AdminClient>,
+        pub admin_client: Arc<RwLock<AdminClient>>,
         handle: RefCell<Option<JoinHandle<()>>>,
         stop_signal: Arc<AtomicBool>,
     }
@@ -42,7 +42,7 @@ pub mod imp {
                 store: Arc::new(Mutex::new(init_store)),
                 settings: Arc::new(Mutex::new(SettingsGObject::default())),
                 status: false,
-                admin_client: Arc::new(AdminClient::new(address, port, None)),
+                admin_client: Arc::new(RwLock::new(AdminClient::new(address, port, None))),
                 handle: RefCell::new(None),
                 stop_signal: Arc::new(AtomicBool::new(false)),
             }
@@ -63,7 +63,7 @@ pub mod imp {
 
                     //Await with timeout
                     let timeout_duration = Duration::from_secs(5);
-                    let Ok(Ok(result)) = timeout(timeout_duration, admin_client.watch()).await else {println!("Watch call timeout/error"); return};
+                    let Ok(Ok(result)) = timeout(timeout_duration, admin_client.read().unwrap().watch()).await else {println!("Watch call timeout/error"); return};
 
                     let list = result.initial.clone();
                     let _ = event_tx.send(EventExtended::InitialList(list));
@@ -173,10 +173,16 @@ pub mod imp {
             store.append(&vm);
         }
 
-        pub fn reconnect(&self) {
+        pub fn reconnect(&self, addr: Option<(String, u16)>) {
             println!("Reconnect request...");
 
             self.disconnect();
+
+            if let Some((host, port)) = addr {
+                let mut admin_client = self.admin_client.write().unwrap();
+                *admin_client = AdminClient::new(host, port, None);
+            }
+            
             self.establish_connection();
         }
 
@@ -192,50 +198,58 @@ pub mod imp {
 
         pub fn start_vm(&self, name: String) {
             let admin_client = self.admin_client.clone();
-            Runtime::new().unwrap().spawn(async move {//or block_on?
-                //there is now app name
-                if let Err(error) = admin_client.start(String::from(""), Some(name), Vec::<String>::new()).await {
-                    println!("Start request error {error}");
-                }
-                else {
-                    println!("Start request sent");
-                };
+            thread::spawn(move || {//not sure it is really needed
+                    Runtime::new().unwrap().block_on(async move {
+                    //there is now app name
+                    if let Err(error) = admin_client.read().unwrap().start(String::from(""), Some(name), Vec::<String>::new()).await {
+                        println!("Start request error {error}");
+                    }
+                    else {
+                        println!("Start request sent");
+                    };
+                })
             });
         }
 
         pub fn pause_vm(&self, name: String) {
             let admin_client = self.admin_client.clone();
-            Runtime::new().unwrap().spawn(async move {
-                if let Err(error) = admin_client.pause(name).await {
-                    println!("Pause request error {error}");
-                }
-                else {
-                    println!("Pause request sent");
-                };
+            thread::spawn(move || {
+                Runtime::new().unwrap().block_on(async move {
+                    if let Err(error) = admin_client.read().unwrap().pause(name).await {
+                        println!("Pause request error {error}");
+                    }
+                    else {
+                        println!("Pause request sent");
+                    };
+                })
             });
         }
 
         pub fn resume_vm(&self, name: String) {
             let admin_client = self.admin_client.clone();
-            Runtime::new().unwrap().spawn(async move {
-                if let Err(error) = admin_client.resume(name).await {
-                    println!("Resume request error {error}");
-                }
-                else {
-                    println!("Resume request sent");
-                };
+            thread::spawn(move || {
+                Runtime::new().unwrap().block_on(async move {
+                    if let Err(error) = admin_client.read().unwrap().resume(name).await {
+                        println!("Resume request error {error}");
+                    }
+                    else {
+                        println!("Resume request sent");
+                    };
+                })
             });
         }
 
         pub fn shutdown_vm(&self, name: String) {
             let admin_client = self.admin_client.clone();
-            Runtime::new().unwrap().spawn(async move {
-                if let Err(error) = admin_client.stop(name).await {
-                    println!("Stop request error {error}");
-                }
-                else {
-                    println!("Stop request sent");
-                };
+            thread::spawn(move || {
+                Runtime::new().unwrap().block_on(async move {
+                    if let Err(error) = admin_client.read().unwrap().stop(name).await {
+                        println!("Stop request error {error}");
+                    }
+                    else {
+                        println!("Stop request sent");
+                    };
+                })
             });
         }
 

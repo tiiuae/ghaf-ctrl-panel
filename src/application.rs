@@ -137,9 +137,7 @@ impl ControlPanelGuiApplication {
                 let addr = values[1].get::<String>().unwrap();
                 let port = values[2].get::<u32>().unwrap();
                 println!("New config applied: address {addr}, port {port}");
-                let data_provider_ref = app.imp().data_provider.clone();
-                data_provider_ref.replace_with(|_|DataProvider::new(addr, port as u16));
-                data_provider_ref.borrow().establish_connection();
+                app.imp().data_provider.borrow().reconnect(Some((addr, port as u16)));
                 None
             },
         );
@@ -163,7 +161,7 @@ impl ControlPanelGuiApplication {
 
     //reconnect with the same config (addr:port)
     pub fn reconnect(&self) {
-        self.imp().data_provider.borrow().reconnect();
+        self.imp().data_provider.borrow().reconnect(None);
     }
 
     pub fn get_store(&self) -> gio::ListStore{
