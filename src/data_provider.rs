@@ -13,6 +13,7 @@ use givc_common::query::{QueryResult, Event, VMStatus, TrustLevel};
 
 use crate::vm_gobject::VMGObject;
 use crate::settings_gobject::SettingsGObject;
+use crate::{ADMIN_SERVICE_ADDR, ADMIN_SERVICE_PORT};
 
 pub mod imp {
     use super::*;
@@ -23,6 +24,7 @@ pub mod imp {
         pub settings: Arc<Mutex<SettingsGObject>>,
         pub status: bool,
         pub admin_client: Arc<RwLock<AdminClient>>,
+        pub service_address: RefCell<(String, u16)>,
         handle: RefCell<Option<JoinHandle<()>>>,
         stop_signal: Arc<AtomicBool>,
     }
@@ -42,14 +44,17 @@ pub mod imp {
                 store: Arc::new(Mutex::new(init_store)),
                 settings: Arc::new(Mutex::new(SettingsGObject::default())),
                 status: false,
-                admin_client: Arc::new(RwLock::new(AdminClient::new(address, port, None))),
+                admin_client: Arc::new(RwLock::new(AdminClient::new(address.clone(), port, None))),
+                service_address: RefCell::new((address, port)),
                 handle: RefCell::new(None),
                 stop_signal: Arc::new(AtomicBool::new(false)),
             }
         }
 
         pub fn establish_connection(&self) {
-            println!("Establishing connection, call watch method...");
+            println!("Establishing connection, call watch method... Address: {}:{}", 
+            self.service_address.borrow().0, 
+            self.service_address.borrow().1);
             let admin_client = self.admin_client.clone();
             let store = self.store.clone();
             let stop_signal = self.stop_signal.clone();
@@ -173,14 +178,21 @@ pub mod imp {
             store.append(&vm);
         }
 
+        pub fn set_service_address(&self, addr: String, port: u16) {//only when disconnected/watch stopped
+            println!("Set service address {addr}:{port}");
+            let mut service_address = self.service_address.borrow_mut();
+            *service_address = (addr.clone(), port);
+            let mut admin_client = self.admin_client.write().unwrap();
+            *admin_client = AdminClient::new(addr, port, None);
+        }
+
         pub fn reconnect(&self, addr: Option<(String, u16)>) {
             println!("Reconnect request...");
 
             self.disconnect();
 
             if let Some((host, port)) = addr {
-                let mut admin_client = self.admin_client.write().unwrap();
-                *admin_client = AdminClient::new(host, port, None);
+                self.set_service_address(host, port);
             }
             
             self.establish_connection();
@@ -266,7 +278,7 @@ pub mod imp {
 
     impl Default for DataProvider {
         fn default() -> Self {
-            Self::new(String::from("192.168.100.10"), 9000)
+            Self::new(String::from(ADMIN_SERVICE_ADDR), ADMIN_SERVICE_PORT)
         }
     }
 

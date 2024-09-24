@@ -86,8 +86,7 @@ impl ControlPanelGuiApplication {
             .property("flags", flags)
             .build();
 
-        let data_provider_ref = app.imp().data_provider.clone();
-        data_provider_ref.replace_with(|_|DataProvider::new(address, port));
+        app.imp().data_provider.borrow().set_service_address(address, port);
 
         app
     }

@@ -29,6 +29,9 @@ use clap::Parser;
 use gtk::{gio, glib};
 use gtk::prelude::*;
 
+const ADMIN_SERVICE_ADDR: &str = "192.168.100.10";
+const ADMIN_SERVICE_PORT: u16 = 9000;
+
 #[derive(Parser, Debug)]
 #[command(name = "ctrl-panel")]
 #[command(about = "Ghaf Control panel", long_about = None)]
@@ -49,14 +52,14 @@ fn main() /*-> glib::ExitCode*/ {
         addr
     }
     else {
-        String::from("192.168.100.1")
+        String::from(ADMIN_SERVICE_ADDR)
     };
 
     let port = if let Some(port) = args.port {
         port
     }
     else {
-        9000 
+        ADMIN_SERVICE_PORT 
     };
 
     // Load resources

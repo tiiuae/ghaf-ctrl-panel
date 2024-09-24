@@ -90,6 +90,21 @@ box.info-box {
   background-color: #2B2B2B;
 }
 
+/*Scroll view for VM's list*/
+.vm-scroll-view {
+  background-color: #1D1D1D;
+}
+
+/*doesn't work
+.vm-scroll-view>trough {
+  background-color: #00FF00;
+}
+
+.vm-scroll-view.right>slider {
+  background-color: #00FF00;
+}
+*/
+
 /* VMRow styling */
 .vm-list-main>row {
   background-color: #1D1D1D;

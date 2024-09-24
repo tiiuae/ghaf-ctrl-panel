@@ -34,8 +34,6 @@ mod imp {
         pub stack: TemplateChild<Stack>,
 
         #[template_child]
-        pub vm_main_box: TemplateChild<Box>,
-        #[template_child]
         pub vm_list_view: TemplateChild<ListView>,
         #[template_child]
         pub vm_settings_box: TemplateChild<VMSettings>,
