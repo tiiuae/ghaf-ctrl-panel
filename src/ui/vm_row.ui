@@ -41,6 +41,7 @@
           <object class="GtkLabel" id="subtitle_label">
             <style><class name="normal-text"/></style>
             <property name="halign">start</property>
+            <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
           </object>
         </child>
       </object>
