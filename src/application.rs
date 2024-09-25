@@ -122,7 +122,8 @@ impl ControlPanelGuiApplication {
 
     pub fn show_config(&self) {
         let window = self.active_window().unwrap();
-        let config = ConnectionConfig::new();
+        let address = self.imp().data_provider.borrow().get_current_service_address();
+        let config = ConnectionConfig::new(address.0, address.1);
         config.set_transient_for(Some(&window));
         config.set_modal(true);
 

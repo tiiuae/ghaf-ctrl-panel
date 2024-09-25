@@ -20,11 +20,11 @@ pub mod imp {
 
     #[derive(Debug)]
     pub struct DataProvider {
-        pub store: Arc<Mutex<ListStore>>,
-        pub settings: Arc<Mutex<SettingsGObject>>,
+        store: Arc<Mutex<ListStore>>,
+        settings: Arc<Mutex<SettingsGObject>>,
         pub status: bool,
-        pub admin_client: Arc<RwLock<AdminClient>>,
-        pub service_address: RefCell<(String, u16)>,
+        admin_client: Arc<RwLock<AdminClient>>,
+        service_address: RefCell<(String, u16)>,
         handle: RefCell<Option<JoinHandle<()>>>,
         stop_signal: Arc<AtomicBool>,
     }
@@ -68,7 +68,8 @@ pub mod imp {
 
                     //Await with timeout
                     let timeout_duration = Duration::from_secs(5);
-                    let Ok(Ok(result)) = timeout(timeout_duration, admin_client.read().unwrap().watch()).await else {println!("Watch call timeout/error"); return};
+                    let Ok(Ok(result)) = timeout(timeout_duration, admin_client.read().unwrap().watch()).await 
+                    else {println!("Watch call timeout/error"); return};
 
                     let list = result.initial.clone();
                     let _ = event_tx.send(EventExtended::InitialList(list));
@@ -173,17 +174,23 @@ pub mod imp {
             self.store.clone()
         }
 
-        pub fn add_vm(&self, vm: VMGObject) {
-            let store = self.store.lock().unwrap();
-            store.append(&vm);
+        pub fn get_current_service_address(&self) -> (String, u16) {
+            self.service_address.clone().into_inner()
         }
 
         pub fn set_service_address(&self, addr: String, port: u16) {//only when disconnected/watch stopped
-            println!("Set service address {addr}:{port}");
-            let mut service_address = self.service_address.borrow_mut();
-            *service_address = (addr.clone(), port);
-            let mut admin_client = self.admin_client.write().unwrap();
-            *admin_client = AdminClient::new(addr, port, None);
+            if !(self.admin_client.try_write().is_err()) {
+                println!("Set service address {addr}:{port}");
+                let mut service_address = self.service_address.borrow_mut();
+                *service_address = (addr.clone(), port);
+                let mut admin_client = self.admin_client.write().unwrap();
+                *admin_client = AdminClient::new(addr, port, None);
+            }
+        }
+
+        pub fn add_vm(&self, vm: VMGObject) {
+            let store = self.store.lock().unwrap();
+            store.append(&vm);
         }
 
         pub fn reconnect(&self, addr: Option<(String, u16)>) {

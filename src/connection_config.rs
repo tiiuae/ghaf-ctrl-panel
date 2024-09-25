@@ -87,13 +87,16 @@ pub struct ConnectionConfig(ObjectSubclass<imp::ConnectionConfig>)
 
 impl Default for ConnectionConfig {
     fn default() -> Self {
-        Self::new()
+        Self::new("".to_string(),1)
     }
 }
 
 impl ConnectionConfig {
-    pub fn new() -> Self {
-        glib::Object::builder().build()
+    pub fn new(address: String, port: u16) -> Self {
+        let config_widget: Self = glib::Object::builder().build();
+        config_widget.imp().address_entry.set_text(address.as_str());
+        config_widget.imp().port_entry.set_text(port.to_string().as_str());
+        config_widget
     }
 
     pub fn init(&self) {
