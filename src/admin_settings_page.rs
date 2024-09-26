@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::sync::OnceLock;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Button, Notebook};
+use gtk::{glib, CompositeTemplate, Notebook};
 use glib::Binding;
 use glib::subclass::Signal;
 

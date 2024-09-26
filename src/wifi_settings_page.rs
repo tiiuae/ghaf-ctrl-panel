@@ -8,7 +8,6 @@ use crate::glib::subclass::Signal;
 //use gtk::gio::ListStore; will be needed for list of available networks
 
 use crate::settings_gobject::SettingsGObject;
-use crate::add_network_popup::AddNetworkPopup;
 
 mod imp {
     use super::*;

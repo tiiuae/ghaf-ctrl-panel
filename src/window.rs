@@ -1,7 +1,7 @@
 use std::rc::Rc;
 use gtk::prelude::*;
 use adw::subclass::prelude::*;
-use gtk::{gio, glib, CompositeTemplate, Stack, Image, Button, MenuButton, Box, ListView, SingleSelection, SignalListItemFactory, ListItem,};
+use gtk::{gio, glib, CompositeTemplate, Stack, Image, Button, MenuButton, ListView, SingleSelection, SignalListItemFactory, ListItem,};
 use glib::Variant;
 
 use crate::application::ControlPanelGuiApplication;

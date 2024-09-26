@@ -1,4 +1,4 @@
-use std::cell::{Ref, RefMut, RefCell};
+use std::cell::RefCell;
 use gtk::{self, gio, glib, prelude::*};
 use gio::ListStore;
 use std::thread::{self, JoinHandle};
@@ -159,7 +159,8 @@ pub mod imp {
         fn fill_by_mock_data() -> ListStore {
             let init_store = ListStore::new::<VMGObject>();
             let mut vec: Vec<VMGObject> = Vec::new();
-            vec.push(VMGObject::new("VM1".to_string(), String::from("This is the file.pdf"), VMStatus::Running, TrustLevel::NotSecure));
+            vec.push(VMGObject::new("VM1".to_string(), String::from("This is the file.pdf and very very long description"), 
+                    VMStatus::Running, TrustLevel::NotSecure));
             vec.push(VMGObject::new("VM2".to_string(), String::from("Google Chrome"), VMStatus::Paused, TrustLevel::Secure));
             vec.push(VMGObject::new("VM3".to_string(), String::from("AppFlowy"), VMStatus::Running, TrustLevel::Secure));
             init_store.extend_from_slice(&vec);

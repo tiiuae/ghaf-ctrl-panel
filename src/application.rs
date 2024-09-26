@@ -1,5 +1,5 @@
 
-use std::cell::{Ref, RefCell};
+use std::cell::RefCell;
 use std::rc::Rc;
 use gtk::prelude::*;
 use adw::subclass::prelude::*;
