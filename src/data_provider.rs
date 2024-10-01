@@ -273,6 +273,34 @@ pub mod imp {
             });
         }
 
+        pub fn set_locale(&self, locale: String) {
+            let admin_client = self.admin_client.clone();
+            thread::spawn(move || {
+                Runtime::new().unwrap().block_on(async move {
+                    if let Err(error) = admin_client.read().unwrap().set_locale(locale).await {
+                        println!("Locale request error {error}");
+                    }
+                    else {
+                        println!("Locale request sent");
+                    };
+                })
+            });
+        }
+
+        pub fn set_timezone(&self, timezone: String) {
+            let admin_client = self.admin_client.clone();
+            thread::spawn(move || {
+                Runtime::new().unwrap().block_on(async move {
+                    if let Err(error) = admin_client.read().unwrap().set_timezone(timezone).await {
+                        println!("Timezone request error {error}");
+                    }
+                    else {
+                        println!("Timezone request sent");
+                    };
+                })
+            });
+        }
+
         pub fn restart_vm(&self, name: String) {
             println!("Restart is not implemented on client lib!");
             //no restart in admin_client

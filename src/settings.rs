@@ -15,6 +15,7 @@ use crate::info_settings_page::InfoSettingsPage;
 use crate::security_settings_page::SecuritySettingsPage;
 use crate::wifi_settings_page::WifiSettingsPage;
 use crate::keyboard_settings_page::KeyboardSettingsPage;
+use crate::language_region_settings_page::LanguageRegionSettingsPage;
 use crate::mouse_settings_page::MouseSettingsPage;
 use crate::display_settings_page::DisplaySettingsPage;
 use crate::vm_control_action::VMControlAction;
@@ -46,6 +47,8 @@ mod imp {
         pub audio_settings_page: TemplateChild<AudioSettings>,
         #[template_child]
         pub display_settings_page: TemplateChild<DisplaySettingsPage>,
+        #[template_child]
+        pub language_region_settings_page: TemplateChild<LanguageRegionSettingsPage>,
 
         //pub vm_model: RefCell<ListStore>,
 
@@ -94,7 +97,25 @@ mod imp {
         fn on_show_add_new_keyboard_popup(&self) {
             let action = SettingsAction::ShowAddKeyboardPopup;
             let empty = Variant::from(None::<()>.as_ref());
-            self.obj().emit_by_name::<()>("settings-action", &[&action, &empty]);
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &empty]);
+        }
+
+        #[template_callback]
+        fn on_locale_timezone_changed(&self, locale: u32, timezone: u32) {
+            let action = SettingsAction::RegionNLanguage;
+            let variant = (
+                match locale {
+                    0 => "en_US.UTF-8",
+                    1 => "ar_AE.UTF-8",
+                    _ => return,
+                },
+                match timezone {
+                    0 => "Asia/Abu_Dhabi",
+                    1 => "Europe/Helsinki",
+                    _ => return }).to_variant();
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &variant]);
         }
     }//end #[gtk::template_callbacks]
 
