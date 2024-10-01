@@ -203,7 +203,7 @@ pub mod imp {
 
         pub fn set_service_address(&self, addr: String, port: u16) {
             //wait for stopping
-            while(self.admin_client.try_write().is_err()){}
+            while (self.admin_client.try_write().is_err()) {}
 
             println!("Set service address {addr}:{port}");
             let mut service_address = self.service_address.borrow_mut();
@@ -298,7 +298,33 @@ pub mod imp {
             });
         }
 
-        pub fn restart_vm(&self, _name: String) {
+        pub fn set_locale(&self, locale: String) {
+            let admin_client = self.admin_client.clone();
+            thread::spawn(move || {
+                Runtime::new().unwrap().block_on(async move {
+                    if let Err(error) = admin_client.read().unwrap().set_locale(locale).await {
+                        println!("Locale request error {error}");
+                    } else {
+                        println!("Locale request sent");
+                    };
+                })
+            });
+        }
+
+        pub fn set_timezone(&self, timezone: String) {
+            let admin_client = self.admin_client.clone();
+            thread::spawn(move || {
+                Runtime::new().unwrap().block_on(async move {
+                    if let Err(error) = admin_client.read().unwrap().set_timezone(timezone).await {
+                        println!("Timezone request error {error}");
+                    } else {
+                        println!("Timezone request sent");
+                    };
+                })
+            });
+        }
+
+        pub fn restart_vm(&self, name: String) {
             println!("Restart is not implemented on client lib!");
             //no restart in admin_client
             //self.admin_client.restart(name);

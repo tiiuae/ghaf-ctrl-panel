@@ -204,7 +204,11 @@ impl ControlPanelGuiApplication {
         match action {
             SettingsAction::AddNetwork => todo!(),
             SettingsAction::RemoveNetwork => todo!(),
-            SettingsAction::RegionNLanguage => todo!(),
+            SettingsAction::RegionNLanguage => {
+                let (locale, timezone): (String, String) = value.get().unwrap();
+                self.imp().data_provider.borrow().set_locale(locale);
+                self.imp().data_provider.borrow().set_timezone(timezone);
+            }
             SettingsAction::DateNTime => todo!(),
             SettingsAction::MouseSpeed => todo!(),
             SettingsAction::KeyboardLayout => todo!(),

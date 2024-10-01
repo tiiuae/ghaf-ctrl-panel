@@ -13,6 +13,7 @@ use crate::audio_settings::AudioSettings;
 use crate::display_settings_page::DisplaySettingsPage;
 use crate::info_settings_page::InfoSettingsPage;
 use crate::keyboard_settings_page::KeyboardSettingsPage;
+use crate::language_region_settings_page::LanguageRegionSettingsPage;
 use crate::mouse_settings_page::MouseSettingsPage;
 use crate::security_settings_page::SecuritySettingsPage;
 use crate::settings_action::SettingsAction;
@@ -46,6 +47,8 @@ mod imp {
         pub audio_settings_page: TemplateChild<AudioSettings>,
         #[template_child]
         pub display_settings_page: TemplateChild<DisplaySettingsPage>,
+        #[template_child]
+        pub language_region_settings_page: TemplateChild<LanguageRegionSettingsPage>,
 
         //pub vm_model: RefCell<ListStore>,
 
@@ -98,6 +101,27 @@ mod imp {
             self.obj()
                 .emit_by_name::<()>("settings-action", &[&action, &empty]);
         }
+
+        #[template_callback]
+        fn on_locale_timezone_changed(&self, locale: u32, timezone: u32) {
+            let action = SettingsAction::RegionNLanguage;
+            let variant = (
+                match locale {
+                    0 => "en_US.UTF-8",
+                    1 => "ar_AE.UTF-8",
+                    _ => return,
+                },
+                match timezone {
+                    0 => "Asia/Abu_Dhabi",
+                    1 => "Europe/Helsinki",
+                    _ => return,
+                },
+            )
+                .to_variant();
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &variant]);
+        }
+
         #[template_callback]
         fn on_show_confirm_display_settings_popup(&self) {
             let action = SettingsAction::ShowConfirmDisplaySettingsPopup;

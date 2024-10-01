@@ -168,7 +168,7 @@
             </child>
             <child>
                 <object class="AdwActionRow">
-                <property name="name">region</property>
+                <property name="name">locale</property>
                 <style><class name="settings-row"/></style>
                 <property name="title">Region &amp;amp; Language</property>
                 <child type="prefix">
@@ -294,17 +294,10 @@
                 </child>
                 <child> <!-- Region&Language view child -->
                     <object class="GtkStackPage">
-                        <property name="name">region</property>
+                        <property name="name">locale</property>
                         <property name="child">
-                            <object class="GtkLabel">
-                            <property name="label">Region &amp; Language</property>
-                            <style><class name="title"/></style>
-                                <property name="margin-start">10</property>
-                                <property name="margin-end">10</property>
-                                <property name="margin-top">10</property>
-                                <property name="margin-bottom">10</property>
-                                <property name="halign">start</property>
-                                <property name="valign">start</property>
+                            <object class="LanguageRegionSettingsPage" id="language_region_settings_page">
+                                <signal name="locale-timezone-changed" handler="on_locale_timezone_changed" swapped="true"/>
                             </object>
                         </property>
                     </object>
