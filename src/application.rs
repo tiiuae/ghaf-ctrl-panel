@@ -183,7 +183,17 @@ impl ControlPanelGuiApplication {
         match action {
             SettingsAction::AddNetwork => todo!(),
             SettingsAction::RemoveNetwork => todo!(),
-            SettingsAction::RegionNLanguage => todo!(),
+            SettingsAction::RegionNLanguage => {
+                let vals : Vec<&str> = value.array_iter_str().unwrap().collect();
+                self.imp()
+                    .data_provider
+                    .borrow()
+                    .set_locale(vals[0].to_owned());
+                self.imp()
+                    .data_provider
+                    .borrow()
+                    .set_timezone(vals[1].to_owned());
+            }
             SettingsAction::DateNTime => todo!(),
             SettingsAction::MouseSpeed => todo!(),
             SettingsAction::KeyboardLayout => todo!(),

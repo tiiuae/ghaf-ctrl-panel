@@ -16,6 +16,7 @@ mod info_settings_page;
 mod security_settings_page;
 mod wifi_settings_page;
 mod keyboard_settings_page;
+mod language_region_settings_page;
 mod mouse_settings_page;
 mod display_settings_page;
 mod vm_control_action;
