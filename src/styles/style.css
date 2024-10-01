@@ -69,6 +69,10 @@ label.title {
   color: #FFFFFF;
 }
 
+.radiobutton>label {
+  color: #FFFFFF;
+}
+
 separator {
   color: #FFFFFF;
   margin: 10px;

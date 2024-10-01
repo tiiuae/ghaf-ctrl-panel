@@ -13,6 +13,7 @@
     <file preprocess="xml-stripblanks">ui/keyboard_settings_page.ui</file>
     <file preprocess="xml-stripblanks">ui/mouse_settings_page.ui</file>
     <file preprocess="xml-stripblanks">ui/admin_settings_page.ui</file>
+    <file preprocess="xml-stripblanks">ui/display_settings_page.ui</file>
     <file preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
     <file preprocess="xml-stripblanks">ui/connection_config.ui</file>
     <file preprocess="xml-stripblanks">ui/add_network_popup.ui</file>

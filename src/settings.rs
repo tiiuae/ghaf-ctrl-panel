@@ -16,6 +16,7 @@ use crate::security_settings_page::SecuritySettingsPage;
 use crate::wifi_settings_page::WifiSettingsPage;
 use crate::keyboard_settings_page::KeyboardSettingsPage;
 use crate::mouse_settings_page::MouseSettingsPage;
+use crate::display_settings_page::DisplaySettingsPage;
 use crate::vm_control_action::VMControlAction;
 use crate::settings_action::SettingsAction;
 
@@ -43,6 +44,8 @@ mod imp {
         pub mouse_settings_page: TemplateChild<MouseSettingsPage>,
         #[template_child]
         pub audio_settings_page: TemplateChild<AudioSettings>,
+        #[template_child]
+        pub display_settings_page: TemplateChild<DisplaySettingsPage>,
 
         //pub vm_model: RefCell<ListStore>,
 
