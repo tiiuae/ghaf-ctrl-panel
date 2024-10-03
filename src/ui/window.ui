@@ -56,27 +56,41 @@
                     </object>
                   </child>
                   <child>
-                    <object class="GtkButton" id="vm_view_button">
-                    <style><class name="header-button-chosen"/></style>
+                    <object class="GtkToggleButton" id="vm_view_button">
+                    <style><class name="header-toggle-button"/></style>
                     <property name="label">Virtual machines</property>
                     <property name="halign">end</property>
                     <property name="valign">center</property>
                     <property name="width-request">220</property>
                     <property name="height-request">30</property>
                     <property name="vexpand">false</property>
-                    <signal name="clicked" handler="switch_to_vm_view" swapped="true"/>
+                    <signal name="toggled" handler="switch_to_vm_view" swapped="true"/>
                     </object>
                   </child>
                   <child>
-                    <object class="GtkButton" id="settings_view_button">
-                    <style><class name="header-button"/></style>
+                    <object class="GtkToggleButton" id="services_view_button">
+                    <style><class name="header-toggle-button"/></style>
+                    <property name="label">Services</property>
+                    <property name="halign">end</property>
+                    <property name="valign">center</property>
+                    <property name="width-request">220</property>
+                    <property name="height-request">30</property>
+                    <property name="vexpand">false</property>
+                    <signal name="toggled" handler="switch_to_services_view" swapped="true"/>
+                    <property name="group">vm_view_button</property>
+                    </object>
+                  </child>
+                  <child>
+                    <object class="GtkToggleButton" id="settings_view_button">
+                    <style><class name="header-toggle-button"/></style>
                     <property name="label">Settings</property>
                     <property name="halign">end</property>
                     <property name="valign">center</property>
                     <property name="width-request">220</property>
                     <property name="height-request">30</property>
                     <property name="vexpand">false</property>
-                    <signal name="clicked" handler="switch_to_settings_view" swapped="true"/>
+                    <signal name="toggled" handler="switch_to_settings_view" swapped="true"/>
+                    <property name="group">vm_view_button</property>
                     </object>
                   </child>
                 </object>

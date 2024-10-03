@@ -1,8 +1,8 @@
 use std::rc::Rc;
 use gtk::prelude::*;
 use adw::subclass::prelude::*;
-use gtk::{gio, glib, CompositeTemplate, Stack, Image, Button, MenuButton, ListView, SingleSelection, SignalListItemFactory, ListItem,};
-use glib::Variant;
+use gtk::{gio, glib, CompositeTemplate, Stack, Image, Button, ToggleButton, MenuButton, ListView, SingleSelection, CustomFilter, SignalListItemFactory, FilterListModel, ListItem,};
+use glib::{Binding, Object, Variant};
 
 use crate::application::ControlPanelGuiApplication;
 use crate::vm_gobject::VMGObject;
@@ -24,9 +24,11 @@ mod imp {
         #[template_child]
         pub header_menu_button: TemplateChild<MenuButton>,
         #[template_child]
-        pub vm_view_button: TemplateChild<Button>,
+        pub vm_view_button: TemplateChild<ToggleButton>,
         #[template_child]
-        pub settings_view_button: TemplateChild<Button>,
+        pub services_view_button: TemplateChild<ToggleButton>,
+        #[template_child]
+        pub settings_view_button: TemplateChild<ToggleButton>,
         #[template_child]
         pub ghaf_logo: TemplateChild<Image>,
 
@@ -65,23 +67,21 @@ mod imp {
     impl ControlPanelGuiWindow {
         #[template_callback]
         fn switch_to_vm_view(&self) {
-            self.stack.set_visible_child_name("vm_view");
-            //change style
-            //a bit awkward way, but Gtk's radio button is not suitable
-            self.vm_view_button.style_context().remove_class("header-button");
-            self.vm_view_button.style_context().add_class("header-button-chosen");
-            self.settings_view_button.style_context().remove_class("header-button-chosen");
-            self.settings_view_button.style_context().add_class("header-button");
-    
+            if (self.stack.visible_child_name() != Some("vm_view".into())) {
+                self.stack.set_visible_child_name("vm_view");
+            }
+        }
+        #[template_callback]
+        fn switch_to_services_view(&self) {
+            if (self.stack.visible_child_name() != Some("vm_view".into())) {
+                self.stack.set_visible_child_name("vm_view");
+            }
         }
         #[template_callback]
         fn switch_to_settings_view(&self) {
-            self.stack.set_visible_child_name("settings_view");
-            //change style
-            self.vm_view_button.style_context().remove_class("header-button-chosen");
-            self.vm_view_button.style_context().add_class("header-button");
-            self.settings_view_button.style_context().remove_class("header-button");
-            self.settings_view_button.style_context().add_class("header-button-chosen");
+            if (self.stack.visible_child_name() != Some("settings_view".into())) {
+                self.stack.set_visible_child_name("settings_view");
+            }
         }
 
         #[template_callback]
@@ -144,6 +144,8 @@ impl ControlPanelGuiWindow {
 
         self.setup_vm_rows();
         self.setup_factory();
+        //vm view by default
+        self.imp().vm_view_button.set_active(true);
     }
 
     #[inline(always)]
@@ -159,10 +161,27 @@ impl ControlPanelGuiWindow {
 
         self.imp().settings_box.set_vm_model(model.clone());
 
-        let count = model.n_items();//save count before model will be consumpted
+        //Create filter: VM services, default
+        let vm_filter = CustomFilter::new(|item: &Object| {
+            if let Some(vm_obj) = item.downcast_ref::<VMGObject>() {
+                return vm_obj.name().starts_with("microvm@");
+            }
+            false
+        });
+
+        //Create filter: other services
+        let services_filter = CustomFilter::new(|item: &Object| {
+            if let Some(vm_obj) = item.downcast_ref::<VMGObject>() {
+                return !vm_obj.name().starts_with("microvm@");
+            }
+            false
+        });
+
+        //VM filter by default
+        let filter_model = FilterListModel::new(Some(model), Some(vm_filter.clone()));
 
         // Wrap model with selection and pass it to the list view
-        let selection_model = SingleSelection::new(Some(model));
+        let selection_model = SingleSelection::new(Some(filter_model.clone()));
         // Connect to the selection-changed and items-changed signals
         selection_model.connect_selection_changed(
             glib::clone!(@strong self as window => move |selection_model, _, _| {
@@ -194,11 +213,33 @@ impl ControlPanelGuiWindow {
         
         self.imp().vm_list_view.set_model(Some(&selection_model));
 
-        //set default selection to 1st item
+        self.bind_vm_settings_box_visibility();
+
+        //bind filter change
+        let filter_model_clone = filter_model.clone();
+        let selection_model_clone = selection_model.clone();
+        let count = self.imp().vm_list_view.model().expect("no model!").n_items();
+        self.imp().vm_view_button.connect_toggled(move |button| {
+            if button.is_active() {
+                println!("Filter is about to change to vm");
+                filter_model_clone.set_filter(Some(&vm_filter));
+                Self::set_default_selection(&selection_model_clone, count);
+            }
+        });
+        self.imp().services_view_button.connect_toggled(move |button| {
+            if button.is_active() {
+                println!("Filter is about to change to services");
+                filter_model.set_filter(Some(&services_filter));
+                Self::set_default_selection(&selection_model, count);
+            }
+        });
+    }
+
+    fn set_default_selection(selection_model: &SingleSelection, count: u32) {
+        println!("Selection is about to change");
+        if (count <= 0) {return};
         selection_model.set_selected(0);
         selection_model.selection_changed(0u32, count);
-
-        self.bind_vm_settings_box_visibility();
     }
 
     fn bind_vm_settings_box_visibility(&self) {

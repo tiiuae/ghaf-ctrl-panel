@@ -21,7 +21,7 @@ pub mod imp {
     #[derive(Debug)]
     pub struct DataProvider {
         store: Arc<Mutex<ListStore>>,
-        settings: Arc<Mutex<SettingsGObject>>,
+        //settings: Arc<Mutex<SettingsGObject>>,//will be in use in the future
         pub status: bool,
         admin_client: Arc<RwLock<AdminClient>>,
         service_address: RefCell<(String, u16)>,
@@ -42,7 +42,7 @@ pub mod imp {
 
             Self {
                 store: Arc::new(Mutex::new(init_store)),
-                settings: Arc::new(Mutex::new(SettingsGObject::default())),
+                //settings: Arc::new(Mutex::new(SettingsGObject::default())),
                 status: false,
                 admin_client: Arc::new(RwLock::new(AdminClient::new(address.clone(), port, None))),
                 service_address: RefCell::new((address, port)),
