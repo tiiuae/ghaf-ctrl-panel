@@ -30,7 +30,7 @@
         <child>
           <object class="GtkLabel">
           <style><class name="normal-text"/></style>
-          <property name="label">Region &amp;amp; Language</property>
+          <property name="label">Region &amp; Language</property>
           <property name="halign">start</property>
           <property name="margin-top">10</property>
           <property name="margin-bottom">10</property>

@@ -220,8 +220,8 @@ pub mod imp {
             let admin_client = self.admin_client.clone();
             thread::spawn(move || {//not sure it is really needed
                     Runtime::new().unwrap().block_on(async move {
-                    //there is now app name
-                    if let Err(error) = admin_client.read().unwrap().start(String::from(""), Some(name), Vec::<String>::new()).await {
+                    //there is only one name in my disposal
+                    if let Err(error) = admin_client.read().unwrap().start(name.clone(), Some(name), Vec::<String>::new()).await {
                         println!("Start request error {error}");
                     }
                     else {
