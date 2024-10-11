@@ -1,8 +1,8 @@
-use std::cell::RefCell;
+use glib::Binding;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Button};
-use glib::Binding;
+use gtk::{glib, Button, CompositeTemplate};
+use std::cell::RefCell;
 
 use crate::settings_gobject::SettingsGObject;
 
@@ -28,8 +28,8 @@ mod imp {
         type ParentType = gtk::Box;
 
         fn class_init(klass: &mut Self::Class) {
-                klass.bind_template();
-                //klass.bind_template_callbacks();
+            klass.bind_template();
+            //klass.bind_template_callbacks();
         }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -41,7 +41,7 @@ mod imp {
     impl SecuritySettingsPage {
         #[template_callback]
         fn on_row_selected(&self, row: &gtk::ListBoxRow) {
-            
+
         }
     }*///end #[gtk::template_callbacks]
 
@@ -74,11 +74,9 @@ impl SecuritySettingsPage {
     pub fn new() -> Self {
         glib::Object::builder().build()
     }
-    pub fn init(&self) {
+    pub fn init(&self) {}
 
-    }
-
-    pub fn bind(&self, settings_object: &SettingsGObject) {
+    pub fn bind(&self, _settings_object: &SettingsGObject) {
         //unbind previous ones
         self.unbind();
         //make new
@@ -91,4 +89,3 @@ impl SecuritySettingsPage {
         }
     }
 }
-

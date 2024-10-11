@@ -1,15 +1,15 @@
-use std::cell::RefCell;
-use std::sync::OnceLock;
+use glib::subclass::Signal;
+use glib::Binding;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Label, Image, MenuButton, Popover};
-use glib::Binding;
-use glib::subclass::Signal;
+use gtk::{glib, CompositeTemplate, Image, Label, MenuButton, Popover};
+use std::cell::RefCell;
+use std::sync::OnceLock;
 
-use crate::vm_gobject::VMGObject;
 use crate::audio_settings::AudioSettings;
 use crate::security_icon::SecurityIcon;
 use crate::vm_control_action::VMControlAction;
+use crate::vm_gobject::VMGObject;
 
 mod imp {
     use super::*;
@@ -52,8 +52,8 @@ mod imp {
         type ParentType = gtk::Box;
 
         fn class_init(klass: &mut Self::Class) {
-                klass.bind_template();
-                klass.bind_template_callbacks();
+            klass.bind_template();
+            klass.bind_template_callbacks();
         }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -67,20 +67,23 @@ mod imp {
         fn on_vm_start_clicked(&self) {
             let vm_name = self.vm_name_label.label();
             //emit signal
-            self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Start, &vm_name]);
+            self.obj()
+                .emit_by_name::<()>("vm-control-action", &[&VMControlAction::Start, &vm_name]);
             //and close menu
             self.popover_menu.popdown();
         }
         #[template_callback]
         fn on_vm_shutdown_clicked(&self) {
             let vm_name = self.vm_name_label.label();
-            self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Shutdown, &vm_name]);
+            self.obj()
+                .emit_by_name::<()>("vm-control-action", &[&VMControlAction::Shutdown, &vm_name]);
             self.popover_menu.popdown();
         }
         #[template_callback]
         fn on_vm_pause_clicked(&self) {
             let vm_name = self.vm_name_label.label();
-            self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Pause, &vm_name]);
+            self.obj()
+                .emit_by_name::<()>("vm-control-action", &[&VMControlAction::Pause, &vm_name]);
             self.popover_menu.popdown();
         }
         #[template_callback]
@@ -100,7 +103,7 @@ mod imp {
             println!("Speaker volume: {}", value);
             //send message to client mod via channel in DataProvider
         }
-    }//end #[gtk::template_callbacks]
+    } //end #[gtk::template_callbacks]
 
     impl ObjectImpl for VMSettings {
         fn signals() -> &'static [Signal] {
@@ -108,21 +111,21 @@ mod imp {
             SIGNALS.get_or_init(|| {
                 vec![
                     Signal::builder("vm-control-action")
-                    .param_types([VMControlAction::static_type(), String::static_type()])
-                    .build(),
+                        .param_types([VMControlAction::static_type(), String::static_type()])
+                        .build(),
                     Signal::builder("vm-mic-changed")
-                    .param_types([u32::static_type()])
-                    .build(),
+                        .param_types([u32::static_type()])
+                        .build(),
                     Signal::builder("vm-speaker-changed")
-                    .param_types([u32::static_type()])
-                    .build(),
+                        .param_types([u32::static_type()])
+                        .build(),
                     Signal::builder("vm-mic-volume-changed")
-                    .param_types([f64::static_type()])
-                    .build(),
+                        .param_types([f64::static_type()])
+                        .build(),
                     Signal::builder("vm-speaker-volume-changed")
-                    .param_types([f64::static_type()])
-                    .build()
-                    ]
+                        .param_types([f64::static_type()])
+                        .build(),
+                ]
             })
         }
     }
@@ -164,7 +167,6 @@ impl VMSettings {
         let security_label = self.imp().security_label.get();
         let mut bindings = self.imp().bindings.borrow_mut();
 
-
         let name_binding = vm_object
             .bind_property("name", &name, "label")
             //.bidirectional()
@@ -178,7 +180,8 @@ impl VMSettings {
             .sync_create()
             .transform_to(move |_, value: &glib::Value| {
                 let status = value.get::<u8>().unwrap_or(0);
-                match status {//make struct like for icon?
+                match status {
+                    //make struct like for icon?
                     0 => Some(glib::Value::from("Running")),
                     1 => Some(glib::Value::from("Powered off")),
                     2 => Some(glib::Value::from("Paused")),
@@ -194,11 +197,20 @@ impl VMSettings {
             .sync_create()
             .transform_to(move |_, value: &glib::Value| {
                 let status = value.get::<u8>().unwrap_or(0);
-                match status {//make struct like for icon?
-                    0 => Some(glib::Value::from("/org/gnome/controlpanelgui/icons/ellipse_green.svg")),
-                    1 => Some(glib::Value::from("/org/gnome/controlpanelgui/icons/ellipse_red.svg")),
-                    2 => Some(glib::Value::from("/org/gnome/controlpanelgui/icons/ellipse_yellow.svg")),
-                    _ => Some(glib::Value::from("/org/gnome/controlpanelgui/icons/ellipse_red.svg")),
+                match status {
+                    //make struct like for icon?
+                    0 => Some(glib::Value::from(
+                        "/org/gnome/controlpanelgui/icons/ellipse_green.svg",
+                    )),
+                    1 => Some(glib::Value::from(
+                        "/org/gnome/controlpanelgui/icons/ellipse_red.svg",
+                    )),
+                    2 => Some(glib::Value::from(
+                        "/org/gnome/controlpanelgui/icons/ellipse_yellow.svg",
+                    )),
+                    _ => Some(glib::Value::from(
+                        "/org/gnome/controlpanelgui/icons/ellipse_red.svg",
+                    )),
                 }
             })
             .build();
@@ -228,7 +240,8 @@ impl VMSettings {
             .sync_create()
             .transform_to(move |_, value: &glib::Value| {
                 let trust_level = value.get::<u8>().unwrap_or(0);
-                match trust_level {//make struct like for icon?
+                match trust_level {
+                    //make struct like for icon?
                     0 => Some(glib::Value::from("Secure!")),
                     1 => Some(glib::Value::from("Security warning!")),
                     2 => Some(glib::Value::from("Security alert!")),
@@ -247,4 +260,3 @@ impl VMSettings {
         }
     }
 }
-
