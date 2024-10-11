@@ -8,11 +8,9 @@ use tokio::runtime::Runtime;
 
 use givc_client::{self, AdminClient};
 use givc_common::query::{QueryResult, Event, VMStatus, TrustLevel};
-//use givc_client::endpoint::{EndpointConfig, TlsConfig};
-//use givc_common::types::*;
 
 use crate::vm_gobject::VMGObject;
-use crate::settings_gobject::SettingsGObject;
+//use crate::settings_gobject::SettingsGObject;//will be in use in the future
 use crate::{ADMIN_SERVICE_ADDR, ADMIN_SERVICE_PORT};
 
 pub mod imp {
@@ -221,7 +219,7 @@ pub mod imp {
             thread::spawn(move || {//not sure it is really needed
                     Runtime::new().unwrap().block_on(async move {
                     //there is only one name in my disposal
-                    if let Err(error) = admin_client.read().unwrap().start(name.clone(), Some(name), Vec::<String>::new()).await {
+                    if let Err(error) = admin_client.read().unwrap().start(name.clone(), None, Vec::<String>::new()).await {
                         println!("Start request error {error}");
                     }
                     else {

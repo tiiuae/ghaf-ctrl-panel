@@ -17,10 +17,10 @@ mod imp {
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/vm_settings.ui")]
     pub struct VMSettings {
-        pub name: String,
-
         #[template_child]
-        pub vm_name_label: TemplateChild<Label>,
+        pub name_slot_1: TemplateChild<Label>,
+        #[template_child]
+        pub name_slot_2: TemplateChild<Label>,
         #[template_child]
         pub vm_status_label: TemplateChild<Label>,
         #[template_child]
@@ -38,9 +38,6 @@ mod imp {
         #[template_child]
         pub popover_menu: TemplateChild<Popover>,
 
-        //current VMGObject ref
-        //vm_object: &VMGObject,
-
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
     }
@@ -52,8 +49,8 @@ mod imp {
         type ParentType = gtk::Box;
 
         fn class_init(klass: &mut Self::Class) {
-                klass.bind_template();
-                klass.bind_template_callbacks();
+            klass.bind_template();
+            klass.bind_template_callbacks();
         }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -65,7 +62,7 @@ mod imp {
     impl VMSettings {
         #[template_callback]
         fn on_vm_start_clicked(&self) {
-            let vm_name = self.vm_name_label.label();
+            let vm_name = self.name_slot_1.label();
             //emit signal
             self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Start, &vm_name]);
             //and close menu
@@ -73,13 +70,13 @@ mod imp {
         }
         #[template_callback]
         fn on_vm_shutdown_clicked(&self) {
-            let vm_name = self.vm_name_label.label();
+            let vm_name = self.name_slot_1.label();
             self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Shutdown, &vm_name]);
             self.popover_menu.popdown();
         }
         #[template_callback]
         fn on_vm_pause_clicked(&self) {
-            let vm_name = self.vm_name_label.label();
+            let vm_name = self.name_slot_1.label();
             self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Pause, &vm_name]);
             self.popover_menu.popdown();
         }
@@ -147,16 +144,12 @@ impl VMSettings {
         glib::Object::builder().build()
     }
 
-    /*pub fn set_current_vm_object(&self, _vm_object: &VMGObject) {
-        vm_object = _vm_object;
-        //bind or set all values?
-    }*/
-
     pub fn bind(&self, vm_object: &VMGObject) {
         //unbind previous ones
         self.unbind();
         //make new
-        let name = self.imp().vm_name_label.get();
+        let name = self.imp().name_slot_1.get();
+        let is_app_vm: bool = vm_object.property("is-app-vm");
         let status = self.imp().vm_status_label.get();
         let status_icon = self.imp().vm_status_icon.get();
         let details = self.imp().vm_details_label.get();
@@ -164,14 +157,27 @@ impl VMSettings {
         let security_label = self.imp().security_label.get();
         let mut bindings = self.imp().bindings.borrow_mut();
 
+        if is_app_vm {
+            let full_service_name = self.imp().name_slot_2.get();
 
-        let name_binding = vm_object
-            .bind_property("name", &name, "label")
-            //.bidirectional()
-            .sync_create()
-            .build();
-        // Save binding
-        bindings.push(name_binding);
+            let name_binding = vm_object
+                .bind_property("app-name", &name, "label")
+                .sync_create()
+                .build();
+            bindings.push(name_binding);
+
+            let full_service_name_binding = vm_object
+                .bind_property("name", &full_service_name, "label")
+                .sync_create()
+                .build();
+            bindings.push(full_service_name_binding);
+        } else {
+            let name_binding = vm_object
+                .bind_property("name", &name, "label")
+                .sync_create()
+                .build();
+            bindings.push(name_binding);
+        };
 
         let status_binding = vm_object
             .bind_property("status", &status, "label")
@@ -186,7 +192,6 @@ impl VMSettings {
                 }
             })
             .build();
-        // Save binding
         bindings.push(status_binding);
 
         let status_icon_binding = vm_object
@@ -202,14 +207,12 @@ impl VMSettings {
                 }
             })
             .build();
-        // Save binding
         bindings.push(status_icon_binding);
 
         let details_binding = vm_object
             .bind_property("details", &details, "label")
             .sync_create()
             .build();
-        // Save binding
         bindings.push(details_binding);
 
         let security_icon_binding = vm_object
@@ -220,7 +223,6 @@ impl VMSettings {
                 Some(glib::Value::from(SecurityIcon::new(trust_level).0))
             })
             .build();
-        // Save binding
         bindings.push(security_icon_binding);
 
         let security_label_binding = vm_object
@@ -236,7 +238,6 @@ impl VMSettings {
                 }
             })
             .build();
-        // Save binding
         bindings.push(security_label_binding);
     }
 
@@ -245,6 +246,8 @@ impl VMSettings {
         for binding in self.imp().bindings.borrow_mut().drain(..) {
             binding.unbind();
         }
+        //clean name slot 2
+        self.imp().name_slot_2.set_text("");
     }
 }
 

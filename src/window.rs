@@ -164,7 +164,7 @@ impl ControlPanelGuiWindow {
         //Create filter: VM services, default
         let vm_filter = CustomFilter::new(|item: &Object| {
             if let Some(vm_obj) = item.downcast_ref::<VMGObject>() {
-                return vm_obj.name().starts_with("microvm@");
+                return vm_obj.is_app_vm();
             }
             false
         });
@@ -172,7 +172,7 @@ impl ControlPanelGuiWindow {
         //Create filter: other services
         let services_filter = CustomFilter::new(|item: &Object| {
             if let Some(vm_obj) = item.downcast_ref::<VMGObject>() {
-                return !vm_obj.name().starts_with("microvm@");
+                return !vm_obj.is_app_vm();
             }
             false
         });

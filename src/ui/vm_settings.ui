@@ -12,13 +12,27 @@
       <property name="margin-bottom">10</property>
       <!--<property name="spacing">10</property>-->
       <child>
-        <object class="GtkLabel" id="vm_name_label">
-        <style><class name="vm-name"/></style>
+        <object class="GtkBox">
+        <style><class name="info-box"/></style>
         <property name="margin-start">20</property>
         <property name="margin-end">10</property>
         <property name="margin-top">10</property>
         <property name="margin-bottom">10</property>
         <property name="halign">start</property>
+          <child>
+            <object class="GtkLabel" id="name_slot_1">
+            <style><class name="vm-name"/></style>
+            <property name="halign">start</property>
+            </object>
+          </child>
+          <child>
+            <object class="GtkLabel" id="name_slot_2">
+            <style><class name="vm-name"/></style>
+            <property name="margin-start">20</property>
+            <property name="margin-end">10</property>
+            <property name="halign">start</property>
+            </object>
+          </child>
         </object>
       </child>
       <child>

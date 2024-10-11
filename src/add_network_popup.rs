@@ -34,8 +34,8 @@ mod imp {
         type ParentType = gtk::Window;
 
         fn class_init(klass: &mut Self::Class) {
-                klass.bind_template();
-                klass.bind_template_callbacks();
+            klass.bind_template();
+            klass.bind_template_callbacks();
         }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -105,7 +105,5 @@ impl AddNetworkPopup {
         glib::Object::builder().build()
     }
 
-    pub fn init(&self) {
-
-    }
+    pub fn init(&self) {}
 }

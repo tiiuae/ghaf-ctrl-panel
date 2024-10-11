@@ -415,6 +415,7 @@ dependencies = [
  "gtk4",
  "libadwaita",
  "prost 0.12.6",
+ "regex",
  "tokio",
  "tokio-stream",
  "tonic 0.11.0",

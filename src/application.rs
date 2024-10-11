@@ -212,8 +212,7 @@ impl ControlPanelGuiApplication {
                 );
                 popup.present();
             },
-            SettingsAction::ShowAddKeyboardPopup => {
-            }
+            SettingsAction::ShowAddKeyboardPopup => {}
         };
     }
 

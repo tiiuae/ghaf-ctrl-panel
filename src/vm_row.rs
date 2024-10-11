@@ -35,8 +35,8 @@ mod imp {
         type ParentType = gtk::Box;
 
         fn class_init(klass: &mut Self::Class) {
-                klass.bind_template();
-            }
+            klass.bind_template();
+        }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
             obj.init_template();
@@ -70,10 +70,16 @@ impl VMRow {
         let subtitle = self.imp().subtitle_label.get();
         let security_icon = self.imp().security_icon.get();
         let mut bindings = self.imp().bindings.borrow_mut();
+        let is_app_vm: bool = vm_object.property("is-app-vm");
 
+        let name_property: &str = if is_app_vm {
+            "app-name"
+        } else {
+            "name"
+        };
 
         let title_binding = vm_object
-            .bind_property("name", &title, "label")
+            .bind_property(name_property, &title, "label")
             //.bidirectional()
             .sync_create()
             .build();

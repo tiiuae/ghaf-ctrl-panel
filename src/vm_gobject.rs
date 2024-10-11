@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use gtk::glib::{self, Object, Properties};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
+use regex::Regex;
 
 use givc_common::query::{QueryResult, VMStatus, TrustLevel}; //cannot be used as property!
 //use crate::trust_level::TrustLevel as MyTrustLevel;//type is no recognised in #property
@@ -12,6 +13,8 @@ mod imp {
     #[derive(Default)]
     pub struct VMData {
         pub name: String,
+        pub app_name: String,
+        pub is_app_vm: bool,
         pub details: String,
         pub status: u8,
         pub trust_level: u8,
@@ -22,6 +25,8 @@ mod imp {
     #[properties(wrapper_type = super::VMGObject)]
     pub struct VMGObject {
         #[property(name = "name", get, set, type = String, member = name)]
+        #[property(name = "app-name", get, set, type = String, member = app_name)]
+        #[property(name = "is-app-vm", get, set, type = bool, member = is_app_vm)]
         #[property(name = "details", get, set, type = String, member = details)]
         #[property(name = "status", get, set, type = u8, member = status)]
         #[property(name = "trust-level", get, set, type = u8, member = trust_level)]
@@ -47,8 +52,19 @@ glib::wrapper! {
 
 impl VMGObject {
     pub fn new(name: String, details: String, status: VMStatus, trust_level: TrustLevel) -> Self {
+        let is_app_vm = name.starts_with("microvm@");
+        let app_name = if is_app_vm {
+            let re = Regex::new(r"^microvm@([^@-]+)-.+$").unwrap();
+            re.captures(&name.clone())
+                .and_then(|cap| cap.get(1).map(|m| m.as_str().to_string())).unwrap()
+        } else {
+            String::from("")
+        };
+        
         Object::builder()
             .property("name", name)
+            .property("app-name", app_name)
+            .property("is-app-vm", is_app_vm)
             .property("details", details)
             .property("status", status as u8)
             .property("trust-level", trust_level as u8)

@@ -32,8 +32,8 @@ mod imp {
         type ParentType = gtk::Window;
 
         fn class_init(klass: &mut Self::Class) {
-                klass.bind_template();
-                klass.bind_template_callbacks();
+            klass.bind_template();
+            klass.bind_template_callbacks();
         }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -99,9 +99,7 @@ impl ConnectionConfig {
         config_widget
     }
 
-    pub fn init(&self) {
-
-    }
+    pub fn init(&self) {}
 
     pub fn get_config(&self) -> (String, u32) {
         let text = self.imp().port_entry.text().to_string();
