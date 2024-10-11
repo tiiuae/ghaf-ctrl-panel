@@ -1,9 +1,9 @@
-use std::cell::RefCell;
+use glib::subclass::Signal;
+use glib::Binding;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, DropDown, CheckButton};
-use glib::Binding;
-use glib::subclass::Signal;
+use gtk::{glib, CheckButton, CompositeTemplate, DropDown};
+use std::cell::RefCell;
 use std::sync::OnceLock;
 
 use crate::settings_gobject::SettingsGObject;
@@ -34,8 +34,8 @@ mod imp {
         type ParentType = gtk::Box;
 
         fn class_init(klass: &mut Self::Class) {
-                klass.bind_template();
-                klass.bind_template_callbacks();
+            klass.bind_template();
+            klass.bind_template_callbacks();
         }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -54,9 +54,10 @@ mod imp {
         fn on_apply_clicked(&self) {
             let value = self.resolution_switch.selected();
             println!("Resolution changed! {}", value);
-            self.obj().emit_by_name::<()>("resolution-changed", &[&value]);
+            self.obj()
+                .emit_by_name::<()>("resolution-changed", &[&value]);
         }
-    }//end #[gtk::template_callbacks]
+    } //end #[gtk::template_callbacks]
 
     impl ObjectImpl for DisplaySettingsPage {
         fn constructed(&self) {
@@ -73,11 +74,10 @@ mod imp {
             SIGNALS.get_or_init(|| {
                 vec![
                     Signal::builder("resolution-changed")
-                    .param_types([u32::static_type()])
-                    .build(),
-                    Signal::builder("resolution-default")
-                    .build(),
-                    ]
+                        .param_types([u32::static_type()])
+                        .build(),
+                    Signal::builder("resolution-default").build(),
+                ]
             })
         }
     }
@@ -100,11 +100,9 @@ impl DisplaySettingsPage {
     pub fn new() -> Self {
         glib::Object::builder().build()
     }
-    pub fn init(&self) {
+    pub fn init(&self) {}
 
-    }
-
-    pub fn bind(&self, settings_object: &SettingsGObject) {
+    pub fn bind(&self, _settings_object: &SettingsGObject) {
         //unbind previous ones
         self.unbind();
         //make new
@@ -118,7 +116,6 @@ impl DisplaySettingsPage {
     }
 
     //fn set_resolution(&self, index: u32) {
-        //wlr-randr --output eDP-1 --mode 1920x1200
+    //wlr-randr --output eDP-1 --mode 1920x1200
     //}
 }
-

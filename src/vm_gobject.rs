@@ -1,10 +1,10 @@
-use std::cell::RefCell;
 use gtk::glib::{self, Object, Properties};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
+use std::cell::RefCell;
 
-use givc_common::query::{QueryResult, VMStatus, TrustLevel}; //cannot be used as property!
-//use crate::trust_level::TrustLevel as MyTrustLevel;//type is no recognised in #property
+use givc_common::query::{QueryResult, TrustLevel, VMStatus}; //cannot be used as property!
+                                                             //use crate::trust_level::TrustLevel as MyTrustLevel;//type is no recognised in #property
 
 mod imp {
     use super::*;

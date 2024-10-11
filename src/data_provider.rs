@@ -1,19 +1,21 @@
-use std::cell::RefCell;
+use async_channel::Sender;
+use gio::ListStore;
 use glib::{IsA, Object};
 use gtk::{self, gio, glib, prelude::*};
-use gio::ListStore;
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::sync::{Arc, RwLock, RwLockReadGuard};
 use std::thread::{self, JoinHandle};
-use std::sync::{Arc, Mutex, RwLock, atomic::{AtomicBool, Ordering}};
-use tokio::time::{sleep, Duration, timeout};
-use tokio::runtime::Runtime;
+use tokio::runtime::{Builder, Handle};
+use tokio::time::{timeout, Duration};
 
 use givc_client::{self, AdminClient};
-use givc_common::query::{QueryResult, Event, VMStatus, TrustLevel};
+use givc_common::query::{Event, TrustLevel, VMStatus};
 //use givc_client::endpoint::{EndpointConfig, TlsConfig};
 //use givc_common::types::*;
 
 use crate::vm_gobject::VMGObject;
-use crate::settings_gobject::SettingsGObject;
+
 use crate::{ADMIN_SERVICE_ADDR, ADMIN_SERVICE_PORT};
 
 pub mod imp {
@@ -35,6 +37,15 @@ pub mod imp {
         }
     }
 
+    type Task = Box<
+        dyn for<'a> FnOnce(
+                RwLockReadGuard<'a, AdminClient>,
+            ) -> std::pin::Pin<
+                Box<dyn std::future::Future<Output = Result<(), String>> + 'a>,
+            > + Sync
+            + Send,
+    >;
+
     #[derive(Debug)]
     pub struct DataProvider {
         store: ListStore,
@@ -42,19 +53,24 @@ pub mod imp {
         pub status: bool,
         admin_client: Arc<RwLock<AdminClient>>,
         service_address: RefCell<(String, u16)>,
-        handle: RefCell<Option<JoinHandle<()>>>,
-        stop_signal: RefCell<Option<async_channel::Sender<()>>>,
+        handle: Rc<RefCell<Option<Handle>>>,
+        join_handle: RefCell<Option<JoinHandle<()>>>,
+        //task_runner: RefCell<Option<Sender<(Task, Sender<Result<(), String>>)>>>,
+        task_runner: Rc<RefCell<Option<Sender<(Task, Sender<Result<(), String>>)>>>>,
     }
 
-    #[derive(Debug)]
-    pub enum EventExtended {
-        InitialList(Vec<QueryResult>),
-        InnerEvent(Event),
+    macro_rules! adminclient {
+        (|$cl:ident| $block:expr) => {
+            Box::new(move |$cl| {
+                Box::pin(async move { $block.map_err(|e| e.to_string()) })
+            })
+        }
     }
+
 
     impl DataProvider {
         pub fn new(address: String, port: u16) -> Self {
-            let init_store = ListStore::new::<VMGObject>();//Self::fill_by_mock_data();
+            let init_store = ListStore::new::<VMGObject>(); //Self::fill_by_mock_data();
 
             Self {
                 store: init_store,
@@ -62,82 +78,101 @@ pub mod imp {
                 status: false,
                 admin_client: Arc::new(RwLock::new(AdminClient::new(address.clone(), port, None))),
                 service_address: RefCell::new((address, port)),
-                handle: RefCell::new(None),
-                stop_signal: RefCell::new(None),
+                join_handle: RefCell::new(None),
+                handle: Rc::new(RefCell::new(None)),
+                task_runner: Rc::new(RefCell::new(None)),
             }
         }
 
         pub fn establish_connection(&self) {
-            println!("Establishing connection, call watch method... Address: {}:{}", 
-            self.service_address.borrow().0, 
-            self.service_address.borrow().1);
+            println!(
+                "Establishing connection, call watch method... Address: {}:{}",
+                self.service_address.borrow().0,
+                self.service_address.borrow().1
+            );
             let admin_client = self.admin_client.clone();
-            let store = self.store.clone();
+            let _store = self.store.clone();
 
             let (event_tx, event_rx) = async_channel::unbounded();
-            let (quit_tx, mut quit_rx) = async_channel::bounded::<()>(1);
+            let (task_tx, task_rx) =
+                async_channel::bounded::<(Task, async_channel::Sender<Result<(), String>>)>(1);
 
-            let handle = thread::spawn(move || {
-                Runtime::new().unwrap().block_on(async move {
-                    //let Ok(result) = admin_client.watch().await else {println!("Watch call error"); return};
+            let joinhandle = thread::spawn(move || {
+                Builder::new_current_thread()
+                    .enable_all()
+                    .build()
+                    .unwrap()
+                    .block_on(async move {
+                        let timeout_duration = Duration::from_secs(5);
+                        let Ok(Ok(result)) =
+                            timeout(timeout_duration, admin_client.read().unwrap().watch()).await
+                        else {
+                            println!("Watch call timeout/error");
+                            return;
+                        };
+                        println!("Connected!");
 
-                    //Await with timeout
-                    let timeout_duration = Duration::from_secs(5);
-                    let Ok(Ok(result)) = timeout(timeout_duration, admin_client.read().unwrap().watch()).await 
-                    else {println!("Watch call timeout/error"); return};
-                    println!("Connected!");
-
-                    let list = result.initial.clone();
-                    let _ = event_tx.send(EventExtended::InitialList(list));
-
-                    loop {
-                        tokio::select! {
-                            _ = quit_rx.recv() => break,
-                            event = result.channel.recv() => {
-                                println!("Got message: {event:?}");
-                                if let Ok(event) = event {
-                                    let _ = event_tx.send(EventExtended::InnerEvent(event)).await;
-                                } else {
-                                    break;
-                                }
-                            }
+                        let _ = event_tx
+                            .send((result.channel, result.initial, Handle::current().clone()))
+                            .await;
+                        while let Ok((task, resp)) = task_rx.recv().await {
+                            let admin_client = admin_client.read().unwrap();
+                            let res = task(admin_client).await;
+                            let _ = resp.send(res.map_err(|e| e.to_string())).await;
                         }
-                    }
-                });
+                    });
             });
 
-            *self.handle.borrow_mut() = Some(handle);
-
+            *self.join_handle.borrow_mut() = Some(joinhandle);
             let store = self.store.clone();
+            let selfhandle = self.handle.clone();
+            let taskrunner = self.task_runner.clone();
             glib::spawn_future_local(async move {
-                while let Ok(event_ext) = event_rx.recv().await {
-                    match event_ext {
-                        EventExtended::InitialList(list) => {
-                            println!("Initial list: {:?}", list);
-                            store.remove_all();
-                            for vm in list {
-                                store.append(&VMGObject::new(vm.name, vm.description, vm.status, vm.trust_level));
+                let Ok((channel, initial, handle)) = event_rx.recv().await else {
+                    return;
+                };
+                println!("Got stuff!");
+                *selfhandle.borrow_mut() = Some(handle);
+                *taskrunner.borrow_mut() = Some(task_tx);
+                store.remove_all();
+                for vm in initial {
+                    store.append(&VMGObject::new(
+                        vm.name,
+                        vm.description,
+                        vm.status,
+                        vm.trust_level,
+                    ));
+                }
+
+                while let Ok(event) = channel.recv().await {
+                    match event {
+                        Event::UnitStatusChanged(result) => {
+                            println!("Status: {:?}", result);
+                            if let Some(obj) = store
+                                .typed_iter()
+                                .find(|obj: &VMGObject| obj.name() == result.name)
+                            {
+                                obj.update(result);
                             }
-                        },
-                        EventExtended::InnerEvent(event) =>
-                        match event {
-                            Event::UnitStatusChanged(result) => {
-                                println!("Status: {:?}", result);
-                                if let Some(obj) = store.typed_iter().find(|obj: &VMGObject| obj.name() == result.name) {
-                                    obj.update(result);
-                                }
-                            },
-                            Event::UnitShutdown(result) => {
-                                println!("Shutdown info: {:?}", result);
-                                if let Some(obj) = store.typed_iter().find(|obj: &VMGObject| obj.name() == result.name) {
-                                    obj.update(result);
-                                }
-                            },
-                            Event::UnitRegistered(result) => {
-                                println!("Unit registered {:?}", result);
-                                store.append(&VMGObject::new(result.name, result.description, result.status, result.trust_level));
-                            },
-                        },
+                        }
+                        Event::UnitShutdown(result) => {
+                            println!("Shutdown info: {:?}", result);
+                            if let Some(obj) = store
+                                .typed_iter()
+                                .find(|obj: &VMGObject| obj.name() == result.name)
+                            {
+                                obj.update(result);
+                            }
+                        }
+                        Event::UnitRegistered(result) => {
+                            println!("Unit registered {:?}", result);
+                            store.append(&VMGObject::new(
+                                result.name,
+                                result.description,
+                                result.status,
+                                result.trust_level,
+                            ));
+                        }
                     }
                 }
             });
@@ -146,12 +181,26 @@ pub mod imp {
         fn fill_by_mock_data() -> ListStore {
             let init_store = ListStore::new::<VMGObject>();
             let mut vec: Vec<VMGObject> = Vec::new();
-            vec.push(VMGObject::new("VM1".to_string(), String::from("This is the file.pdf and very very long description"), 
-                    VMStatus::Running, TrustLevel::NotSecure));
-            vec.push(VMGObject::new("VM2".to_string(), String::from("Google Chrome"), VMStatus::Paused, TrustLevel::Secure));
-            vec.push(VMGObject::new("VM3".to_string(), String::from("AppFlowy"), VMStatus::Running, TrustLevel::Secure));
+            vec.push(VMGObject::new(
+                "VM1".to_string(),
+                String::from("This is the file.pdf and very very long description"),
+                VMStatus::Running,
+                TrustLevel::NotSecure,
+            ));
+            vec.push(VMGObject::new(
+                "VM2".to_string(),
+                String::from("Google Chrome"),
+                VMStatus::Paused,
+                TrustLevel::Secure,
+            ));
+            vec.push(VMGObject::new(
+                "VM3".to_string(),
+                String::from("AppFlowy"),
+                VMStatus::Running,
+                TrustLevel::Secure,
+            ));
             init_store.extend_from_slice(&vec);
-            return init_store;
+            init_store
         }
 
         pub fn get_store(&self) -> ListStore {
@@ -162,8 +211,9 @@ pub mod imp {
             self.service_address.clone().into_inner()
         }
 
-        pub fn set_service_address(&self, addr: String, port: u16) {//only when disconnected/watch stopped
-            if !(self.admin_client.try_write().is_err()) {
+        pub fn set_service_address(&self, addr: String, port: u16) {
+            //only when disconnected/watch stopped
+            if self.admin_client.try_write().is_ok() {
                 println!("Set service address {addr}:{port}");
                 let mut service_address = self.service_address.borrow_mut();
                 *service_address = (addr.clone(), port);
@@ -184,113 +234,108 @@ pub mod imp {
             if let Some((host, port)) = addr {
                 self.set_service_address(host, port);
             }
-            
+
             self.establish_connection();
         }
 
         pub fn disconnect(&self) {
             println!("Disconnect request...");
-            self.stop_signal.take();
-            // self.stop_signal.store(true, Ordering::SeqCst);
-            if let Some(handle) = self.handle.take() {
-                handle.join().unwrap();
+            self.task_runner.take();
+            self.handle.take();
+            if let Some(joinhandle) = self.join_handle.take() {
+                joinhandle.join().unwrap();
                 //drop(self.admin_client.clone());
                 println!("Client thread stopped!");
             }
         }
 
-        pub fn start_vm(&self, name: String) {
-            let admin_client = self.admin_client.clone();
-            thread::spawn(move || {//not sure it is really needed
-                    Runtime::new().unwrap().block_on(async move {
-                    //there is only one name in my disposal
-                    if let Err(error) = admin_client.read().unwrap().start(name.clone(), Some(name), Vec::<String>::new()).await {
-                        println!("Start request error {error}");
-                    }
-                    else {
-                        println!("Start request sent");
-                    };
-                })
+        fn client_cmd<F: FnOnce(Result<(), String>) -> () + 'static>(&self, task: Task, cb: F) {
+            let (res_tx, res_rx) = async_channel::bounded(1);
+            let Some(tr) = self.task_runner.borrow().as_ref().cloned() else {
+                cb(Err("Not connected to admin".into()));
+                return;
+            };
+            glib::spawn_future_local(async move {
+                // On error res_tx is dropped and res_rx.recv() will fail below
+                let _ = tr.send((task, res_tx)).await;
+                let res = match res_rx.recv().await {
+                    Ok(res) => res,
+                    Err(err) => Err(err.to_string()),
+                };
+                cb(res);
             });
+        }
+        
+        pub fn start_vm(&self, name: String) {
+            self.client_cmd(
+                adminclient!(|client| client.start("".to_owned(), Some(name), vec![]).await),
+                |res| match res {
+                    Ok(_) => println!("Start request sent"),
+                    Err(error) => println!("Start request error {error}"),
+                },
+            );
         }
 
         pub fn pause_vm(&self, name: String) {
-            let admin_client = self.admin_client.clone();
-            thread::spawn(move || {
-                Runtime::new().unwrap().block_on(async move {
-                    if let Err(error) = admin_client.read().unwrap().pause(name).await {
-                        println!("Pause request error {error}");
-                    }
-                    else {
-                        println!("Pause request sent");
-                    };
-                })
-            });
+            self.client_cmd(
+                adminclient!(|client| client.pause(name).await),
+                |res| match res {
+                    Ok(_) => println!("Pause request sent"),
+                    Err(error) => println!("Pause request error {error}"),
+                },
+            );
         }
 
         pub fn resume_vm(&self, name: String) {
-            let admin_client = self.admin_client.clone();
-            thread::spawn(move || {
-                Runtime::new().unwrap().block_on(async move {
-                    if let Err(error) = admin_client.read().unwrap().resume(name).await {
-                        println!("Resume request error {error}");
-                    }
-                    else {
-                        println!("Resume request sent");
-                    };
-                })
-            });
+            self.client_cmd(
+                adminclient!(|client| client.resume(name).await),
+                |res| match res {
+                    Ok(_) => println!("Resume request sent"),
+                    Err(error) => println!("Resume request error {error}"),
+                },
+            );
         }
 
         pub fn shutdown_vm(&self, name: String) {
-            let admin_client = self.admin_client.clone();
-            thread::spawn(move || {
-                Runtime::new().unwrap().block_on(async move {
-                    if let Err(error) = admin_client.read().unwrap().stop(name).await {
-                        println!("Stop request error {error}");
-                    }
-                    else {
-                        println!("Stop request sent");
-                    };
-                })
-            });
+            self.client_cmd(
+                adminclient!(|client| client.stop(name).await),
+                |res| match res {
+                    Ok(_) => println!("Stop request sent"),
+                    Err(error) => println!("Stop request error {error}"),
+                },
+            );
         }
 
-        pub fn set_locale(&self, locale: String) {
-            let admin_client = self.admin_client.clone();
-            thread::spawn(move || {
-                Runtime::new().unwrap().block_on(async move {
-                    if let Err(error) = admin_client.read().unwrap().set_locale(locale).await {
-                        println!("Locale request error {error}");
-                    }
-                    else {
-                        println!("Locale request sent");
-                    };
-                })
-            });
-        }
-
-        pub fn set_timezone(&self, timezone: String) {
-            let admin_client = self.admin_client.clone();
-            thread::spawn(move || {
-                Runtime::new().unwrap().block_on(async move {
-                    if let Err(error) = admin_client.read().unwrap().set_timezone(timezone).await {
-                        println!("Timezone request error {error}");
-                    }
-                    else {
-                        println!("Timezone request sent");
-                    };
-                })
-            });
-        }
-
-        pub fn restart_vm(&self, name: String) {
+        pub fn restart_vm(&self, _name: String) {
             println!("Restart is not implemented on client lib!");
             //no restart in admin_client
             //self.admin_client.restart(name);
         }
 
-        pub fn add_network(&self, name: String, security: String, password: String) {
+        pub fn set_locale(&self, locale: String) {
+            self.client_cmd(
+                adminclient!(|client| client.set_locale(locale).await),
+                |res| match res {
+                    Ok(_) => println!("Locale set"),
+                    Err(e) => println!("Locale setting failed: {e}"),
+                },
+            );
+        }
+
+        pub fn set_timezone(&self, timezone: String) {
+            self.client_cmd(
+                Box::new(move |client| {
+                    Box::pin(
+                        async move { client.set_timezone(timezone).await.map_err(|e| e.to_string()) },
+                    )
+                }),
+            |res| match res {
+                Ok(_) => println!("Timezone set"),
+                Err(e) => println!("Timezone setting failed: {e}"),
+            });
+        }
+
+        pub fn add_network(&self, _name: String, _security: String, _password: String) {
             println!("Not yet implemented!");
         }
     }
@@ -308,4 +353,3 @@ pub mod imp {
         }
     }
 }
-

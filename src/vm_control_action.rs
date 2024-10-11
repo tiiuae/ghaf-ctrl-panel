@@ -1,6 +1,9 @@
+use glib::{
+    value::{FromValue, ToValue, Value},
+    Type,
+};
 use gtk::glib;
 use gtk::prelude::*;
-use glib::{value::{FromValue, ToValue, Value}, Type};
 
 #[derive(Debug, Clone, Copy)]
 #[repr(u8)]
