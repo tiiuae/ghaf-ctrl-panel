@@ -195,9 +195,9 @@ impl ControlPanelGuiWindow {
                 if let Some(selected_item) = selection_model.selected_item() {
                     println!("Selected: {}", selection_model.selected());
                     if let Some(vm_obj) = selected_item.downcast_ref::<VMGObject>() {//???
-                        let title: Option<String> = vm_obj.property("name");
-                        let subtitle: Option<String> = vm_obj.property("details");
-                        println!("Property {}, {}", title.unwrap(), subtitle.unwrap());
+                        let title = vm_obj.name();
+                        let subtitle = vm_obj.details();
+                        println!("Property {title}, {subtitle}");
                         window.set_vm_details(&vm_obj);
                     }
                 } else {

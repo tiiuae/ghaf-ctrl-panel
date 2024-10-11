@@ -74,17 +74,14 @@ pub struct ErrorPopup(ObjectSubclass<imp::ErrorPopup>)
 
 impl Default for ErrorPopup {
     fn default() -> Self {
-        Self::new("Unknown error".to_string())
+        Self::new("Unknown error")
     }
 }
 
 impl ErrorPopup {
-    pub fn new(message_to_user: String) -> Self {
+    pub fn new(message_to_user: &str) -> Self {
         let popup: Self = glib::Object::builder().build();
-        popup
-            .imp()
-            .message_to_user
-            .set_label(message_to_user.as_str());
+        popup.imp().message_to_user.set_label(message_to_user);
         popup
     }
 

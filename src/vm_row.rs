@@ -70,7 +70,7 @@ impl VMRow {
         let subtitle = self.imp().subtitle_label.get();
         let security_icon = self.imp().security_icon.get();
         let mut bindings = self.imp().bindings.borrow_mut();
-        let is_app_vm: bool = vm_object.property("is-app-vm");
+        let is_app_vm = vm_object.is_app_vm();
 
         let name_property: &str = if is_app_vm { "app-name" } else { "name" };
 

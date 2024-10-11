@@ -253,11 +253,12 @@ impl ControlPanelGuiApplication {
                 popup.launch_close_timer(5);
             }
             SettingsAction::ShowErrorPopup => {
-                let window = self.active_window().unwrap();
-                let popup = ErrorPopup::new(value.to_string());
-                popup.set_transient_for(Some(&window));
-                popup.set_modal(true);
-                popup.present();
+                if let Some(error) = value.str() {
+                    let popup = ErrorPopup::new(error);
+                    popup.set_transient_for(self.active_window().as_ref());
+                    popup.set_modal(true);
+                    popup.present();
+                }
             }
         };
     }

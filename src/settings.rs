@@ -76,16 +76,8 @@ mod imp {
     impl Settings {
         #[template_callback]
         fn on_settings_row_selected(&self, row: &gtk::ListBoxRow) {
-            if let Some(action_row) = row.downcast_ref::<adw::ActionRow>() {
-                let name: Option<String> = action_row.property("name");
-                if let Some(name) = name {
-                    self.stack.set_visible_child_name(&name);
-                } else {
-                    println!("(No title)");
-                }
-            } else {
-                println!("(Invalid row type)");
-            }
+            self.stack
+                .set_visible_child_name(row.widget_name().as_str());
         }
         #[template_callback]
         fn on_show_add_network_popup(&self) {
