@@ -1,177 +1,209 @@
-use std::cell::RefCell;
-use gtk::{self, gio, glib, prelude::*};
+use async_channel::Sender;
 use gio::ListStore;
+use glib::{IsA, Object};
+use gtk::{self, gio, glib, prelude::*};
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::sync::{Arc, RwLock, RwLockReadGuard};
 use std::thread::{self, JoinHandle};
-use std::sync::{Arc, Mutex, RwLock, mpsc::{self, Sender, Receiver}, atomic::{AtomicBool, Ordering}};
-use tokio::time::{sleep, Duration, timeout};
-use tokio::runtime::Runtime;
+use tokio::runtime::{Builder, Handle};
+use tokio::time::{timeout, Duration};
 
 use givc_client::{self, AdminClient};
-use givc_common::query::{QueryResult, Event, VMStatus, TrustLevel};
+use givc_common::query::{Event, TrustLevel, VMStatus};
 //use givc_client::endpoint::{EndpointConfig, TlsConfig};
 //use givc_common::types::*;
 
 use crate::vm_gobject::VMGObject;
-use crate::settings_gobject::SettingsGObject;
+
 use crate::{ADMIN_SERVICE_ADDR, ADMIN_SERVICE_PORT};
 
 pub mod imp {
     use super::*;
 
+    trait TypedStore<T: IsA<Object>> {
+        fn get(&self, index: u32) -> Option<T>;
+        fn typed_iter(&self) -> impl Iterator<Item = T>;
+    }
+
+    impl<T: IsA<Object>> TypedStore<T> for ListStore {
+        fn get(&self, index: u32) -> Option<T> {
+            self.item(index).and_then(|item| item.downcast().ok())
+        }
+
+        fn typed_iter(&self) -> impl Iterator<Item = T> {
+            let s = self.clone();
+            (0..).map_while(move |idx| s.get(idx))
+        }
+    }
+
+    type Task = Box<
+        dyn for<'a> FnOnce(
+                RwLockReadGuard<'a, AdminClient>,
+            ) -> std::pin::Pin<
+                Box<dyn std::future::Future<Output = Result<(), String>> + 'a>,
+            > + Sync
+            + Send,
+    >;
+
     #[derive(Debug)]
     pub struct DataProvider {
-        store: Arc<Mutex<ListStore>>,
+        store: ListStore,
         //settings: Arc<Mutex<SettingsGObject>>,//will be in use in the future
         pub status: bool,
         admin_client: Arc<RwLock<AdminClient>>,
         service_address: RefCell<(String, u16)>,
-        handle: RefCell<Option<JoinHandle<()>>>,
-        stop_signal: Arc<AtomicBool>,
+        handle: Rc<RefCell<Option<Handle>>>,
+        join_handle: RefCell<Option<JoinHandle<()>>>,
+        //task_runner: RefCell<Option<Sender<(Task, Sender<Result<(), String>>)>>>,
+        task_runner: Rc<RefCell<Option<Sender<(Task, Sender<Result<(), String>>)>>>>,
     }
 
-    #[derive(Debug)]
-    pub enum EventExtended {
-        InitialList(Vec<QueryResult>),
-        InnerEvent(Event),
-        BreakLoop,
+    macro_rules! adminclient {
+        (|$cl:ident| $block:expr) => {
+            Box::new(move |$cl| {
+                Box::pin(async move { $block.map_err(|e| e.to_string()) })
+            })
+        }
     }
+
 
     impl DataProvider {
         pub fn new(address: String, port: u16) -> Self {
-            let init_store = ListStore::new::<VMGObject>();//Self::fill_by_mock_data();
+            let init_store = ListStore::new::<VMGObject>(); //Self::fill_by_mock_data();
 
             Self {
-                store: Arc::new(Mutex::new(init_store)),
+                store: init_store,
                 //settings: Arc::new(Mutex::new(SettingsGObject::default())),
                 status: false,
                 admin_client: Arc::new(RwLock::new(AdminClient::new(address.clone(), port, None))),
                 service_address: RefCell::new((address, port)),
-                handle: RefCell::new(None),
-                stop_signal: Arc::new(AtomicBool::new(false)),
+                join_handle: RefCell::new(None),
+                handle: Rc::new(RefCell::new(None)),
+                task_runner: Rc::new(RefCell::new(None)),
             }
         }
 
         pub fn establish_connection(&self) {
-            println!("Establishing connection, call watch method... Address: {}:{}", 
-            self.service_address.borrow().0, 
-            self.service_address.borrow().1);
+            println!(
+                "Establishing connection, call watch method... Address: {}:{}",
+                self.service_address.borrow().0,
+                self.service_address.borrow().1
+            );
             let admin_client = self.admin_client.clone();
-            let store = self.store.clone();
-            let stop_signal = self.stop_signal.clone();
-            self.stop_signal.store(false, Ordering::SeqCst);
+            let _store = self.store.clone();
 
-            let (event_tx, event_rx): (Sender<EventExtended>, Receiver<EventExtended>) = mpsc::channel();
+            let (event_tx, event_rx) = async_channel::unbounded();
+            let (task_tx, task_rx) =
+                async_channel::bounded::<(Task, async_channel::Sender<Result<(), String>>)>(1);
 
-            let handle = thread::spawn(move || {
-                Runtime::new().unwrap().block_on(async move {
-                    //let Ok(result) = admin_client.watch().await else {println!("Watch call error"); return};
+            let joinhandle = thread::spawn(move || {
+                Builder::new_current_thread()
+                    .enable_all()
+                    .build()
+                    .unwrap()
+                    .block_on(async move {
+                        let timeout_duration = Duration::from_secs(5);
+                        let Ok(Ok(result)) =
+                            timeout(timeout_duration, admin_client.read().unwrap().watch()).await
+                        else {
+                            println!("Watch call timeout/error");
+                            return;
+                        };
+                        println!("Connected!");
 
-                    //Await with timeout
-                    let timeout_duration = Duration::from_secs(5);
-                    let Ok(Ok(result)) = timeout(timeout_duration, admin_client.read().unwrap().watch()).await 
-                    else {println!("Watch call timeout/error"); return};
-
-                    let list = result.initial.clone();
-                    let _ = event_tx.send(EventExtended::InitialList(list));
-
-                    while !(stop_signal.load(Ordering::SeqCst)) {
-                        if let Ok(event) = result.channel.try_recv() {
-                            let _ = event_tx.send(EventExtended::InnerEvent(event));
-                        } else {
-                            println!("Error received from client lib!");
+                        let _ = event_tx
+                            .send((result.channel, result.initial, Handle::current().clone()))
+                            .await;
+                        while let Ok((task, resp)) = task_rx.recv().await {
+                            let admin_client = admin_client.read().unwrap();
+                            let res = task(admin_client).await;
+                            let _ = resp.send(res.map_err(|e| e.to_string())).await;
                         }
-                        println!("Waiting for data...");
-                        sleep(Duration::new(2,0)).await;
-                    }
-
-                    println!("BreakLoop");
-                    let _ = event_tx.send(EventExtended::BreakLoop);
-                });
+                    });
             });
 
-            *self.handle.borrow_mut() = Some(handle);
+            *self.join_handle.borrow_mut() = Some(joinhandle);
+            let store = self.store.clone();
+            let selfhandle = self.handle.clone();
+            let taskrunner = self.task_runner.clone();
+            glib::spawn_future_local(async move {
+                let Ok((channel, initial, handle)) = event_rx.recv().await else {
+                    return;
+                };
+                println!("Got stuff!");
+                *selfhandle.borrow_mut() = Some(handle);
+                *taskrunner.borrow_mut() = Some(task_tx);
+                store.remove_all();
+                for vm in initial {
+                    store.append(&VMGObject::new(
+                        vm.name,
+                        vm.description,
+                        vm.status,
+                        vm.trust_level,
+                    ));
+                }
 
-            glib::source::idle_add_local(move || {
-                while let Ok(event_ext) = event_rx.try_recv() {
-                    match event_ext {
-                        EventExtended::InitialList(list) => {
-                            println!("Initial list: {:?}", list);
-                            let store_inner = store.lock().unwrap();
-                            store_inner.remove_all();
-                            for vm in list {
-                                store_inner.append(&VMGObject::new(vm.name, vm.description, vm.status, vm.trust_level));
+                while let Ok(event) = channel.recv().await {
+                    match event {
+                        Event::UnitStatusChanged(result) => {
+                            println!("Status: {:?}", result);
+                            if let Some(obj) = store
+                                .typed_iter()
+                                .find(|obj: &VMGObject| obj.name() == result.name)
+                            {
+                                obj.update(result);
                             }
-                        },
-                        EventExtended::InnerEvent(event) =>
-                        match event {
-                            Event::UnitStatusChanged(result) => {
-                                println!("Status: {:?}", result);
-                                let store_inner = store.lock().unwrap();
-                                for i in 0..store_inner.n_items() {
-                                    if let Some(item) = store_inner.item(i) {
-                                        let obj = item.downcast_ref::<VMGObject>().unwrap();
-                                        if obj.name() == result.name {
-                                            obj.update(result);
-                                            break;
-                                        }
-                                    }
-                                }
-                                //for some reason func is not found
-                                /*store_inner.find_with_equal_func(|item| {
-                                    let obj = item.downcast_ref::<VMGObject>().unwrap();
-                                    if obj.name() == result.name {
-                                        obj.update(result);
-                                        true // Return true if the item is found and updated
-                                    } else {
-                                        false // Continue searching otherwise
-                                    }
-                                });*/
-                            },
-                            Event::UnitShutdown(result) => {
-                                println!("Shutdown info: {:?}", result);
-                                let store_inner = store.lock().unwrap();
-                                for i in 0..store_inner.n_items() {
-                                    if let Some(item) = store_inner.item(i) {
-                                        let obj = item.downcast_ref::<VMGObject>().unwrap();
-                                        if obj.name() == result.name {
-                                            obj.update(result);
-                                            break;
-                                        }
-                                    }
-                                }
-                            },
-                            Event::UnitRegistered(result) => {
-                                println!("Unit registered {:?}", result);
-                                let store_inner = store.lock().unwrap();
-                                store_inner.append(&VMGObject::new(result.name, result.description, result.status, result.trust_level));
-                            },
-                        },
-                        EventExtended::BreakLoop => {
-                            println!("BreakLoop event received");
-                            break;
+                        }
+                        Event::UnitShutdown(result) => {
+                            println!("Shutdown info: {:?}", result);
+                            if let Some(obj) = store
+                                .typed_iter()
+                                .find(|obj: &VMGObject| obj.name() == result.name)
+                            {
+                                obj.update(result);
+                            }
+                        }
+                        Event::UnitRegistered(result) => {
+                            println!("Unit registered {:?}", result);
+                            store.append(&VMGObject::new(
+                                result.name,
+                                result.description,
+                                result.status,
+                                result.trust_level,
+                            ));
                         }
                     }
                 }
-                glib::ControlFlow::Continue
             });
         }
 
         fn fill_by_mock_data() -> ListStore {
             let init_store = ListStore::new::<VMGObject>();
             let mut vec: Vec<VMGObject> = Vec::new();
-            vec.push(VMGObject::new("VM1".to_string(), String::from("This is the file.pdf and very very long description"), 
-                    VMStatus::Running, TrustLevel::NotSecure));
-            vec.push(VMGObject::new("VM2".to_string(), String::from("Google Chrome"), VMStatus::Paused, TrustLevel::Secure));
-            vec.push(VMGObject::new("VM3".to_string(), String::from("AppFlowy"), VMStatus::Running, TrustLevel::Secure));
+            vec.push(VMGObject::new(
+                "VM1".to_string(),
+                String::from("This is the file.pdf and very very long description"),
+                VMStatus::Running,
+                TrustLevel::NotSecure,
+            ));
+            vec.push(VMGObject::new(
+                "VM2".to_string(),
+                String::from("Google Chrome"),
+                VMStatus::Paused,
+                TrustLevel::Secure,
+            ));
+            vec.push(VMGObject::new(
+                "VM3".to_string(),
+                String::from("AppFlowy"),
+                VMStatus::Running,
+                TrustLevel::Secure,
+            ));
             init_store.extend_from_slice(&vec);
-            return init_store;
+            init_store
         }
 
         pub fn get_store(&self) -> ListStore {
-            self.store.lock().unwrap().clone()
-        }
-
-        pub fn get_store_ref(&self) -> Arc<Mutex<ListStore>> {
             self.store.clone()
         }
 
@@ -179,8 +211,9 @@ pub mod imp {
             self.service_address.clone().into_inner()
         }
 
-        pub fn set_service_address(&self, addr: String, port: u16) {//only when disconnected/watch stopped
-            if !(self.admin_client.try_write().is_err()) {
+        pub fn set_service_address(&self, addr: String, port: u16) {
+            //only when disconnected/watch stopped
+            if self.admin_client.try_write().is_ok() {
                 println!("Set service address {addr}:{port}");
                 let mut service_address = self.service_address.borrow_mut();
                 *service_address = (addr.clone(), port);
@@ -190,8 +223,7 @@ pub mod imp {
         }
 
         pub fn add_vm(&self, vm: VMGObject) {
-            let store = self.store.lock().unwrap();
-            store.append(&vm);
+            self.store.append(&vm);
         }
 
         pub fn reconnect(&self, addr: Option<(String, u16)>) {
@@ -202,84 +234,108 @@ pub mod imp {
             if let Some((host, port)) = addr {
                 self.set_service_address(host, port);
             }
-            
+
             self.establish_connection();
         }
 
         pub fn disconnect(&self) {
             println!("Disconnect request...");
-            self.stop_signal.store(true, Ordering::SeqCst);
-            if let Some(handle) = self.handle.borrow_mut().take() {
-                handle.join().unwrap();
+            self.task_runner.take();
+            self.handle.take();
+            if let Some(joinhandle) = self.join_handle.take() {
+                joinhandle.join().unwrap();
                 //drop(self.admin_client.clone());
                 println!("Client thread stopped!");
             }
         }
 
-        pub fn start_vm(&self, name: String) {
-            let admin_client = self.admin_client.clone();
-            thread::spawn(move || {//not sure it is really needed
-                    Runtime::new().unwrap().block_on(async move {
-                    //there is only one name in my disposal
-                    if let Err(error) = admin_client.read().unwrap().start(name.clone(), Some(name), Vec::<String>::new()).await {
-                        println!("Start request error {error}");
-                    }
-                    else {
-                        println!("Start request sent");
-                    };
-                })
+        fn client_cmd<F: FnOnce(Result<(), String>) -> () + 'static>(&self, task: Task, cb: F) {
+            let (res_tx, res_rx) = async_channel::bounded(1);
+            let Some(tr) = self.task_runner.borrow().as_ref().cloned() else {
+                cb(Err("Not connected to admin".into()));
+                return;
+            };
+            glib::spawn_future_local(async move {
+                // On error res_tx is dropped and res_rx.recv() will fail below
+                let _ = tr.send((task, res_tx)).await;
+                let res = match res_rx.recv().await {
+                    Ok(res) => res,
+                    Err(err) => Err(err.to_string()),
+                };
+                cb(res);
             });
+        }
+        
+        pub fn start_vm(&self, name: String) {
+            self.client_cmd(
+                adminclient!(|client| client.start("".to_owned(), Some(name), vec![]).await),
+                |res| match res {
+                    Ok(_) => println!("Start request sent"),
+                    Err(error) => println!("Start request error {error}"),
+                },
+            );
         }
 
         pub fn pause_vm(&self, name: String) {
-            let admin_client = self.admin_client.clone();
-            thread::spawn(move || {
-                Runtime::new().unwrap().block_on(async move {
-                    if let Err(error) = admin_client.read().unwrap().pause(name).await {
-                        println!("Pause request error {error}");
-                    }
-                    else {
-                        println!("Pause request sent");
-                    };
-                })
-            });
+            self.client_cmd(
+                adminclient!(|client| client.pause(name).await),
+                |res| match res {
+                    Ok(_) => println!("Pause request sent"),
+                    Err(error) => println!("Pause request error {error}"),
+                },
+            );
         }
 
         pub fn resume_vm(&self, name: String) {
-            let admin_client = self.admin_client.clone();
-            thread::spawn(move || {
-                Runtime::new().unwrap().block_on(async move {
-                    if let Err(error) = admin_client.read().unwrap().resume(name).await {
-                        println!("Resume request error {error}");
-                    }
-                    else {
-                        println!("Resume request sent");
-                    };
-                })
-            });
+            self.client_cmd(
+                adminclient!(|client| client.resume(name).await),
+                |res| match res {
+                    Ok(_) => println!("Resume request sent"),
+                    Err(error) => println!("Resume request error {error}"),
+                },
+            );
         }
 
         pub fn shutdown_vm(&self, name: String) {
-            let admin_client = self.admin_client.clone();
-            thread::spawn(move || {
-                Runtime::new().unwrap().block_on(async move {
-                    if let Err(error) = admin_client.read().unwrap().stop(name).await {
-                        println!("Stop request error {error}");
-                    }
-                    else {
-                        println!("Stop request sent");
-                    };
-                })
-            });
+            self.client_cmd(
+                adminclient!(|client| client.stop(name).await),
+                |res| match res {
+                    Ok(_) => println!("Stop request sent"),
+                    Err(error) => println!("Stop request error {error}"),
+                },
+            );
         }
 
-        pub fn restart_vm(&self, name: String) {
+        pub fn restart_vm(&self, _name: String) {
             println!("Restart is not implemented on client lib!");
             //no restart in admin_client
             //self.admin_client.restart(name);
         }
 
-        pub fn add_network(&self, name: String, security: String, password: String) {
+        pub fn set_locale(&self, locale: String) {
+            self.client_cmd(
+                adminclient!(|client| client.set_locale(locale).await),
+                |res| match res {
+                    Ok(_) => println!("Locale set"),
+                    Err(e) => println!("Locale setting failed: {e}"),
+                },
+            );
+        }
+
+        pub fn set_timezone(&self, timezone: String) {
+            self.client_cmd(
+                Box::new(move |client| {
+                    Box::pin(
+                        async move { client.set_timezone(timezone).await.map_err(|e| e.to_string()) },
+                    )
+                }),
+            |res| match res {
+                Ok(_) => println!("Timezone set"),
+                Err(e) => println!("Timezone setting failed: {e}"),
+            });
+        }
+
+        pub fn add_network(&self, _name: String, _security: String, _password: String) {
             println!("Not yet implemented!");
         }
     }
@@ -297,4 +353,3 @@ pub mod imp {
         }
     }
 }
-

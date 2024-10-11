@@ -1,8 +1,7 @@
-use std::cell::RefCell;
 use gtk::glib::{self, Object, Properties};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::glib::subclass::prelude::*;
+use std::cell::RefCell;
 
 pub mod imp {
     use super::*;
@@ -12,8 +11,8 @@ pub mod imp {
         pub memory_usage: u32,
         pub cpu_load: u32,
         pub network_load: u32,
-        pub date: u32,//?
-        pub time: i64,//in sec
+        pub date: u32, //?
+        pub time: i64, //in sec
         pub wifi_on: bool,
         pub wifi_name: String,
     }
@@ -54,6 +53,7 @@ impl Default for SettingsGObject {
 
 impl SettingsGObject {
     pub fn new() -> Self {
-        Object::builder()/*properties*/.build()
+        Object::builder() /*properties*/
+            .build()
     }
 }

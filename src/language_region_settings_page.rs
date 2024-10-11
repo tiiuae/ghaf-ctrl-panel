@@ -2,31 +2,34 @@ use glib::subclass::Signal;
 use glib::Binding;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, DropDown, ListView};
+use gtk::{glib, CompositeTemplate, DropDown};
 use std::cell::RefCell;
 use std::sync::OnceLock;
 
 use crate::settings_gobject::SettingsGObject;
 
+//+list of supported resolutions/modes ?
+
 mod imp {
     use super::*;
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/keyboard_settings_page.ui")]
-    pub struct KeyboardSettingsPage {
+    #[template(resource = "/org/gnome/controlpanelgui/ui/language_region_settings_page.ui")]
+    pub struct LanguageRegionSettingsPage {
         #[template_child]
-        pub region_language_switch: TemplateChild<DropDown>,
+        pub language_switch: TemplateChild<DropDown>,
+
         #[template_child]
-        pub keyboards_list_view: TemplateChild<ListView>,
+        pub timezone_switch: TemplateChild<DropDown>,
 
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for KeyboardSettingsPage {
-        const NAME: &'static str = "KeyboardSettingsPage";
-        type Type = super::KeyboardSettingsPage;
+    impl ObjectSubclass for LanguageRegionSettingsPage {
+        const NAME: &'static str = "LanguageRegionSettingsPage";
+        type Type = super::LanguageRegionSettingsPage;
         type ParentType = gtk::Box;
 
         fn class_init(klass: &mut Self::Class) {
@@ -40,16 +43,22 @@ mod imp {
     }
 
     #[gtk::template_callbacks]
-    impl KeyboardSettingsPage {
+    impl LanguageRegionSettingsPage {
         #[template_callback]
-        fn on_add_clicked(&self) {
-            println!("Add new keyboard!");
-            self.obj()
-                .emit_by_name::<()>("show-add-new-keyboard-popup", &[]);
+        fn on_reset_clicked(&self) {
+            println!("Reset to defaults!");
+            self.obj().emit_by_name::<()>("locale-default", &[]);
+        }
+        #[template_callback]
+        fn on_apply_clicked(&self) {
+            let locale = self.language_switch.selected();
+            let timezone = self.timezone_switch.selected();
+            println!("Language and timezone changed! {locale}, {timezone}");
+            self.obj().emit_by_name::<()>("locale-timezone-changed", &[&locale, &timezone]);
         }
     } //end #[gtk::template_callbacks]
 
-    impl ObjectImpl for KeyboardSettingsPage {
+    impl ObjectImpl for LanguageRegionSettingsPage {
         fn constructed(&self) {
             // Call "constructed" on parent
             self.parent_constructed();
@@ -63,30 +72,30 @@ mod imp {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
             SIGNALS.get_or_init(|| {
                 vec![
-                    Signal::builder("show-add-new-keyboard-popup").build(),
-                    Signal::builder("remove-keyboard")
-                        .param_types([u32::static_type()])
+                    Signal::builder("locale-timezone-changed")
+                        .param_types([u32::static_type(), u32::static_type()])
                         .build(),
+                    Signal::builder("locale-default").build(),
                 ]
             })
         }
     }
-    impl WidgetImpl for KeyboardSettingsPage {}
-    impl BoxImpl for KeyboardSettingsPage {}
+    impl WidgetImpl for LanguageRegionSettingsPage {}
+    impl BoxImpl for LanguageRegionSettingsPage {}
 }
 
 glib::wrapper! {
-pub struct KeyboardSettingsPage(ObjectSubclass<imp::KeyboardSettingsPage>)
+pub struct LanguageRegionSettingsPage(ObjectSubclass<imp::LanguageRegionSettingsPage>)
     @extends gtk::Widget, gtk::Box;
 }
 
-impl Default for KeyboardSettingsPage {
+impl Default for LanguageRegionSettingsPage {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl KeyboardSettingsPage {
+impl LanguageRegionSettingsPage {
     pub fn new() -> Self {
         glib::Object::builder().build()
     }

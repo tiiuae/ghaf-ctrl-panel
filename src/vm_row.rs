@@ -1,11 +1,11 @@
-use std::cell::RefCell;
+use glib::Binding;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate};
-use glib::Binding;
+use std::cell::RefCell;
 
-use crate::vm_gobject::VMGObject;
 use crate::security_icon::SecurityIcon;
+use crate::vm_gobject::VMGObject;
 
 mod imp {
     use super::*;
@@ -35,8 +35,8 @@ mod imp {
         type ParentType = gtk::Box;
 
         fn class_init(klass: &mut Self::Class) {
-                klass.bind_template();
-            }
+            klass.bind_template();
+        }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
             obj.init_template();
@@ -70,7 +70,6 @@ impl VMRow {
         let subtitle = self.imp().subtitle_label.get();
         let security_icon = self.imp().security_icon.get();
         let mut bindings = self.imp().bindings.borrow_mut();
-
 
         let title_binding = vm_object
             .bind_property("name", &title, "label")
@@ -125,4 +124,3 @@ impl VMRow {
         }
     }
 }
-

@@ -1,10 +1,10 @@
-use std::cell::RefCell;
-use std::sync::OnceLock;
+use crate::glib::subclass::Signal;
+use glib::Binding;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Switch, Image};
-use glib::Binding;
-use crate::glib::subclass::Signal;
+use gtk::{glib, CompositeTemplate, Image, Switch};
+use std::cell::RefCell;
+use std::sync::OnceLock;
 //use gtk::gio::ListStore; will be needed for list of available networks
 
 use crate::settings_gobject::SettingsGObject;
@@ -35,8 +35,8 @@ mod imp {
         type ParentType = gtk::Box;
 
         fn class_init(klass: &mut Self::Class) {
-                klass.bind_template();
-                klass.bind_template_callbacks();
+            klass.bind_template();
+            klass.bind_template_callbacks();
         }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -49,13 +49,13 @@ mod imp {
         #[template_callback]
         fn on_switch_state_changed(&self, value: bool) -> bool {
             println!("Wifi switched: {}", value);
-            false//propagate event futher
+            false //propagate event futher
         }
         #[template_callback]
         fn on_add_clicked(&self) {
             self.obj().emit_by_name::<()>("show-add-network-popup", &[]);
         }
-    }//end #[gtk::template_callbacks]
+    } //end #[gtk::template_callbacks]
 
     impl ObjectImpl for WifiSettingsPage {
         fn constructed(&self) {
@@ -68,12 +68,7 @@ mod imp {
         }
         fn signals() -> &'static [Signal] {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
-            SIGNALS.get_or_init(|| {
-                vec![
-                    Signal::builder("show-add-network-popup")
-                    .build(),
-                    ]
-            })
+            SIGNALS.get_or_init(|| vec![Signal::builder("show-add-network-popup").build()])
         }
     }
     impl WidgetImpl for WifiSettingsPage {}
@@ -95,11 +90,9 @@ impl WifiSettingsPage {
     pub fn new() -> Self {
         glib::Object::builder().build()
     }
-    pub fn init(&self) {
+    pub fn init(&self) {}
 
-    }
-
-    pub fn bind(&self, settings_object: &SettingsGObject) {
+    pub fn bind(&self, _settings_object: &SettingsGObject) {
         //unbind previous ones
         self.unbind();
         //make new
