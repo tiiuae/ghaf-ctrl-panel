@@ -34,6 +34,8 @@ mod imp {
         #[template_child]
         pub audio_settings_box: TemplateChild<AudioSettings>,
         #[template_child]
+        pub control_label: TemplateChild<Label>,
+        #[template_child]
         pub vm_action_menu_button: TemplateChild<MenuButton>,
         #[template_child]
         pub popover_menu: TemplateChild<Popover>,
@@ -155,6 +157,8 @@ impl VMSettings {
         let details = self.imp().vm_details_label.get();
         let security_icon = self.imp().security_icon.get();
         let security_label = self.imp().security_label.get();
+        let control_label = self.imp().control_label.get();
+        let audio_settings_box = self.imp().audio_settings_box.get();
         let mut bindings = self.imp().bindings.borrow_mut();
 
         if is_app_vm {
@@ -239,6 +243,28 @@ impl VMSettings {
             })
             .build();
         bindings.push(security_label_binding);
+
+        //change label
+        let controls_title_binding = vm_object
+            .bind_property("is-app-vm", &control_label, "label")
+            .sync_create()
+            .transform_to(move |_, value: &glib::Value| {
+                let is_app_vm = value.get::<bool>().unwrap_or(false);
+                if (is_app_vm) {
+                    Some(glib::Value::from("VM Controls"))
+                } else {
+                    Some(glib::Value::from("Service Controls"))
+                }
+            })
+            .build();
+        bindings.push(controls_title_binding);
+
+        //hide audio settings for services
+        let audio_settings_visibilty_binding = vm_object
+            .bind_property("is-app-vm", &audio_settings_box, "visible")
+            .sync_create()
+            .build();
+        bindings.push(audio_settings_visibilty_binding);
     }
 
     pub fn unbind(&self) {

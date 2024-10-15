@@ -126,8 +126,7 @@
         <property name="margin-top">10</property>
         <property name="margin-bottom">10</property>
           <child>
-            <object class="GtkLabel" id="vm_control_label">
-            <property name="label">VM controls</property>
+            <object class="GtkLabel" id="control_label">
             <style><class name="title"/></style>
             <property name="margin-start">0</property>
             <property name="margin-end">10</property>
