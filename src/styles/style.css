@@ -150,44 +150,44 @@ box.info-box {
 /* VMRow on Info page*/
 .running-vm-list>row {
   background-color: #2B2B2B;
-  border: 0;
+  border: none;
   margin: 0;
-  box-shadow: 0 0 0 0;
+  box-shadow: none;
 }
 
 .vm-row-2 {
   background-color: #2B2B2B;
-  border: 0;
+  border: none;
   margin: 0;
-  box-shadow: 0 0 0 0;
+  box-shadow: none;
 }
 
 .vm-row-2:active {
   background-color: #2B2B2B;
-  border: 0;
+  border: none;
   margin: 0;
-  box-shadow: 0 0 0 0;
+  box-shadow: none;
 }
 
 .vm-row-2:hover {
   background-color: #2B2B2B;
-  border: 0;
+  border: none;
   margin: 0;
-  box-shadow: 0 0 0 0;
+  box-shadow: none;
 }
 
 .vm-row-2:focus {
   background-color: #2B2B2B;
-  border: 0;
+  border: none;
   margin: 0;
-  box-shadow: 0 0 0 0;
+  box-shadow: none;
 }
 
 .vm-row-2:selected {
   background-color: #2B2B2B;
-  border: 0;
+  border: none;
   margin: 0;
-  box-shadow: 0 0 0 0;
+  box-shadow: none;
 }
 
 /* Settings List styling */
@@ -197,31 +197,31 @@ box.info-box {
 
 .settings-row {
   background-color: #1D1D1D;
-  border: 0;
+  border: none;
   margin: 0;
 }
 
 .settings-row:active {
   background-color: #1D1D1D;
-  border: 0;
+  border: none;
   margin: 0;
 }
 
 .settings-row:hover {
   background-color: #2B2B2B;
-  border: 0;
+  border: none;
   margin: 0;
 }
 
 .settings-row:focus {
   background-color: #2B2B2B;
-  border: 0;
+  border: none;
   margin: 0;
 }
 
 .settings-row:selected {
   background-color: #2B2B2B;
-  border: 0;
+  border: none;
   margin: 0;
 }
 
@@ -296,7 +296,7 @@ box.info-box {
 /*Dropdown styling*/
 .dropdown-button {
   background-color: #353535;
-  border: 0;
+  border: none;
   margin: 0;
 }
 
@@ -313,20 +313,20 @@ box.info-box {
 
 .dropdown-button>button>box {
   background-color: #353535;
-  border: 0;
+  border: none;
   margin: 0;
 }
 
 .dropdown-button>button>box>*>row {
   background-color: #353535;
-  border: 0;
+  border: none;
   margin: 0;
-  box-shadow: 0 0 0 0;
+  box-shadow: none;
 }
 
 .dropdown-button>button>box>*>row:hover {
   background-color: #353535;
-  border: 0;
+  border: none;
   margin: 0;
 }
 
@@ -347,38 +347,44 @@ box.info-box {
 
 .dropdown-button>popover>contents>*>*>*>row {
   background-color: #353535;
-  border: 0;
+  border: none;
+  border-radius: 0px;
   margin: 0;
-  box-shadow: 0 0 0 0;
+  box-shadow: none;
 }
 
 .dropdown-button>popover>contents>*>*>*>row:selected {
   background-color: #2B2B2B;
-  border: 0;
+  border: none;
+  border-radius: 0px;
   margin: 0;
 }
 
 .dropdown-button>popover>contents>*>*>*>row:hover {
   background-color: #2B2B2B;
-  border: 0;
+  border: none;
+  border-radius: 0px;
   margin: 0;
 }
 
 .dropdown-button>popover>contents>*>*>*>row:selected:hover {
   background-color: #2B2B2B;
-  border: 0;
+  border: none;
+  border-radius: 0px;
   margin: 0;
 }
 
 .dropdown-button>popover>contents>*>*>*>row:selected:focus {
   background-color: #2B2B2B;
-  border: 0;
+  border: none;
+  border-radius: 0px;
   margin: 0;
 }
 
 .dropdown-button>popover>contents>*>*>*>row:focus {
   background-color: #353535;
-  border: 0;
+  border: none;
+  border-radius: 0px;
   margin: 0;
 }
 
@@ -388,27 +394,32 @@ box.info-box {
 
 /*Scale slider styling*/
 scale {
-  /*background-color: lightblue;*/
+  background-color: transparent;
   padding: 1px;
 }
 
 scale>trough {
-  /*min-height: 10px;*/
   background-color: #F15025;
+  color: #F15025;
+  background-image: none;
 }
 
 scale>trough>fill {
-  background-color: #FFFFFF;
+  background-color: #F15025;
+  color: #F15025;
+  background-image: none;
 }
 
 scale>trough>highlight {
   background-color: #F15025;
+  color: #F15025;
+  background-image: none;
 }
 
 scale>trough>slider {
   background-color: #FFFFFF;
-  /*min-width: 12px;
-  min-height: 12px;*/
+  /*min-width: 20px;
+  min-height: 20px;*/
 }
 
 scale>value {
@@ -418,8 +429,7 @@ scale>value {
 /*Progress bar styling */
 /*green: #5AC379, red: #FF2E00*/
 progressbar {
-  background-color: rgba(0, 0, 0, 0.0);
-  /*?*/
+  background-color: transparent;
   min-height: 20px;
   border-radius: 2px;
 }
@@ -479,6 +489,7 @@ switch {
   color: #FFFFFF;
   min-width: 30px;
   min-height: 16px;
+  border: none;
 }
 
 switch:checked {
@@ -486,6 +497,7 @@ switch:checked {
   color: #FFFFFF;
   min-width: 30px;
   min-height: 16px;
+  border: none;
 }
 
 /*Dropdown menu button*/
@@ -521,8 +533,8 @@ switch:checked {
 }
 
 .menu-button>popover>arrow {
-  background-color: rgba(0, 0, 0, 0.0);
-  border: 0;
+  background-color: transparent;
+  border: none;
   margin: 0;
   padding: 0;
 }
@@ -533,6 +545,7 @@ switch:checked {
   background-color: #353535;
   color: #FFFFFF;
   border-radius: 0px;
+  border: none;
   padding-left: 10px;
 }
 
@@ -540,6 +553,7 @@ switch:checked {
   background-color: #2B2B2B;
   color: #FFFFFF;
   border-radius: 0px;
+  border: none;
 }
 
 .popover-button:disabled {
@@ -570,12 +584,12 @@ entry>text {
 /*Tab widget (GtkNotebook)*/
 .tab-widget {
   background-color: #2B2B2B;
-  border: 0;
+  border: none;
 }
 
 .tab-widget>stack {
   background-color: #2B2B2B;
-  border: 0;
+  border: none;
 }
 
 .tab-widget>stack>box {
@@ -589,9 +603,9 @@ entry>text {
 .tab-widget>header>tabs>tab {
   background-color: #2B2B2B;
   margin-right: 20px;
+  box-shadow: none;
 }
 
-/* The standard appearance complies with the one defined in Figma
 .tab-widget>header>tabs>tab:checked {
   background-color: #2B2B2B;
   margin-right: 20px;
@@ -605,7 +619,13 @@ entry>text {
   background-image: none;
   box-shadow: inset 0 -2px 0 rgba(255, 255, 255, 0.09);
 }
-*/
+
+.tab-widget>header>tabs>tab:checked:hover {
+  background-color: #2B2B2B;
+  margin-right: 20px;
+  background-image: none;
+  box-shadow: inset 0 -2px 0 #F15025;
+}
 
 .tab-widget>header>tabs>tab>label {
   color: #FFFFFF;
