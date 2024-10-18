@@ -1,14 +1,12 @@
 use std::cell::RefCell;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, DropDown, CheckButton};
+use gtk::{glib, CompositeTemplate, DropDown, CheckButton, StringList};
 use glib::Binding;
 use glib::subclass::Signal;
 use std::sync::OnceLock;
-
+use std::process::{Command, Stdio};
 use crate::settings_gobject::SettingsGObject;
-
-//+list of supported resolutions/modes ?
 
 mod imp {
     use super::*;
@@ -22,6 +20,9 @@ mod imp {
         pub light_theme_button: TemplateChild<CheckButton>,
         #[template_child]
         pub dark_theme_button: TemplateChild<CheckButton>,
+
+        //must be read from somewhere
+        pub supported_resolutions: StringList,
 
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
@@ -53,7 +54,8 @@ mod imp {
         #[template_callback]
         fn on_apply_clicked(&self) {
             let value = self.resolution_switch.selected();
-            println!("Resolution changed! {}", value);
+            self.obj().set_resolution(value);
+            //signal to show popup which allows user revert settings
             self.obj().emit_by_name::<()>("resolution-changed", &[&value]);
         }
     }//end #[gtk::template_callbacks]
@@ -101,9 +103,19 @@ impl DisplaySettingsPage {
         glib::Object::builder().build()
     }
     
-    pub fn init(&self) {}
+    pub fn init(&self) {
+        //temporary, must be read from somewhere
+        let supported_resolutions = self.imp().supported_resolutions.clone();
+        //the list is taken from /sys/kernel/debug/dri/0/i915_display_info
+        supported_resolutions.append(&String::from("1920x1200"));
+        supported_resolutions.append(&String::from("1936x1203"));
+        supported_resolutions.append(&String::from("1952x1217"));
+        supported_resolutions.append(&String::from("2104x1236"));
+        let switch = self.imp().resolution_switch.get();
+        switch.set_model(Some(&supported_resolutions));
+    }
 
-    pub fn bind(&self, settings_object: &SettingsGObject) {
+    pub fn bind(&self, _settings_object: &SettingsGObject) {
         //unbind previous ones
         self.unbind();
         //make new
@@ -116,8 +128,34 @@ impl DisplaySettingsPage {
         }
     }
 
-    //fn set_resolution(&self, index: u32) {
-        //wlr-randr --output eDP-1 --mode 1920x1200
-    //}
+    pub fn set_resolution(&self, index: u32) {
+        //default: wlr-randr --output eDP-1 --mode 1920x1200
+        //custom: wlr-randr --output eDP-1 --custom-mode 'resolution@fps'
+        let resolution = self.imp().supported_resolutions.string(index).unwrap();
+        let command = if index > 0 {
+            String::from("wlr-randr --output eDP-1 --custom-mode") + &resolution + &String::from("@60")
+        } else {
+            String::from("wlr-randr --output eDP-1 --mode ") + &resolution
+        };
+        let output = Command::new(command.as_str())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .output();
+
+        match output {
+            Ok(output) => {
+                if output.status.success() {
+                    let stdout = String::from_utf8_lossy(&output.stdout);
+                    println!("wlr-randr output: {}", stdout);
+                } else {
+                    let stderr = String::from_utf8_lossy(&output.stderr);
+                    eprintln!("wlr-randr error: {}", stderr);
+                }
+            }
+            Err(e) => {
+                eprintln!("Failed to execute wlr-randr: {}", e);
+            }
+        }
+    }
 }
 
