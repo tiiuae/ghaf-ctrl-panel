@@ -40,21 +40,10 @@
         <child>
           <object class="GtkDropDown" id="resolution_switch">
             <style><class name="dropdown-button"/></style>
-            <!--<signal name="notify::selected" handler="on_resolution_changed" swapped="true"/>-->
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="width-request">220</property>
             <property name="height-request">30</property>
-            <property name="model">
-              <object class="GtkStringList">
-                <items>
-                  <item translatable="yes">1920x1200</item>
-                  <item translatable="yes">1936x1203</item>
-                  <item translatable="yes">1952x1217</item>
-                  <item translatable="yes">2104x1236</item>
-                </items>
-              </object>
-            </property>
           </object>
         </child>
       </object>
