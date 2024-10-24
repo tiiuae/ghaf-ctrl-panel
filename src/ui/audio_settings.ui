@@ -2,7 +2,6 @@
 <interface>
   <requires lib="gtk" version="4.0"/>
   <template class="AudioSettings" parent="GtkBox">
-    <!--<style><class name="vm-row"/></style>-->
     <property name="visible">True</property>
     <property name="orientation">vertical</property>
     <property name="can_focus">false</property>
@@ -11,7 +10,7 @@
     <property name="margin-start">20</property>
     <property name="margin-end">10</property>
     <property name="margin-top">10</property>
-    <property name="margin-bottom">20</property>
+    <property name="margin-bottom">10</property>
     <property name="spacing">10</property>
     <child>
       <object class="GtkLabel">

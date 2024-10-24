@@ -49,13 +49,14 @@ mod imp {
         #[template_callback]
         fn on_reset_clicked(&self) {
             println!("Reset to defaults!");
-            self.obj().emit_by_name::<()>("resolution-default", &[]);
+            self.obj().set_resolution(0);
+            self.obj().emit_by_name::<()>("default-display-settings", &[]);
         }
         #[template_callback]
         fn on_apply_clicked(&self) {
             let value = self.resolution_switch.selected();
             self.obj().set_resolution(value);
-            //signal to show popup which allows user revert settings
+            //signal to show popup(not implemented yet) which allows user revert settings
             self.obj().emit_by_name::<()>("resolution-changed", &[&value]);
         }
     }//end #[gtk::template_callbacks]
@@ -77,7 +78,7 @@ mod imp {
                     Signal::builder("resolution-changed")
                     .param_types([u32::static_type()])
                     .build(),
-                    Signal::builder("resolution-default")
+                    Signal::builder("default-display-settings")
                     .build(),
                     ]
             })
