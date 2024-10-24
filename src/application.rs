@@ -9,7 +9,8 @@ use std::rc::Rc;
 use crate::add_network_popup::AddNetworkPopup;
 use crate::confirm_display_settings_popup::ConfirmDisplaySettingsPopup;
 use crate::connection_config::ConnectionConfig;
-use crate::data_provider::imp::DataProvider;
+use crate::data_gobject::DataGObject;
+use crate::data_provider::imp::{DataProvider, LanguageRegionData};
 use crate::error_popup::ErrorPopup;
 use crate::settings_action::SettingsAction;
 use crate::vm_control_action::VMControlAction;
@@ -60,6 +61,37 @@ mod imp {
                 window
             } else {
                 let window = ControlPanelGuiWindow::new(&*application);
+
+                let win = window.clone();
+                glib::spawn_future_local(async move {
+                    let LanguageRegionData {
+                        languages,
+                        current_language,
+                        timezones,
+                        current_timezone,
+                    } = DataProvider::get_timezone_locale_info().await;
+                    let index = current_language.and_then(|cur| {
+                        languages
+                            .iter()
+                            .enumerate()
+                            .find_map(|(idx, lang)| (lang.code == cur).then_some(idx))
+                    });
+                    win.set_locale_model(
+                        languages.into_iter().map(DataGObject::from).collect(),
+                        index,
+                    );
+
+                    let index = current_timezone.and_then(|cur| {
+                        timezones
+                            .iter()
+                            .enumerate()
+                            .find_map(|(idx, tz)| (tz.code == cur).then_some(idx))
+                    });
+                    win.set_timezone_model(
+                        timezones.into_iter().map(DataGObject::from).collect(),
+                        index,
+                    );
+                });
                 window.upcast()
             };
 
@@ -91,6 +123,7 @@ impl ControlPanelGuiApplication {
         address: String,
         port: u16,
     ) -> Self {
+        let _ = DataGObject::static_type();
         let app: Self = glib::Object::builder()
             .property("application-id", application_id)
             .property("flags", flags)

@@ -95,21 +95,9 @@ mod imp {
         }
 
         #[template_callback]
-        fn on_locale_timezone_changed(&self, locale: u32, timezone: u32) {
+        fn on_locale_timezone_changed(&self, locale: String, timezone: String) {
             let action = SettingsAction::RegionNLanguage;
-            let variant = (
-                match locale {
-                    0 => "en_US.UTF-8",
-                    1 => "ar_AE.UTF-8",
-                    _ => return,
-                },
-                match timezone {
-                    0 => "Asia/Abu_Dhabi",
-                    1 => "Europe/Helsinki",
-                    _ => return,
-                },
-            )
-                .to_variant();
+            let variant = (locale, timezone).to_variant();
             self.obj()
                 .emit_by_name::<()>("settings-action", &[&action, &variant]);
         }
@@ -173,8 +161,20 @@ impl Settings {
         glib::Object::builder().build()
     }
 
+    pub fn set_locale_model(&self, model: ListStore, selected: Option<usize>) {
+        self.imp()
+            .language_region_settings_page
+            .set_locale_model(model, selected)
+    }
+
+    pub fn set_timezone_model(&self, model: ListStore, selected: Option<usize>) {
+        self.imp()
+            .language_region_settings_page
+            .set_timezone_model(model, selected)
+    }
+
     pub fn set_vm_model(&self, model: ListStore) {
-        self.imp().info_settings_page.set_vm_model(model.clone());
+        self.imp().info_settings_page.set_vm_model(model)
     }
     pub fn init(&self) {
         let this = self.clone();

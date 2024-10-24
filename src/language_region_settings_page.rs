@@ -1,11 +1,13 @@
+use gio::ListStore;
 use glib::subclass::Signal;
 use glib::Binding;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, DropDown};
+use gtk::{gio, glib, CompositeTemplate, DropDown};
 use std::cell::RefCell;
 use std::sync::OnceLock;
 
+use crate::data_gobject::DataGObject;
 use crate::settings_gobject::SettingsGObject;
 
 //+list of supported resolutions/modes ?
@@ -51,8 +53,16 @@ mod imp {
         }
         #[template_callback]
         fn on_apply_clicked(&self) {
-            let locale = self.language_switch.selected();
-            let timezone = self.timezone_switch.selected();
+            let locale = self
+                .language_switch
+                .selected_item()
+                .map(|obj| obj.downcast::<DataGObject>().unwrap().name())
+                .unwrap_or("C".into());
+            let timezone = self
+                .timezone_switch
+                .selected_item()
+                .map(|obj| obj.downcast::<DataGObject>().unwrap().name())
+                .unwrap_or("UTC".into());
             println!("Language and timezone changed! {locale}, {timezone}");
             self.obj()
                 .emit_by_name::<()>("locale-timezone-changed", &[&locale, &timezone]);
@@ -74,7 +84,7 @@ mod imp {
             SIGNALS.get_or_init(|| {
                 vec![
                     Signal::builder("locale-timezone-changed")
-                        .param_types([u32::static_type(), u32::static_type()])
+                        .param_types([String::static_type(), String::static_type()])
                         .build(),
                     Signal::builder("locale-default").build(),
                 ]
@@ -112,6 +122,20 @@ impl LanguageRegionSettingsPage {
         // Unbind all stored bindings
         for binding in self.imp().bindings.borrow_mut().drain(..) {
             binding.unbind();
+        }
+    }
+
+    pub fn set_locale_model(&self, model: ListStore, selected: Option<usize>) {
+        self.imp().language_switch.set_model(Some(&model));
+        if let Some(idx) = selected {
+            self.imp().language_switch.set_selected(idx as u32);
+        }
+    }
+
+    pub fn set_timezone_model(&self, model: ListStore, selected: Option<usize>) {
+        self.imp().timezone_switch.set_model(Some(&model));
+        if let Some(idx) = selected {
+            self.imp().timezone_switch.set_selected(idx as u32);
         }
     }
 }

@@ -1,4 +1,5 @@
 use adw::subclass::prelude::*;
+use gio::ListStore;
 use glib::{Object, Variant};
 use gtk::prelude::*;
 use gtk::{
@@ -332,5 +333,13 @@ impl ControlPanelGuiWindow {
     //pub API
     pub fn restore_default_display_settings(&self) {
         self.imp().settings_box.restore_default_display_settings();
+    }
+
+    pub fn set_locale_model(&self, store: ListStore, selected: Option<usize>) {
+        self.imp().settings_box.set_locale_model(store, selected);
+    }
+
+    pub fn set_timezone_model(&self, store: ListStore, selected: Option<usize>) {
+        self.imp().settings_box.set_timezone_model(store, selected);
     }
 }

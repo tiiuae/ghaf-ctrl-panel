@@ -4,6 +4,7 @@ mod application;
 mod audio_settings;
 mod confirm_display_settings_popup;
 mod connection_config;
+mod data_gobject;
 mod data_provider;
 mod display_settings_page;
 mod error_popup;

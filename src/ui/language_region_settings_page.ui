@@ -43,14 +43,9 @@
             <property name="valign">center</property>
             <property name="width-request">220</property>
             <property name="height-request">30</property>
-            <property name="model">
-              <object class="GtkStringList">
-                <items>
-                  <item translatable="yes">English (United States)</item>
-                  <item translatable="yes">Arabic (UAE)</item>
-                </items>
-              </object>
-            </property>
+	    <property name="expression">
+              <lookup name="display" type="DataGObject"/>
+	    </property>
           </object>
         </child>
       </object>
@@ -79,39 +74,11 @@
             <property name="valign">center</property>
             <property name="width-request">220</property>
             <property name="height-request">30</property>
-            <property name="model">
-              <object class="GtkStringList">
-                <items>
-		  <item translatable="yes">Abu Dhabi</item>
-                  <item translatable="yes">Helsinki</item>
-                </items>
-              </object>
-            </property>
+	    <property name="expression">
+              <lookup name="display" type="DataGObject"/>
+	    </property>
           </object>
         </child>
-      </object>
-    </child>
-    <child>
-      <object class="GtkBox">
-          <style><class name="info-box"/></style>
-          <property name="orientation">vertical</property>
-          <property name="vexpand">false</property>
-          <property name="hexpand">true</property>
-          <property name="margin-top">10</property>
-          <property name="margin-bottom">10</property>
-          <property name="spacing">10</property>
-          <child>
-            <object class="GtkLabel" id="label">
-            <style><class name="normal-text"/></style>
-            <property name="label">Appearance</property>
-            <property name="halign">start</property>
-            </object>
-          </child>
-        </object>
-      </child>
-    <child>
-      <object class="GtkBox">
-      <property name="vexpand">true</property>
       </object>
     </child>
     <child>
