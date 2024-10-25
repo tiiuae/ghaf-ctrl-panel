@@ -168,10 +168,10 @@ impl ControlPanelGuiApplication {
         self.imp().data_provider.borrow().get_store()
     }
 
-    pub fn control_vm(&self, action: VMControlAction, vm_name: String) {
+    pub fn control_vm(&self, action: VMControlAction, name: String, vm_name: String) {
         println!("Control VM {vm_name}, {:?}", action);
         match action {
-            VMControlAction::Start => self.imp().data_provider.borrow().start_vm(vm_name),
+            VMControlAction::Start => self.imp().data_provider.borrow().start_vm(name, vm_name),
             VMControlAction::Restart => self.imp().data_provider.borrow().restart_vm(vm_name),
             VMControlAction::Pause => self.imp().data_provider.borrow().pause_vm(vm_name),
             VMControlAction::Resume => self.imp().data_provider.borrow().resume_vm(vm_name),

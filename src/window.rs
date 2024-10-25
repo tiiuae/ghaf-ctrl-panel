@@ -85,9 +85,9 @@ mod imp {
         }
 
         #[template_callback]
-        fn on_vm_control_action(&self, action: VMControlAction, name: String) {
+        fn on_vm_control_action(&self, action: VMControlAction, name: String, vm_name: String) {
             let app = self.obj().get_app_ref();
-            app.control_vm(action, name);
+            app.control_vm(action, name, vm_name);
         }
         #[template_callback]
         fn on_settings_action(&self, action: SettingsAction, value: Variant) {

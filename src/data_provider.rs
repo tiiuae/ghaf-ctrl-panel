@@ -214,12 +214,11 @@ pub mod imp {
             }
         }
 
-        pub fn start_vm(&self, name: String) {
+        pub fn start_vm(&self, name: String, _vm_name: String) {//need to test
             let admin_client = self.admin_client.clone();
             thread::spawn(move || {//not sure it is really needed
                     Runtime::new().unwrap().block_on(async move {
-                    //there is only one name in my disposal
-                    if let Err(error) = admin_client.read().unwrap().start(name.clone(), None, Vec::<String>::new()).await {
+                    if let Err(error) = admin_client.read().unwrap().start(name, None/*Some(vm_name)*/, Vec::<String>::new()).await {
                         println!("Start request error {error}");
                     }
                     else {
@@ -257,11 +256,11 @@ pub mod imp {
             });
         }
 
-        pub fn shutdown_vm(&self, name: String) {
+        pub fn shutdown_vm(&self, vm_name: String) {
             let admin_client = self.admin_client.clone();
             thread::spawn(move || {
                 Runtime::new().unwrap().block_on(async move {
-                    if let Err(error) = admin_client.read().unwrap().stop(name).await {
+                    if let Err(error) = admin_client.read().unwrap().stop(vm_name).await {
                         println!("Stop request error {error}");
                     }
                     else {

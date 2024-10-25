@@ -64,22 +64,23 @@ mod imp {
     impl VMSettings {
         #[template_callback]
         fn on_vm_start_clicked(&self) {
-            let vm_name = self.name_slot_1.label();
-            //emit signal
-            self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Start, &vm_name]);
-            //and close menu
+            let name = self.name_slot_1.label();
+            let vm_name = self.name_slot_2.label();
+            self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Start, &name, &vm_name]);
             self.popover_menu.popdown();
         }
         #[template_callback]
         fn on_vm_shutdown_clicked(&self) {
-            let vm_name = self.name_slot_1.label();
-            self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Shutdown, &vm_name]);
+            let name = self.name_slot_1.label();
+            let vm_name = self.name_slot_2.label();
+            self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Shutdown, &name, &vm_name]);
             self.popover_menu.popdown();
         }
         #[template_callback]
         fn on_vm_pause_clicked(&self) {
-            let vm_name = self.name_slot_1.label();
-            self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Pause, &vm_name]);
+            let name = self.name_slot_1.label();
+            let vm_name = self.name_slot_2.label();
+            self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Pause, &name, &vm_name]);
             self.popover_menu.popdown();
         }
         #[template_callback]
@@ -107,7 +108,13 @@ mod imp {
             SIGNALS.get_or_init(|| {
                 vec![
                     Signal::builder("vm-control-action")
-                    .param_types([VMControlAction::static_type(), String::static_type()])
+                    .param_types(
+                        [
+                        VMControlAction::static_type(),
+                        String::static_type(),
+                        String::static_type(),
+                        ]
+                    )
                     .build(),
                     Signal::builder("vm-mic-changed")
                     .param_types([u32::static_type()])
