@@ -56,8 +56,8 @@ mod imp {
         fn on_apply_clicked(&self) {
             let value = self.resolution_switch.selected();
             self.obj().set_resolution(value);
-            //signal to show popup(not implemented yet) which allows user revert settings
-            self.obj().emit_by_name::<()>("resolution-changed", &[&value]);
+            //to test popup appearance
+            //self.obj().emit_by_name::<()>("resolution-changed", &[&value]);
         }
     }//end #[gtk::template_callbacks]
 
@@ -148,6 +148,11 @@ impl DisplaySettingsPage {
                 if output.status.success() {
                     let stdout = String::from_utf8_lossy(&output.stdout);
                     println!("wlr-randr output: {}", stdout);
+
+                    //signal to show popup(not implemented yet) which allows user revert settings
+                    if index > 0 {
+                        self.emit_by_name::<()>("resolution-changed", &[&index]);
+                    }
                 } else {
                     let stderr = String::from_utf8_lossy(&output.stderr);
                     eprintln!("wlr-randr error: {}", stderr);

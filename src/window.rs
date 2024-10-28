@@ -312,4 +312,9 @@ impl ControlPanelGuiWindow {
     fn set_vm_details(&self, vm_obj: &VMGObject) {
         self.imp().vm_settings_box.bind(vm_obj);
     }
+
+    //pub API
+    pub fn set_default_resolution(&self) {
+        self.imp().settings_box.set_default_resolution();
+    }
 }

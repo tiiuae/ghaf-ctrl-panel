@@ -96,6 +96,12 @@ mod imp {
             let empty = Variant::from(None::<()>.as_ref());
             self.obj().emit_by_name::<()>("settings-action", &[&action, &empty]);
         }
+        #[template_callback]
+        fn on_show_confirm_resolution_popup(&self, _value: u32) {
+            let action = SettingsAction::ShowConfirmResolutionPopup;
+            let empty = Variant::from(None::<()>.as_ref());
+            self.obj().emit_by_name::<()>("settings-action", &[&action, &empty]);
+        }
     }//end #[gtk::template_callbacks]
 
     impl ObjectImpl for Settings {
@@ -174,6 +180,10 @@ impl Settings {
         for binding in self.imp().bindings.borrow_mut().drain(..) {
             binding.unbind();
         }
+    }
+
+    pub fn set_default_resolution(&self) {
+        self.imp().display_settings_page.set_resolution(0);
     }
 }
 
