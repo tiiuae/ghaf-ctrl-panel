@@ -50,18 +50,20 @@ mod imp {
     impl DisplaySettingsPage {
         #[template_callback]
         fn on_reset_clicked(&self) {
-            println!("Reset to defaults!");
-            self.obj().set_resolution(0);
+            self.obj().restore_default();
             self.obj().emit_by_name::<()>("default-display-settings", &[]);
         }
         #[template_callback]
         fn on_apply_clicked(&self) {
             let resolution_idx = self.resolution_switch.selected();
             let scale_idx = self.scale_switch.selected();
-            self.obj().set_resolution(resolution_idx);
-            self.obj().set_scale(scale_idx);
-            //to test popup appearance
-            //self.obj().emit_by_name::<()>("resolution-changed", &[&value]);
+            let is_resolution_set = self.obj().set_resolution(resolution_idx);
+            let is_scale_set = self.obj().set_scale(scale_idx);
+            if (resolution_idx > 0 || scale_idx > 0) &&
+                is_resolution_set &&
+                is_scale_set {
+                    self.obj().emit_by_name::<()>("display-settings-changed", &[]);
+                }
         }
     }//end #[gtk::template_callbacks]
 
@@ -79,10 +81,11 @@ mod imp {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
             SIGNALS.get_or_init(|| {
                 vec![
-                    Signal::builder("resolution-changed")
-                    .param_types([u32::static_type()])
+                    Signal::builder("display-settings-changed")
                     .build(),
                     Signal::builder("default-display-settings")
+                    .build(),
+                    Signal::builder("display-settings-error")
                     .build(),
                     ]
             })
@@ -133,19 +136,27 @@ impl DisplaySettingsPage {
         }
     }
 
-    pub fn set_resolution(&self, index: u32) {
+    pub fn restore_default(&self) {
+        self.imp().resolution_switch.set_selected(0);
+        self.imp().scale_switch.set_selected(0);
+        self.set_resolution(0);
+        self.set_scale(0);
+    }
+
+    pub fn set_resolution(&self, index: u32) -> bool {
         //default: wlr-randr --output eDP-1 --mode 1920x1200
         //custom: wlr-randr --output eDP-1 --custom-mode 'resolution@fps'
+        let mut result: bool = false;
         let resolution = self.imp().supported_resolutions.string(index).unwrap();
-        let command = if index > 0 {
-            String::from("wlr-randr --output eDP-1 --custom-mode") + &resolution + &String::from("@60")
-        } else {
-            String::from("wlr-randr --output eDP-1 --mode ") + &resolution
-        };
-        let output = Command::new(command.as_str())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .output();
+        let output = Command::new("wlr-randr")
+            .arg("--output")
+            .arg("eDP-1")
+            .arg(if index > 0 { "--custom-mode" } else { "--mode" })
+            .arg(if index > 0 {String::from(resolution) + &String::from("@60")} else {String::from(resolution)})
+            //.env("PATH", "/run/current-system/sw/bin")
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output();
 
         match output {
             Ok(output) => {
@@ -153,21 +164,23 @@ impl DisplaySettingsPage {
                     let stdout = String::from_utf8_lossy(&output.stdout);
                     println!("wlr-randr output: {}", stdout);
 
-                    if index > 0 {
-                        self.emit_by_name::<()>("resolution-changed", &[&index]);
-                    }
+                    result = true;
                 } else {
                     let stderr = String::from_utf8_lossy(&output.stderr);
                     eprintln!("wlr-randr error: {}", stderr);
+                    //emit error signal to show popup
                 }
             }
             Err(e) => {
                 eprintln!("Failed to execute wlr-randr: {}", e);
+                //emit error signal to show popup
             }
         }
+        result
     }
 
-    pub fn set_scale(&self, index: u32) {
+    pub fn set_scale(&self, index: u32) -> bool {
+        let mut result: bool = false;
         let factor = match index {
             0 => 1.0,
             1 => 1.25,
@@ -175,12 +188,15 @@ impl DisplaySettingsPage {
             _ => 1.0,
         };
 
-        let command = String::from("wlr-randr --output eDP-1 --scale ") + &factor.to_string();
-
-        let output = Command::new(command.as_str())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .output();
+        let output = Command::new("wlr-randr")
+            .arg("--output")
+            .arg("eDP-1")
+            .arg("--scale")
+            .arg(&factor.to_string())
+            //.env("PATH", "/run/current-system/sw/bin")
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output();
 
         match output {
             Ok(output) => {
@@ -188,18 +204,19 @@ impl DisplaySettingsPage {
                     let stdout = String::from_utf8_lossy(&output.stdout);
                     println!("wlr-randr scale output: {}", stdout);
 
-                    if index > 0 {
-                        self.emit_by_name::<()>("resolution-changed", &[&index]);
-                    }
+                    result = true;
                 } else {
                     let stderr = String::from_utf8_lossy(&output.stderr);
                     eprintln!("wlr-randr error: {}", stderr);
+                    //emit error signal
                 }
             }
             Err(e) => {
                 eprintln!("Failed to execute wlr-randr: {}", e);
+                //emit error signal
             }
         }
+        result
     }
 }
 

@@ -17,7 +17,7 @@
     <file preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
     <file preprocess="xml-stripblanks">ui/connection_config.ui</file>
     <file preprocess="xml-stripblanks">ui/add_network_popup.ui</file>
-    <file preprocess="xml-stripblanks">ui/confirm_resolution_popup.ui</file>
+    <file preprocess="xml-stripblanks">ui/confirm_display_settings_popup.ui</file>
     <file>styles/style.css</file>
     <!-- Icons -->
     <file>icons/ghaf_logo.svg</file>

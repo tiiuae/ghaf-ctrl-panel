@@ -97,8 +97,8 @@ mod imp {
             self.obj().emit_by_name::<()>("settings-action", &[&action, &empty]);
         }
         #[template_callback]
-        fn on_show_confirm_resolution_popup(&self, _value: u32) {
-            let action = SettingsAction::ShowConfirmResolutionPopup;
+        fn on_show_confirm_display_settings_popup(&self) {
+            let action = SettingsAction::ShowConfirmDisplaySettingsPopup;
             let empty = Variant::from(None::<()>.as_ref());
             self.obj().emit_by_name::<()>("settings-action", &[&action, &empty]);
         }
@@ -182,8 +182,8 @@ impl Settings {
         }
     }
 
-    pub fn set_default_resolution(&self) {
-        self.imp().display_settings_page.set_resolution(0);
+    pub fn restore_default_display_settings(&self) {
+        self.imp().display_settings_page.restore_default();
     }
 }
 

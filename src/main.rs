@@ -22,7 +22,7 @@ mod vm_control_action;
 mod trust_level;
 mod add_network_popup;
 mod settings_action;
-mod confirm_resolution_popup;
+mod confirm_display_settings_popup;
 
 use self::application::ControlPanelGuiApplication;
 use self::window::ControlPanelGuiWindow;

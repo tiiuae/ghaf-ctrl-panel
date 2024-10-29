@@ -13,8 +13,8 @@ mod imp {
     use super::*;
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/confirm_resolution_popup.ui")]
-    pub struct ConfirmResolutionPopup {
+    #[template(resource = "/org/gnome/controlpanelgui/ui/confirm_display_settings_popup.ui")]
+    pub struct ConfirmDisplaySettingsPopup {
         #[template_child]
         pub countdown_label: TemplateChild<Label>,
         #[template_child]
@@ -27,9 +27,9 @@ mod imp {
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for ConfirmResolutionPopup {
-        const NAME: &'static str = "ConfirmResolutionPopup";
-        type Type = super::ConfirmResolutionPopup;
+    impl ObjectSubclass for ConfirmDisplaySettingsPopup {
+        const NAME: &'static str = "ConfirmDisplaySettingsPopup";
+        type Type = super::ConfirmDisplaySettingsPopup;
         type ParentType = gtk::Window;
 
         fn class_init(klass: &mut Self::Class) {
@@ -43,7 +43,7 @@ mod imp {
     }
 
     #[gtk::template_callbacks]
-    impl ConfirmResolutionPopup {
+    impl ConfirmDisplaySettingsPopup {
         #[template_callback]
         fn on_ok_clicked(&self) {
             self.obj().close();
@@ -55,7 +55,7 @@ mod imp {
         }
     }//end #[gtk::template_callbacks]
 
-    impl ObjectImpl for ConfirmResolutionPopup {
+    impl ObjectImpl for ConfirmDisplaySettingsPopup {
         fn constructed(&self) {
             // Call "constructed" on parent
             self.parent_constructed();
@@ -75,23 +75,23 @@ mod imp {
             })
         }
     }
-    impl WidgetImpl for ConfirmResolutionPopup {}
-    impl BoxImpl for ConfirmResolutionPopup {}
-    impl WindowImpl for ConfirmResolutionPopup {}
+    impl WidgetImpl for ConfirmDisplaySettingsPopup {}
+    impl BoxImpl for ConfirmDisplaySettingsPopup {}
+    impl WindowImpl for ConfirmDisplaySettingsPopup {}
 }
 
 glib::wrapper! {
-pub struct ConfirmResolutionPopup(ObjectSubclass<imp::ConfirmResolutionPopup>)
+pub struct ConfirmDisplaySettingsPopup(ObjectSubclass<imp::ConfirmDisplaySettingsPopup>)
 @extends gtk::Widget, gtk::Window, @implements gio::ActionGroup, gio::ActionMap;
 }
 
-impl Default for ConfirmResolutionPopup {
+impl Default for ConfirmDisplaySettingsPopup {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl ConfirmResolutionPopup {
+impl ConfirmDisplaySettingsPopup {
     pub fn new() -> Self {
         glib::Object::builder().build()
     }

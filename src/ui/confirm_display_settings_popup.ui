@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
     <requires lib="gtk" version="4.0"/>
-    <template class="ConfirmResolutionPopup" parent="GtkWindow">
+    <template class="ConfirmDisplaySettingsPopup" parent="GtkWindow">
     <style><class name="settings-popup"/></style>
     <property name="decorated">false</property>
     <property name="width-request">320</property>
@@ -19,7 +19,7 @@
       <property name="vexpand">false</property>
         <child>
           <object class="GtkLabel">
-            <property name="label">The display resolution has been changed</property>
+            <property name="label">The display settings have been changed</property>
             <style><class name="title"/></style>
             <property name="halign">center</property>
           </object>
@@ -27,7 +27,7 @@
 
         <child>
           <object class="GtkLabel">
-            <property name="label">If you would like to switch back to default resolution, press "Reset to default", otherwise press OK or wait when window closes automatically.</property>
+            <property name="label">If you would like to switch back to default display settings, press "Reset to default", otherwise press OK or wait when window closes automatically.</property>
             <property name="lines">2</property>
             <property name="max-width-chars">70</property>
             <style><class name="normal-text"/></style>

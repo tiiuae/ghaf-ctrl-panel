@@ -259,7 +259,7 @@
                         <property name="name">display</property>
                         <property name="child">
                             <object class="DisplaySettingsPage" id="display_settings_page">
-                            <signal name="resolution-changed" handler="on_show_confirm_resolution_popup" swapped="true"/>
+                            <signal name="display-settings-changed" handler="on_show_confirm_display_settings_popup" swapped="true"/>
                             </object>
                         </property>
                     </object>

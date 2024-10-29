@@ -13,7 +13,7 @@ use crate::connection_config::ConnectionConfig;
 use crate::vm_control_action::VMControlAction;
 use crate::settings_action::SettingsAction;
 use crate::add_network_popup::AddNetworkPopup;
-use crate::confirm_resolution_popup::ConfirmResolutionPopup;
+use crate::confirm_display_settings_popup::ConfirmDisplaySettingsPopup;
 
 mod imp {
     use super::*;
@@ -214,19 +214,18 @@ impl ControlPanelGuiApplication {
                 popup.present();
             },
             SettingsAction::ShowAddKeyboardPopup => {},
-            SettingsAction::ShowConfirmResolutionPopup => {
+            SettingsAction::ShowConfirmDisplaySettingsPopup => {
                 let app = self.clone();
                 let window = self.active_window().unwrap();
-                let popup = ConfirmResolutionPopup::new();
+                let popup = ConfirmDisplaySettingsPopup::new();
                 popup.set_transient_for(Some(&window));
                 popup.set_modal(true);
                 popup.connect_local(
                     "reset-default",
                     false,
                     move |_| {
-                        println!("Reset to default resolution chosen");
                         if let Some(window) = window.downcast_ref::<ControlPanelGuiWindow>() {
-                            window.set_default_resolution();
+                            window.restore_default_display_settings();
                         }
                         None
                     },

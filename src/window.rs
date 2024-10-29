@@ -314,7 +314,7 @@ impl ControlPanelGuiWindow {
     }
 
     //pub API
-    pub fn set_default_resolution(&self) {
-        self.imp().settings_box.set_default_resolution();
+    pub fn restore_default_display_settings(&self) {
+        self.imp().settings_box.restore_default_display_settings();
     }
 }
