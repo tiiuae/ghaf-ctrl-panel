@@ -35,6 +35,7 @@
              pkgs.glib
              pkgs.protobuf
              pkgs.wrapGAppsHook4
+             pkgs.dbus
           ];
           buildInputs = [
             # Add additional build inputs here
@@ -43,6 +44,7 @@
              pkgs.pango
              pkgs.gtk4
              pkgs.libadwaita
+             pkgs.dbus
           ] ++ lib.optionals pkgs.stdenv.isDarwin [
             # Additional darwin specific inputs can be set here
             pkgs.libiconv
@@ -93,6 +95,7 @@
              pkgs.libadwaita
              pkgs.pkg-config
              pkgs.protobuf
+             pkgs.dbus
           ];
         };
       });

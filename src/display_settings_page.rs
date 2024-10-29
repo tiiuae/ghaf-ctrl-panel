@@ -25,7 +25,6 @@ mod imp {
 
         //must be read from somewhere
         pub supported_resolutions: StringList,
-        pub scales: StringList,
 
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
@@ -119,11 +118,6 @@ impl DisplaySettingsPage {
         supported_resolutions.append(&String::from("2104x1236"));
         let switch = self.imp().resolution_switch.get();
         switch.set_model(Some(&supported_resolutions));
-
-        let scales = self.imp().scales.clone();
-        scales.append("100%");
-        scales.append("125%");
-        scales.append("150%");
     }
 
     pub fn bind(&self, _settings_object: &SettingsGObject) {
