@@ -17,12 +17,15 @@ mod imp {
         #[template_child]
         pub resolution_switch: TemplateChild<DropDown>,
         #[template_child]
+        pub scale_switch: TemplateChild<DropDown>,
+        #[template_child]
         pub light_theme_button: TemplateChild<CheckButton>,
         #[template_child]
         pub dark_theme_button: TemplateChild<CheckButton>,
 
         //must be read from somewhere
         pub supported_resolutions: StringList,
+        pub scales: StringList,
 
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
@@ -54,8 +57,10 @@ mod imp {
         }
         #[template_callback]
         fn on_apply_clicked(&self) {
-            let value = self.resolution_switch.selected();
-            self.obj().set_resolution(value);
+            let resolution_idx = self.resolution_switch.selected();
+            let scale_idx = self.scale_switch.selected();
+            self.obj().set_resolution(resolution_idx);
+            self.obj().set_scale(scale_idx);
             //to test popup appearance
             //self.obj().emit_by_name::<()>("resolution-changed", &[&value]);
         }
@@ -114,6 +119,11 @@ impl DisplaySettingsPage {
         supported_resolutions.append(&String::from("2104x1236"));
         let switch = self.imp().resolution_switch.get();
         switch.set_model(Some(&supported_resolutions));
+
+        let scales = self.imp().scales.clone();
+        scales.append("100%");
+        scales.append("125%");
+        scales.append("150%");
     }
 
     pub fn bind(&self, _settings_object: &SettingsGObject) {
@@ -149,7 +159,41 @@ impl DisplaySettingsPage {
                     let stdout = String::from_utf8_lossy(&output.stdout);
                     println!("wlr-randr output: {}", stdout);
 
-                    //signal to show popup(not implemented yet) which allows user revert settings
+                    if index > 0 {
+                        self.emit_by_name::<()>("resolution-changed", &[&index]);
+                    }
+                } else {
+                    let stderr = String::from_utf8_lossy(&output.stderr);
+                    eprintln!("wlr-randr error: {}", stderr);
+                }
+            }
+            Err(e) => {
+                eprintln!("Failed to execute wlr-randr: {}", e);
+            }
+        }
+    }
+
+    pub fn set_scale(&self, index: u32) {
+        let factor = match index {
+            0 => 1.0,
+            1 => 1.25,
+            2 => 1.5,
+            _ => 1.0,
+        };
+
+        let command = String::from("wlr-randr --output eDP-1 --scale ") + &factor.to_string();
+
+        let output = Command::new(command.as_str())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .output();
+
+        match output {
+            Ok(output) => {
+                if output.status.success() {
+                    let stdout = String::from_utf8_lossy(&output.stdout);
+                    println!("wlr-randr scale output: {}", stdout);
+
                     if index > 0 {
                         self.emit_by_name::<()>("resolution-changed", &[&index]);
                     }

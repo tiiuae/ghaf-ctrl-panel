@@ -48,6 +48,60 @@
         </child>
       </object>
     </child>
+
+    <child>
+      <object class="GtkBox">
+      <style><class name="info-box"/></style>
+      <property name="orientation">vertical</property>
+      <property name="vexpand">false</property>
+      <property name="hexpand">true</property>
+      <property name="margin-top">10</property>
+      <property name="margin-bottom">10</property>
+      <property name="spacing">10</property>
+        <child>
+          <object class="GtkLabel">
+          <style><class name="normal-text"/></style>
+          <property name="label">Scale</property>
+          <property name="halign">start</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkDropDown" id="scale_switch">
+            <style><class name="dropdown-button"/></style>
+            <property name="halign">start</property>
+            <property name="valign">center</property>
+            <property name="width-request">220</property>
+            <property name="height-request">30</property>
+            <property name="model">
+              <object class="GtkStringList">
+                <items>
+                  <item translatable="yes">100%</item>
+                  <item translatable="yes">125%</item>
+                  <item translatable="yes">150%</item>
+                </items>
+              </object>
+            </property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <!--<child>
+      <object class="GtkScale" id="fixed_scale">
+        <property name="orientation">horizontal</property>
+        <property name="adjustment">
+          <object class="GtkAdjustment">
+            <property name="lower">100</property>
+            <property name="upper">150</property>
+            <property name="step-increment">25</property>
+            <property name="page-increment">25</property>
+            <property name="value">100</property>
+          </object>
+        </property>
+        <property name="draw-value">true</property>
+      </object>
+    </child>-->
+
     <child>
       <object class="GtkBox">
           <style><class name="info-box"/></style>
