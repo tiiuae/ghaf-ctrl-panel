@@ -13,14 +13,37 @@
     <property name="margin-bottom">10</property>
     <property name="spacing">10</property>
     <child>
-      <object class="GtkLabel">
-      <style><class name="title"/></style>
-      <property name="halign">start</property>
-      <property name="label">Audio Settings</property>
+      <object class="GtkBox">
+      <style><class name="info-box"/></style>
+      <property name="orientation">horizontal</property>
       <property name="margin-start">0</property>
       <property name="margin-end">0</property>
       <property name="margin-top">10</property>
       <property name="margin-bottom">10</property>
+      <property name="hexpand">true</property>
+        <child>
+          <object class="GtkLabel">
+          <style><class name="title"/></style>
+          <property name="halign">start</property>
+          <property name="label">Audio Settings</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+          <property name="hexpand">true</property>
+          <property name="orientation">horizontal</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton">
+          <property name="label">Open advanced settings</property>
+          <signal name="clicked" handler="on_advanced_settings_clicked" swapped="true"/>
+          <style><class name="settings-button"/></style>
+          <property name="width-request">140</property>
+          <property name="height-request">30</property>
+          <property name="halign">end</property>
+          </object>
+        </child>
       </object>
     </child>
     <child>

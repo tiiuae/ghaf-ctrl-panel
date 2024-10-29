@@ -5,6 +5,8 @@ use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, Box, DropDown, Scale};
 use glib::{Binding, Properties};
 use glib::subclass::Signal;
+use dbus::blocking::{Connection, Proxy};
+use std::time::Duration;
 
 mod imp {
     use super::*;
@@ -51,6 +53,10 @@ mod imp {
 
     #[gtk::template_callbacks]
     impl AudioSettings {
+        #[template_callback]
+        fn on_advanced_settings_clicked(&self) {
+            self.obj().open_advanced_settings_widget();
+        }
         #[template_callback]
         fn on_mic_changed(&self) {
             let value = self.mic_switch.selected();
@@ -147,6 +153,31 @@ impl AudioSettings {
     pub fn new() -> Self {
         //glib::Object::new::<Self>()
         glib::Object::builder().build()
+    }
+
+    pub fn open_advanced_settings_widget(&self) {
+        // Connect to the session bus
+        let connection = match Connection::new_session() {
+            Ok(connection) => connection,
+            Err(e) => {
+                eprintln!("Failed to connect to session bus: {}", e);
+                return;
+            }
+        };
+
+        // Create a proxy to the object and interface
+        let proxy = Proxy::new(
+            "org.ghaf.Audio",     // Service name
+            "/org/ghaf/Audio",    // Object path
+            Duration::from_millis(5000), // Timeout for the method call
+            &connection
+        );
+
+        // Make the method call
+        match proxy.method_call("org.ghaf.Audio", "Open", ()) {
+            Ok(()) => println!("D-Bus message has been sent successfully."),
+            Err(e) => eprintln!("Failed to send D-Bus message: {}", e),
+        }
     }
 
     /*
