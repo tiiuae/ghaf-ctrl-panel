@@ -51,7 +51,7 @@ glib::wrapper! {
 }
 
 impl VMGObject {
-    pub fn new(name: String, details: String, status: VMStatus, trust_level: TrustLevel) -> Self {
+    pub fn new(name: String, details: String, _status: VMStatus, _trust_level: TrustLevel) -> Self {
         let is_app_vm = name.starts_with("microvm@");
         let app_name = if is_app_vm {
             let re = Regex::new(r"^microvm@([^@-]+)-.+$").unwrap();
@@ -66,8 +66,9 @@ impl VMGObject {
             .property("app-name", app_name)
             .property("is-app-vm", is_app_vm)
             .property("details", details)
-            .property("status", status as u8)
-            .property("trust-level", trust_level as u8)
+            //for demo
+            .property("status", 0u8)//status as u8)
+            .property("trust-level", 0u8)//trust_level as u8)
             .build()
     }
 
@@ -77,7 +78,8 @@ impl VMGObject {
 
     pub fn update(&self, query_result: QueryResult) {
         self.set_property("details", query_result.description);
-        self.set_property("status", query_result.status as u8);
-        self.set_property("trust-level", query_result.trust_level as u8);
+        //for demo
+        //self.set_property("status", query_result.status as u8);
+        //self.set_property("trust-level", query_result.trust_level as u8);
     }
 }

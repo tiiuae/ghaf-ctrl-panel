@@ -153,7 +153,7 @@ impl DisplaySettingsPage {
             .arg("eDP-1")
             .arg(if index > 0 { "--custom-mode" } else { "--mode" })
             .arg(if index > 0 {String::from(resolution) + &String::from("@60")} else {String::from(resolution)})
-            //.env("PATH", "/run/current-system/sw/bin")
+            .env("PATH", "/run/current-system/sw/bin")
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .output();
@@ -193,7 +193,7 @@ impl DisplaySettingsPage {
             .arg("eDP-1")
             .arg("--scale")
             .arg(&factor.to_string())
-            //.env("PATH", "/run/current-system/sw/bin")
+            .env("PATH", "/run/current-system/sw/bin")
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .output();
