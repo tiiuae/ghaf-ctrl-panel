@@ -79,7 +79,7 @@ pub mod imp {
                             println!("Error received from client lib!");
                         }
                         println!("Waiting for data...");
-                        sleep(Duration::new(2,0)).await;
+                        sleep(Duration::from_millis(1000)).await;
                     }
 
                     println!("BreakLoop");
@@ -89,7 +89,7 @@ pub mod imp {
 
             *self.handle.borrow_mut() = Some(handle);
 
-            glib::source::idle_add_local(move || {
+            glib::source::timeout_add_local(Duration::from_millis(1000), move || {
                 while let Ok(event_ext) = event_rx.try_recv() {
                     match event_ext {
                         EventExtended::InitialList(list) => {
@@ -114,16 +114,6 @@ pub mod imp {
                                         }
                                     }
                                 }
-                                //for some reason func is not found
-                                /*store_inner.find_with_equal_func(|item| {
-                                    let obj = item.downcast_ref::<VMGObject>().unwrap();
-                                    if obj.name() == result.name {
-                                        obj.update(result);
-                                        true // Return true if the item is found and updated
-                                    } else {
-                                        false // Continue searching otherwise
-                                    }
-                                });*/
                             },
                             Event::UnitShutdown(result) => {
                                 println!("Shutdown info: {:?}", result);
@@ -294,4 +284,3 @@ pub mod imp {
         }
     }
 }
-
