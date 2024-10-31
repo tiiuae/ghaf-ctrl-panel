@@ -1,5 +1,4 @@
 use std::cell::RefCell;
-use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, Button};
 use glib::Binding;
@@ -77,7 +76,7 @@ impl SecuritySettingsPage {
     
     pub fn init(&self) {}
 
-    pub fn bind(&self, settings_object: &SettingsGObject) {
+    pub fn bind(&self, _settings_object: &SettingsGObject) {
         //unbind previous ones
         self.unbind();
         //make new

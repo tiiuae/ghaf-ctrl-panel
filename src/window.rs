@@ -1,8 +1,8 @@
 use std::rc::Rc;
 use gtk::prelude::*;
 use adw::subclass::prelude::*;
-use gtk::{gio, glib, CompositeTemplate, Stack, Image, Button, ToggleButton, MenuButton, ListView, SingleSelection, CustomFilter, SignalListItemFactory, FilterListModel, ListItem,};
-use glib::{Binding, Object, Variant};
+use gtk::{gio, glib, CompositeTemplate, Stack, Image, ToggleButton, MenuButton, ListView, SingleSelection, CustomFilter, SignalListItemFactory, FilterListModel, ListItem,};
+use glib::{Object, Variant};
 
 use crate::application::ControlPanelGuiApplication;
 use crate::vm_gobject::VMGObject;

@@ -260,13 +260,13 @@ pub mod imp {
             });
         }
 
-        pub fn restart_vm(&self, name: String) {
+        pub fn restart_vm(&self, _name: String) {
             println!("Restart is not implemented on client lib!");
             //no restart in admin_client
             //self.admin_client.restart(name);
         }
 
-        pub fn add_network(&self, name: String, security: String, password: String) {
+        pub fn add_network(&self, _name: String, _security: String, _password: String) {
             println!("Not yet implemented!");
         }
     }

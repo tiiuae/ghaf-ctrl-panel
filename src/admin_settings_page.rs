@@ -88,7 +88,7 @@ impl AdminSettingsPage {
     
     pub fn init(&self) {}
 
-    pub fn bind(&self, settings_object: &SettingsGObject) {
+    pub fn bind(&self, _settings_object: &SettingsGObject) {
         //unbind previous ones
         self.unbind();
         //make new

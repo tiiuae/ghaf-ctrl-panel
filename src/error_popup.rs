@@ -1,13 +1,10 @@
 use std::cell::RefCell;
 use std::sync::OnceLock;
-use std::rc::Rc;
-use std::time::Duration;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{gio, glib, CompositeTemplate, Button, Label};
 use glib::Binding;
 use glib::subclass::Signal;
-use glib::timeout_add_local;
 
 mod imp {
     use super::*;

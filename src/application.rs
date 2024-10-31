@@ -216,7 +216,7 @@ impl ControlPanelGuiApplication {
             },
             SettingsAction::ShowAddKeyboardPopup => {},
             SettingsAction::ShowConfirmDisplaySettingsPopup => {
-                let app = self.clone();
+                //let app = self.clone();//center in, resize or scale might be needed
                 let window = self.active_window().unwrap();
                 let popup = ConfirmDisplaySettingsPopup::new();
                 popup.set_transient_for(Some(&window));
@@ -235,7 +235,6 @@ impl ControlPanelGuiApplication {
                 popup.launch_close_timer(5);
             },
             SettingsAction::ShowErrorPopup => {
-                let app = self.clone();
                 let window = self.active_window().unwrap();
                 let popup = ErrorPopup::new(value.to_string());
                 popup.set_transient_for(Some(&window));
