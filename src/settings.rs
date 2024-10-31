@@ -102,6 +102,12 @@ mod imp {
             let empty = Variant::from(None::<()>.as_ref());
             self.obj().emit_by_name::<()>("settings-action", &[&action, &empty]);
         }
+        #[template_callback]
+        fn on_show_error_popup(&self) {
+            let action = SettingsAction::ShowErrorPopup;
+            let message = Variant::from(String::from("Display settings cannot be set."));
+            self.obj().emit_by_name::<()>("settings-action", &[&action, &message]);
+        }
     }//end #[gtk::template_callbacks]
 
     impl ObjectImpl for Settings {

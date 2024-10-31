@@ -53,17 +53,27 @@ mod imp {
             self.obj().restore_default();
             self.obj().emit_by_name::<()>("default-display-settings", &[]);
         }
+        //TODO: revise logic
         #[template_callback]
         fn on_apply_clicked(&self) {
             let resolution_idx = self.resolution_switch.selected();
             let scale_idx = self.scale_switch.selected();
             let is_resolution_set = self.obj().set_resolution(resolution_idx);
             let is_scale_set = self.obj().set_scale(scale_idx);
+
+            //if error occures then show popup and return
+            if (!is_resolution_set || !is_scale_set) {
+                self.obj().emit_by_name::<()>("display-settings-error", &[]);
+                return;
+            }
+
+            //if all non-default settings are applied
+            //then show confirmation popup
             if (resolution_idx > 0 || scale_idx > 0) &&
-                is_resolution_set &&
+                is_resolution_set && 
                 is_scale_set {
                     self.obj().emit_by_name::<()>("display-settings-changed", &[]);
-                }
+            }
         }
     }//end #[gtk::template_callbacks]
 
@@ -110,7 +120,7 @@ impl DisplaySettingsPage {
     pub fn new() -> Self {
         glib::Object::builder().build()
     }
-    
+    //TODO: read current mode and all supported modes
     pub fn init(&self) {
         //temporary, must be read from somewhere
         let supported_resolutions = self.imp().supported_resolutions.clone();
@@ -168,12 +178,10 @@ impl DisplaySettingsPage {
                 } else {
                     let stderr = String::from_utf8_lossy(&output.stderr);
                     eprintln!("wlr-randr error: {}", stderr);
-                    //emit error signal to show popup
                 }
             }
             Err(e) => {
                 eprintln!("Failed to execute wlr-randr: {}", e);
-                //emit error signal to show popup
             }
         }
         result
@@ -208,12 +216,10 @@ impl DisplaySettingsPage {
                 } else {
                     let stderr = String::from_utf8_lossy(&output.stderr);
                     eprintln!("wlr-randr error: {}", stderr);
-                    //emit error signal
                 }
             }
             Err(e) => {
                 eprintln!("Failed to execute wlr-randr: {}", e);
-                //emit error signal
             }
         }
         result

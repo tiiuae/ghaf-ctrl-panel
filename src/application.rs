@@ -14,6 +14,7 @@ use crate::vm_control_action::VMControlAction;
 use crate::settings_action::SettingsAction;
 use crate::add_network_popup::AddNetworkPopup;
 use crate::confirm_display_settings_popup::ConfirmDisplaySettingsPopup;
+use crate::error_popup::ErrorPopup;
 
 mod imp {
     use super::*;
@@ -232,6 +233,14 @@ impl ControlPanelGuiApplication {
                 );
                 popup.present();
                 popup.launch_close_timer(5);
+            },
+            SettingsAction::ShowErrorPopup => {
+                let app = self.clone();
+                let window = self.active_window().unwrap();
+                let popup = ErrorPopup::new(value.to_string());
+                popup.set_transient_for(Some(&window));
+                popup.set_modal(true);
+                popup.present();
             },
         };
     }

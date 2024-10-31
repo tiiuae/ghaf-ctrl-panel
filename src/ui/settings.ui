@@ -260,6 +260,7 @@
                         <property name="child">
                             <object class="DisplaySettingsPage" id="display_settings_page">
                             <signal name="display-settings-changed" handler="on_show_confirm_display_settings_popup" swapped="true"/>
+                            <signal name="display-settings-error" handler="on_show_error_popup" swapped="true"/>
                             </object>
                         </property>
                     </object>
