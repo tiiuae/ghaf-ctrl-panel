@@ -124,7 +124,7 @@ glib::wrapper! {
 }
 
 impl ControlPanelGuiWindow {
-    pub fn new<P: glib::IsA<gtk::Application>>(application: &P) -> Self {
+    pub fn new<P: IsA<gtk::Application>>(application: &P) -> Self {
         let window: Self = glib::Object::builder()
             .property("application", application)
             .build();

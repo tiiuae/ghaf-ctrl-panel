@@ -12,6 +12,7 @@ use crate::connection_config::ConnectionConfig;
 use crate::data_gobject::DataGObject;
 use crate::data_provider::imp::{DataProvider, LanguageRegionData};
 use crate::error_popup::ErrorPopup;
+use crate::language_region_notify_popup::LanguageRegionNotifyPopup;
 use crate::settings_action::SettingsAction;
 use crate::vm_control_action::VMControlAction;
 use crate::ControlPanelGuiWindow;
@@ -239,8 +240,26 @@ impl ControlPanelGuiApplication {
             SettingsAction::RemoveNetwork => todo!(),
             SettingsAction::RegionNLanguage => {
                 let (locale, timezone): (String, String) = value.get().unwrap();
-                self.imp().data_provider.borrow().set_locale(locale);
-                self.imp().data_provider.borrow().set_timezone(timezone);
+                let app = self.clone();
+                let popup = LanguageRegionNotifyPopup::new();
+                popup.set_transient_for(self.active_window().as_ref());
+                popup.set_modal(true);
+                glib::spawn_future_local(async move {
+                    if let Err(err) = app.imp().data_provider.borrow().set_locale(locale).await {
+                        println!("Locale setting failed: {err}");
+                    }
+                    if let Err(err) = app
+                        .imp()
+                        .data_provider
+                        .borrow()
+                        .set_timezone(timezone)
+                        .await
+                    {
+                        println!("Timezone setting failed: {err}");
+                    }
+
+                    popup.present();
+                });
             }
             SettingsAction::DateNTime => todo!(),
             SettingsAction::MouseSpeed => todo!(),
