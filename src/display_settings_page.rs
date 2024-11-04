@@ -6,6 +6,7 @@ use glib::Binding;
 use glib::subclass::Signal;
 use std::sync::OnceLock;
 use std::process::{Command, Stdio};
+use regex::Regex;
 use crate::settings_gobject::SettingsGObject;
 
 mod imp {
@@ -120,8 +121,16 @@ impl DisplaySettingsPage {
     pub fn new() -> Self {
         glib::Object::builder().build()
     }
-    //TODO: read current mode and all supported modes
+    //TODO: read all supported modes
     pub fn init(&self) {
+        self.read_supported_resolutions();
+        let supported_resolutions = self.imp().supported_resolutions.clone();
+        let switch = self.imp().resolution_switch.get();
+        switch.set_model(Some(&supported_resolutions));
+        self.set_current_resolution();
+    }
+
+    fn read_supported_resolutions(&self) {
         //temporary, must be read from somewhere
         let supported_resolutions = self.imp().supported_resolutions.clone();
         //the list is taken from /sys/kernel/debug/dri/0/i915_display_info
@@ -129,8 +138,51 @@ impl DisplaySettingsPage {
         supported_resolutions.append(&String::from("1936x1203"));
         supported_resolutions.append(&String::from("1952x1217"));
         supported_resolutions.append(&String::from("2104x1236"));
-        let switch = self.imp().resolution_switch.get();
-        switch.set_model(Some(&supported_resolutions));
+        supported_resolutions.append(&String::from("2560x1600"));
+    }
+
+    fn set_current_resolution(&self) {
+        //let output = Command::new("xrandr")//for testing
+        let output = Command::new("wlr-randr")
+            .env("PATH", "/run/current-system/sw/bin")
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output();
+
+        match output {
+            Ok(output) => {
+                if output.status.success() {
+                    let stdout = String::from_utf8_lossy(&output.stdout);
+                    //for standart eDP-1 display
+                    let current_resolution_regex = Regex::new(r"eDP-1[\s\S]*?(\d+x\d+)\s*px[^\n]*current").unwrap();
+                    //let current_resolution_regex = Regex::new(r"(\d+x\d+)\s+\d+\.\d+\*").unwrap();//for testing
+                    // Search for the first match marked as current
+                    println!("wlr-randr output:\n{}", stdout);
+                    if let Some(cap) = current_resolution_regex.captures(&stdout) {
+                        let resolution = &cap[1];
+                        println!("Current resolution: {}", resolution);
+                        let supported_resolutions = self.imp().supported_resolutions.clone();
+
+                        match index_of(&supported_resolutions, resolution) {
+                            Some(index) => {
+                                println!("Found {} at index: {}", resolution, index);
+                                let switch = self.imp().resolution_switch.get();
+                                switch.set_selected(index);
+                            },
+                            None => println!("resolution not found"),
+                        }
+                    } else {
+                        println!("No current resolution found.");
+                    }
+                } else {
+                    let stderr = String::from_utf8_lossy(&output.stderr);
+                    eprintln!("wlr-randr error: {}", stderr);
+                }
+            }
+            Err(e) => {
+                eprintln!("Failed to execute wlr-randr: {}", e);
+            }
+        }
     }
 
     pub fn bind(&self, _settings_object: &SettingsGObject) {
@@ -226,3 +278,12 @@ impl DisplaySettingsPage {
     }
 }
 
+fn index_of(list: &StringList, target: &str) -> Option<u32> {
+    for i in 0..list.n_items() {
+        let string = list.string(i);
+        if string.as_deref() == Some(target) {
+            return Some(i);
+        }
+    }
+    None
+}
