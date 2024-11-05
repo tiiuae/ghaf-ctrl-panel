@@ -26,6 +26,7 @@ mod imp {
 
         //must be read from somewhere
         pub supported_resolutions: StringList,
+        pub supported_scales: StringList,
 
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
@@ -124,10 +125,10 @@ impl DisplaySettingsPage {
     //TODO: read all supported modes
     pub fn init(&self) {
         self.read_supported_resolutions();
-        let supported_resolutions = self.imp().supported_resolutions.clone();
-        let switch = self.imp().resolution_switch.get();
-        switch.set_model(Some(&supported_resolutions));
-        self.set_current_resolution();
+        self.set_supported_scales();
+
+        //set the current settings selected in the Dropdowns
+        self.display_current_settings();
     }
 
     fn read_supported_resolutions(&self) {
@@ -138,10 +139,23 @@ impl DisplaySettingsPage {
         supported_resolutions.append(&String::from("1936x1203"));
         supported_resolutions.append(&String::from("1952x1217"));
         supported_resolutions.append(&String::from("2104x1236"));
-        supported_resolutions.append(&String::from("2560x1600"));
+        //supported_resolutions.append(&String::from("2560x1600"));//for testing
+
+        let switch = self.imp().resolution_switch.get();
+        switch.set_model(Some(&supported_resolutions));
     }
 
-    fn set_current_resolution(&self) {
+    fn set_supported_scales(&self) {
+        let supported_scales = self.imp().supported_scales.clone();
+        supported_scales.append(&String::from("100%"));
+        supported_scales.append(&String::from("125%"));
+        supported_scales.append(&String::from("150%"));
+
+        let switch = self.imp().scale_switch.get();
+        switch.set_model(Some(&supported_scales));
+    }
+
+    fn display_current_settings(&self) {
         //let output = Command::new("xrandr")//for testing
         let output = Command::new("wlr-randr")
             .env("PATH", "/run/current-system/sw/bin")
@@ -153,27 +167,8 @@ impl DisplaySettingsPage {
             Ok(output) => {
                 if output.status.success() {
                     let stdout = String::from_utf8_lossy(&output.stdout);
-                    //for standart eDP-1 display
-                    let current_resolution_regex = Regex::new(r"eDP-1[\s\S]*?(\d+x\d+)\s*px[^\n]*current").unwrap();
-                    //let current_resolution_regex = Regex::new(r"(\d+x\d+)\s+\d+\.\d+\*").unwrap();//for testing
-                    // Search for the first match marked as current
-                    println!("wlr-randr output:\n{}", stdout);
-                    if let Some(cap) = current_resolution_regex.captures(&stdout) {
-                        let resolution = &cap[1];
-                        println!("Current resolution: {}", resolution);
-                        let supported_resolutions = self.imp().supported_resolutions.clone();
-
-                        match index_of(&supported_resolutions, resolution) {
-                            Some(index) => {
-                                println!("Found {} at index: {}", resolution, index);
-                                let switch = self.imp().resolution_switch.get();
-                                switch.set_selected(index);
-                            },
-                            None => println!("resolution not found"),
-                        }
-                    } else {
-                        println!("No current resolution found.");
-                    }
+                    self.set_current_resolution(&stdout);
+                    self.set_current_scale(&stdout);
                 } else {
                     let stderr = String::from_utf8_lossy(&output.stderr);
                     eprintln!("wlr-randr error: {}", stderr);
@@ -182,6 +177,61 @@ impl DisplaySettingsPage {
             Err(e) => {
                 eprintln!("Failed to execute wlr-randr: {}", e);
             }
+        }
+    }
+
+    #[inline]
+    fn set_current_resolution(&self, stdout: &str) {
+        //for standart eDP-1
+        let current_resolution_regex = Regex::new(r"eDP-1[\s\S]*?(\d+x\d+)\s*px[^\n]*current").unwrap();
+        //let current_resolution_regex = Regex::new(r"(\d+x\d+)\s+\d+\.\d+\*").unwrap();//for testing
+        if let Some(cap) = current_resolution_regex.captures(&stdout) {
+            let resolution = &cap[1];
+            println!("Current resolution: {}", resolution);
+            let supported_resolutions = self.imp().supported_resolutions.clone();
+
+            match index_of(&supported_resolutions, resolution) {
+                Some(index) => {
+                    println!("Found {} at index: {}", resolution, index);
+                    let switch = self.imp().resolution_switch.get();
+                    switch.set_selected(index);
+                },
+                None => println!("Resolution not found"),
+            }
+        } else {
+            println!("No current resolution found.");
+        }
+    }
+
+    #[inline]
+    fn set_current_scale(&self, stdout: &str) {
+        //for standart eDP-1
+        let current_scale_regex = Regex::new(r"eDP-1[\s\S]*?Scale:\s*([\d.]+)").unwrap();
+        if let Some(cap) = current_scale_regex.captures(&stdout) {
+            let scale = &cap[1];
+            println!("Current scale: {}", scale);
+            
+            //transform to percents
+            if let Ok(scale_f) = scale.parse::<f32>() {
+                let scale_percent = (scale_f * 100.0).round();
+                let scale_percent_str = format!("{}%", scale_percent as i32);
+                println!("Scale as percentage: {}", scale_percent_str);
+
+                let supported_scales = self.imp().supported_scales.clone();
+
+                match index_of(&supported_scales, scale_percent_str.as_str()) {
+                    Some(index) => {
+                        println!("Found {} at index: {}", scale_percent_str, index);
+                        let switch = self.imp().scale_switch.get();
+                        switch.set_selected(index);
+                    },
+                    None => println!("Scale not found"),
+                }
+            } else {
+                println!("Failed to parse scale.");
+            }
+        } else {
+            println!("No current scale found.");
         }
     }
 
@@ -278,6 +328,7 @@ impl DisplaySettingsPage {
     }
 }
 
+#[inline]
 fn index_of(list: &StringList, target: &str) -> Option<u32> {
     for i in 0..list.n_items() {
         let string = list.string(i);
