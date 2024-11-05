@@ -25,7 +25,7 @@ pub mod imp {
     use super::*;
 
     #[derive(Debug, Clone)]
-    struct TypedListStore<T: IsA<Object>>(ListStore, std::marker::PhantomData<T>);
+    pub struct TypedListStore<T: IsA<Object>>(ListStore, std::marker::PhantomData<T>);
 
     pub struct LanguageRegionEntry {
         pub code: String,
@@ -63,9 +63,15 @@ pub mod imp {
             self.item(index).and_then(|item| item.downcast().ok())
         }
 
-        fn iter(&self) -> impl Iterator<Item = T> {
+        pub fn iter(&self) -> impl Iterator<Item = T> {
             let s = self.clone();
             (0..).map_while(move |idx| s.get(idx))
+        }
+    }
+
+    impl<T: IsA<Object>, L: IsA<ListStore>> From<L> for TypedListStore<T> {
+        fn from(store: L) -> Self {
+            Self(store.upcast(), std::marker::PhantomData)
         }
     }
 

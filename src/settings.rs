@@ -95,6 +95,18 @@ mod imp {
         }
 
         #[template_callback]
+        fn on_locale_timezone_default(&self) {
+            let action = SettingsAction::RegionNLanguage;
+            let variant = ("en_US.utf8", "UTC").to_variant();
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &variant]);
+            self.language_region_settings_page
+                .locale_select_find(|obj| obj.name() == "en_US.utf8");
+            self.language_region_settings_page
+                .timezone_select_find(|obj| obj.name() == "UTC");
+        }
+
+        #[template_callback]
         fn on_locale_timezone_changed(&self, locale: String, timezone: String) {
             let action = SettingsAction::RegionNLanguage;
             let variant = (locale, timezone).to_variant();

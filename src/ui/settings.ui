@@ -297,6 +297,7 @@
                         <property name="name">locale</property>
                         <property name="child">
                             <object class="LanguageRegionSettingsPage" id="language_region_settings_page">
+                                <signal name="locale-default" handler="on_locale_timezone_default" swapped="true"/>
                                 <signal name="locale-timezone-changed" handler="on_locale_timezone_changed" swapped="true"/>
                             </object>
                         </property>

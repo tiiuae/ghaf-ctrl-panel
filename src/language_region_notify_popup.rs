@@ -1,12 +1,9 @@
 use glib::subclass::Signal;
-use glib::timeout_add_local;
 use glib::Binding;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{gio, glib, CompositeTemplate, Spinner};
 use std::cell::RefCell;
-use std::ops::Deref;
-use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
 
