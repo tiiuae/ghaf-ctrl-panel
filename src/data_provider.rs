@@ -202,14 +202,14 @@ pub mod imp {
         }
 
         pub fn set_service_address(&self, addr: String, port: u16) {
-            //only when disconnected/watch stopped
-            if !(self.admin_client.try_write().is_err()) {
-                println!("Set service address {addr}:{port}");
-                let mut service_address = self.service_address.borrow_mut();
-                *service_address = (addr.clone(), port);
-                let mut admin_client = self.admin_client.write().unwrap();
-                *admin_client = AdminClient::new(addr, port, None);
-            }
+            //wait for stopping
+            while(self.admin_client.try_write().is_err()){}
+
+            println!("Set service address {addr}:{port}");
+            let mut service_address = self.service_address.borrow_mut();
+            *service_address = (addr.clone(), port);
+            let mut admin_client = self.admin_client.write().unwrap();
+            *admin_client = AdminClient::new(addr, port, None);
         }
 
         pub fn add_vm(&self, vm: VMGObject) {
