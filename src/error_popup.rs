@@ -1,10 +1,10 @@
-use std::cell::RefCell;
-use std::sync::OnceLock;
+use glib::subclass::Signal;
+use glib::Binding;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{gio, glib, CompositeTemplate, Button, Label};
-use glib::Binding;
-use glib::subclass::Signal;
+use gtk::{gio, glib, Button, CompositeTemplate, Label};
+use std::cell::RefCell;
+use std::sync::OnceLock;
 
 mod imp {
     use super::*;
@@ -45,7 +45,7 @@ mod imp {
         fn on_ok_clicked(&self) {
             self.obj().close();
         }
-    }//end #[gtk::template_callbacks]
+    } //end #[gtk::template_callbacks]
 
     impl ObjectImpl for ErrorPopup {
         fn constructed(&self) {
@@ -59,12 +59,7 @@ mod imp {
 
         fn signals() -> &'static [Signal] {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
-            SIGNALS.get_or_init(|| {
-                vec![
-                    Signal::builder("reset-default")
-                    .build()
-                    ]
-            })
+            SIGNALS.get_or_init(|| vec![Signal::builder("reset-default").build()])
         }
     }
     impl WidgetImpl for ErrorPopup {}
@@ -86,7 +81,10 @@ impl Default for ErrorPopup {
 impl ErrorPopup {
     pub fn new(message_to_user: String) -> Self {
         let popup: Self = glib::Object::builder().build();
-        popup.imp().message_to_user.set_label(message_to_user.as_str());
+        popup
+            .imp()
+            .message_to_user
+            .set_label(message_to_user.as_str());
         popup
     }
 

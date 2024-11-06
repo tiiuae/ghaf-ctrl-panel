@@ -1,6 +1,9 @@
 use gtk::glib;
 //use glib::prelude::*;
-use glib::{value::{FromValue, ToValue, Value}, Type, Enum};
+use glib::{
+    value::{FromValue, ToValue, Value},
+    Enum, Type,
+};
 //use strum::EnumString;
 
 // Derive necessary traits for automatic conversion
@@ -24,7 +27,6 @@ impl Default for TrustLevel {
         u8::static_type()
     }
 }*/
-
 
 /*unsafe impl<'a> FromValue<'a> for TrustLevel {
     type Checker = glib::value::GenericValueTypeChecker<Self>;

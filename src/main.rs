@@ -1,36 +1,35 @@
-
-mod application;
-mod window;
-mod connection_config;
-mod vm_row;
-mod vm_row_2;
-mod vm_gobject;
-mod vm_settings;
-mod audio_settings;
-mod settings;
-mod settings_gobject;
-mod data_provider;
-mod security_icon;
+mod add_network_popup;
 mod admin_settings_page;
+mod application;
+mod audio_settings;
+mod confirm_display_settings_popup;
+mod connection_config;
+mod data_provider;
+mod display_settings_page;
+mod error_popup;
 mod info_settings_page;
-mod security_settings_page;
-mod wifi_settings_page;
 mod keyboard_settings_page;
 mod mouse_settings_page;
-mod display_settings_page;
-mod vm_control_action;
-mod trust_level;
-mod add_network_popup;
+mod security_icon;
+mod security_settings_page;
+mod settings;
 mod settings_action;
-mod confirm_display_settings_popup;
-mod error_popup;
+mod settings_gobject;
+mod trust_level;
+mod vm_control_action;
+mod vm_gobject;
+mod vm_row;
+mod vm_row_2;
+mod vm_settings;
+mod wifi_settings_page;
+mod window;
 
 use self::application::ControlPanelGuiApplication;
 use self::window::ControlPanelGuiWindow;
 use clap::Parser;
 
-use gtk::{gio, glib};
 use gtk::prelude::*;
+use gtk::{gio, glib};
 
 const ADMIN_SERVICE_ADDR: &str = "192.168.101.10";
 const ADMIN_SERVICE_PORT: u16 = 9001;
@@ -45,7 +44,8 @@ struct Args {
     port: Option<u16>,
 }
 
-fn main() /*-> glib::ExitCode*/ {
+fn main() /*-> glib::ExitCode*/
+{
     //std::env::set_var("RUST_BACKTRACE", "full");
 
     // Parse the command-line arguments
@@ -53,16 +53,14 @@ fn main() /*-> glib::ExitCode*/ {
 
     let addr = if let Some(addr) = args.addr {
         addr
-    }
-    else {
+    } else {
         String::from(ADMIN_SERVICE_ADDR)
     };
 
     let port = if let Some(port) = args.port {
         port
-    }
-    else {
-        ADMIN_SERVICE_PORT 
+    } else {
+        ADMIN_SERVICE_PORT
     };
 
     // Load resources
@@ -72,7 +70,12 @@ fn main() /*-> glib::ExitCode*/ {
     // Create a new GtkApplication. The application manages our main loop,
     // application windows, integration with the window manager/compositor, and
     // desktop features such as file opening and single-instance applications.
-    let app = ControlPanelGuiApplication::new("org.gnome.controlpanelgui", &gio::ApplicationFlags::empty(), addr, port);
+    let app = ControlPanelGuiApplication::new(
+        "org.gnome.controlpanelgui",
+        &gio::ApplicationFlags::empty(),
+        addr,
+        port,
+    );
 
     // Run the application. This function will block until the application
     // exits. Upon return, we have our exit code to return to the shell. (This

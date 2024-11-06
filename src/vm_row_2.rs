@@ -1,13 +1,13 @@
-use std::cell::RefCell;
-use std::sync::OnceLock;
+use glib::subclass::Signal;
+use glib::Binding;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, Label, MenuButton, Popover};
-use glib::Binding;
-use glib::subclass::Signal;
+use std::cell::RefCell;
+use std::sync::OnceLock;
 
-use crate::vm_gobject::VMGObject;
 use crate::vm_control_action::VMControlAction;
+use crate::vm_gobject::VMGObject;
 
 mod imp {
     use super::*;
@@ -50,33 +50,34 @@ mod imp {
         fn on_vm_restart_clicked(&self) {
             let vm_name = self.title_label.label();
             //emit signal
-            self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Restart, &vm_name]);
+            self.obj()
+                .emit_by_name::<()>("vm-control-action", &[&VMControlAction::Restart, &vm_name]);
             //and close menu
             self.popover_menu.popdown();
         }
         #[template_callback]
         fn on_vm_shutdown_clicked(&self) {
             let vm_name = self.title_label.label();
-            self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Shutdown, &vm_name]);
+            self.obj()
+                .emit_by_name::<()>("vm-control-action", &[&VMControlAction::Shutdown, &vm_name]);
             self.popover_menu.popdown();
         }
         #[template_callback]
         fn on_vm_pause_clicked(&self) {
             let vm_name = self.title_label.label();
-            self.obj().emit_by_name::<()>("vm-control-action", &[&VMControlAction::Pause, &vm_name]);
+            self.obj()
+                .emit_by_name::<()>("vm-control-action", &[&VMControlAction::Pause, &vm_name]);
             self.popover_menu.popdown();
         }
-    }//end #[gtk::template_callbacks]
+    } //end #[gtk::template_callbacks]
 
     impl ObjectImpl for VMRow2 {
         fn signals() -> &'static [Signal] {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
             SIGNALS.get_or_init(|| {
-                vec![
-                    Signal::builder("vm-control-action")
+                vec![Signal::builder("vm-control-action")
                     .param_types([VMControlAction::static_type(), String::static_type()])
-                    .build(),
-                    ]
+                    .build()]
             })
         }
     }
@@ -105,7 +106,6 @@ impl VMRow2 {
         let title = self.imp().title_label.get();
         let subtitle = self.imp().subtitle_label.get();
         let mut bindings = self.imp().bindings.borrow_mut();
-
 
         let title_binding = vm_object
             .bind_property("app-name", &title, "label")
@@ -149,4 +149,3 @@ impl VMRow2 {
         }
     }
 }
-

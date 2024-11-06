@@ -1,10 +1,10 @@
-use std::cell::RefCell;
-use std::sync::OnceLock;
+use glib::subclass::Signal;
+use glib::Binding;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{gio, glib, CompositeTemplate, Entry, Button};
-use glib::Binding;
-use glib::subclass::Signal;
+use gtk::{gio, glib, Button, CompositeTemplate, Entry};
+use std::cell::RefCell;
+use std::sync::OnceLock;
 
 mod imp {
     use super::*;
@@ -48,20 +48,21 @@ mod imp {
         #[template_callback]
         fn on_switch_state_changed(&self, value: bool) -> bool {
             self.password_entry.set_visibility(value);
-            false//propagate event futher
+            false //propagate event futher
         }
         #[template_callback]
         fn on_save_clicked(&self) {
             let name = self.name_entry.text().to_string();
             let sec = self.security_entry.text().to_string();
             let passwd = self.password_entry.text().to_string();
-            self.obj().emit_by_name::<()>("new-network", &[&name, &sec, &passwd]);
+            self.obj()
+                .emit_by_name::<()>("new-network", &[&name, &sec, &passwd]);
         }
         #[template_callback]
         fn on_cancel_clicked(&self) {
             self.obj().close();
         }
-    }//end #[gtk::template_callbacks]
+    } //end #[gtk::template_callbacks]
 
     impl ObjectImpl for AddNetworkPopup {
         fn constructed(&self) {
@@ -76,11 +77,13 @@ mod imp {
         fn signals() -> &'static [Signal] {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
             SIGNALS.get_or_init(|| {
-                vec![
-                    Signal::builder("new-network")
-                    .param_types([String::static_type(), String::static_type(), String::static_type()])
-                    .build()
-                    ]
+                vec![Signal::builder("new-network")
+                    .param_types([
+                        String::static_type(),
+                        String::static_type(),
+                        String::static_type(),
+                    ])
+                    .build()]
             })
         }
     }

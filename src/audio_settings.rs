@@ -1,11 +1,11 @@
-use std::cell::RefCell;
-use std::sync::OnceLock;
+use dbus::blocking::{Connection, Proxy};
+use glib::subclass::Signal;
+use glib::{Binding, Properties};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Box, DropDown, Scale};
-use glib::{Binding, Properties};
-use glib::subclass::Signal;
-use dbus::blocking::{Connection, Proxy};
+use gtk::{glib, Box, CompositeTemplate, DropDown, Scale};
+use std::cell::RefCell;
+use std::sync::OnceLock;
 use std::time::Duration;
 
 mod imp {
@@ -73,12 +73,14 @@ mod imp {
         #[template_callback]
         fn on_mic_volume_changed(&self, scale: &Scale) {
             let value = scale.value();
-            self.obj().emit_by_name::<()>("mic-volume-changed", &[&value]);
+            self.obj()
+                .emit_by_name::<()>("mic-volume-changed", &[&value]);
         }
         #[template_callback]
         fn on_speaker_volume_changed(&self, scale: &Scale) {
             let value = scale.value();
-            self.obj().emit_by_name::<()>("speaker-volume-changed", &[&value]);
+            self.obj()
+                .emit_by_name::<()>("speaker-volume-changed", &[&value]);
         }
         #[template_callback]
         fn on_reset_clicked(&self) {
@@ -92,15 +94,16 @@ mod imp {
             let speaker = self.speaker_switch.selected();
             let mic_volume = self.mic_volume.value();
             let speaker_volume = self.speaker_volume.value();
-            self.obj().emit_by_name::<()>("apply-new", &[&mic, &speaker, &mic_volume, &speaker_volume]);
+            self.obj()
+                .emit_by_name::<()>("apply-new", &[&mic, &speaker, &mic_volume, &speaker_volume]);
         }
-    }//end #[gtk::template_callbacks]
+    } //end #[gtk::template_callbacks]
 
     #[glib::derived_properties]
     impl ObjectImpl for AudioSettings {
         fn constructed(&self) {
             self.parent_constructed();
-    
+
             // After the object is constructed, bind the footer visibilty property
             let obj = self.obj();
             obj.bind_property("footer-visible", &self.footer.get(), "visible")
@@ -113,23 +116,27 @@ mod imp {
             SIGNALS.get_or_init(|| {
                 vec![
                     Signal::builder("mic-changed")
-                    .param_types([u32::static_type()])
-                    .build(),
+                        .param_types([u32::static_type()])
+                        .build(),
                     Signal::builder("speaker-changed")
-                    .param_types([u32::static_type()])
-                    .build(),
+                        .param_types([u32::static_type()])
+                        .build(),
                     Signal::builder("mic-volume-changed")
-                    .param_types([f64::static_type()])
-                    .build(),
+                        .param_types([f64::static_type()])
+                        .build(),
                     Signal::builder("speaker-volume-changed")
-                    .param_types([f64::static_type()])
-                    .build(),
-                    Signal::builder("set-defaults")
-                    .build(),
+                        .param_types([f64::static_type()])
+                        .build(),
+                    Signal::builder("set-defaults").build(),
                     Signal::builder("apply-new")
-                    .param_types([u32::static_type(), u32::static_type(), f64::static_type(), f64::static_type()])
-                    .build(),
-                    ]
+                        .param_types([
+                            u32::static_type(),
+                            u32::static_type(),
+                            f64::static_type(),
+                            f64::static_type(),
+                        ])
+                        .build(),
+                ]
             })
         }
     }
@@ -167,10 +174,10 @@ impl AudioSettings {
 
         // Create a proxy to the object and interface
         let proxy = Proxy::new(
-            "org.ghaf.Audio",     // Service name
-            "/org/ghaf/Audio",    // Object path
+            "org.ghaf.Audio",            // Service name
+            "/org/ghaf/Audio",           // Object path
             Duration::from_millis(5000), // Timeout for the method call
-            &connection
+            &connection,
         );
 
         // Make the method call
@@ -230,4 +237,3 @@ impl AudioSettings {
     }
     */
 }
-

@@ -1,20 +1,19 @@
-
+use adw::subclass::prelude::*;
+use glib::Variant;
+use gtk::prelude::*;
+use gtk::CssProvider;
+use gtk::{gdk, gio, glib};
 use std::cell::RefCell;
 use std::rc::Rc;
-use gtk::prelude::*;
-use adw::subclass::prelude::*;
-use gtk::{gio, glib, gdk};
-use gtk::CssProvider;
-use glib::Variant;
 
-use crate::ControlPanelGuiWindow;
-use crate::data_provider::imp::DataProvider;
-use crate::connection_config::ConnectionConfig;
-use crate::vm_control_action::VMControlAction;
-use crate::settings_action::SettingsAction;
 use crate::add_network_popup::AddNetworkPopup;
 use crate::confirm_display_settings_popup::ConfirmDisplaySettingsPopup;
+use crate::connection_config::ConnectionConfig;
+use crate::data_provider::imp::DataProvider;
 use crate::error_popup::ErrorPopup;
+use crate::settings_action::SettingsAction;
+use crate::vm_control_action::VMControlAction;
+use crate::ControlPanelGuiWindow;
 
 mod imp {
     use super::*;
@@ -67,7 +66,11 @@ mod imp {
             // Ask the window manager/compositor to present the window
             window.present();
             //connect on start
-            application.imp().data_provider.borrow().establish_connection();
+            application
+                .imp()
+                .data_provider
+                .borrow()
+                .establish_connection();
         }
     }
 
@@ -82,13 +85,21 @@ glib::wrapper! {
 }
 
 impl ControlPanelGuiApplication {
-    pub fn new(application_id: &str, flags: &gio::ApplicationFlags, address: String, port: u16) -> Self {
+    pub fn new(
+        application_id: &str,
+        flags: &gio::ApplicationFlags,
+        address: String,
+        port: u16,
+    ) -> Self {
         let app: Self = glib::Object::builder()
             .property("application-id", application_id)
             .property("flags", flags)
             .build();
 
-        app.imp().data_provider.borrow().set_service_address(address, port);
+        app.imp()
+            .data_provider
+            .borrow()
+            .set_service_address(address, port);
 
         app
     }
@@ -119,30 +130,38 @@ impl ControlPanelGuiApplication {
         let about_action = gio::ActionEntry::builder("about")
             .activate(move |app: &Self, _, _| app.show_about())
             .build();
-        self.add_action_entries([reconnect_action, show_config_action, quit_action, about_action]);
+        self.add_action_entries([
+            reconnect_action,
+            show_config_action,
+            quit_action,
+            about_action,
+        ]);
     }
 
     pub fn show_config(&self) {
         let window = self.active_window().unwrap();
-        let address = self.imp().data_provider.borrow().get_current_service_address();
+        let address = self
+            .imp()
+            .data_provider
+            .borrow()
+            .get_current_service_address();
         let config = ConnectionConfig::new(address.0, address.1);
         config.set_transient_for(Some(&window));
         config.set_modal(true);
 
         let app = self.clone();
 
-        config.connect_local(
-            "new-config-applied",
-            false,
-            move |values| {
-                //the value[0] is self
-                let addr = values[1].get::<String>().unwrap();
-                let port = values[2].get::<u32>().unwrap();
-                println!("New config applied: address {addr}, port {port}");
-                app.imp().data_provider.borrow().reconnect(Some((addr, port as u16)));
-                None
-            },
-        );
+        config.connect_local("new-config-applied", false, move |values| {
+            //the value[0] is self
+            let addr = values[1].get::<String>().unwrap();
+            let port = values[2].get::<u32>().unwrap();
+            println!("New config applied: address {addr}, port {port}");
+            app.imp()
+                .data_provider
+                .borrow()
+                .reconnect(Some((addr, port as u16)));
+            None
+        });
 
         config.present();
     }
@@ -166,7 +185,7 @@ impl ControlPanelGuiApplication {
         self.imp().data_provider.borrow().reconnect(None);
     }
 
-    pub fn get_store(&self) -> gio::ListStore{
+    pub fn get_store(&self) -> gio::ListStore {
         self.imp().data_provider.borrow().get_store()
     }
 
@@ -199,48 +218,43 @@ impl ControlPanelGuiApplication {
                 let popup = AddNetworkPopup::new();
                 popup.set_transient_for(Some(&window));
                 popup.set_modal(true);
-                popup.connect_local(
-                    "new-network",
-                    false,
-                    move |values| {
-                        //the value[0] is self
-                        let name = values[1].get::<String>().unwrap();
-                        let security = values[2].get::<String>().unwrap();
-                        let password = values[3].get::<String>().unwrap();
-                        println!("New network: {name}, {security}, {password}");
-                        app.imp().data_provider.borrow().add_network(name, security, password);
-                        None
-                    },
-                );
+                popup.connect_local("new-network", false, move |values| {
+                    //the value[0] is self
+                    let name = values[1].get::<String>().unwrap();
+                    let security = values[2].get::<String>().unwrap();
+                    let password = values[3].get::<String>().unwrap();
+                    println!("New network: {name}, {security}, {password}");
+                    app.imp()
+                        .data_provider
+                        .borrow()
+                        .add_network(name, security, password);
+                    None
+                });
                 popup.present();
-            },
-            SettingsAction::ShowAddKeyboardPopup => {},
+            }
+            SettingsAction::ShowAddKeyboardPopup => {}
             SettingsAction::ShowConfirmDisplaySettingsPopup => {
                 //let app = self.clone();//center in, resize or scale might be needed
                 let window = self.active_window().unwrap();
                 let popup = ConfirmDisplaySettingsPopup::new();
                 popup.set_transient_for(Some(&window));
                 popup.set_modal(true);
-                popup.connect_local(
-                    "reset-default",
-                    false,
-                    move |_| {
-                        if let Some(window) = window.downcast_ref::<ControlPanelGuiWindow>() {
-                            window.restore_default_display_settings();
-                        }
-                        None
-                    },
-                );
+                popup.connect_local("reset-default", false, move |_| {
+                    if let Some(window) = window.downcast_ref::<ControlPanelGuiWindow>() {
+                        window.restore_default_display_settings();
+                    }
+                    None
+                });
                 popup.present();
                 popup.launch_close_timer(5);
-            },
+            }
             SettingsAction::ShowErrorPopup => {
                 let window = self.active_window().unwrap();
                 let popup = ErrorPopup::new(value.to_string());
                 popup.set_transient_for(Some(&window));
                 popup.set_modal(true);
                 popup.present();
-            },
+            }
         };
     }
 

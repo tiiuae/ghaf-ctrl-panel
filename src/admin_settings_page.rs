@@ -1,10 +1,10 @@
-use std::cell::RefCell;
-use std::sync::OnceLock;
+use glib::subclass::Signal;
+use glib::Binding;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, Notebook};
-use glib::Binding;
-use glib::subclass::Signal;
+use std::cell::RefCell;
+use std::sync::OnceLock;
 
 use crate::settings_gobject::SettingsGObject;
 
@@ -44,7 +44,7 @@ mod imp {
             println!("Update clicked!");
             self.obj().emit_by_name::<()>("update-request", &[]);
         }
-    }//end #[gtk::template_callbacks]
+    } //end #[gtk::template_callbacks]
 
     impl ObjectImpl for AdminSettingsPage {
         fn constructed(&self) {
@@ -58,11 +58,9 @@ mod imp {
         fn signals() -> &'static [Signal] {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
             SIGNALS.get_or_init(|| {
-                vec![
-                    Signal::builder("update-request")
+                vec![Signal::builder("update-request")
                     //.param_types([u32::static_type()])
-                    .build(),
-                    ]
+                    .build()]
             })
         }
     }
@@ -85,7 +83,7 @@ impl AdminSettingsPage {
     pub fn new() -> Self {
         glib::Object::builder().build()
     }
-    
+
     pub fn init(&self) {}
 
     pub fn bind(&self, _settings_object: &SettingsGObject) {
@@ -101,4 +99,3 @@ impl AdminSettingsPage {
         }
     }
 }
-

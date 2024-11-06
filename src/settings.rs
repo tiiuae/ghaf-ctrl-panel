@@ -1,24 +1,24 @@
-use std::cell::RefCell;
-use std::sync::OnceLock;
-use gtk::prelude::*;
-use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Stack, ListBox};
+use glib::subclass::Signal;
 use glib::{Binding, Variant};
 use gtk::gio::ListStore;
-use glib::subclass::Signal;
+use gtk::prelude::*;
+use gtk::subclass::prelude::*;
+use gtk::{glib, CompositeTemplate, ListBox, Stack};
+use std::cell::RefCell;
+use std::sync::OnceLock;
 
 //use crate::vm_gobject::VMGObject; will be used in the future
-use crate::audio_settings::AudioSettings;
-use crate::settings_gobject::SettingsGObject;
 use crate::admin_settings_page::AdminSettingsPage;
+use crate::audio_settings::AudioSettings;
+use crate::display_settings_page::DisplaySettingsPage;
 use crate::info_settings_page::InfoSettingsPage;
-use crate::security_settings_page::SecuritySettingsPage;
-use crate::wifi_settings_page::WifiSettingsPage;
 use crate::keyboard_settings_page::KeyboardSettingsPage;
 use crate::mouse_settings_page::MouseSettingsPage;
-use crate::display_settings_page::DisplaySettingsPage;
-use crate::vm_control_action::VMControlAction;
+use crate::security_settings_page::SecuritySettingsPage;
 use crate::settings_action::SettingsAction;
+use crate::settings_gobject::SettingsGObject;
+use crate::vm_control_action::VMControlAction;
+use crate::wifi_settings_page::WifiSettingsPage;
 
 mod imp {
     use super::*;
@@ -60,8 +60,8 @@ mod imp {
         type ParentType = gtk::Box;
 
         fn class_init(klass: &mut Self::Class) {
-                klass.bind_template();
-                klass.bind_template_callbacks();
+            klass.bind_template();
+            klass.bind_template_callbacks();
         }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -88,27 +88,31 @@ mod imp {
         fn on_show_add_network_popup(&self) {
             let action = SettingsAction::ShowAddNetworkPopup;
             let empty = Variant::from(None::<()>.as_ref());
-            self.obj().emit_by_name::<()>("settings-action", &[&action, &empty]);
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &empty]);
         }
         #[template_callback]
         fn on_show_add_new_keyboard_popup(&self) {
             let action = SettingsAction::ShowAddKeyboardPopup;
             let empty = Variant::from(None::<()>.as_ref());
-            self.obj().emit_by_name::<()>("settings-action", &[&action, &empty]);
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &empty]);
         }
         #[template_callback]
         fn on_show_confirm_display_settings_popup(&self) {
             let action = SettingsAction::ShowConfirmDisplaySettingsPopup;
             let empty = Variant::from(None::<()>.as_ref());
-            self.obj().emit_by_name::<()>("settings-action", &[&action, &empty]);
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &empty]);
         }
         #[template_callback]
         fn on_show_error_popup(&self) {
             let action = SettingsAction::ShowErrorPopup;
             let message = Variant::from(String::from("Display settings cannot be set."));
-            self.obj().emit_by_name::<()>("settings-action", &[&action, &message]);
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &message]);
         }
-    }//end #[gtk::template_callbacks]
+    } //end #[gtk::template_callbacks]
 
     impl ObjectImpl for Settings {
         fn constructed(&self) {
@@ -124,12 +128,12 @@ mod imp {
             SIGNALS.get_or_init(|| {
                 vec![
                     Signal::builder("vm-control-action")
-                    .param_types([VMControlAction::static_type(), String::static_type()])
-                    .build(),
+                        .param_types([VMControlAction::static_type(), String::static_type()])
+                        .build(),
                     Signal::builder("settings-action")
-                    .param_types([SettingsAction::static_type(), Variant::static_type()])
-                    .build(),
-                    ]
+                        .param_types([SettingsAction::static_type(), Variant::static_type()])
+                        .build(),
+                ]
             })
         }
     }
@@ -158,17 +162,15 @@ impl Settings {
     }
     pub fn init(&self) {
         let this = self.clone();
-        self.imp().info_settings_page.connect_local(
-            "vm-control-action",
-            false,
-            move |values| {
+        self.imp()
+            .info_settings_page
+            .connect_local("vm-control-action", false, move |values| {
                 //the value[0] is self
                 let vm_action = values[1].get::<VMControlAction>().unwrap();
                 let vm_name = values[2].get::<String>().unwrap();
                 this.emit_by_name::<()>("vm-control-action", &[&vm_action, &vm_name]);
                 None
-            },
-        );
+            });
 
         if let Some(row) = self.imp().settings_list_box.row_at_index(0) {
             self.imp().settings_list_box.select_row(Some(&row));
@@ -192,4 +194,3 @@ impl Settings {
         self.imp().display_settings_page.restore_default();
     }
 }
-

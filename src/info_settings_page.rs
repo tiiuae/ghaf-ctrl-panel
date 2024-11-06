@@ -1,17 +1,20 @@
-use std::cell::RefCell;
-use std::sync::OnceLock;
-use gtk::prelude::*;
-use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, ProgressBar, ListView, NoSelection, SignalListItemFactory, ListItem, CustomFilter, FilterListModel};
+use glib::subclass::Signal;
 use glib::{Binding, Object};
 use gtk::gio::ListStore;
-use glib::subclass::Signal;
+use gtk::prelude::*;
+use gtk::subclass::prelude::*;
+use gtk::{
+    glib, CompositeTemplate, CustomFilter, FilterListModel, ListItem, ListView, NoSelection,
+    ProgressBar, SignalListItemFactory,
+};
+use std::cell::RefCell;
+use std::sync::OnceLock;
 
+use crate::settings_gobject::SettingsGObject;
+use crate::vm_control_action::VMControlAction;
 use crate::vm_gobject::VMGObject;
 use crate::vm_row_2::VMRow2;
-use crate::settings_gobject::SettingsGObject;
 use givc_common::query::VMStatus;
-use crate::vm_control_action::VMControlAction;
 
 mod imp {
     use super::*;
@@ -60,11 +63,9 @@ mod imp {
         fn signals() -> &'static [Signal] {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
             SIGNALS.get_or_init(|| {
-                vec![
-                    Signal::builder("vm-control-action")
+                vec![Signal::builder("vm-control-action")
                     .param_types([VMControlAction::static_type(), String::static_type()])
-                    .build(),
-                    ]
+                    .build()]
             })
         }
     }
@@ -101,15 +102,17 @@ impl InfoSettingsPage {
 
     fn setup_vm_rows(&self, model: ListStore) {
         //Set filter: only running VM's
-        let filter_model = FilterListModel::new(Some(model), Some(CustomFilter::new(|item: &Object| {
-            if let Some(vm_obj) = item.downcast_ref::<VMGObject>() {
-                if (vm_obj.is_app_vm() 
-                    && (vm_obj.status() == (VMStatus::Running as u8))) {
-                    return true;
+        let filter_model = FilterListModel::new(
+            Some(model),
+            Some(CustomFilter::new(|item: &Object| {
+                if let Some(vm_obj) = item.downcast_ref::<VMGObject>() {
+                    if (vm_obj.is_app_vm() && (vm_obj.status() == (VMStatus::Running as u8))) {
+                        return true;
+                    }
                 }
-            }
-            false
-        })));
+                false
+            })),
+        );
 
         // Wrap model with no selection and pass it to the list view
         let selection_model = NoSelection::new(Some(filter_model));
@@ -119,7 +122,7 @@ impl InfoSettingsPage {
     fn setup_factory(&self) {
         // Create a new factory
         let factory = SignalListItemFactory::new();
-        
+
         let this = self.clone();
         // Create an empty `VMRow2` during setup
         factory.connect_setup(move |_, list_item| {
@@ -127,18 +130,14 @@ impl InfoSettingsPage {
             let vm_row = VMRow2::new();
             //connect signals
             let widget = this.clone();
-            vm_row.connect_local(
-                "vm-control-action",
-                false,
-                move |values| {
-                    //the value[0] is self
-                    let vm_action = values[1].get::<VMControlAction>().unwrap();
-                    let vm_name = values[2].get::<String>().unwrap();
-                    widget.emit_by_name::<()>("vm-control-action", &[&vm_action, &vm_name]);
-                    None
-                },
-            );
-            
+            vm_row.connect_local("vm-control-action", false, move |values| {
+                //the value[0] is self
+                let vm_action = values[1].get::<VMControlAction>().unwrap();
+                let vm_name = values[2].get::<String>().unwrap();
+                widget.emit_by_name::<()>("vm-control-action", &[&vm_action, &vm_name]);
+                None
+            });
+
             list_item
                 .downcast_ref::<ListItem>()
                 .expect("Needs to be ListItem")
@@ -196,4 +195,3 @@ impl InfoSettingsPage {
         }
     }
 }
-

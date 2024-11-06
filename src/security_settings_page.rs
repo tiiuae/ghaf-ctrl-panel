@@ -1,7 +1,7 @@
-use std::cell::RefCell;
-use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Button};
 use glib::Binding;
+use gtk::subclass::prelude::*;
+use gtk::{glib, Button, CompositeTemplate};
+use std::cell::RefCell;
 
 use crate::settings_gobject::SettingsGObject;
 
@@ -40,7 +40,7 @@ mod imp {
     impl SecuritySettingsPage {
         #[template_callback]
         fn on_row_selected(&self, row: &gtk::ListBoxRow) {
-            
+
         }
     }*///end #[gtk::template_callbacks]
 
@@ -73,7 +73,7 @@ impl SecuritySettingsPage {
     pub fn new() -> Self {
         glib::Object::builder().build()
     }
-    
+
     pub fn init(&self) {}
 
     pub fn bind(&self, _settings_object: &SettingsGObject) {
@@ -89,4 +89,3 @@ impl SecuritySettingsPage {
         }
     }
 }
-

@@ -1,13 +1,13 @@
-use std::cell::RefCell;
-use std::sync::OnceLock;
-use std::rc::Rc;
-use std::time::Duration;
-use gtk::prelude::*;
-use gtk::subclass::prelude::*;
-use gtk::{gio, glib, CompositeTemplate, Button, Label};
-use glib::Binding;
 use glib::subclass::Signal;
 use glib::timeout_add_local;
+use glib::Binding;
+use gtk::prelude::*;
+use gtk::subclass::prelude::*;
+use gtk::{gio, glib, Button, CompositeTemplate, Label};
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::sync::OnceLock;
+use std::time::Duration;
 
 mod imp {
     use super::*;
@@ -53,7 +53,7 @@ mod imp {
             self.obj().emit_by_name::<()>("reset-default", &[]);
             self.obj().close();
         }
-    }//end #[gtk::template_callbacks]
+    } //end #[gtk::template_callbacks]
 
     impl ObjectImpl for ConfirmDisplaySettingsPopup {
         fn constructed(&self) {
@@ -67,12 +67,7 @@ mod imp {
 
         fn signals() -> &'static [Signal] {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
-            SIGNALS.get_or_init(|| {
-                vec![
-                    Signal::builder("reset-default")
-                    .build()
-                    ]
-            })
+            SIGNALS.get_or_init(|| vec![Signal::builder("reset-default").build()])
         }
     }
     impl WidgetImpl for ConfirmDisplaySettingsPopup {}

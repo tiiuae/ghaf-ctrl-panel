@@ -1,13 +1,17 @@
-use std::cell::RefCell;
-use gtk::{self, gio, glib, prelude::*};
 use gio::ListStore;
+use gtk::{self, gio, glib, prelude::*};
+use std::cell::RefCell;
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    mpsc::{self, Receiver, Sender},
+    Arc, Mutex, RwLock,
+};
 use std::thread::{self, JoinHandle};
-use std::sync::{Arc, Mutex, RwLock, mpsc::{self, Sender, Receiver}, atomic::{AtomicBool, Ordering}};
-use tokio::time::{sleep, Duration, timeout};
 use tokio::runtime::Runtime;
+use tokio::time::{sleep, timeout, Duration};
 
 use givc_client::{self, AdminClient};
-use givc_common::query::{QueryResult, Event, VMStatus, TrustLevel};
+use givc_common::query::{Event, QueryResult, TrustLevel, VMStatus};
 
 use crate::vm_gobject::VMGObject;
 //use crate::settings_gobject::SettingsGObject;//will be in use in the future
@@ -36,7 +40,7 @@ pub mod imp {
 
     impl DataProvider {
         pub fn new(address: String, port: u16) -> Self {
-            let init_store = ListStore::new::<VMGObject>();//Self::fill_by_mock_data();
+            let init_store = ListStore::new::<VMGObject>(); //Self::fill_by_mock_data();
 
             Self {
                 store: Arc::new(Mutex::new(init_store)),
@@ -50,15 +54,18 @@ pub mod imp {
         }
 
         pub fn establish_connection(&self) {
-            println!("Establishing connection, call watch method... Address: {}:{}", 
-            self.service_address.borrow().0, 
-            self.service_address.borrow().1);
+            println!(
+                "Establishing connection, call watch method... Address: {}:{}",
+                self.service_address.borrow().0,
+                self.service_address.borrow().1
+            );
             let admin_client = self.admin_client.clone();
             let store = self.store.clone();
             let stop_signal = self.stop_signal.clone();
             self.stop_signal.store(false, Ordering::SeqCst);
 
-            let (event_tx, event_rx): (Sender<EventExtended>, Receiver<EventExtended>) = mpsc::channel();
+            let (event_tx, event_rx): (Sender<EventExtended>, Receiver<EventExtended>) =
+                mpsc::channel();
 
             let handle = thread::spawn(move || {
                 Runtime::new().unwrap().block_on(async move {
@@ -66,8 +73,12 @@ pub mod imp {
 
                     //Await with timeout
                     let timeout_duration = Duration::from_secs(5);
-                    let Ok(Ok(result)) = timeout(timeout_duration, admin_client.read().unwrap().watch()).await 
-                    else {println!("Watch call timeout/error"); return};
+                    let Ok(Ok(result)) =
+                        timeout(timeout_duration, admin_client.read().unwrap().watch()).await
+                    else {
+                        println!("Watch call timeout/error");
+                        return;
+                    };
 
                     let list = result.initial.clone();
                     let _ = event_tx.send(EventExtended::InitialList(list));
@@ -97,11 +108,15 @@ pub mod imp {
                             let store_inner = store.lock().unwrap();
                             store_inner.remove_all();
                             for vm in list {
-                                store_inner.append(&VMGObject::new(vm.name, vm.description, vm.status, vm.trust_level));
+                                store_inner.append(&VMGObject::new(
+                                    vm.name,
+                                    vm.description,
+                                    vm.status,
+                                    vm.trust_level,
+                                ));
                             }
-                        },
-                        EventExtended::InnerEvent(event) =>
-                        match event {
+                        }
+                        EventExtended::InnerEvent(event) => match event {
                             Event::UnitStatusChanged(result) => {
                                 println!("Status: {:?}", result);
                                 let store_inner = store.lock().unwrap();
@@ -114,7 +129,7 @@ pub mod imp {
                                         }
                                     }
                                 }
-                            },
+                            }
                             Event::UnitShutdown(result) => {
                                 println!("Shutdown info: {:?}", result);
                                 let store_inner = store.lock().unwrap();
@@ -127,12 +142,17 @@ pub mod imp {
                                         }
                                     }
                                 }
-                            },
+                            }
                             Event::UnitRegistered(result) => {
                                 println!("Unit registered {:?}", result);
                                 let store_inner = store.lock().unwrap();
-                                store_inner.append(&VMGObject::new(result.name, result.description, result.status, result.trust_level));
-                            },
+                                store_inner.append(&VMGObject::new(
+                                    result.name,
+                                    result.description,
+                                    result.status,
+                                    result.trust_level,
+                                ));
+                            }
                         },
                         EventExtended::BreakLoop => {
                             println!("BreakLoop event received");
@@ -147,10 +167,24 @@ pub mod imp {
         fn fill_by_mock_data() -> ListStore {
             let init_store = ListStore::new::<VMGObject>();
             let mut vec: Vec<VMGObject> = Vec::new();
-            vec.push(VMGObject::new("VM1".to_string(), String::from("This is the file.pdf and very very long description"), 
-                    VMStatus::Running, TrustLevel::NotSecure));
-            vec.push(VMGObject::new("VM2".to_string(), String::from("Google Chrome"), VMStatus::Paused, TrustLevel::Secure));
-            vec.push(VMGObject::new("VM3".to_string(), String::from("AppFlowy"), VMStatus::Running, TrustLevel::Secure));
+            vec.push(VMGObject::new(
+                "VM1".to_string(),
+                String::from("This is the file.pdf and very very long description"),
+                VMStatus::Running,
+                TrustLevel::NotSecure,
+            ));
+            vec.push(VMGObject::new(
+                "VM2".to_string(),
+                String::from("Google Chrome"),
+                VMStatus::Paused,
+                TrustLevel::Secure,
+            ));
+            vec.push(VMGObject::new(
+                "VM3".to_string(),
+                String::from("AppFlowy"),
+                VMStatus::Running,
+                TrustLevel::Secure,
+            ));
             init_store.extend_from_slice(&vec);
             return init_store;
         }
@@ -167,7 +201,8 @@ pub mod imp {
             self.service_address.clone().into_inner()
         }
 
-        pub fn set_service_address(&self, addr: String, port: u16) {//only when disconnected/watch stopped
+        pub fn set_service_address(&self, addr: String, port: u16) {
+            //only when disconnected/watch stopped
             if !(self.admin_client.try_write().is_err()) {
                 println!("Set service address {addr}:{port}");
                 let mut service_address = self.service_address.borrow_mut();
@@ -190,7 +225,7 @@ pub mod imp {
             if let Some((host, port)) = addr {
                 self.set_service_address(host, port);
             }
-            
+
             self.establish_connection();
         }
 
@@ -204,14 +239,20 @@ pub mod imp {
             }
         }
 
-        pub fn start_vm(&self, name: String, _vm_name: String) {//need to test
+        pub fn start_vm(&self, name: String, _vm_name: String) {
+            //need to test
             let admin_client = self.admin_client.clone();
-            thread::spawn(move || {//not sure it is really needed
-                    Runtime::new().unwrap().block_on(async move {
-                    if let Err(error) = admin_client.read().unwrap().start(name, None/*Some(vm_name)*/, Vec::<String>::new()).await {
+            thread::spawn(move || {
+                //not sure it is really needed
+                Runtime::new().unwrap().block_on(async move {
+                    if let Err(error) = admin_client
+                        .read()
+                        .unwrap()
+                        .start(name, None /*Some(vm_name)*/, Vec::<String>::new())
+                        .await
+                    {
                         println!("Start request error {error}");
-                    }
-                    else {
+                    } else {
                         println!("Start request sent");
                     };
                 })
@@ -224,8 +265,7 @@ pub mod imp {
                 Runtime::new().unwrap().block_on(async move {
                     if let Err(error) = admin_client.read().unwrap().pause(name).await {
                         println!("Pause request error {error}");
-                    }
-                    else {
+                    } else {
                         println!("Pause request sent");
                     };
                 })
@@ -238,8 +278,7 @@ pub mod imp {
                 Runtime::new().unwrap().block_on(async move {
                     if let Err(error) = admin_client.read().unwrap().resume(name).await {
                         println!("Resume request error {error}");
-                    }
-                    else {
+                    } else {
                         println!("Resume request sent");
                     };
                 })
@@ -252,8 +291,7 @@ pub mod imp {
                 Runtime::new().unwrap().block_on(async move {
                     if let Err(error) = admin_client.read().unwrap().stop(vm_name).await {
                         println!("Stop request error {error}");
-                    }
-                    else {
+                    } else {
                         println!("Stop request sent");
                     };
                 })

@@ -1,11 +1,11 @@
-use std::cell::RefCell;
+use glib::Binding;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate};
-use glib::Binding;
+use std::cell::RefCell;
 
-use crate::vm_gobject::VMGObject;
 use crate::security_icon::SecurityIcon;
+use crate::vm_gobject::VMGObject;
 
 mod imp {
     use super::*;
@@ -72,11 +72,7 @@ impl VMRow {
         let mut bindings = self.imp().bindings.borrow_mut();
         let is_app_vm: bool = vm_object.property("is-app-vm");
 
-        let name_property: &str = if is_app_vm {
-            "app-name"
-        } else {
-            "name"
-        };
+        let name_property: &str = if is_app_vm { "app-name" } else { "name" };
 
         let title_binding = vm_object
             .bind_property(name_property, &title, "label")
@@ -131,4 +127,3 @@ impl VMRow {
         }
     }
 }
-

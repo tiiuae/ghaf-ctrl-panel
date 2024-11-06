@@ -1,13 +1,13 @@
-use std::cell::RefCell;
+use crate::settings_gobject::SettingsGObject;
+use glib::subclass::Signal;
+use glib::Binding;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, DropDown, CheckButton, StringList};
-use glib::Binding;
-use glib::subclass::Signal;
-use std::sync::OnceLock;
-use std::process::{Command, Stdio};
+use gtk::{glib, CheckButton, CompositeTemplate, DropDown, StringList};
 use regex::Regex;
-use crate::settings_gobject::SettingsGObject;
+use std::cell::RefCell;
+use std::process::{Command, Stdio};
+use std::sync::OnceLock;
 
 mod imp {
     use super::*;
@@ -53,7 +53,8 @@ mod imp {
         #[template_callback]
         fn on_reset_clicked(&self) {
             self.obj().restore_default();
-            self.obj().emit_by_name::<()>("default-display-settings", &[]);
+            self.obj()
+                .emit_by_name::<()>("default-display-settings", &[]);
         }
         //TODO: revise logic
         #[template_callback]
@@ -71,13 +72,12 @@ mod imp {
 
             //if all non-default settings are applied
             //then show confirmation popup
-            if (resolution_idx > 0 || scale_idx > 0) &&
-                is_resolution_set && 
-                is_scale_set {
-                    self.obj().emit_by_name::<()>("display-settings-changed", &[]);
+            if (resolution_idx > 0 || scale_idx > 0) && is_resolution_set && is_scale_set {
+                self.obj()
+                    .emit_by_name::<()>("display-settings-changed", &[]);
             }
         }
-    }//end #[gtk::template_callbacks]
+    } //end #[gtk::template_callbacks]
 
     impl ObjectImpl for DisplaySettingsPage {
         fn constructed(&self) {
@@ -93,13 +93,10 @@ mod imp {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
             SIGNALS.get_or_init(|| {
                 vec![
-                    Signal::builder("display-settings-changed")
-                    .build(),
-                    Signal::builder("default-display-settings")
-                    .build(),
-                    Signal::builder("display-settings-error")
-                    .build(),
-                    ]
+                    Signal::builder("display-settings-changed").build(),
+                    Signal::builder("default-display-settings").build(),
+                    Signal::builder("display-settings-error").build(),
+                ]
             })
         }
     }
@@ -183,7 +180,8 @@ impl DisplaySettingsPage {
     #[inline]
     fn set_current_resolution(&self, stdout: &str) {
         //for standart eDP-1
-        let current_resolution_regex = Regex::new(r"eDP-1[\s\S]*?(\d+x\d+)\s*px[^\n]*current").unwrap();
+        let current_resolution_regex =
+            Regex::new(r"eDP-1[\s\S]*?(\d+x\d+)\s*px[^\n]*current").unwrap();
         //let current_resolution_regex = Regex::new(r"(\d+x\d+)\s+\d+\.\d+\*").unwrap();//for testing
         if let Some(cap) = current_resolution_regex.captures(&stdout) {
             let resolution = &cap[1];
@@ -195,7 +193,7 @@ impl DisplaySettingsPage {
                     println!("Found {} at index: {}", resolution, index);
                     let switch = self.imp().resolution_switch.get();
                     switch.set_selected(index);
-                },
+                }
                 None => println!("Resolution not found"),
             }
         } else {
@@ -210,7 +208,7 @@ impl DisplaySettingsPage {
         if let Some(cap) = current_scale_regex.captures(&stdout) {
             let scale = &cap[1];
             println!("Current scale: {}", scale);
-            
+
             //transform to percents
             if let Ok(scale_f) = scale.parse::<f32>() {
                 let scale_percent = (scale_f * 100.0).round();
@@ -224,7 +222,7 @@ impl DisplaySettingsPage {
                         println!("Found {} at index: {}", scale_percent_str, index);
                         let switch = self.imp().scale_switch.get();
                         switch.set_selected(index);
-                    },
+                    }
                     None => println!("Scale not found"),
                 }
             } else {
@@ -264,7 +262,11 @@ impl DisplaySettingsPage {
             .arg("--output")
             .arg("eDP-1")
             .arg(if index > 0 { "--custom-mode" } else { "--mode" })
-            .arg(if index > 0 {String::from(resolution) + &String::from("@60")} else {String::from(resolution)})
+            .arg(if index > 0 {
+                String::from(resolution) + &String::from("@60")
+            } else {
+                String::from(resolution)
+            })
             .env("PATH", "/run/current-system/sw/bin")
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())

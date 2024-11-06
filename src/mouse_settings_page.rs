@@ -1,10 +1,10 @@
-use std::cell::RefCell;
-use std::sync::OnceLock;
+use glib::subclass::Signal;
+use glib::Binding;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Switch, Scale};
-use glib::Binding;
-use glib::subclass::Signal;
+use gtk::{glib, CompositeTemplate, Scale, Switch};
+use std::cell::RefCell;
+use std::sync::OnceLock;
 
 use crate::settings_gobject::SettingsGObject;
 
@@ -45,15 +45,17 @@ mod imp {
         fn on_mouse_speed_changed(&self, scale: &Scale) {
             let value = scale.value();
             println!("Mouse speed changed: {}", value);
-            self.obj().emit_by_name::<()>("mouse-speed-changed", &[&value]);
+            self.obj()
+                .emit_by_name::<()>("mouse-speed-changed", &[&value]);
         }
-        #[template_callback] 
+        #[template_callback]
         fn on_button_switch_state_changed(&self, value: bool) -> bool {
             println!("Mouse buttons switched: {}", value);
-            self.obj().emit_by_name::<()>("mouse-buttons-changed", &[&value]);
-            false//propagate event futher
+            self.obj()
+                .emit_by_name::<()>("mouse-buttons-changed", &[&value]);
+            false //propagate event futher
         }
-    }//end #[gtk::template_callbacks]
+    } //end #[gtk::template_callbacks]
 
     impl ObjectImpl for MouseSettingsPage {
         fn constructed(&self) {
@@ -70,12 +72,12 @@ mod imp {
             SIGNALS.get_or_init(|| {
                 vec![
                     Signal::builder("mouse-speed-changed")
-                    .param_types([f64::static_type()])
-                    .build(),
+                        .param_types([f64::static_type()])
+                        .build(),
                     Signal::builder("mouse-buttons-changed")
-                    .param_types([bool::static_type()])
-                    .build(),
-                    ]
+                        .param_types([bool::static_type()])
+                        .build(),
+                ]
             })
         }
     }
@@ -98,7 +100,7 @@ impl MouseSettingsPage {
     pub fn new() -> Self {
         glib::Object::builder().build()
     }
-    
+
     pub fn init(&self) {}
 
     pub fn bind(&self, _settings_object: &SettingsGObject) {
@@ -114,4 +116,3 @@ impl MouseSettingsPage {
         }
     }
 }
-

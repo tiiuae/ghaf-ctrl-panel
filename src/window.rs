@@ -1,16 +1,19 @@
-use std::rc::Rc;
-use gtk::prelude::*;
 use adw::subclass::prelude::*;
-use gtk::{gio, glib, CompositeTemplate, Stack, Image, ToggleButton, MenuButton, ListView, SingleSelection, CustomFilter, SignalListItemFactory, FilterListModel, ListItem,};
 use glib::{Object, Variant};
+use gtk::prelude::*;
+use gtk::{
+    gio, glib, CompositeTemplate, CustomFilter, FilterListModel, Image, ListItem, ListView,
+    MenuButton, SignalListItemFactory, SingleSelection, Stack, ToggleButton,
+};
+use std::rc::Rc;
 
 use crate::application::ControlPanelGuiApplication;
+use crate::settings::Settings;
+use crate::settings_action::SettingsAction;
+use crate::vm_control_action::VMControlAction;
 use crate::vm_gobject::VMGObject;
 use crate::vm_row::VMRow;
 use crate::vm_settings::VMSettings;
-use crate::settings::Settings;
-use crate::vm_control_action::VMControlAction;
-use crate::settings_action::SettingsAction;
 
 mod imp {
     use super::*;
@@ -94,7 +97,7 @@ mod imp {
             let app = self.obj().get_app_ref();
             app.perform_setting_action(action, value);
         }
-    }//end #[gtk::template_callbacks]
+    } //end #[gtk::template_callbacks]
 
     impl ObjectImpl for ControlPanelGuiWindow {
         fn constructed(&self) {
@@ -132,7 +135,7 @@ impl ControlPanelGuiWindow {
         self.set_destroy_with_parent(true);
 
         self.connect_close_request(glib::clone!(@strong self as window => move |_| {
-            println!("Close window request");    
+            println!("Close window request");
             let app = window.get_app_ref();
             app.clean_n_quit();
             glib::Propagation::Stop // Returning Stop allows the window to be destroyed
@@ -150,14 +153,18 @@ impl ControlPanelGuiWindow {
 
     #[inline(always)]
     fn get_app_ref(&self) -> Rc<ControlPanelGuiApplication> {
-        let binding = self.application().expect("Failed to get application");     
-        binding.downcast_ref::<ControlPanelGuiApplication>().expect("ControlPanelGuiApplication is expected!").clone().into()
+        let binding = self.application().expect("Failed to get application");
+        binding
+            .downcast_ref::<ControlPanelGuiApplication>()
+            .expect("ControlPanelGuiApplication is expected!")
+            .clone()
+            .into()
     }
 
     fn setup_vm_rows(&self) {
         let app = self.get_app_ref();
 
-        let model = app.get_store();//ListStore doc: "GLib type: GObject with reference counted clone semantics."
+        let model = app.get_store(); //ListStore doc: "GLib type: GObject with reference counted clone semantics."
 
         self.imp().settings_box.set_vm_model(model.clone());
 
@@ -196,7 +203,7 @@ impl ControlPanelGuiWindow {
                 } else {
                     println!("No item selected");
                 }
-            })
+            }),
         );
         selection_model.connect_items_changed(
             glib::clone!(@strong self as window => move |selection_model, position, removed, added| {
@@ -210,7 +217,7 @@ impl ControlPanelGuiWindow {
                 }
             })
         );
-        
+
         self.imp().vm_list_view.set_model(Some(&selection_model));
 
         self.bind_vm_settings_box_visibility();
@@ -218,7 +225,12 @@ impl ControlPanelGuiWindow {
         //bind filter change
         let filter_model_clone = filter_model.clone();
         let selection_model_clone = selection_model.clone();
-        let count = self.imp().vm_list_view.model().expect("no model!").n_items();
+        let count = self
+            .imp()
+            .vm_list_view
+            .model()
+            .expect("no model!")
+            .n_items();
         self.imp().vm_view_button.connect_toggled(move |button| {
             if button.is_active() {
                 println!("Filter is about to change to vm");
@@ -226,18 +238,22 @@ impl ControlPanelGuiWindow {
                 Self::set_default_selection(&selection_model_clone, count);
             }
         });
-        self.imp().services_view_button.connect_toggled(move |button| {
-            if button.is_active() {
-                println!("Filter is about to change to services");
-                filter_model.set_filter(Some(&services_filter));
-                Self::set_default_selection(&selection_model, count);
-            }
-        });
+        self.imp()
+            .services_view_button
+            .connect_toggled(move |button| {
+                if button.is_active() {
+                    println!("Filter is about to change to services");
+                    filter_model.set_filter(Some(&services_filter));
+                    Self::set_default_selection(&selection_model, count);
+                }
+            });
     }
 
     fn set_default_selection(selection_model: &SingleSelection, count: u32) {
         println!("Selection is about to change");
-        if (count <= 0) {return};
+        if (count <= 0) {
+            return;
+        };
         selection_model.set_selected(0);
         selection_model.selection_changed(0u32, count);
     }
@@ -247,13 +263,13 @@ impl ControlPanelGuiWindow {
         let vm_settings_box = imp.vm_settings_box.clone().upcast::<gtk::Widget>();
         if let Some(model) = imp.vm_list_view.model() {
             model
-            .bind_property("n_items", &vm_settings_box, "visible")
-            .sync_create()
-            .transform_to(move |_, value: &glib::Value| {
-                let count = value.get::<u32>().unwrap_or(0);
-                Some(glib::Value::from(count != 0))
-            })
-            .build();
+                .bind_property("n_items", &vm_settings_box, "visible")
+                .sync_create()
+                .transform_to(move |_, value: &glib::Value| {
+                    let count = value.get::<u32>().unwrap_or(0);
+                    Some(glib::Value::from(count != 0))
+                })
+                .build();
         }
     }
 

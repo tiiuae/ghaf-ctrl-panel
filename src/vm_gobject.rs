@@ -1,11 +1,11 @@
-use std::cell::RefCell;
 use gtk::glib::{self, Object, Properties};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use regex::Regex;
+use std::cell::RefCell;
 
-use givc_common::query::{QueryResult, VMStatus, TrustLevel}; //cannot be used as property!
-//use crate::trust_level::TrustLevel as MyTrustLevel;//type is no recognised in #property
+use givc_common::query::{QueryResult, TrustLevel, VMStatus}; //cannot be used as property!
+                                                             //use crate::trust_level::TrustLevel as MyTrustLevel;//type is no recognised in #property
 
 mod imp {
     use super::*;
@@ -56,19 +56,20 @@ impl VMGObject {
         let app_name = if is_app_vm {
             let re = Regex::new(r"^microvm@([^@-]+)-.+$").unwrap();
             re.captures(&name.clone())
-                .and_then(|cap| cap.get(1).map(|m| m.as_str().to_string())).unwrap()
+                .and_then(|cap| cap.get(1).map(|m| m.as_str().to_string()))
+                .unwrap()
         } else {
             String::from("")
         };
-        
+
         Object::builder()
             .property("name", name)
             .property("app-name", app_name)
             .property("is-app-vm", is_app_vm)
             .property("details", details)
             //for demo
-            .property("status", 0u8)//status as u8)
-            .property("trust-level", 0u8)//trust_level as u8)
+            .property("status", 0u8) //status as u8)
+            .property("trust-level", 0u8) //trust_level as u8)
             .build()
     }
 
