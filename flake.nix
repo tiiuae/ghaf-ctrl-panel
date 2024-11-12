@@ -65,6 +65,10 @@
           postUnpack = ''
             find .
           '';
+          postFixup = ''
+            wrapProgram $out/bin/ctrl-panel \
+              --prefix PATH : ${lib.makeBinPath [ pkgs.glibc ]}
+          '';
         });
       in
       {

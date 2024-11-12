@@ -165,7 +165,7 @@ impl VMSettings {
         self.unbind();
         //make new
         let name = self.imp().name_slot_1.get();
-        let is_app_vm: bool = vm_object.property("is-app-vm");
+        let is_app_vm = vm_object.is_app_vm();
         let status = self.imp().vm_status_label.get();
         let status_icon = self.imp().vm_status_icon.get();
         let details = self.imp().vm_details_label.get();

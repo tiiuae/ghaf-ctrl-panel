@@ -9,8 +9,10 @@ use std::rc::Rc;
 use crate::add_network_popup::AddNetworkPopup;
 use crate::confirm_display_settings_popup::ConfirmDisplaySettingsPopup;
 use crate::connection_config::ConnectionConfig;
-use crate::data_provider::imp::DataProvider;
+use crate::data_gobject::DataGObject;
+use crate::data_provider::imp::{DataProvider, LanguageRegionData};
 use crate::error_popup::ErrorPopup;
+use crate::language_region_notify_popup::LanguageRegionNotifyPopup;
 use crate::settings_action::SettingsAction;
 use crate::vm_control_action::VMControlAction;
 use crate::ControlPanelGuiWindow;
@@ -60,6 +62,37 @@ mod imp {
                 window
             } else {
                 let window = ControlPanelGuiWindow::new(&*application);
+
+                let win = window.clone();
+                glib::spawn_future_local(async move {
+                    let LanguageRegionData {
+                        languages,
+                        current_language,
+                        timezones,
+                        current_timezone,
+                    } = DataProvider::get_timezone_locale_info().await;
+                    let index = current_language.and_then(|cur| {
+                        languages
+                            .iter()
+                            .enumerate()
+                            .find_map(|(idx, lang)| (lang.code == cur).then_some(idx))
+                    });
+                    win.set_locale_model(
+                        languages.into_iter().map(DataGObject::from).collect(),
+                        index,
+                    );
+
+                    let index = current_timezone.and_then(|cur| {
+                        timezones
+                            .iter()
+                            .enumerate()
+                            .find_map(|(idx, tz)| (tz.code == cur).then_some(idx))
+                    });
+                    win.set_timezone_model(
+                        timezones.into_iter().map(DataGObject::from).collect(),
+                        index,
+                    );
+                });
                 window.upcast()
             };
 
@@ -91,6 +124,7 @@ impl ControlPanelGuiApplication {
         address: String,
         port: u16,
     ) -> Self {
+        let _ = DataGObject::static_type();
         let app: Self = glib::Object::builder()
             .property("application-id", application_id)
             .property("flags", flags)
@@ -204,7 +238,29 @@ impl ControlPanelGuiApplication {
         match action {
             SettingsAction::AddNetwork => todo!(),
             SettingsAction::RemoveNetwork => todo!(),
-            SettingsAction::RegionNLanguage => todo!(),
+            SettingsAction::RegionNLanguage => {
+                let (locale, timezone): (String, String) = value.get().unwrap();
+                let app = self.clone();
+                let popup = LanguageRegionNotifyPopup::new();
+                popup.set_transient_for(self.active_window().as_ref());
+                popup.set_modal(true);
+                glib::spawn_future_local(async move {
+                    if let Err(err) = app.imp().data_provider.borrow().set_locale(locale).await {
+                        println!("Locale setting failed: {err}");
+                    }
+                    if let Err(err) = app
+                        .imp()
+                        .data_provider
+                        .borrow()
+                        .set_timezone(timezone)
+                        .await
+                    {
+                        println!("Timezone setting failed: {err}");
+                    }
+
+                    popup.present();
+                });
+            }
             SettingsAction::DateNTime => todo!(),
             SettingsAction::MouseSpeed => todo!(),
             SettingsAction::KeyboardLayout => todo!(),
@@ -249,11 +305,12 @@ impl ControlPanelGuiApplication {
                 popup.launch_close_timer(5);
             }
             SettingsAction::ShowErrorPopup => {
-                let window = self.active_window().unwrap();
-                let popup = ErrorPopup::new(value.to_string());
-                popup.set_transient_for(Some(&window));
-                popup.set_modal(true);
-                popup.present();
+                if let Some(error) = value.str() {
+                    let popup = ErrorPopup::new(error);
+                    popup.set_transient_for(self.active_window().as_ref());
+                    popup.set_modal(true);
+                    popup.present();
+                }
             }
         };
     }

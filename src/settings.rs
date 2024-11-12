@@ -13,6 +13,7 @@ use crate::audio_settings::AudioSettings;
 use crate::display_settings_page::DisplaySettingsPage;
 use crate::info_settings_page::InfoSettingsPage;
 use crate::keyboard_settings_page::KeyboardSettingsPage;
+use crate::language_region_settings_page::LanguageRegionSettingsPage;
 use crate::mouse_settings_page::MouseSettingsPage;
 use crate::security_settings_page::SecuritySettingsPage;
 use crate::settings_action::SettingsAction;
@@ -46,6 +47,8 @@ mod imp {
         pub audio_settings_page: TemplateChild<AudioSettings>,
         #[template_child]
         pub display_settings_page: TemplateChild<DisplaySettingsPage>,
+        #[template_child]
+        pub language_region_settings_page: TemplateChild<LanguageRegionSettingsPage>,
 
         //pub vm_model: RefCell<ListStore>,
 
@@ -73,16 +76,8 @@ mod imp {
     impl Settings {
         #[template_callback]
         fn on_settings_row_selected(&self, row: &gtk::ListBoxRow) {
-            if let Some(action_row) = row.downcast_ref::<adw::ActionRow>() {
-                let name: Option<String> = action_row.property("name");
-                if let Some(name) = name {
-                    self.stack.set_visible_child_name(&name);
-                } else {
-                    println!("(No title)");
-                }
-            } else {
-                println!("(Invalid row type)");
-            }
+            self.stack
+                .set_visible_child_name(row.widget_name().as_str());
         }
         #[template_callback]
         fn on_show_add_network_popup(&self) {
@@ -98,6 +93,27 @@ mod imp {
             self.obj()
                 .emit_by_name::<()>("settings-action", &[&action, &empty]);
         }
+
+        #[template_callback]
+        fn on_locale_timezone_default(&self) {
+            let action = SettingsAction::RegionNLanguage;
+            let variant = ("en_US.utf8", "UTC").to_variant();
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &variant]);
+            self.language_region_settings_page
+                .locale_select_find(|obj| obj.name() == "en_US.utf8");
+            self.language_region_settings_page
+                .timezone_select_find(|obj| obj.name() == "UTC");
+        }
+
+        #[template_callback]
+        fn on_locale_timezone_changed(&self, locale: String, timezone: String) {
+            let action = SettingsAction::RegionNLanguage;
+            let variant = (locale, timezone).to_variant();
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &variant]);
+        }
+
         #[template_callback]
         fn on_show_confirm_display_settings_popup(&self) {
             let action = SettingsAction::ShowConfirmDisplaySettingsPopup;
@@ -157,8 +173,20 @@ impl Settings {
         glib::Object::builder().build()
     }
 
+    pub fn set_locale_model(&self, model: ListStore, selected: Option<usize>) {
+        self.imp()
+            .language_region_settings_page
+            .set_locale_model(model, selected)
+    }
+
+    pub fn set_timezone_model(&self, model: ListStore, selected: Option<usize>) {
+        self.imp()
+            .language_region_settings_page
+            .set_timezone_model(model, selected)
+    }
+
     pub fn set_vm_model(&self, model: ListStore) {
-        self.imp().info_settings_page.set_vm_model(model.clone());
+        self.imp().info_settings_page.set_vm_model(model)
     }
     pub fn init(&self) {
         let this = self.clone();

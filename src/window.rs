@@ -1,4 +1,5 @@
 use adw::subclass::prelude::*;
+use gio::ListStore;
 use glib::{Object, Variant};
 use gtk::prelude::*;
 use gtk::{
@@ -123,7 +124,7 @@ glib::wrapper! {
 }
 
 impl ControlPanelGuiWindow {
-    pub fn new<P: glib::IsA<gtk::Application>>(application: &P) -> Self {
+    pub fn new<P: IsA<gtk::Application>>(application: &P) -> Self {
         let window: Self = glib::Object::builder()
             .property("application", application)
             .build();
@@ -195,9 +196,9 @@ impl ControlPanelGuiWindow {
                 if let Some(selected_item) = selection_model.selected_item() {
                     println!("Selected: {}", selection_model.selected());
                     if let Some(vm_obj) = selected_item.downcast_ref::<VMGObject>() {//???
-                        let title: Option<String> = vm_obj.property("name");
-                        let subtitle: Option<String> = vm_obj.property("details");
-                        println!("Property {}, {}", title.unwrap(), subtitle.unwrap());
+                        let title = vm_obj.name();
+                        let subtitle = vm_obj.details();
+                        println!("Property {title}, {subtitle}");
                         window.set_vm_details(&vm_obj);
                     }
                 } else {
@@ -332,5 +333,13 @@ impl ControlPanelGuiWindow {
     //pub API
     pub fn restore_default_display_settings(&self) {
         self.imp().settings_box.restore_default_display_settings();
+    }
+
+    pub fn set_locale_model(&self, store: ListStore, selected: Option<usize>) {
+        self.imp().settings_box.set_locale_model(store, selected);
+    }
+
+    pub fn set_timezone_model(&self, store: ListStore, selected: Option<usize>) {
+        self.imp().settings_box.set_timezone_model(store, selected);
     }
 }

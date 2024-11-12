@@ -94,21 +94,18 @@ impl ConfirmDisplaySettingsPopup {
     pub fn init(&self) {}
 
     pub fn launch_close_timer(&self, sec: u32) {
+        let mut countdown = sec;
         let label = self.imp().countdown_label.get();
-        label.set_text(&format!("Closing in: {} seconds", sec));
-
-        let countdown = Rc::new(RefCell::new(sec));
+        label.set_text(&format!("Closing in: {countdown} seconds"));
 
         let popup = self.clone();
-        let label_clone = label.clone();
-        let countdown_clone = countdown.clone();
+
         timeout_add_local(Duration::from_secs(1), move || {
-            let mut remaining_time = countdown_clone.borrow_mut();
-            *remaining_time -= 1;
+            countdown -= 1;
 
-            label_clone.set_text(&format!("Closing in: {} seconds", *remaining_time));
+            label.set_text(&format!("Closing in: {countdown} seconds"));
 
-            if *remaining_time == 0 {
+            if countdown == 0 {
                 popup.close();
                 glib::ControlFlow::Break
             } else {

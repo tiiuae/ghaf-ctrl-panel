@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="LanguageRegionSettingsPage" parent="GtkBox">
+    <style><class name="info-box"/></style>
+    <property name="orientation">vertical</property>
+    <property name="vexpand">true</property>
+    <property name="hexpand">true</property>
+    <property name="margin-start">20</property>
+    <property name="margin-end">10</property>
+    <property name="margin-top">10</property>
+    <property name="margin-bottom">10</property>
+    <child>
+      <object class="GtkLabel">
+      <property name="label">Language &amp; Region</property>
+      <style><class name="title"/></style>
+      <property name="margin-end">10</property>
+      <property name="margin-top">10</property>
+      <property name="margin-bottom">10</property>
+      <property name="halign">start</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox">
+      <style><class name="info-box"/></style>
+      <property name="orientation">vertical</property>
+      <property name="vexpand">false</property>
+      <property name="hexpand">true</property>
+      <property name="margin-top">10</property>
+      <property name="margin-bottom">10</property>
+      <property name="spacing">10</property>
+        <child>
+          <object class="GtkLabel">
+          <style><class name="normal-text"/></style>
+          <property name="label">Language</property>
+          <property name="halign">start</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkDropDown" id="language_switch">
+            <style><class name="dropdown-button"/></style>
+            <property name="halign">start</property>
+            <property name="valign">center</property>
+            <property name="width-request">220</property>
+            <property name="height-request">30</property>
+	    <property name="expression">
+              <lookup name="display" type="DataGObject"/>
+	    </property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox">
+      <style><class name="info-box"/></style>
+      <property name="orientation">vertical</property>
+      <property name="vexpand">true</property>
+      <property name="hexpand">true</property>
+      <property name="valign">start</property>
+      <property name="margin-top">10</property>
+      <property name="margin-bottom">10</property>
+      <property name="spacing">10</property>
+        <child>
+          <object class="GtkLabel">
+          <style><class name="normal-text"/></style>
+          <property name="label">Timezone</property>
+          <property name="halign">start</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkDropDown" id="timezone_switch">
+            <style><class name="dropdown-button"/></style>
+            <property name="halign">start</property>
+            <property name="valign">center</property>
+            <property name="width-request">220</property>
+            <property name="height-request">30</property>
+	    <property name="expression">
+              <lookup name="display" type="DataGObject"/>
+	    </property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox" id="footer">
+      <property name="orientation">vertical</property>
+      <property name="valign">end</property>
+        <child>
+          <object class="GtkSeparator">
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+          <property name="orientation">horizontal</property>
+            <child>
+              <object class="GtkButton">
+              <property name="label">Reset to defaults</property>
+              <signal name="clicked" handler="on_reset_clicked" swapped="true"/>
+              <style><class name="settings-button"/></style>
+              <property name="width-request">140</property>
+              <property name="height-request">30</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+              <property name="hexpand">true</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton">
+              <property name="label">Apply</property>
+              <signal name="clicked" handler="on_apply_clicked" swapped="true"/>
+              <style><class name="settings-button"/></style>
+              <property name="width-request">60</property>
+              <property name="height-request">30</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>
