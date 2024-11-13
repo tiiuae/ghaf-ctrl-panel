@@ -19,11 +19,11 @@ mod settings;
 mod settings_action;
 mod settings_gobject;
 mod trust_level;
-mod vm_control_action;
-mod vm_gobject;
+mod control_action;
+mod service_gobject;
+mod service_row;
 mod vm_row;
-mod vm_row_2;
-mod vm_settings;
+mod service_settings;
 mod wifi_settings_page;
 mod window;
 

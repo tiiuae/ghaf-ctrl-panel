@@ -14,7 +14,7 @@ use crate::data_provider::imp::{DataProvider, LanguageRegionData};
 use crate::error_popup::ErrorPopup;
 use crate::language_region_notify_popup::LanguageRegionNotifyPopup;
 use crate::settings_action::SettingsAction;
-use crate::vm_control_action::VMControlAction;
+use crate::control_action::ControlAction;
 use crate::ControlPanelGuiWindow;
 
 mod imp {
@@ -223,14 +223,14 @@ impl ControlPanelGuiApplication {
         self.imp().data_provider.borrow().get_store()
     }
 
-    pub fn control_vm(&self, action: VMControlAction, name: String, vm_name: String) {
+    pub fn control_vm(&self, action: ControlAction, name: String, vm_name: String) {
         println!("Control VM {vm_name}, {:?}", action);
         match action {
-            VMControlAction::Start => self.imp().data_provider.borrow().start_vm(name, vm_name),
-            VMControlAction::Restart => self.imp().data_provider.borrow().restart_vm(vm_name),
-            VMControlAction::Pause => self.imp().data_provider.borrow().pause_vm(vm_name),
-            VMControlAction::Resume => self.imp().data_provider.borrow().resume_vm(vm_name),
-            VMControlAction::Shutdown => self.imp().data_provider.borrow().shutdown_vm(vm_name),
+            ControlAction::Start => self.imp().data_provider.borrow().start_vm(name, vm_name),
+            ControlAction::Restart => self.imp().data_provider.borrow().restart_vm(vm_name),
+            ControlAction::Pause => self.imp().data_provider.borrow().pause_vm(vm_name),
+            ControlAction::Resume => self.imp().data_provider.borrow().resume_vm(vm_name),
+            ControlAction::Shutdown => self.imp().data_provider.borrow().shutdown_vm(vm_name),
         }
     }
 

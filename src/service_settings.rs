@@ -8,15 +8,15 @@ use std::sync::OnceLock;
 
 use crate::audio_settings::AudioSettings;
 use crate::security_icon::SecurityIcon;
-use crate::vm_control_action::VMControlAction;
-use crate::vm_gobject::VMGObject;
+use crate::control_action::ControlAction;
+use crate::service_gobject::ServiceGObject;
 
 mod imp {
     use super::*;
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/vm_settings.ui")]
-    pub struct VMSettings {
+    #[template(resource = "/org/gnome/controlpanelgui/ui/service_settings.ui")]
+    pub struct ServiceSettings {
         #[template_child]
         pub name_slot_1: TemplateChild<Label>,
         #[template_child]
@@ -45,9 +45,9 @@ mod imp {
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for VMSettings {
-        const NAME: &'static str = "VMSettings";
-        type Type = super::VMSettings;
+    impl ObjectSubclass for ServiceSettings {
+        const NAME: &'static str = "ServiceSettings";
+        type Type = super::ServiceSettings;
         type ParentType = gtk::Box;
 
         fn class_init(klass: &mut Self::Class) {
@@ -61,14 +61,14 @@ mod imp {
     }
 
     #[gtk::template_callbacks]
-    impl VMSettings {
+    impl ServiceSettings {
         #[template_callback]
         fn on_vm_start_clicked(&self) {
             let name = self.name_slot_1.label();
             let vm_name = self.name_slot_2.label();
             self.obj().emit_by_name::<()>(
                 "vm-control-action",
-                &[&VMControlAction::Start, &name, &vm_name],
+                &[&ControlAction::Start, &name, &vm_name],
             );
             self.popover_menu.popdown();
         }
@@ -78,7 +78,7 @@ mod imp {
             let vm_name = self.name_slot_2.label();
             self.obj().emit_by_name::<()>(
                 "vm-control-action",
-                &[&VMControlAction::Shutdown, &name, &vm_name],
+                &[&ControlAction::Shutdown, &name, &vm_name],
             );
             self.popover_menu.popdown();
         }
@@ -88,7 +88,7 @@ mod imp {
             let vm_name = self.name_slot_2.label();
             self.obj().emit_by_name::<()>(
                 "vm-control-action",
-                &[&VMControlAction::Pause, &name, &vm_name],
+                &[&ControlAction::Pause, &name, &vm_name],
             );
             self.popover_menu.popdown();
         }
@@ -111,14 +111,14 @@ mod imp {
         }
     } //end #[gtk::template_callbacks]
 
-    impl ObjectImpl for VMSettings {
+    impl ObjectImpl for ServiceSettings {
         fn signals() -> &'static [Signal] {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
             SIGNALS.get_or_init(|| {
                 vec![
                     Signal::builder("vm-control-action")
                         .param_types([
-                            VMControlAction::static_type(),
+                            ControlAction::static_type(),
                             String::static_type(),
                             String::static_type(),
                         ])
@@ -139,33 +139,33 @@ mod imp {
             })
         }
     }
-    impl WidgetImpl for VMSettings {}
-    impl BoxImpl for VMSettings {}
+    impl WidgetImpl for ServiceSettings {}
+    impl BoxImpl for ServiceSettings {}
 }
 
 glib::wrapper! {
-pub struct VMSettings(ObjectSubclass<imp::VMSettings>)
+pub struct ServiceSettings(ObjectSubclass<imp::ServiceSettings>)
     @extends gtk::Widget, gtk::Box,
     @implements gtk::Buildable, gtk::ConstraintTarget;
 }
 
-impl Default for VMSettings {
+impl Default for ServiceSettings {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl VMSettings {
+impl ServiceSettings {
     pub fn new() -> Self {
         glib::Object::builder().build()
     }
 
-    pub fn bind(&self, vm_object: &VMGObject) {
+    pub fn bind(&self, vm_object: &ServiceGObject) {
         //unbind previous ones
         self.unbind();
         //make new
         let name = self.imp().name_slot_1.get();
-        let is_app_vm = vm_object.is_app_vm();
+        let is_vm = vm_object.is_vm();
         let status = self.imp().vm_status_label.get();
         let status_icon = self.imp().vm_status_icon.get();
         let details = self.imp().vm_details_label.get();
@@ -175,11 +175,11 @@ impl VMSettings {
         let audio_settings_box = self.imp().audio_settings_box.get();
         let mut bindings = self.imp().bindings.borrow_mut();
 
-        if is_app_vm {
+        if is_vm {
             let full_service_name = self.imp().name_slot_2.get();
 
             let name_binding = vm_object
-                .bind_property("app-name", &name, "label")
+                .bind_property("display-name", &name, "label")
                 .sync_create()
                 .build();
             bindings.push(name_binding);
@@ -271,11 +271,11 @@ impl VMSettings {
 
         //change label
         let controls_title_binding = vm_object
-            .bind_property("is-app-vm", &control_label, "label")
+            .bind_property("is-vm", &control_label, "label")
             .sync_create()
             .transform_to(move |_, value: &glib::Value| {
-                let is_app_vm = value.get::<bool>().unwrap_or(false);
-                if (is_app_vm) {
+                let is_vm = value.get::<bool>().unwrap_or(false);
+                if (is_vm) {
                     Some(glib::Value::from("VM Controls"))
                 } else {
                     Some(glib::Value::from("Service Controls"))
@@ -286,7 +286,7 @@ impl VMSettings {
 
         //hide audio settings for services
         let audio_settings_visibilty_binding = vm_object
-            .bind_property("is-app-vm", &audio_settings_box, "visible")
+            .bind_property("is-vm", &audio_settings_box, "visible")
             .sync_create()
             .build();
         bindings.push(audio_settings_visibilty_binding);

@@ -11,10 +11,11 @@ mod imp {
     use super::*;
 
     #[derive(Default)]
-    pub struct VMData {
+    pub struct ServiceData {
         pub name: String,
-        pub app_name: String,
-        pub is_app_vm: bool,
+        pub display_name: String,
+        pub is_vm: bool,
+        pub is_app: bool,
         pub details: String,
         pub status: u8,
         pub trust_level: u8,
@@ -22,38 +23,40 @@ mod imp {
     }
 
     #[derive(Default, Properties)]
-    #[properties(wrapper_type = super::VMGObject)]
-    pub struct VMGObject {
+    #[properties(wrapper_type = super::ServiceGObject)]
+    pub struct ServiceGObject {
         #[property(name = "name", get, set, type = String, member = name)]
-        #[property(name = "app-name", get, set, type = String, member = app_name)]
-        #[property(name = "is-app-vm", get, set, type = bool, member = is_app_vm)]
+        #[property(name = "display-name", get, set, type = String, member = display_name)]
+        #[property(name = "is-vm", get, set, type = bool, member = is_vm)]
+        #[property(name = "is-app", get, set, type = bool, member = is_app)]
         #[property(name = "details", get, set, type = String, member = details)]
         #[property(name = "status", get, set, type = u8, member = status)]
         #[property(name = "trust-level", get, set, type = u8, member = trust_level)]
         //#[property(name = "my-trust-level", get, set, type = MyTrustLevel, member = my_trust_level)]
-        pub data: RefCell<VMData>,
+        pub data: RefCell<ServiceData>,
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for VMGObject {
+    impl ObjectSubclass for ServiceGObject {
         const NAME: &'static str = "VMObject";
-        type Type = super::VMGObject;
+        type Type = super::ServiceGObject;
         type ParentType = glib::Object;
     }
 
     // Trait shared by all GObjects
     #[glib::derived_properties]
-    impl ObjectImpl for VMGObject {}
+    impl ObjectImpl for ServiceGObject {}
 }
 
 glib::wrapper! {
-    pub struct VMGObject(ObjectSubclass<imp::VMGObject>);
+    pub struct ServiceGObject(ObjectSubclass<imp::ServiceGObject>);
 }
 
-impl VMGObject {
+impl ServiceGObject {
     pub fn new(name: String, details: String, _status: VMStatus, _trust_level: TrustLevel) -> Self {
-        let is_app_vm = name.starts_with("microvm@");
-        let app_name = if is_app_vm {
+        let is_vm = name.starts_with("microvm@");
+        let is_app = false;//no pattern to grep now
+        let display_name = if is_app {
             let re = Regex::new(r"^microvm@([^@-]+)-.+$").unwrap();
             re.captures(&name.clone())
                 .and_then(|cap| cap.get(1).map(|m| m.as_str().to_string()))
@@ -64,8 +67,9 @@ impl VMGObject {
 
         Object::builder()
             .property("name", name)
-            .property("app-name", app_name)
-            .property("is-app-vm", is_app_vm)
+            .property("display-name", display_name)
+            .property("is-vm", is_vm)
+            .property("is-app", is_app)
             .property("details", details)
             //for demo
             .property("status", 0u8) //status as u8)
@@ -73,7 +77,7 @@ impl VMGObject {
             .build()
     }
 
-    pub fn is_equal_to(&self, other: &VMGObject) -> bool {
+    pub fn is_equal_to(&self, other: &ServiceGObject) -> bool {
         self.name() == other.name()
     }
 

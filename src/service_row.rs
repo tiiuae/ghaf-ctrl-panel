@@ -1,42 +1,41 @@
-use glib::subclass::Signal;
 use glib::Binding;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Label, MenuButton, Popover};
+use gtk::{glib, CompositeTemplate};
 use std::cell::RefCell;
-use std::sync::OnceLock;
 
-use crate::control_action::ControlAction;
+use crate::security_icon::SecurityIcon;
 use crate::service_gobject::ServiceGObject;
 
 mod imp {
     use super::*;
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/vm_row.ui")]
-    pub struct VMRow {
-        #[template_child]
-        pub title_label: TemplateChild<Label>,
-        #[template_child]
-        pub subtitle_label: TemplateChild<Label>,
-        #[template_child]
-        pub vm_action_menu_button: TemplateChild<MenuButton>,
-        #[template_child]
-        pub popover_menu: TemplateChild<Popover>,
+    #[template(resource = "/org/gnome/controlpanelgui/ui/service_row.ui")]
+    pub struct ServiceRow {
+        pub name: String,
 
-        // Vector holding the bindings to properties of `Object`
+        #[template_child]
+        pub title_label: TemplateChild<gtk::Label>,
+        #[template_child]
+        pub subtitle_label: TemplateChild<gtk::Label>,
+        #[template_child]
+        pub vm_icon: TemplateChild<gtk::Image>,
+        #[template_child]
+        pub security_icon: TemplateChild<gtk::Image>,
+
+        // Vector holding the bindings to properties of `TaskObject`
         pub bindings: RefCell<Vec<Binding>>,
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for VMRow {
-        const NAME: &'static str = "VMRow";
-        type Type = super::VMRow;
+    impl ObjectSubclass for ServiceRow {
+        const NAME: &'static str = "ServiceRow";
+        type Type = super::ServiceRow;
         type ParentType = gtk::Box;
 
         fn class_init(klass: &mut Self::Class) {
             klass.bind_template();
-            klass.bind_template_callbacks();
         }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -44,59 +43,23 @@ mod imp {
         }
     }
 
-    #[gtk::template_callbacks]
-    impl VMRow {
-        #[template_callback]
-        fn on_vm_restart_clicked(&self) {
-            let vm_name = self.title_label.label();
-            //emit signal
-            self.obj()
-                .emit_by_name::<()>("vm-control-action", &[&ControlAction::Restart, &vm_name]);
-            //and close menu
-            self.popover_menu.popdown();
-        }
-        #[template_callback]
-        fn on_vm_shutdown_clicked(&self) {
-            let vm_name = self.title_label.label();
-            self.obj()
-                .emit_by_name::<()>("vm-control-action", &[&ControlAction::Shutdown, &vm_name]);
-            self.popover_menu.popdown();
-        }
-        #[template_callback]
-        fn on_vm_pause_clicked(&self) {
-            let vm_name = self.title_label.label();
-            self.obj()
-                .emit_by_name::<()>("vm-control-action", &[&ControlAction::Pause, &vm_name]);
-            self.popover_menu.popdown();
-        }
-    } //end #[gtk::template_callbacks]
-
-    impl ObjectImpl for VMRow {
-        fn signals() -> &'static [Signal] {
-            static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
-            SIGNALS.get_or_init(|| {
-                vec![Signal::builder("vm-control-action")
-                    .param_types([ControlAction::static_type(), String::static_type()])
-                    .build()]
-            })
-        }
-    }
-    impl WidgetImpl for VMRow {}
-    impl BoxImpl for VMRow {}
+    impl ObjectImpl for ServiceRow {}
+    impl WidgetImpl for ServiceRow {}
+    impl BoxImpl for ServiceRow {}
 }
 
 glib::wrapper! {
-pub struct VMRow(ObjectSubclass<imp::VMRow>)
+pub struct ServiceRow(ObjectSubclass<imp::ServiceRow>)
     @extends gtk::Widget, gtk::Box;
 }
 
-impl Default for VMRow {
+impl Default for ServiceRow {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl VMRow {
+impl ServiceRow {
     pub fn new() -> Self {
         //glib::Object::new::<Self>()
         glib::Object::builder().build()
@@ -105,10 +68,14 @@ impl VMRow {
     pub fn bind(&self, vm_object: &ServiceGObject) {
         let title = self.imp().title_label.get();
         let subtitle = self.imp().subtitle_label.get();
+        let security_icon = self.imp().security_icon.get();
         let mut bindings = self.imp().bindings.borrow_mut();
+        let is_vm = vm_object.is_vm();
+
+        let name_property: &str = if is_vm { "display-name" } else { "name" };
 
         let title_binding = vm_object
-            .bind_property("display-name", &title, "label")
+            .bind_property(name_property, &title, "label")
             //.bidirectional()
             .sync_create()
             .build();
@@ -121,6 +88,17 @@ impl VMRow {
             .build();
         // Save binding
         bindings.push(subtitle_binding);
+
+        let security_binding = vm_object
+            .bind_property("trust-level", &security_icon, "resource")
+            .sync_create()
+            .transform_to(move |_, value: &glib::Value| {
+                let trust_level = value.get::<u8>().unwrap_or(0);
+                Some(glib::Value::from(SecurityIcon::new(trust_level).0))
+            })
+            .build();
+        // Save binding
+        bindings.push(security_binding);
 
         //block was left here as example
         /*/ Bind `task_object.completed` to `task_row.content_label.attributes`

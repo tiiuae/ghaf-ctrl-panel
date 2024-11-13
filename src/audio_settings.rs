@@ -188,7 +188,7 @@ impl AudioSettings {
     }
 
     /*
-    pub fn bind(&self, vm_object: &VMGObject) {
+    pub fn bind(&self, vm_object: &ServiceGObject) {
         let title = self.imp().title_label.get();
         let subtitle = self.imp().subtitle_label.get();
         let mut bindings = self.imp().bindings.borrow_mut();

@@ -129,8 +129,8 @@
                             </object> <!-- VM box object (list of VM's)-->
                           </child>
                           <child>
-                            <object class="VMSettings" id="vm_settings_box">
-                            <signal name="vm-control-action" handler="on_vm_control_action" swapped="true"/>
+                            <object class="ServiceSettings" id="service_settings_box">
+                            <signal name="vm-control-action" handler="on_control_action" swapped="true"/>
                             </object> <!-- Settings box object -->
                           </child>
                         </object> <!-- Main box object -->
@@ -143,7 +143,7 @@
                       <property name="name">settings_view</property>
                       <property name="child">
                         <object class="Settings" id="settings_box">
-                        <signal name="vm-control-action" handler="on_vm_control_action" swapped="true"/>
+                        <signal name="vm-control-action" handler="on_control_action" swapped="true"/>
                         <signal name="settings-action" handler="on_settings_action" swapped="true"/>
                         </object>
                       </property>

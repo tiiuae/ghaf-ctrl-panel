@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::ops::{Deref, DerefMut};
 use std::process::Command;
 use std::rc::Rc;
-use std::sync::{Arc, RwLock, RwLockReadGuard};
+use std::sync::Arc;
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
@@ -16,7 +16,7 @@ use givc_common::query::{Event, TrustLevel, VMStatus};
 use tokio::runtime::Builder;
 
 use crate::data_gobject::DataGObject;
-use crate::vm_gobject::VMGObject;
+use crate::service_gobject::ServiceGObject;
 //use crate::settings_gobject::SettingsGObject;//will be in use in the future
 
 use crate::{ADMIN_SERVICE_ADDR, ADMIN_SERVICE_PORT};
@@ -102,7 +102,7 @@ pub mod imp {
 
     #[derive(Debug)]
     pub struct DataProvider {
-        store: TypedListStore<VMGObject>,
+        store: TypedListStore<ServiceGObject>,
         //settings: Arc<Mutex<SettingsGObject>>,//will be in use in the future
         pub status: bool,
         service_address: RefCell<(String, u16)>,
@@ -192,7 +192,7 @@ pub mod imp {
                 if let Ok((channel, initial)) = event_rx.recv().await {
                     store.remove_all();
                     store.extend(initial.into_iter().map(|vm| {
-                        VMGObject::new(vm.name, vm.description, vm.status, vm.trust_level)
+                        ServiceGObject::new(vm.name, vm.description, vm.status, vm.trust_level)
                     }));
 
                     while let Ok(event) = channel.recv().await {
@@ -215,7 +215,7 @@ pub mod imp {
                             }
                             Event::UnitRegistered(result) => {
                                 println!("Unit registered {:?}", result);
-                                store.append(&VMGObject::new(
+                                store.append(&ServiceGObject::new(
                                     result.name,
                                     result.description,
                                     result.status,
@@ -238,21 +238,21 @@ pub mod imp {
         }
 
         fn fill_by_mock_data() -> ListStore {
-            let init_store = ListStore::new::<VMGObject>();
-            let mut vec: Vec<VMGObject> = Vec::new();
-            vec.push(VMGObject::new(
+            let init_store = ListStore::new::<ServiceGObject>();
+            let mut vec: Vec<ServiceGObject> = Vec::new();
+            vec.push(ServiceGObject::new(
                 "VM1".to_string(),
                 String::from("This is the file.pdf and very very long description"),
                 VMStatus::Running,
                 TrustLevel::NotSecure,
             ));
-            vec.push(VMGObject::new(
+            vec.push(ServiceGObject::new(
                 "VM2".to_string(),
                 String::from("Google Chrome"),
                 VMStatus::Paused,
                 TrustLevel::Secure,
             ));
-            vec.push(VMGObject::new(
+            vec.push(ServiceGObject::new(
                 "VM3".to_string(),
                 String::from("AppFlowy"),
                 VMStatus::Running,
@@ -277,7 +277,7 @@ pub mod imp {
             *service_address = (addr.clone(), port);
         }
 
-        pub fn add_vm(&self, vm: VMGObject) {
+        pub fn add_vm(&self, vm: ServiceGObject) {
             self.store.append(&vm);
         }
 

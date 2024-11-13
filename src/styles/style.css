@@ -109,7 +109,7 @@ box.info-box {
 }
 */
 
-/* VMRow styling */
+/* ServiceRow styling */
 .vm-list-main>row {
   background-color: #1D1D1D;
   border: 1px solid #353535;
@@ -147,7 +147,7 @@ box.info-box {
   margin: 5px;
 }
 
-/* VMRow on Info page*/
+/* ServiceRow on Info page*/
 .running-vm-list>row {
   background-color: #2B2B2B;
   border: none;

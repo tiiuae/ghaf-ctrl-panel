@@ -7,7 +7,7 @@ use gtk::{glib, CompositeTemplate, ListBox, Stack};
 use std::cell::RefCell;
 use std::sync::OnceLock;
 
-//use crate::vm_gobject::VMGObject; will be used in the future
+//use crate::service_gobject::ServiceGObject; will be used in the future
 use crate::admin_settings_page::AdminSettingsPage;
 use crate::audio_settings::AudioSettings;
 use crate::display_settings_page::DisplaySettingsPage;
@@ -18,7 +18,7 @@ use crate::mouse_settings_page::MouseSettingsPage;
 use crate::security_settings_page::SecuritySettingsPage;
 use crate::settings_action::SettingsAction;
 use crate::settings_gobject::SettingsGObject;
-use crate::vm_control_action::VMControlAction;
+use crate::control_action::ControlAction;
 use crate::wifi_settings_page::WifiSettingsPage;
 
 mod imp {
@@ -144,7 +144,7 @@ mod imp {
             SIGNALS.get_or_init(|| {
                 vec![
                     Signal::builder("vm-control-action")
-                        .param_types([VMControlAction::static_type(), String::static_type()])
+                        .param_types([ControlAction::static_type(), String::static_type()])
                         .build(),
                     Signal::builder("settings-action")
                         .param_types([SettingsAction::static_type(), Variant::static_type()])
@@ -194,7 +194,7 @@ impl Settings {
             .info_settings_page
             .connect_local("vm-control-action", false, move |values| {
                 //the value[0] is self
-                let vm_action = values[1].get::<VMControlAction>().unwrap();
+                let vm_action = values[1].get::<ControlAction>().unwrap();
                 let vm_name = values[2].get::<String>().unwrap();
                 this.emit_by_name::<()>("vm-control-action", &[&vm_action, &vm_name]);
                 None

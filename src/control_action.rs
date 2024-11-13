@@ -7,7 +7,7 @@ use gtk::prelude::*;
 
 #[derive(Debug, Clone, Copy)]
 #[repr(u8)]
-pub enum VMControlAction {
+pub enum ControlAction {
     Start = 0,
     Restart = 1,
     Pause = 2,
@@ -15,35 +15,35 @@ pub enum VMControlAction {
     Shutdown = 4,
 }
 
-impl StaticType for VMControlAction {
+impl StaticType for ControlAction {
     fn static_type() -> Type {
         u8::static_type()
     }
 }
 
-unsafe impl FromValue<'_> for VMControlAction {
+unsafe impl FromValue<'_> for ControlAction {
     type Checker = glib::value::GenericValueTypeChecker<Self>;
 
     unsafe fn from_value(value: &Value) -> Self {
         match value.get::<u8>().unwrap() {
-            0 => VMControlAction::Start,
-            1 => VMControlAction::Restart,
-            2 => VMControlAction::Pause,
-            3 => VMControlAction::Resume,
-            4 => VMControlAction::Shutdown,
-            _ => panic!("Invalid VMControlAction value"),
+            0 => ControlAction::Start,
+            1 => ControlAction::Restart,
+            2 => ControlAction::Pause,
+            3 => ControlAction::Resume,
+            4 => ControlAction::Shutdown,
+            _ => panic!("Invalid ControlAction value"),
         }
     }
 }
 
-impl ToValue for VMControlAction {
+impl ToValue for ControlAction {
     fn to_value(&self) -> Value {
         let v = match self {
-            VMControlAction::Start => 0u8,
-            VMControlAction::Restart => 1u8,
-            VMControlAction::Pause => 2u8,
-            VMControlAction::Resume => 3u8,
-            VMControlAction::Shutdown => 4u8,
+            ControlAction::Start => 0u8,
+            ControlAction::Restart => 1u8,
+            ControlAction::Pause => 2u8,
+            ControlAction::Resume => 3u8,
+            ControlAction::Shutdown => 4u8,
         };
         v.to_value()
     }

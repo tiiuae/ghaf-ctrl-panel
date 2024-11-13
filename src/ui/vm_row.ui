@@ -2,62 +2,105 @@
 <interface>
   <requires lib="gtk" version="4.0"/>
   <template class="VMRow" parent="GtkBox">
+    <style><class name="vm-row-2"/></style>
     <property name="orientation">horizontal</property>
-    <property name="can_focus">true</property>
+    <property name="can_focus">false</property>
     <property name="vexpand">true</property>
     <property name="hexpand">true</property>
-    <property name="spacing">5</property>
+    <property name="spacing">10</property>
     <child>
-      <object class="GtkImage" id="vm_icon">
-          <property name="visible">true</property>
-          <property name="can_focus">false</property>
-          <property name="resource">/org/gnome/controlpanelgui/icons/ghaf_logo.svg</property>
-          <property name="margin-start">5</property>
-          <property name="margin-end">0</property>
-          <property name="margin-top">5</property>
-          <property name="margin-bottom">5</property>
-          <property name="width-request">30</property>
-          <property name="height-request">30</property>
-          <property name="halign">start</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkBox" id="text_box">
-        <property name="orientation">vertical</property>
-        <property name="margin-start">0</property>
-        <property name="margin-end">10</property>
-        <property name="margin-top">10</property>
-        <property name="margin-bottom">10</property>
-        <property name="vexpand">false</property>
-        <property name="hexpand">true</property>
+      <object class="GtkLabel" id="title_label">
+        <style><class name="normal-text"/></style>
         <property name="halign">start</property>
-        <child>
-          <object class="GtkLabel" id="title_label">
-            <style><class name="normal-text"/></style>
-            <property name="halign">start</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkLabel" id="subtitle_label">
-            <style><class name="normal-text"/></style>
-            <property name="halign">start</property>
-            <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
-          </object>
-        </child>
+        <property name="margin-start">10</property>
       </object>
     </child>
     <child>
-      <object class="GtkImage" id="security_icon">
-          <property name="visible">True</property>
-          <property name="can_focus">False</property>
-          <property name="margin-start">10</property>
-          <property name="margin-end">10</property>
-          <property name="margin-top">5</property>
-          <property name="margin-bottom">5</property>
-          <property name="width-request">16</property>
-          <property name="height-request">20</property>
-          <property name="halign">end</property>
+      <object class="GtkLabel" id="subtitle_label">
+        <style><class name="normal-text"/></style>
+        <property name="halign">start</property>
+        <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox"><!-- Placeholder -->
+        <property name="vexpand">true</property>
+        <property name="hexpand">true</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuButton" id="vm_action_menu_button">
+        <style><class name="menu-button"/></style>
+        <property name="visible">true</property>
+        <property name="direction">GTK_ARROW_DOWN</property>
+        <property name="halign">start</property>
+        <property name="width-request">140</property>
+        <property name="height-request">30</property>
+        <property name="label">Action</property>
+        <property name="popover">popover_menu</property>
       </object>
     </child>
   </template>
+  <object class="GtkPopover" id="popover_menu">
+  <property name="width-request">140</property>
+    <child>
+      <object class="GtkBox">
+      <style><class name="info-box"/></style>
+      <property name="vexpand">false</property>
+      <property name="hexpand">true</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkButton" id="start_button">
+          <signal name="clicked" handler="on_vm_restart_clicked" swapped="true"/>
+          <style><class name="popover-button"/></style>
+          <property name="vexpand">false</property>
+          <property name="hexpand">true</property>
+            <property name="halign">start</property>
+            <property name="width-request">140</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">start</property>
+                <property name="label">Restart</property>
+                <property name="visible">1</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="pause_button">
+          <signal name="clicked" handler="on_vm_pause_clicked" swapped="true"/>
+          <style><class name="popover-button"/></style>
+          <property name="vexpand">false</property>
+          <property name="hexpand">true</property>
+            <property name="halign">start</property>
+            <property name="width-request">140</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">start</property>
+                <property name="label">Pause</property>
+                <property name="visible">1</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="shutdown_button">
+          <signal name="clicked" handler="on_vm_shutdown_clicked" swapped="true"/>
+          <style><class name="popover-button"/></style>
+          <property name="vexpand">false</property>
+          <property name="hexpand">true</property>
+          <property name="halign">start</property>
+          <property name="width-request">140</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">start</property>
+                <property name="label">Shutdown</property>
+                <property name="visible">1</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
 </interface>

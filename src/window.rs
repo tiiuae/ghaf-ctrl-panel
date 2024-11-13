@@ -11,10 +11,10 @@ use std::rc::Rc;
 use crate::application::ControlPanelGuiApplication;
 use crate::settings::Settings;
 use crate::settings_action::SettingsAction;
-use crate::vm_control_action::VMControlAction;
-use crate::vm_gobject::VMGObject;
-use crate::vm_row::VMRow;
-use crate::vm_settings::VMSettings;
+use crate::control_action::ControlAction;
+use crate::service_gobject::ServiceGObject;
+use crate::service_row::ServiceRow;
+use crate::service_settings::ServiceSettings;
 
 mod imp {
     use super::*;
@@ -42,7 +42,7 @@ mod imp {
         #[template_child]
         pub vm_list_view: TemplateChild<ListView>,
         #[template_child]
-        pub vm_settings_box: TemplateChild<VMSettings>,
+        pub service_settings_box: TemplateChild<ServiceSettings>,
 
         #[template_child]
         pub settings_box: TemplateChild<Settings>,
@@ -55,8 +55,8 @@ mod imp {
         type ParentType = adw::ApplicationWindow;
 
         fn class_init(klass: &mut Self::Class) {
-            // Register `VMRow`
-            VMRow::ensure_type();
+            // Register `ServiceRow`
+            ServiceRow::ensure_type();
 
             klass.bind_template();
             klass.bind_template_callbacks();
@@ -89,7 +89,7 @@ mod imp {
         }
 
         #[template_callback]
-        fn on_vm_control_action(&self, action: VMControlAction, name: String, vm_name: String) {
+        fn on_control_action(&self, action: ControlAction, name: String, vm_name: String) {
             let app = self.obj().get_app_ref();
             app.control_vm(action, name, vm_name);
         }
@@ -146,7 +146,7 @@ impl ControlPanelGuiWindow {
             println!("Destroy window");
         }));
 
-        self.setup_vm_rows();
+        self.setup_service_rows();
         self.setup_factory();
         //vm view by default
         self.imp().vm_view_button.set_active(true);
@@ -162,7 +162,7 @@ impl ControlPanelGuiWindow {
             .into()
     }
 
-    fn setup_vm_rows(&self) {
+    fn setup_service_rows(&self) {
         let app = self.get_app_ref();
 
         let model = app.get_store(); //ListStore doc: "GLib type: GObject with reference counted clone semantics."
@@ -171,16 +171,16 @@ impl ControlPanelGuiWindow {
 
         //Create filter: VM services, default
         let vm_filter = CustomFilter::new(|item: &Object| {
-            if let Some(vm_obj) = item.downcast_ref::<VMGObject>() {
-                return vm_obj.is_app_vm();
+            if let Some(vm_obj) = item.downcast_ref::<ServiceGObject>() {
+                return vm_obj.is_vm();
             }
             false
         });
 
         //Create filter: other services
         let services_filter = CustomFilter::new(|item: &Object| {
-            if let Some(vm_obj) = item.downcast_ref::<VMGObject>() {
-                return !vm_obj.is_app_vm();
+            if let Some(vm_obj) = item.downcast_ref::<ServiceGObject>() {
+                return !vm_obj.is_vm();
             }
             false
         });
@@ -195,7 +195,7 @@ impl ControlPanelGuiWindow {
             glib::clone!(@strong self as window => move |selection_model, _, _| {
                 if let Some(selected_item) = selection_model.selected_item() {
                     println!("Selected: {}", selection_model.selected());
-                    if let Some(vm_obj) = selected_item.downcast_ref::<VMGObject>() {//???
+                    if let Some(vm_obj) = selected_item.downcast_ref::<ServiceGObject>() {//???
                         let title = vm_obj.name();
                         let subtitle = vm_obj.details();
                         println!("Property {title}, {subtitle}");
@@ -210,7 +210,7 @@ impl ControlPanelGuiWindow {
             glib::clone!(@strong self as window => move |selection_model, position, removed, added| {
                 println!("Items changed at position {}, removed: {}, added: {}", position, removed, added);
                 if let Some(selected_item) = selection_model.selected_item() {
-                    if let Some(vm_obj) = selected_item.downcast_ref::<VMGObject>() {
+                    if let Some(vm_obj) = selected_item.downcast_ref::<ServiceGObject>() {
                         window.set_vm_details(&vm_obj);
                     }
                 } else {
@@ -221,7 +221,7 @@ impl ControlPanelGuiWindow {
 
         self.imp().vm_list_view.set_model(Some(&selection_model));
 
-        self.bind_vm_settings_box_visibility();
+        self.bind_service_settings_box_visibility();
 
         //bind filter change
         let filter_model_clone = filter_model.clone();
@@ -259,12 +259,12 @@ impl ControlPanelGuiWindow {
         selection_model.selection_changed(0u32, count);
     }
 
-    fn bind_vm_settings_box_visibility(&self) {
+    fn bind_service_settings_box_visibility(&self) {
         let imp = self.imp();
-        let vm_settings_box = imp.vm_settings_box.clone().upcast::<gtk::Widget>();
+        let service_settings_box = imp.service_settings_box.clone().upcast::<gtk::Widget>();
         if let Some(model) = imp.vm_list_view.model() {
             model
-                .bind_property("n_items", &vm_settings_box, "visible")
+                .bind_property("n_items", &service_settings_box, "visible")
                 .sync_create()
                 .transform_to(move |_, value: &glib::Value| {
                     let count = value.get::<u32>().unwrap_or(0);
@@ -278,56 +278,56 @@ impl ControlPanelGuiWindow {
         // Create a new factory
         let factory = SignalListItemFactory::new();
 
-        // Create an empty `VMRow` during setup
+        // Create an empty `ServiceRow` during setup
         factory.connect_setup(move |_, list_item| {
-            // Create `VMRow`
-            let vm_row = VMRow::new();
+            // Create `ServiceRow`
+            let service_row = ServiceRow::new();
             list_item
                 .downcast_ref::<ListItem>()
                 .expect("Needs to be ListItem")
-                .set_child(Some(&vm_row));
+                .set_child(Some(&service_row));
         });
 
-        // Tell factory how to bind `VMRow` to a `VMGObject`
+        // Tell factory how to bind `ServiceRow` to a `ServiceGObject`
         factory.connect_bind(move |_, list_item| {
-            // Get `VMGObject` from `ListItem`
+            // Get `ServiceGObject` from `ListItem`
             let vm_object = list_item
                 .downcast_ref::<ListItem>()
                 .expect("Needs to be ListItem")
                 .item()
-                .and_downcast::<VMGObject>()
-                .expect("The item has to be an `VMGObject`.");
+                .and_downcast::<ServiceGObject>()
+                .expect("The item has to be an `ServiceGObject`.");
 
-            // Get `VMRow` from `ListItem`
-            let vm_row = list_item
+            // Get `ServiceRow` from `ListItem`
+            let service_row = list_item
                 .downcast_ref::<ListItem>()
                 .expect("Needs to be ListItem")
                 .child()
-                .and_downcast::<VMRow>()
-                .expect("The child has to be a `VMRow`.");
+                .and_downcast::<ServiceRow>()
+                .expect("The child has to be a `ServiceRow`.");
 
-            vm_row.bind(&vm_object);
+            service_row.bind(&vm_object);
         });
 
-        // Tell factory how to unbind `VMRow` from `VMGObject`
+        // Tell factory how to unbind `ServiceRow` from `ServiceGObject`
         factory.connect_unbind(move |_, list_item| {
-            // Get `VMRow` from `ListItem`
-            let vm_row = list_item
+            // Get `ServiceRow` from `ListItem`
+            let service_row = list_item
                 .downcast_ref::<ListItem>()
                 .expect("Needs to be ListItem")
                 .child()
-                .and_downcast::<VMRow>()
-                .expect("The child has to be a `VMRow`.");
+                .and_downcast::<ServiceRow>()
+                .expect("The child has to be a `ServiceRow`.");
 
-            vm_row.unbind();
+            service_row.unbind();
         });
 
         // Set the factory of the list view
         self.imp().vm_list_view.set_factory(Some(&factory));
     }
 
-    fn set_vm_details(&self, vm_obj: &VMGObject) {
-        self.imp().vm_settings_box.bind(vm_obj);
+    fn set_vm_details(&self, vm_obj: &ServiceGObject) {
+        self.imp().service_settings_box.bind(vm_obj);
     }
 
     //pub API
