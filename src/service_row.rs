@@ -65,16 +65,16 @@ impl ServiceRow {
         glib::Object::builder().build()
     }
 
-    pub fn bind(&self, vm_object: &ServiceGObject) {
+    pub fn bind(&self, object: &ServiceGObject) {
         let title = self.imp().title_label.get();
         let subtitle = self.imp().subtitle_label.get();
         let security_icon = self.imp().security_icon.get();
         let mut bindings = self.imp().bindings.borrow_mut();
-        let is_vm = vm_object.is_vm();
+        let is_vm = object.is_vm();
 
         let name_property: &str = if is_vm { "display-name" } else { "name" };
 
-        let title_binding = vm_object
+        let title_binding = object
             .bind_property(name_property, &title, "label")
             //.bidirectional()
             .sync_create()
@@ -82,14 +82,14 @@ impl ServiceRow {
         // Save binding
         bindings.push(title_binding);
 
-        let subtitle_binding = vm_object
+        let subtitle_binding = object
             .bind_property("details", &subtitle, "label")
             .sync_create()
             .build();
         // Save binding
         bindings.push(subtitle_binding);
 
-        let security_binding = vm_object
+        let security_binding = object
             .bind_property("trust-level", &security_icon, "resource")
             .sync_create()
             .transform_to(move |_, value: &glib::Value| {

@@ -7,8 +7,8 @@ use std::cell::RefCell;
 use std::sync::OnceLock;
 
 use crate::audio_settings::AudioSettings;
-use crate::security_icon::SecurityIcon;
 use crate::control_action::ControlAction;
+use crate::security_icon::SecurityIcon;
 use crate::service_gobject::ServiceGObject;
 
 mod imp {
@@ -22,11 +22,11 @@ mod imp {
         #[template_child]
         pub name_slot_2: TemplateChild<Label>,
         #[template_child]
-        pub vm_status_label: TemplateChild<Label>,
+        pub status_label: TemplateChild<Label>,
         #[template_child]
-        pub vm_status_icon: TemplateChild<Image>,
+        pub status_icon: TemplateChild<Image>,
         #[template_child]
-        pub vm_details_label: TemplateChild<Label>,
+        pub details_label: TemplateChild<Label>,
         #[template_child]
         pub security_icon: TemplateChild<Image>,
         #[template_child]
@@ -36,7 +36,7 @@ mod imp {
         #[template_child]
         pub control_label: TemplateChild<Label>,
         #[template_child]
-        pub vm_action_menu_button: TemplateChild<MenuButton>,
+        pub action_menu_button: TemplateChild<MenuButton>,
         #[template_child]
         pub popover_menu: TemplateChild<Popover>,
 
@@ -63,32 +63,32 @@ mod imp {
     #[gtk::template_callbacks]
     impl ServiceSettings {
         #[template_callback]
-        fn on_vm_start_clicked(&self) {
+        fn on_start_clicked(&self) {
             let name = self.name_slot_1.label();
-            let vm_name = self.name_slot_2.label();
+            let display_name = self.name_slot_2.label();
             self.obj().emit_by_name::<()>(
                 "vm-control-action",
-                &[&ControlAction::Start, &name, &vm_name],
+                &[&ControlAction::Start, &name, &display_name],
             );
             self.popover_menu.popdown();
         }
         #[template_callback]
-        fn on_vm_shutdown_clicked(&self) {
+        fn on_shutdown_clicked(&self) {
             let name = self.name_slot_1.label();
-            let vm_name = self.name_slot_2.label();
+            let display_name = self.name_slot_2.label();
             self.obj().emit_by_name::<()>(
                 "vm-control-action",
-                &[&ControlAction::Shutdown, &name, &vm_name],
+                &[&ControlAction::Shutdown, &name, &display_name],
             );
             self.popover_menu.popdown();
         }
         #[template_callback]
-        fn on_vm_pause_clicked(&self) {
+        fn on_pause_clicked(&self) {
             let name = self.name_slot_1.label();
-            let vm_name = self.name_slot_2.label();
+            let display_name = self.name_slot_2.label();
             self.obj().emit_by_name::<()>(
                 "vm-control-action",
-                &[&ControlAction::Pause, &name, &vm_name],
+                &[&ControlAction::Pause, &name, &display_name],
             );
             self.popover_menu.popdown();
         }
@@ -160,15 +160,15 @@ impl ServiceSettings {
         glib::Object::builder().build()
     }
 
-    pub fn bind(&self, vm_object: &ServiceGObject) {
+    pub fn bind(&self, object: &ServiceGObject) {
         //unbind previous ones
         self.unbind();
         //make new
         let name = self.imp().name_slot_1.get();
-        let is_vm = vm_object.is_vm();
-        let status = self.imp().vm_status_label.get();
-        let status_icon = self.imp().vm_status_icon.get();
-        let details = self.imp().vm_details_label.get();
+        let is_vm = object.is_vm();
+        let status = self.imp().status_label.get();
+        let status_icon = self.imp().status_icon.get();
+        let details = self.imp().details_label.get();
         let security_icon = self.imp().security_icon.get();
         let security_label = self.imp().security_label.get();
         let control_label = self.imp().control_label.get();
@@ -178,26 +178,26 @@ impl ServiceSettings {
         if is_vm {
             let full_service_name = self.imp().name_slot_2.get();
 
-            let name_binding = vm_object
+            let name_binding = object
                 .bind_property("display-name", &name, "label")
                 .sync_create()
                 .build();
             bindings.push(name_binding);
 
-            let full_service_name_binding = vm_object
+            let full_service_name_binding = object
                 .bind_property("name", &full_service_name, "label")
                 .sync_create()
                 .build();
             bindings.push(full_service_name_binding);
         } else {
-            let name_binding = vm_object
+            let name_binding = object
                 .bind_property("name", &name, "label")
                 .sync_create()
                 .build();
             bindings.push(name_binding);
         };
 
-        let status_binding = vm_object
+        let status_binding = object
             .bind_property("status", &status, "label")
             .sync_create()
             .transform_to(move |_, value: &glib::Value| {
@@ -213,7 +213,7 @@ impl ServiceSettings {
             .build();
         bindings.push(status_binding);
 
-        let status_icon_binding = vm_object
+        let status_icon_binding = object
             .bind_property("status", &status_icon, "resource")
             .sync_create()
             .transform_to(move |_, value: &glib::Value| {
@@ -237,13 +237,13 @@ impl ServiceSettings {
             .build();
         bindings.push(status_icon_binding);
 
-        let details_binding = vm_object
+        let details_binding = object
             .bind_property("details", &details, "label")
             .sync_create()
             .build();
         bindings.push(details_binding);
 
-        let security_icon_binding = vm_object
+        let security_icon_binding = object
             .bind_property("trust-level", &security_icon, "resource")
             .sync_create()
             .transform_to(move |_, value: &glib::Value| {
@@ -253,7 +253,7 @@ impl ServiceSettings {
             .build();
         bindings.push(security_icon_binding);
 
-        let security_label_binding = vm_object
+        let security_label_binding = object
             .bind_property("trust-level", &security_label, "label")
             .sync_create()
             .transform_to(move |_, value: &glib::Value| {
@@ -270,7 +270,7 @@ impl ServiceSettings {
         bindings.push(security_label_binding);
 
         //change label
-        let controls_title_binding = vm_object
+        let controls_title_binding = object
             .bind_property("is-vm", &control_label, "label")
             .sync_create()
             .transform_to(move |_, value: &glib::Value| {
@@ -285,7 +285,7 @@ impl ServiceSettings {
         bindings.push(controls_title_binding);
 
         //hide audio settings for services
-        let audio_settings_visibilty_binding = vm_object
+        let audio_settings_visibilty_binding = object
             .bind_property("is-vm", &audio_settings_box, "visible")
             .sync_create()
             .build();

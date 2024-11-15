@@ -54,10 +54,17 @@ glib::wrapper! {
 
 impl ServiceGObject {
     pub fn new(name: String, details: String, _status: VMStatus, _trust_level: TrustLevel) -> Self {
+        //must be retrieved from service type argument
         let is_vm = name.starts_with("microvm@");
-        let is_app = false;//no pattern to grep now
-        let display_name = if is_app {
+        let is_app = false;
+
+        let display_name = if is_vm {
             let re = Regex::new(r"^microvm@([^@-]+)-.+$").unwrap();
+            re.captures(&name.clone())
+                .and_then(|cap| cap.get(1).map(|m| m.as_str().to_string()))
+                .unwrap()
+        } else if is_app {
+            let re = Regex::new(r"^([\s\S]*)@\d*?.service/gm").unwrap();
             re.captures(&name.clone())
                 .and_then(|cap| cap.get(1).map(|m| m.as_str().to_string()))
                 .unwrap()

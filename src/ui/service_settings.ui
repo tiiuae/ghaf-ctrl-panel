@@ -45,7 +45,7 @@
         <property name="vexpand">false</property>
         <property name="hexpand">false</property>
           <child>
-            <object class="GtkImage" id="vm_status_icon">
+            <object class="GtkImage" id="status_icon">
               <property name="visible">true</property>
               <property name="can_focus">false</property>
               <property name="margin-top">0</property>
@@ -56,7 +56,7 @@
             </object>
           </child>
           <child>
-            <object class="GtkLabel" id="vm_status_label">
+            <object class="GtkLabel" id="status_label">
             <style><class name="normal-text"/></style>
             <property name="margin-start">10</property>
             <property name="margin-end">10</property>
@@ -71,7 +71,7 @@
         </object>
       </child>
       <child>
-        <object class="GtkLabel" id="vm_details_label">
+        <object class="GtkLabel" id="details_label">
         <style><class name="normal-text"/></style>
         <property name="margin-start">20</property>
         <property name="margin-end">10</property>
@@ -81,7 +81,7 @@
         </object>
       </child>
       <child>
-        <object class="GtkBox" id="vm_security_box">
+        <object class="GtkBox" id="security_box">
         <style><class name="info-box"/></style>
         <property name="orientation">horizontal</property>
         <property name="vexpand">false</property>
@@ -116,7 +116,7 @@
         </object>
       </child>
       <child>
-        <object class="GtkBox" id="vm_control_box">
+        <object class="GtkBox" id="control_box">
         <style><class name="info-box"/></style>
         <property name="orientation">vertical</property>
         <property name="vexpand">false</property>
@@ -136,7 +136,7 @@
             </object>
           </child>
           <child>
-            <object class="GtkMenuButton" id="vm_action_menu_button">
+            <object class="GtkMenuButton" id="action_menu_button">
             <style><class name="menu-button"/></style>
             <property name="visible">true</property>
             <property name="direction">GTK_ARROW_DOWN</property>
@@ -169,7 +169,7 @@
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkButton" id="start_button">
-          <signal name="clicked" handler="on_vm_start_clicked" swapped="true"/>
+          <signal name="clicked" handler="on_start_clicked" swapped="true"/>
           <style><class name="popover-button"/></style>
           <property name="vexpand">false</property>
           <property name="hexpand">true</property>
@@ -186,7 +186,7 @@
         </child>
         <child>
           <object class="GtkButton" id="pause_button">
-          <signal name="clicked" handler="on_vm_pause_clicked" swapped="true"/>
+          <signal name="clicked" handler="on_pause_clicked" swapped="true"/>
           <style><class name="popover-button"/></style>
           <property name="vexpand">false</property>
           <property name="hexpand">true</property>
@@ -203,7 +203,7 @@
         </child>
         <child>
           <object class="GtkButton" id="shutdown_button">
-          <signal name="clicked" handler="on_vm_shutdown_clicked" swapped="true"/>
+          <signal name="clicked" handler="on_shutdown_clicked" swapped="true"/>
           <style><class name="popover-button"/></style>
           <property name="vexpand">false</property>
           <property name="hexpand">true</property>

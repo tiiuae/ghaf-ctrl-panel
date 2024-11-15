@@ -9,12 +9,12 @@ use std::rc::Rc;
 use crate::add_network_popup::AddNetworkPopup;
 use crate::confirm_display_settings_popup::ConfirmDisplaySettingsPopup;
 use crate::connection_config::ConnectionConfig;
+use crate::control_action::ControlAction;
 use crate::data_gobject::DataGObject;
 use crate::data_provider::imp::{DataProvider, LanguageRegionData};
 use crate::error_popup::ErrorPopup;
 use crate::language_region_notify_popup::LanguageRegionNotifyPopup;
 use crate::settings_action::SettingsAction;
-use crate::control_action::ControlAction;
 use crate::ControlPanelGuiWindow;
 
 mod imp {

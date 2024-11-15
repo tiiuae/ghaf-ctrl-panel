@@ -61,10 +61,23 @@
                     <property name="label">Virtual machines</property>
                     <property name="halign">end</property>
                     <property name="valign">center</property>
-                    <property name="width-request">220</property>
+                    <property name="width-request">160</property>
                     <property name="height-request">30</property>
                     <property name="vexpand">false</property>
                     <signal name="toggled" handler="switch_to_vm_view" swapped="true"/>
+                    </object>
+                  </child>
+                  <child>
+                    <object class="GtkToggleButton" id="app_view_button">
+                    <style><class name="header-toggle-button"/></style>
+                    <property name="label">Applications</property>
+                    <property name="halign">end</property>
+                    <property name="valign">center</property>
+                    <property name="width-request">160</property>
+                    <property name="height-request">30</property>
+                    <property name="vexpand">false</property>
+                    <signal name="toggled" handler="switch_to_app_view" swapped="true"/>
+                    <property name="group">vm_view_button</property>
                     </object>
                   </child>
                   <child>
@@ -73,7 +86,7 @@
                     <property name="label">Services</property>
                     <property name="halign">end</property>
                     <property name="valign">center</property>
-                    <property name="width-request">220</property>
+                    <property name="width-request">160</property>
                     <property name="height-request">30</property>
                     <property name="vexpand">false</property>
                     <signal name="toggled" handler="switch_to_services_view" swapped="true"/>
@@ -86,7 +99,7 @@
                     <property name="label">Settings</property>
                     <property name="halign">end</property>
                     <property name="valign">center</property>
-                    <property name="width-request">220</property>
+                    <property name="width-request">160</property>
                     <property name="height-request">30</property>
                     <property name="vexpand">false</property>
                     <signal name="toggled" handler="switch_to_settings_view" swapped="true"/>
@@ -99,13 +112,13 @@
                 <object class="GtkStack" id="stack">
                   <child> <!--VM view child -->
                     <object class="GtkStackPage"> <!-- 1st stack child /page -->
-                      <property name="name">vm_view</property>
+                      <property name="name">services_view</property>
                       <property name="child">
                         <object class="GtkBox" id="vm_main_box"> <!-- Main box object -->
                           <style><class name="vm-scroll-view"/></style>
                           <property name="orientation">horizontal</property>
                           <child>
-                            <object class="GtkScrolledWindow" id="vm_box">
+                            <object class="GtkScrolledWindow" id="services_box">
                             <style><class name="container"/></style>
                             <property name="margin-start">10</property>
                             <property name="margin-end">10</property>
@@ -116,7 +129,7 @@
                             <property name="hscrollbar-policy">GTK_POLICY_NEVER</property>
                             <property name="vscrollbar-policy">GTK_POLICY_EXTERNAL</property>
                               <child>
-                                <object class="GtkListView" id="vm_list_view">
+                                <object class="GtkListView" id="services_list_view">
                                   <!--<property name="can_focus">true</property>-->
                                   <property name="margin-start">10</property>
                                   <property name="margin-end">0</property>

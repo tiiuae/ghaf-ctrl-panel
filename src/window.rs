@@ -9,12 +9,12 @@ use gtk::{
 use std::rc::Rc;
 
 use crate::application::ControlPanelGuiApplication;
-use crate::settings::Settings;
-use crate::settings_action::SettingsAction;
 use crate::control_action::ControlAction;
 use crate::service_gobject::ServiceGObject;
 use crate::service_row::ServiceRow;
 use crate::service_settings::ServiceSettings;
+use crate::settings::Settings;
+use crate::settings_action::SettingsAction;
 
 mod imp {
     use super::*;
@@ -30,6 +30,8 @@ mod imp {
         #[template_child]
         pub vm_view_button: TemplateChild<ToggleButton>,
         #[template_child]
+        pub app_view_button: TemplateChild<ToggleButton>,
+        #[template_child]
         pub services_view_button: TemplateChild<ToggleButton>,
         #[template_child]
         pub settings_view_button: TemplateChild<ToggleButton>,
@@ -40,7 +42,7 @@ mod imp {
         pub stack: TemplateChild<Stack>,
 
         #[template_child]
-        pub vm_list_view: TemplateChild<ListView>,
+        pub services_list_view: TemplateChild<ListView>,
         #[template_child]
         pub service_settings_box: TemplateChild<ServiceSettings>,
 
@@ -70,15 +72,21 @@ mod imp {
     #[gtk::template_callbacks]
     impl ControlPanelGuiWindow {
         #[template_callback]
+        fn switch_to_app_view(&self) {
+            if (self.stack.visible_child_name() != Some("services_view".into())) {
+                self.stack.set_visible_child_name("services_view");
+            }
+        }
+        #[template_callback]
         fn switch_to_vm_view(&self) {
-            if (self.stack.visible_child_name() != Some("vm_view".into())) {
-                self.stack.set_visible_child_name("vm_view");
+            if (self.stack.visible_child_name() != Some("services_view".into())) {
+                self.stack.set_visible_child_name("services_view");
             }
         }
         #[template_callback]
         fn switch_to_services_view(&self) {
-            if (self.stack.visible_child_name() != Some("vm_view".into())) {
-                self.stack.set_visible_child_name("vm_view");
+            if (self.stack.visible_child_name() != Some("services_view".into())) {
+                self.stack.set_visible_child_name("services_view");
             }
         }
         #[template_callback]
@@ -171,16 +179,24 @@ impl ControlPanelGuiWindow {
 
         //Create filter: VM services, default
         let vm_filter = CustomFilter::new(|item: &Object| {
-            if let Some(vm_obj) = item.downcast_ref::<ServiceGObject>() {
-                return vm_obj.is_vm();
+            if let Some(obj) = item.downcast_ref::<ServiceGObject>() {
+                return obj.is_vm();
+            }
+            false
+        });
+
+        //Create filter: Apps
+        let app_filter = CustomFilter::new(|item: &Object| {
+            if let Some(obj) = item.downcast_ref::<ServiceGObject>() {
+                return obj.is_app();
             }
             false
         });
 
         //Create filter: other services
         let services_filter = CustomFilter::new(|item: &Object| {
-            if let Some(vm_obj) = item.downcast_ref::<ServiceGObject>() {
-                return !vm_obj.is_vm();
+            if let Some(obj) = item.downcast_ref::<ServiceGObject>() {
+                return !obj.is_vm() && !obj.is_app();
             }
             false
         });
@@ -195,11 +211,11 @@ impl ControlPanelGuiWindow {
             glib::clone!(@strong self as window => move |selection_model, _, _| {
                 if let Some(selected_item) = selection_model.selected_item() {
                     println!("Selected: {}", selection_model.selected());
-                    if let Some(vm_obj) = selected_item.downcast_ref::<ServiceGObject>() {//???
-                        let title = vm_obj.name();
-                        let subtitle = vm_obj.details();
+                    if let Some(obj) = selected_item.downcast_ref::<ServiceGObject>() {//???
+                        let title = obj.name();
+                        let subtitle = obj.details();
                         println!("Property {title}, {subtitle}");
-                        window.set_vm_details(&vm_obj);
+                        window.set_vm_details(&obj);
                     }
                 } else {
                     println!("No item selected");
@@ -210,8 +226,8 @@ impl ControlPanelGuiWindow {
             glib::clone!(@strong self as window => move |selection_model, position, removed, added| {
                 println!("Items changed at position {}, removed: {}, added: {}", position, removed, added);
                 if let Some(selected_item) = selection_model.selected_item() {
-                    if let Some(vm_obj) = selected_item.downcast_ref::<ServiceGObject>() {
-                        window.set_vm_details(&vm_obj);
+                    if let Some(obj) = selected_item.downcast_ref::<ServiceGObject>() {
+                        window.set_vm_details(&obj);
                     }
                 } else {
                     println!("No item selected");
@@ -219,26 +235,41 @@ impl ControlPanelGuiWindow {
             })
         );
 
-        self.imp().vm_list_view.set_model(Some(&selection_model));
+        self.imp()
+            .services_list_view
+            .set_model(Some(&selection_model));
 
         self.bind_service_settings_box_visibility();
 
         //bind filter change
-        let filter_model_clone = filter_model.clone();
-        let selection_model_clone = selection_model.clone();
+        let filter_model_clone_vm = filter_model.clone();
+        let selection_model_clone_vm = selection_model.clone();
+        let filter_model_clone_app = filter_model.clone();
+        let selection_model_clone_app = selection_model.clone();
+
         let count = self
             .imp()
-            .vm_list_view
+            .services_list_view
             .model()
             .expect("no model!")
             .n_items();
+
         self.imp().vm_view_button.connect_toggled(move |button| {
             if button.is_active() {
                 println!("Filter is about to change to vm");
-                filter_model_clone.set_filter(Some(&vm_filter));
-                Self::set_default_selection(&selection_model_clone, count);
+                filter_model_clone_vm.set_filter(Some(&vm_filter));
+                Self::set_default_selection(&selection_model_clone_vm, count);
             }
         });
+
+        self.imp().app_view_button.connect_toggled(move |button| {
+            if button.is_active() {
+                println!("Filter is about to change to app");
+                filter_model_clone_app.set_filter(Some(&app_filter));
+                Self::set_default_selection(&selection_model_clone_app, count);
+            }
+        });
+
         self.imp()
             .services_view_button
             .connect_toggled(move |button| {
@@ -262,7 +293,7 @@ impl ControlPanelGuiWindow {
     fn bind_service_settings_box_visibility(&self) {
         let imp = self.imp();
         let service_settings_box = imp.service_settings_box.clone().upcast::<gtk::Widget>();
-        if let Some(model) = imp.vm_list_view.model() {
+        if let Some(model) = imp.services_list_view.model() {
             model
                 .bind_property("n_items", &service_settings_box, "visible")
                 .sync_create()
@@ -291,7 +322,7 @@ impl ControlPanelGuiWindow {
         // Tell factory how to bind `ServiceRow` to a `ServiceGObject`
         factory.connect_bind(move |_, list_item| {
             // Get `ServiceGObject` from `ListItem`
-            let vm_object = list_item
+            let object = list_item
                 .downcast_ref::<ListItem>()
                 .expect("Needs to be ListItem")
                 .item()
@@ -306,7 +337,7 @@ impl ControlPanelGuiWindow {
                 .and_downcast::<ServiceRow>()
                 .expect("The child has to be a `ServiceRow`.");
 
-            service_row.bind(&vm_object);
+            service_row.bind(&object);
         });
 
         // Tell factory how to unbind `ServiceRow` from `ServiceGObject`
@@ -323,11 +354,11 @@ impl ControlPanelGuiWindow {
         });
 
         // Set the factory of the list view
-        self.imp().vm_list_view.set_factory(Some(&factory));
+        self.imp().services_list_view.set_factory(Some(&factory));
     }
 
-    fn set_vm_details(&self, vm_obj: &ServiceGObject) {
-        self.imp().service_settings_box.bind(vm_obj);
+    fn set_vm_details(&self, obj: &ServiceGObject) {
+        self.imp().service_settings_box.bind(obj);
     }
 
     //pub API

@@ -10,9 +10,9 @@ use gtk::{
 use std::cell::RefCell;
 use std::sync::OnceLock;
 
-use crate::settings_gobject::SettingsGObject;
 use crate::control_action::ControlAction;
 use crate::service_gobject::ServiceGObject;
+use crate::settings_gobject::SettingsGObject;
 use crate::vm_row::VMRow;
 use givc_common::query::VMStatus;
 
@@ -105,8 +105,8 @@ impl InfoSettingsPage {
         let filter_model = FilterListModel::new(
             Some(model),
             Some(CustomFilter::new(|item: &Object| {
-                if let Some(vm_obj) = item.downcast_ref::<ServiceGObject>() {
-                    if (vm_obj.is_vm() && (vm_obj.status() == (VMStatus::Running as u8))) {
+                if let Some(obj) = item.downcast_ref::<ServiceGObject>() {
+                    if (obj.is_vm() && (obj.status() == (VMStatus::Running as u8))) {
                         return true;
                     }
                 }
@@ -147,7 +147,7 @@ impl InfoSettingsPage {
         // Tell factory how to bind `VMRow` to a `ServiceGObject`
         factory.connect_bind(move |_, list_item| {
             // Get `ServiceGObject` from `ListItem`
-            let vm_object = list_item
+            let service_object = list_item
                 .downcast_ref::<ListItem>()
                 .expect("Needs to be ListItem")
                 .item()
@@ -162,7 +162,7 @@ impl InfoSettingsPage {
                 .and_downcast::<VMRow>()
                 .expect("The child has to be a `VMRow`.");
 
-            service_row.bind(&vm_object);
+            service_row.bind(&service_object);
         });
 
         // Tell factory how to unbind `VMRow` from `ServiceGObject`

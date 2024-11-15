@@ -10,6 +10,7 @@ use std::sync::OnceLock;
 //use crate::service_gobject::ServiceGObject; will be used in the future
 use crate::admin_settings_page::AdminSettingsPage;
 use crate::audio_settings::AudioSettings;
+use crate::control_action::ControlAction;
 use crate::display_settings_page::DisplaySettingsPage;
 use crate::info_settings_page::InfoSettingsPage;
 use crate::keyboard_settings_page::KeyboardSettingsPage;
@@ -18,7 +19,6 @@ use crate::mouse_settings_page::MouseSettingsPage;
 use crate::security_settings_page::SecuritySettingsPage;
 use crate::settings_action::SettingsAction;
 use crate::settings_gobject::SettingsGObject;
-use crate::control_action::ControlAction;
 use crate::wifi_settings_page::WifiSettingsPage;
 
 mod imp {
