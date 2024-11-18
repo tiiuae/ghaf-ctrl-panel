@@ -1,8 +1,8 @@
 use glib::subclass::Signal;
-use glib::Binding;
+use glib::{Binding, Properties};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Image, Label, MenuButton, Popover};
+use gtk::{glib, CompositeTemplate, Image, Label, MenuButton, Popover, Widget};
 use std::cell::RefCell;
 use std::sync::OnceLock;
 
@@ -14,7 +14,8 @@ use crate::service_gobject::ServiceGObject;
 mod imp {
     use super::*;
 
-    #[derive(Default, CompositeTemplate)]
+    #[derive(Default, CompositeTemplate, Properties)]
+    #[properties(wrapper_type = super::ServiceSettings)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/service_settings.ui")]
     pub struct ServiceSettings {
         #[template_child]
@@ -42,6 +43,9 @@ mod imp {
         #[template_child]
         pub popover_menu_2: TemplateChild<Popover>,
 
+        #[property(name = "full-service-name", get, set, type = String)]
+        full_service_name: RefCell<String>,
+
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
     }
@@ -66,32 +70,29 @@ mod imp {
     impl ServiceSettings {
         #[template_callback]
         fn on_start_clicked(&self) {
-            let name = self.name_slot_1.label();
-            let display_name = self.name_slot_2.label();
+            let full_service_name = self.obj().full_service_name();
             self.obj().emit_by_name::<()>(
-                "vm-control-action",
-                &[&ControlAction::Start, &name, &display_name],
+                "control-action",
+                &[&ControlAction::Start, &full_service_name],
             );
             self.popover_menu.popdown();
         }
         #[template_callback]
         fn on_shutdown_clicked(&self) {
-            let name = self.name_slot_1.label();
-            let display_name = self.name_slot_2.label();
+            let full_service_name = self.obj().full_service_name();
             self.obj().emit_by_name::<()>(
-                "vm-control-action",
-                &[&ControlAction::Shutdown, &name, &display_name],
+                "control-action",
+                &[&ControlAction::Shutdown, &full_service_name],
             );
             self.popover_menu.popdown();
             self.popover_menu_2.popdown();
         }
         #[template_callback]
         fn on_pause_clicked(&self) {
-            let name = self.name_slot_1.label();
-            let display_name = self.name_slot_2.label();
+            let full_service_name = self.obj().full_service_name();
             self.obj().emit_by_name::<()>(
-                "vm-control-action",
-                &[&ControlAction::Pause, &name, &display_name],
+                "control-action",
+                &[&ControlAction::Pause, &full_service_name],
             );
             self.popover_menu.popdown();
             self.popover_menu_2.popdown();
@@ -115,17 +116,14 @@ mod imp {
         }
     } //end #[gtk::template_callbacks]
 
+    #[glib::derived_properties]
     impl ObjectImpl for ServiceSettings {
         fn signals() -> &'static [Signal] {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
             SIGNALS.get_or_init(|| {
                 vec![
-                    Signal::builder("vm-control-action")
-                        .param_types([
-                            ControlAction::static_type(),
-                            String::static_type(),
-                            String::static_type(),
-                        ])
+                    Signal::builder("control-action")
+                        .param_types([ControlAction::static_type(), String::static_type()])
                         .build(),
                     Signal::builder("vm-mic-changed")
                         .param_types([u32::static_type()])
@@ -169,7 +167,7 @@ impl ServiceSettings {
         self.unbind();
         //make new
         let name = self.imp().name_slot_1.get();
-        let is_vm = object.is_vm();
+        let is_vm_or_app = object.is_vm() || object.is_app();
         let status = self.imp().status_label.get();
         let status_icon = self.imp().status_icon.get();
         let details = self.imp().details_label.get();
@@ -190,7 +188,15 @@ impl ServiceSettings {
                 .set_popover(Some(&self.imp().popover_menu.get()));
         }
 
-        if is_vm {
+        //full service name binding
+        let full_service_name_binding = object
+            .bind_property("name", &self.clone(), "full-service-name")
+            .flags(glib::BindingFlags::DEFAULT)
+            .sync_create()
+            .build();
+        bindings.push(full_service_name_binding);
+
+        if is_vm_or_app {
             let full_service_name = self.imp().name_slot_2.get();
 
             let name_binding = object
@@ -299,7 +305,7 @@ impl ServiceSettings {
             .build();
         bindings.push(controls_title_binding);
 
-        //hide audio settings for services
+        //hide audio settings for services and apps?
         let audio_settings_visibilty_binding = object
             .bind_property("is-vm", &audio_settings_box, "visible")
             .sync_create()

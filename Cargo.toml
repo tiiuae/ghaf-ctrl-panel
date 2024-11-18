@@ -15,8 +15,11 @@ dbus = "0.9"
 tokio = {version = "1.0", features = ["rt", "time", "macros"]}
 async-channel = "2.3.1"
 
-givc-client = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main" }
-givc-common = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main" }
+#givc-client = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main" }
+#givc-common = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main" }
+
+givc-client = { git = "https://github.com/avnik/ghaf-givc", branch = "avnik/more-info" }
+givc-common = { git = "https://github.com/avnik/ghaf-givc", branch = "avnik/more-info" }
 
 [build-dependencies]
 glib-build-tools = "0.18"

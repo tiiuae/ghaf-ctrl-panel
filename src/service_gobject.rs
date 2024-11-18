@@ -6,14 +6,15 @@ use std::cell::RefCell;
 
 use givc_common::query::{QueryResult, TrustLevel, VMStatus}; //cannot be used as property!
                                                              //use crate::trust_level::TrustLevel as MyTrustLevel;//type is no recognised in #property
+use givc_common::types::ServiceType;
 
 mod imp {
     use super::*;
 
     #[derive(Default)]
     pub struct ServiceData {
-        pub name: String,
-        pub display_name: String,
+        pub name: String,         //unique name, used as id
+        pub display_name: String, //user-friendly name
         pub is_vm: bool,
         pub is_app: bool,
         pub details: String,
@@ -53,21 +54,26 @@ glib::wrapper! {
 }
 
 impl ServiceGObject {
-    pub fn new(name: String, details: String, _status: VMStatus, _trust_level: TrustLevel) -> Self {
-        //must be retrieved from service type argument
-        let is_vm = name.starts_with("microvm@");
-        let is_app = false;
+    pub fn new(
+        name: String,
+        details: String,
+        _status: VMStatus,
+        _trust_level: TrustLevel,
+        service_type: ServiceType,
+    ) -> Self {
+        let is_vm = service_type == ServiceType::VM;
+        let is_app = service_type == ServiceType::App;
 
         let display_name = if is_vm {
             let re = Regex::new(r"^microvm@([^@-]+)-.+$").unwrap();
             re.captures(&name.clone())
                 .and_then(|cap| cap.get(1).map(|m| m.as_str().to_string()))
-                .unwrap()
+                .unwrap_or(String::from(""))
         } else if is_app {
-            let re = Regex::new(r"^([\s\S]*)@\d*?.service/gm").unwrap();
+            let re = Regex::new(r"^([\s\S]*)@\d*?.service").unwrap();
             re.captures(&name.clone())
                 .and_then(|cap| cap.get(1).map(|m| m.as_str().to_string()))
-                .unwrap()
+                .unwrap_or(String::from(""))
         } else {
             String::from("")
         };

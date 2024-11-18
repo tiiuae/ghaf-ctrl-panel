@@ -226,14 +226,14 @@ impl ControlPanelGuiApplication {
         self.imp().data_provider.borrow().get_store()
     }
 
-    pub fn control_vm(&self, action: ControlAction, name: String, vm_name: String) {
-        println!("Control VM {vm_name}, {:?}", action);
+    pub fn control_service(&self, action: ControlAction, name: String) {
+        println!("Control service {name}, {:?}", action);
         match action {
-            ControlAction::Start => self.imp().data_provider.borrow().start_vm(name, vm_name),
-            ControlAction::Restart => self.imp().data_provider.borrow().restart_vm(vm_name),
-            ControlAction::Pause => self.imp().data_provider.borrow().pause_vm(vm_name),
-            ControlAction::Resume => self.imp().data_provider.borrow().resume_vm(vm_name),
-            ControlAction::Shutdown => self.imp().data_provider.borrow().shutdown_vm(vm_name),
+            ControlAction::Start => self.imp().data_provider.borrow().start_service(name),
+            ControlAction::Restart => self.imp().data_provider.borrow().restart_service(name),
+            ControlAction::Pause => self.imp().data_provider.borrow().pause_service(name),
+            ControlAction::Resume => self.imp().data_provider.borrow().resume_service(name),
+            ControlAction::Shutdown => self.imp().data_provider.borrow().stop_service(name),
         }
     }
 

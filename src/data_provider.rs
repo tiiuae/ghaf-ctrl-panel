@@ -14,6 +14,7 @@ use async_channel::Sender;
 use givc_client::endpoint::TlsConfig;
 use givc_client::{self, AdminClient};
 use givc_common::query::{Event, TrustLevel, VMStatus};
+use givc_common::types::ServiceType;
 use tokio::runtime::Builder;
 
 use crate::data_gobject::DataGObject;
@@ -120,10 +121,10 @@ pub mod imp {
 
     impl DataProvider {
         pub fn new(address: String, port: u16) -> Self {
-            let init_store = TypedListStore::new(); //Self::fill_by_mock_data();
+            let init_store = Self::fill_by_mock_data();
 
             Self {
-                store: init_store,
+                store: init_store.into(),
                 //settings: Arc::new(Mutex::new(SettingsGObject::default())),
                 status: false,
                 service_address: RefCell::new((address, port)),
@@ -195,8 +196,14 @@ pub mod imp {
 
                 if let Ok((channel, initial)) = event_rx.recv().await {
                     store.remove_all();
-                    store.extend(initial.into_iter().map(|vm| {
-                        ServiceGObject::new(vm.name, vm.description, vm.status, vm.trust_level)
+                    store.extend(initial.into_iter().map(|service| {
+                        ServiceGObject::new(
+                            service.name,
+                            service.description,
+                            service.status,
+                            service.trust_level,
+                            service.service_type,
+                        )
                     }));
 
                     while let Ok(event) = channel.recv().await {
@@ -224,6 +231,7 @@ pub mod imp {
                                     result.description,
                                     result.status,
                                     result.trust_level,
+                                    result.service_type,
                                 ));
                             }
                         }
@@ -245,22 +253,25 @@ pub mod imp {
             let init_store = ListStore::new::<ServiceGObject>();
             let mut vec: Vec<ServiceGObject> = Vec::new();
             vec.push(ServiceGObject::new(
-                "VM1".to_string(),
+                "microvm@zathura-vm.service".to_string(),
                 String::from("This is the file.pdf and very very long description"),
                 VMStatus::Running,
                 TrustLevel::NotSecure,
+                ServiceType::VM,
             ));
             vec.push(ServiceGObject::new(
-                "VM2".to_string(),
+                "chrome@1.service".to_string(),
                 String::from("Google Chrome"),
                 VMStatus::Paused,
                 TrustLevel::Secure,
+                ServiceType::App,
             ));
             vec.push(ServiceGObject::new(
-                "VM3".to_string(),
+                "appflowy@1.service".to_string(),
                 String::from("AppFlowy"),
                 VMStatus::Running,
                 TrustLevel::Secure,
+                ServiceType::Svc,
             ));
             init_store.extend_from_slice(&vec);
             init_store
@@ -342,24 +353,36 @@ pub mod imp {
             });
         }
 
-        pub fn start_vm(&self, name: String, _vm_name: String) {
-            self.client_cmd(
-                adminclient!(|client| client.start(name, None /*Some(vm_name)*/, vec![])),
-                |res| match res {
-                    Ok(_) => println!("Start request sent"),
-                    Err(error) => println!("Start request error {error}"),
-                },
-            );
+        pub fn start_service(&self, name: String) {
+            let store = self.store.clone();
+            if let Some(obj) = store.iter().find(|obj| obj.name() == name) {
+                if obj.is_app() {
+                    let app_name = obj.display_name();
+                    self.client_cmd(
+                        adminclient!(|client| client.start(
+                            app_name,
+                            None, /*Some(vm_name)*/
+                            vec![]
+                        )),
+                        |res| match res {
+                            Ok(_) => println!("Start app request sent"),
+                            Err(error) => println!("Start app request error {error}"),
+                        },
+                    );
+                } else {
+                    //another function for VMs and services?
+                }
+            }
         }
 
-        pub fn pause_vm(&self, name: String) {
+        pub fn pause_service(&self, name: String) {
             self.client_cmd(adminclient!(|client| client.pause(name)), |res| match res {
                 Ok(_) => println!("Pause request sent"),
                 Err(error) => println!("Pause request error {error}"),
             });
         }
 
-        pub fn resume_vm(&self, name: String) {
+        pub fn resume_service(&self, name: String) {
             self.client_cmd(
                 adminclient!(|client| client.resume(name)),
                 |res| match res {
@@ -369,17 +392,21 @@ pub mod imp {
             );
         }
 
-        pub fn shutdown_vm(&self, vm_name: String) {
-            self.client_cmd(
-                adminclient!(|client| client.stop(vm_name)),
-                |res| match res {
+        pub fn stop_service(&self, name: String) {
+            let store = self.store.clone();
+            if let Some(obj) = store.iter().find(|obj| obj.name() == name) {
+                let mut name_to_use = name;
+                if obj.is_app() {
+                    name_to_use = obj.display_name();
+                }
+                self.client_cmd(adminclient!(|client| client.stop(name_to_use)), |res| match res {
                     Ok(_) => println!("Stop request sent"),
                     Err(error) => println!("Stop request error {error}"),
-                },
-            );
+                });
+            }
         }
 
-        pub fn restart_vm(&self, _name: String) {
+        pub fn restart_service(&self, _name: String) {
             println!("Restart is not implemented on client lib!");
             //no restart in admin_client
             //self.admin_client.restart(name);

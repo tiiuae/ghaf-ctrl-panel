@@ -108,7 +108,7 @@ impl VMRow {
         let mut bindings = self.imp().bindings.borrow_mut();
 
         let title_binding = vm_object
-            .bind_property("display-name", &title, "label")
+            .bind_property("name", &title, "label")
             //.bidirectional()
             .sync_create()
             .build();
