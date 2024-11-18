@@ -97,9 +97,9 @@ mod imp {
         }
 
         #[template_callback]
-        fn on_control_action(&self, action: ControlAction, name: String, vm_name: String) {
+        fn on_control_action(&self, action: ControlAction, name: String) {
             let app = self.obj().get_app_ref();
-            app.control_vm(action, name, vm_name);
+            app.control_service(action, name);
         }
         #[template_callback]
         fn on_settings_action(&self, action: SettingsAction, value: Variant) {
