@@ -57,7 +57,7 @@ impl ServiceGObject {
     pub fn new(
         name: String,
         details: String,
-        _status: VMStatus,
+        status: VMStatus,
         _trust_level: TrustLevel,
         service_type: ServiceType,
     ) -> Self {
@@ -85,7 +85,7 @@ impl ServiceGObject {
             .property("is-app", is_app)
             .property("details", details)
             //for demo
-            .property("status", 0u8) //status as u8)
+            .property("status", status as u8)
             .property("trust-level", 0u8) //trust_level as u8)
             .build()
     }
@@ -96,8 +96,8 @@ impl ServiceGObject {
 
     pub fn update(&self, query_result: QueryResult) {
         self.set_property("details", query_result.description);
+        self.set_property("status", query_result.status as u8);
         //for demo
-        //self.set_property("status", query_result.status as u8);
         //self.set_property("trust-level", query_result.trust_level as u8);
     }
 }
