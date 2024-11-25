@@ -2,7 +2,9 @@ use glib::subclass::Signal;
 use glib::{Binding, Properties};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Image, Label, MenuButton, Popover, Widget};
+use gtk::{
+    glib, CompositeTemplate, Image, Label, MenuButton, Popover, Revealer, ToggleButton, Widget,
+};
 use std::cell::RefCell;
 use std::sync::OnceLock;
 
@@ -24,6 +26,12 @@ mod imp {
         pub name_slot_2: TemplateChild<Label>,
         #[template_child]
         pub status_label: TemplateChild<Label>,
+        #[template_child]
+        pub arrow_button: TemplateChild<ToggleButton>,
+        #[template_child]
+        pub revealer: TemplateChild<Revealer>,
+        #[template_child]
+        pub extra_info: TemplateChild<Label>,
         #[template_child]
         pub status_icon: TemplateChild<Image>,
         #[template_child]
@@ -68,6 +76,16 @@ mod imp {
 
     #[gtk::template_callbacks]
     impl ServiceSettings {
+        #[template_callback]
+        fn open_info(&self) {
+            let value = self.arrow_button.is_active();
+            self.revealer.set_reveal_child(value);
+            if (value) {
+                self.arrow_button.set_icon_name("go-up-symbolic");
+            } else {
+                self.arrow_button.set_icon_name("go-down-symbolic");
+            }
+        }
         #[template_callback]
         fn on_start_clicked(&self) {
             let full_service_name = self.obj().full_service_name();
@@ -168,6 +186,8 @@ impl ServiceSettings {
         //make new
         let name = self.imp().name_slot_1.get();
         let is_vm_or_app = object.is_vm() || object.is_app();
+        let arrow_button = self.imp().arrow_button.get();
+        let extra_info = self.imp().extra_info.get();
         let status = self.imp().status_label.get();
         let status_icon = self.imp().status_icon.get();
         let details = self.imp().details_label.get();
@@ -217,6 +237,26 @@ impl ServiceSettings {
                 .build();
             bindings.push(name_binding);
         };
+
+        //arrow/more info button visibilty
+        let arrow_visibilty_binding = object
+            .bind_property("is-app", &arrow_button, "visible")
+            .flags(glib::BindingFlags::DEFAULT)
+            .sync_create()
+            .build();
+        bindings.push(arrow_visibilty_binding);
+
+        let extra_info_binding = object
+            .bind_property("vm-name", &extra_info, "label")
+            .sync_create()
+            .transform_to(move |_, value: &glib::Value| {
+                let vm_name = value.get::<String>().unwrap_or("".to_string());
+                Some(glib::Value::from(
+                    "The app is in the ".to_owned() + &vm_name,
+                ))
+            })
+            .build();
+        bindings.push(extra_info_binding);
 
         let status_binding = object
             .bind_property("status", &status, "label")

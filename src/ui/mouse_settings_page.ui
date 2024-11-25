@@ -75,7 +75,7 @@
             <child>
               <object class="GtkLabel">
               <style><class name="normal-text"/></style>
-              <property name="label">Switch Primary and Secindary butons</property>
+              <property name="label">Switch Primary and Secondary buttons</property>
               <property name="halign">start</property>
               </object>
             </child>

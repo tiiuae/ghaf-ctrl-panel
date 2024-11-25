@@ -13,10 +13,11 @@ mod imp {
 
     #[derive(Default)]
     pub struct ServiceData {
-        pub name: String,         //unique name, used as id
+        pub name: String,         //unique service name, used as id
         pub display_name: String, //user-friendly name
         pub is_vm: bool,
         pub is_app: bool,
+        pub vm_name: String, //for apps running in VMs
         pub details: String,
         pub status: u8,
         pub trust_level: u8,
@@ -30,6 +31,7 @@ mod imp {
         #[property(name = "display-name", get, set, type = String, member = display_name)]
         #[property(name = "is-vm", get, set, type = bool, member = is_vm)]
         #[property(name = "is-app", get, set, type = bool, member = is_app)]
+        #[property(name = "vm-name", get, set, type = String, member = vm_name)]
         #[property(name = "details", get, set, type = String, member = details)]
         #[property(name = "status", get, set, type = u8, member = status)]
         #[property(name = "trust-level", get, set, type = u8, member = trust_level)]
@@ -60,6 +62,7 @@ impl ServiceGObject {
         status: VMStatus,
         _trust_level: TrustLevel,
         service_type: ServiceType,
+        vm_name: Option<String>,
     ) -> Self {
         let is_vm = service_type == ServiceType::VM;
         let is_app = service_type == ServiceType::App;
@@ -83,6 +86,7 @@ impl ServiceGObject {
             .property("display-name", display_name)
             .property("is-vm", is_vm)
             .property("is-app", is_app)
+            .property("vm-name", vm_name.unwrap_or("".to_string()))
             .property("details", details)
             //for demo
             .property("status", status as u8)
