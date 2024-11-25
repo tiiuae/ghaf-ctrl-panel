@@ -203,6 +203,7 @@ pub mod imp {
                             service.status,
                             service.trust_level,
                             service.service_type,
+                            service.vm_name,
                         )
                     }));
 
@@ -218,10 +219,17 @@ pub mod imp {
                             }
                             Event::UnitShutdown(result) => {
                                 println!("Shutdown info: {:?}", result);
-                                if let Some(obj) =
-                                    store.iter().find(|obj| obj.name() == result.name)
+                                //Remove service/app, update VM
+                                if let Some(pos) =
+                                    store.iter().position(|obj| obj.name() == result.name)
                                 {
-                                    obj.update(result);
+                                    let obj: ServiceGObject = store.get(pos as u32).unwrap();
+
+                                    if obj.is_vm() {
+                                        obj.update(result);
+                                    } else {
+                                        store.remove(pos as u32);
+                                    }
                                 }
                             }
                             Event::UnitRegistered(result) => {
@@ -232,6 +240,7 @@ pub mod imp {
                                     result.status,
                                     result.trust_level,
                                     result.service_type,
+                                    result.vm_name,
                                 ));
                             }
                         }
@@ -258,6 +267,7 @@ pub mod imp {
                 VMStatus::Running,
                 TrustLevel::NotSecure,
                 ServiceType::VM,
+                None,
             ));
             vec.push(ServiceGObject::new(
                 "chrome@1.service".to_string(),
@@ -265,6 +275,7 @@ pub mod imp {
                 VMStatus::Paused,
                 TrustLevel::Secure,
                 ServiceType::App,
+                Some(String::from("TestVM")),
             ));
             vec.push(ServiceGObject::new(
                 "appflowy@1.service".to_string(),
@@ -272,6 +283,7 @@ pub mod imp {
                 VMStatus::Running,
                 TrustLevel::Secure,
                 ServiceType::Svc,
+                None,
             ));
             init_store.extend_from_slice(&vec);
             init_store
@@ -399,10 +411,13 @@ pub mod imp {
                 if obj.is_app() {
                     name_to_use = obj.display_name();
                 }
-                self.client_cmd(adminclient!(|client| client.stop(name_to_use)), |res| match res {
-                    Ok(_) => println!("Stop request sent"),
-                    Err(error) => println!("Stop request error {error}"),
-                });
+                self.client_cmd(
+                    adminclient!(|client| client.stop(name_to_use)),
+                    |res| match res {
+                        Ok(_) => println!("Stop request sent"),
+                        Err(error) => println!("Stop request error {error}"),
+                    },
+                );
             }
         }
 
