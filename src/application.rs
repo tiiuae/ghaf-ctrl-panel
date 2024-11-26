@@ -16,6 +16,7 @@ use crate::error_popup::ErrorPopup;
 use crate::language_region_notify_popup::LanguageRegionNotifyPopup;
 use crate::settings_action::SettingsAction;
 use crate::ControlPanelGuiWindow;
+use givc_client::endpoint::TlsConfig;
 
 mod imp {
     use super::*;
@@ -123,6 +124,7 @@ impl ControlPanelGuiApplication {
         flags: &gio::ApplicationFlags,
         address: String,
         port: u16,
+        tls_info: Option<(String, TlsConfig)>,
     ) -> Self {
         let _ = DataGObject::static_type();
         let app: Self = glib::Object::builder()
@@ -134,6 +136,7 @@ impl ControlPanelGuiApplication {
             .data_provider
             .borrow()
             .set_service_address(address, port);
+        app.imp().data_provider.borrow().set_tls_info(tls_info);
 
         app
     }

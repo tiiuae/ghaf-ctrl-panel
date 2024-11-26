@@ -8,7 +8,7 @@ default-run = "ctrl-panel"
 gettext-rs = { version = "0.7", features = ["gettext-system"] }
 gtk = { version = "0.7", package = "gtk4" }
 adw = { version = "0.5", package = "libadwaita", features = ["v1_4"] }
-clap = { version = "4.4", features = ["derive"] }
+clap = {version = "4.5.4", features = ["derive", "env"]}
 regex = "1"
 dbus = "0.9"
 
