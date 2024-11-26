@@ -48,6 +48,8 @@ mod imp {
         pub action_menu_button: TemplateChild<MenuButton>,
         #[template_child]
         pub popover_menu: TemplateChild<Popover>,
+        #[template_child]
+        pub popover_menu_2: TemplateChild<Popover>,
 
         #[property(name = "full-service-name", get, set, type = String)]
         full_service_name: RefCell<String>,
@@ -101,6 +103,7 @@ mod imp {
                 &[&ControlAction::Shutdown, &full_service_name],
             );
             self.popover_menu.popdown();
+            self.popover_menu_2.popdown();
         }
         #[template_callback]
         fn on_pause_clicked(&self) {
@@ -110,6 +113,7 @@ mod imp {
                 &[&ControlAction::Pause, &full_service_name],
             );
             self.popover_menu.popdown();
+            self.popover_menu_2.popdown();
         }
         #[template_callback]
         fn on_mic_changed(&self, value: u32) {
@@ -192,6 +196,17 @@ impl ServiceSettings {
         let control_label = self.imp().control_label.get();
         let audio_settings_box = self.imp().audio_settings_box.get();
         let mut bindings = self.imp().bindings.borrow_mut();
+
+        //action popover
+        if !object.is_vm() {
+            self.imp()
+                .action_menu_button
+                .set_popover(Some(&self.imp().popover_menu_2.get()));
+        } else {
+            self.imp()
+                .action_menu_button
+                .set_popover(Some(&self.imp().popover_menu.get()));
+        }
 
         //full service name binding
         let full_service_name_binding = object

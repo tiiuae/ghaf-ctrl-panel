@@ -253,4 +253,49 @@
       </object>
     </child>
   </object>
+  <object class="GtkPopover" id="popover_menu_2">
+  <property name="width-request">220</property>
+    <child>
+      <object class="GtkBox">
+      <style><class name="info-box"/></style>
+      <property name="vexpand">false</property>
+      <property name="hexpand">true</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkButton" id="pause_button_2">
+          <signal name="clicked" handler="on_pause_clicked" swapped="true"/>
+          <style><class name="popover-button"/></style>
+          <property name="vexpand">false</property>
+          <property name="hexpand">true</property>
+            <property name="halign">start</property>
+            <property name="width-request">220</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">start</property>
+                <property name="label">Pause</property>
+                <property name="visible">1</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="stop_button">
+          <signal name="clicked" handler="on_shutdown_clicked" swapped="true"/>
+          <style><class name="popover-button"/></style>
+          <property name="vexpand">false</property>
+          <property name="hexpand">true</property>
+          <property name="halign">start</property>
+          <property name="width-request">220</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">start</property>
+                <property name="label">Stop</property>
+                <property name="visible">1</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
 </interface>
