@@ -121,7 +121,7 @@ pub mod imp {
 
     impl DataProvider {
         pub fn new(address: String, port: u16) -> Self {
-            let init_store = Self::fill_by_mock_data();
+            let init_store = Self::fill_by_mock_data(); //ListStore::new::<ServiceGObject>();
 
             Self {
                 store: init_store.into(),
