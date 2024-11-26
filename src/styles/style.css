@@ -630,3 +630,16 @@ entry>text {
 .tab-widget>header>tabs>tab>label {
   color: #FFFFFF;
 }
+
+/*Arrow button for expander-like behaviour*/
+.arrow-button {
+  background-color: transparent;
+  border: none;
+  color: #FFFFFF;
+  padding: 0;
+}
+
+.arrow-button image {
+  min-width: 8px;
+  min-height: 8px;
+}

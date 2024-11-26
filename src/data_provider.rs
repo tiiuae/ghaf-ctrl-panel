@@ -11,6 +11,7 @@ use glib::Object;
 use gtk::{self, gio, glib, prelude::*};
 
 use async_channel::Sender;
+use givc_client::endpoint::TlsConfig;
 use givc_client::{self, AdminClient};
 use givc_common::query::{Event, TrustLevel, VMStatus};
 use tokio::runtime::Builder;
@@ -106,6 +107,7 @@ pub mod imp {
         //settings: Arc<Mutex<SettingsGObject>>,//will be in use in the future
         pub status: bool,
         service_address: RefCell<(String, u16)>,
+        tls_info: RefCell<Option<(String, TlsConfig)>>,
         join_handle: RefCell<Option<JoinHandle<()>>>,
         task_runner: Rc<RefCell<Option<Rc<TaskSender>>>>,
     }
@@ -125,6 +127,7 @@ pub mod imp {
                 //settings: Arc::new(Mutex::new(SettingsGObject::default())),
                 status: false,
                 service_address: RefCell::new((address, port)),
+                tls_info: RefCell::new(None),
                 join_handle: RefCell::new(None),
                 task_runner: Rc::new(RefCell::new(None)),
             }
@@ -141,6 +144,7 @@ pub mod imp {
             let (task_tx, task_rx) =
                 async_channel::bounded::<(Task, async_channel::Sender<Result<(), String>>)>(1);
             let (address, port) = self.service_address.borrow().clone();
+            let tls_info = self.tls_info.borrow().clone();
 
             let joinhandle = thread::spawn(move || {
                 Builder::new_current_thread()
@@ -149,7 +153,7 @@ pub mod imp {
                     .unwrap()
                     .block_on(async move {
                         let timeout_duration = Duration::from_secs(5);
-                        let admin_client = AdminClient::new(address, port, None);
+                        let admin_client = AdminClient::new(address, port, tls_info);
                         let result = {
                             tokio::select! {
                                 _ = tokio::time::sleep(timeout_duration) => {
@@ -275,6 +279,11 @@ pub mod imp {
             println!("Set service address {addr}:{port}");
             let mut service_address = self.service_address.borrow_mut();
             *service_address = (addr.clone(), port);
+        }
+
+        pub fn set_tls_info(&self, value: Option<(String, TlsConfig)>) {
+            let mut tls_info = self.tls_info.borrow_mut();
+            *tls_info = value;
         }
 
         pub fn add_vm(&self, vm: ServiceGObject) {

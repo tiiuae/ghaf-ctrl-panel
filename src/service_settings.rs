@@ -39,6 +39,8 @@ mod imp {
         pub action_menu_button: TemplateChild<MenuButton>,
         #[template_child]
         pub popover_menu: TemplateChild<Popover>,
+        #[template_child]
+        pub popover_menu_2: TemplateChild<Popover>,
 
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
@@ -81,6 +83,7 @@ mod imp {
                 &[&ControlAction::Shutdown, &name, &display_name],
             );
             self.popover_menu.popdown();
+            self.popover_menu_2.popdown();
         }
         #[template_callback]
         fn on_pause_clicked(&self) {
@@ -91,6 +94,7 @@ mod imp {
                 &[&ControlAction::Pause, &name, &display_name],
             );
             self.popover_menu.popdown();
+            self.popover_menu_2.popdown();
         }
         #[template_callback]
         fn on_mic_changed(&self, value: u32) {
@@ -174,6 +178,17 @@ impl ServiceSettings {
         let control_label = self.imp().control_label.get();
         let audio_settings_box = self.imp().audio_settings_box.get();
         let mut bindings = self.imp().bindings.borrow_mut();
+
+        //action popover
+        if !object.is_vm() {
+            self.imp()
+                .action_menu_button
+                .set_popover(Some(&self.imp().popover_menu_2.get()));
+        } else {
+            self.imp()
+                .action_menu_button
+                .set_popover(Some(&self.imp().popover_menu.get()));
+        }
 
         if is_vm {
             let full_service_name = self.imp().name_slot_2.get();

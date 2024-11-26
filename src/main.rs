@@ -30,9 +30,12 @@ mod window;
 use self::application::ControlPanelGuiApplication;
 use self::window::ControlPanelGuiWindow;
 use clap::Parser;
+use std::path::PathBuf;
 
 use gtk::prelude::*;
 use gtk::{gio, glib};
+
+use givc_client::endpoint::TlsConfig;
 
 const ADMIN_SERVICE_ADDR: &str = "192.168.101.10";
 const ADMIN_SERVICE_PORT: u16 = 9001;
@@ -45,6 +48,21 @@ struct Args {
     addr: Option<String>,
     #[arg(long)]
     port: Option<u16>,
+
+    #[arg(long, env = "NAME", default_value = "admin.ghaf")]
+    name: String, // for TLS service name
+
+    #[arg(long, env = "CA_CERT", default_value = "/run/givc/ca-cert.pem")]
+    cacert: Option<PathBuf>,
+
+    #[arg(long, env = "HOST_CERT", default_value = "/run/givc/cert.pem")]
+    cert: Option<PathBuf>,
+
+    #[arg(long, env = "HOST_KEY", default_value = "/run/givc/key.pem")]
+    key: Option<PathBuf>,
+
+    #[arg(long, default_value_t = false)]
+    notls: bool,
 }
 
 fn main() /*-> glib::ExitCode*/
@@ -66,6 +84,20 @@ fn main() /*-> glib::ExitCode*/
         ADMIN_SERVICE_PORT
     };
 
+    let tls_info = if args.notls {
+        None
+    } else {
+        Some((
+            args.name.clone(),
+            TlsConfig {
+                ca_cert_file_path: args.cacert.expect("cacert is required"),
+                cert_file_path: args.cert.expect("cert is required"),
+                key_file_path: args.key.expect("key is required"),
+                tls_name: Some(args.name),
+            },
+        ))
+    };
+
     // Load resources
     gio::resources_register_include!("control_panel_gui.gresource")
         .expect("Failed to register resources.");
@@ -78,6 +110,7 @@ fn main() /*-> glib::ExitCode*/
         &gio::ApplicationFlags::empty(),
         addr,
         port,
+        tls_info,
     );
 
     // Run the application. This function will block until the application
