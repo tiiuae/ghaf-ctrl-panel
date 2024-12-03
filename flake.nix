@@ -67,7 +67,8 @@
           '';
           postFixup = ''
             wrapProgram $out/bin/ctrl-panel \
-              --prefix PATH : ${lib.makeBinPath [ pkgs.glibc ]}
+              --prefix PATH : ${lib.makeBinPath [ pkgs.glibc ]} \
+              --prefix PATH : ${lib.makeBinPath [ pkgs.dmidecode ]}
           '';
         });
       in

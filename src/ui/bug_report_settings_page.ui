@@ -1,0 +1,733 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="BugReportSettingsPage" parent="GtkBox">
+  <style><class name="info-box"/></style>
+    <property name="vexpand">true</property>
+    <property name="hexpand">true</property>
+    <property name="margin-start">20</property>
+    <property name="margin-end">10</property>
+    <property name="margin-top">10</property>
+    <property name="margin-bottom">10</property>
+    <!--<property name="spacing">10</property>-->
+    <child>
+      <object class="GtkLabel">
+      <property name="label">Bug Report</property>
+      <style><class name="title"/></style>
+      <property name="margin-end">10</property>
+      <property name="margin-top">10</property>
+      <property name="margin-bottom">10</property>
+      <property name="halign">start</property>
+      </object>
+    </child>
+    <property name="orientation">vertical</property>
+    <child>
+      <object class="GtkScrolledWindow">
+        <property name="child">
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkBox" id="report_details_box_1">
+                <property name="hexpand">true</property>
+                <property name="margin-bottom">10</property>
+                <property name="margin-end">10</property>
+                <property name="margin-start">10</property>
+                <property name="margin-top">15</property>
+                <property name="orientation">vertical</property>
+                <property name="vexpand">true</property>
+                <child>
+                  <object class="GtkLabel" id="q_1">
+                    <property name="halign">start</property>
+                    <property name="label">I am reporting</property>
+                    <property name="margin-start">15</property>
+                    <style>
+                      <class name="normal-text"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="report_questionnaire_box_1">
+                    <property name="margin-bottom">10</property>
+                    <property name="margin-end">10</property>
+                    <property name="margin-start">10</property>
+                    <property name="margin-top">10</property>
+                    <property name="orientation">vertical</property>
+                    <property name="width-request">300</property>
+                    <child>
+                      <object class="GtkCheckButton" id="bug">
+                        <property name="group">bug</property>
+                        <property name="label">Bug</property>
+                        <signal name="toggled" handler="on_a1_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">bug</property>
+                        <property name="label">Performance issue</property>
+                        <signal name="toggled" handler="on_a1_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">bug</property>
+                        <property name="label">Usability issue</property>
+                        <signal name="toggled" handler="on_a1_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">bug</property>
+                        <property name="label">Feature request</property>
+                        <signal name="toggled" handler="on_a1_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">bug</property>
+                        <property name="label">Missing documentation</property>
+                        <signal name="toggled" handler="on_a1_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <child>
+                          <object class="GtkCheckButton" id="other_1">
+                            <property name="group">bug</property>
+                            <signal name="toggled" handler="on_a1_toggled" swapped="yes"/>
+                            <style>
+                              <class name="normal-text"/>
+                            </style>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="entry_1">
+                            <property name="hexpand">True</property>
+                            <property name="placeholder-text">Other</property>
+                            <signal name="changed" handler="entry_1_focused" swapped="yes"/>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <style>
+                      <class name="report_questionnaire"/>
+                    </style>
+                    <style>
+                      <class name="questionnaire-box"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="required_1">
+                    <property name="halign">start</property>
+                    <property name="label">The question is required.</property>
+                    <property name="margin-start">15</property>
+                    <property name="visible">False</property>
+                    <style>
+                      <class name="required-text"/>
+                    </style>
+                  </object>
+                </child>
+                <style>
+                  <class name="info-box"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox" id="report_details_box_2">
+                <property name="hexpand">true</property>
+                <property name="margin-bottom">10</property>
+                <property name="margin-end">10</property>
+                <property name="margin-start">10</property>
+                <property name="margin-top">15</property>
+                <property name="orientation">vertical</property>
+                <property name="vexpand">true</property>
+                <child>
+                  <object class="GtkLabel" id="q_2">
+                    <property name="halign">start</property>
+                    <property name="label">This feedback relates to</property>
+                    <property name="margin-start">15</property>
+                    <style>
+                      <class name="normal-text"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="report_questionnaire_box_2">
+                    <property name="margin-bottom">10</property>
+                    <property name="margin-end">10</property>
+                    <property name="margin-start">10</property>
+                    <property name="margin-top">10</property>
+                    <property name="orientation">vertical</property>
+                    <property name="width-request">300</property>
+                    <child>
+                      <object class="GtkCheckButton" id="app">
+                        <property name="group">app</property>
+                        <property name="label">App</property>
+                        <signal name="toggled" handler="on_a2_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="desktop">
+                        <property name="group">app</property>
+                        <property name="label">Desktop</property>
+                        <signal name="toggled" handler="on_a2_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="login">
+                        <property name="group">app</property>
+                        <property name="label">Login / Lock</property>
+                        <signal name="toggled" handler="on_a2_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="installer">
+                        <property name="group">app</property>
+                        <property name="label">Installer / Setup</property>
+                        <signal name="toggled" handler="on_a2_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <child>
+                          <object class="GtkCheckButton" id="other_2">
+                            <property name="group">app</property>
+                            <signal name="toggled" handler="on_a1_toggled" swapped="yes"/>
+                            <style>
+                              <class name="normal-text"/>
+                            </style>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="entry_2">
+                            <property name="hexpand">True</property>
+                            <property name="placeholder-text">Other</property>
+                            <signal name="changed" handler="entry_2_focused" swapped="yes"/>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <style>
+                      <class name="report_questionnaire"/>
+                    </style>
+                    <style>
+                      <class name="questionnaire-box"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="required_2">
+                    <property name="halign">start</property>
+                    <property name="label">The question is required.</property>
+                    <property name="margin-start">15</property>
+                    <property name="visible">False</property>
+                    <style>
+                      <class name="required-text"/>
+                    </style>
+                  </object>
+                </child>
+                <style>
+                  <class name="info-box"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox" id="qbox_3">
+                <property name="hexpand">True</property>
+                <property name="margin-bottom">10</property>
+                <property name="margin-end">10</property>
+                <property name="margin-start">10</property>
+                <property name="margin-top">15</property>
+                <property name="orientation">vertical</property>
+                <property name="vexpand">True</property>
+                <property name="visible">False</property>
+                <child>
+                  <object class="GtkLabel" id="q_3">
+                    <property name="halign">start</property>
+                    <property name="label">What app?</property>
+                    <property name="margin-start">15</property>
+                    <style>
+                      <class name="normal-text"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="report_questionnaire_box_3">
+                    <property name="margin-bottom">10</property>
+                    <property name="margin-end">10</property>
+                    <property name="margin-start">10</property>
+                    <property name="margin-top">10</property>
+                    <property name="orientation">vertical</property>
+                    <property name="width-request">300</property>
+                    <child>
+                      <object class="GtkCheckButton" id="a_3">
+                        <property name="group">a_3</property>
+                        <property name="label">AppFlowy</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">Audio Control</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">Bluetooth Settings</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">Calculator</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">Chromium</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">Element</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">File Manager</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">GALA</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">Gnome Text Editor</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">Microsoft 365</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">Microsoft Outlook</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">Network Settings</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">PDF Viewer</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">Slack</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">Sticky-Notes</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">Teams</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">Terminal</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">Trusted Browser</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">VPN</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">Video Editor</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="margin-start">1</property>
+                        <child>
+                          <object class="GtkCheckButton" id="other_3">
+                            <property name="group">a_3</property>
+                            <signal name="toggled" handler="on_a1_toggled" swapped="yes"/>
+                            <style>
+                              <class name="normal-text"/>
+                            </style>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="entry_3">
+                            <property name="hexpand">True</property>
+                            <property name="placeholder-text">Other</property>
+                            <signal name="changed" handler="entry_3_focused" swapped="yes"/>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <style>
+                      <class name="report_questionnaire"/>
+                    </style>
+                    <style>
+                      <class name="questionnaire-box"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="required_3">
+                    <property name="halign">start</property>
+                    <property name="label">The question is required.</property>
+                    <property name="margin-start">15</property>
+                    <property name="visible">False</property>
+                    <style>
+                      <class name="required-text"/>
+                    </style>
+                  </object>
+                </child>
+                <style>
+                  <class name="info-box"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="margin-end">20</property>
+                <property name="margin-start">25</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="margin-top">15</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">start</property>
+                        <property name="justify">center</property>
+                        <property name="label">Describe the issue as accurately as possible. Please include any error messages you received.</property>
+                        <property name="margin-bottom">10</property>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="a_4">
+                        <property name="hexpand">True</property>
+                        <property name="placeholder-text">Enter your answer</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="required_4">
+                        <property name="halign">start</property>
+                        <property name="label">The question is required.</property>
+                        <property name="margin-top">5</property>
+                        <property name="visible">False</property>
+                        <style>
+                          <class name="required-text"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="margin-top">15</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">start</property>
+                        <property name="label">Reporter name</property>
+                        <property name="margin-bottom">10</property>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="a_6">
+                        <property name="hexpand">True</property>
+                        <property name="placeholder-text">Enter your answer</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="required_6">
+                        <property name="halign">start</property>
+                        <property name="label">The question is required.</property>
+                        <property name="margin-top">5</property>
+                        <property name="visible">False</property>
+                        <style>
+                          <class name="required-text"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="margin-top">15</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">start</property>
+                        <property name="label">Ghaf-version used</property>
+                        <property name="margin-bottom">10</property>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="a_5">
+                        <property name="hexpand">True</property>
+                        <property name="placeholder-text">Enter your answer</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="required_5">
+                        <property name="halign">start</property>
+                        <property name="label">The question is required.</property>
+                        <property name="margin-top">5</property>
+                        <property name="visible">False</property>
+                        <style>
+                          <class name="required-text"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="margin-top">15</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">start</property>
+                        <property name="label">Reporter email address</property>
+                        <property name="margin-bottom">10</property>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="a_7">
+                        <property name="hexpand">True</property>
+                        <property name="placeholder-text">Please enter an email</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="required_7">
+                        <property name="halign">start</property>
+                        <property name="label">The question is required.</property>
+                        <property name="margin-start">5</property>
+                        <property name="visible">False</property>
+                        <style>
+                          <class name="required-text"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </property>
+        <property name="vexpand">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox" id="footer">
+        <property name="orientation">vertical</property>
+        <property name="valign">end</property>
+        <property name="width-request">0</property>
+        <child>
+          <object class="GtkSeparator"/>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <child>
+              <object class="GtkBox">
+                <property name="halign">start</property>
+                <property name="width-request">60</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="hexpand">True</property>
+                <child>
+                  <object class="GtkLabel" id="summary">
+                    <property name="hexpand">True</property>
+                    <property name="visible">False</property>
+                    <style>
+                      <class name="success-text"/>
+                    </style>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="submit">
+                <property name="height-request">30</property>
+                <property name="label">Submit</property>
+                <property name="halign">end</property>
+                <property name="width-request">60</property>
+                <signal name="clicked" handler="on_submit" swapped="yes"/>
+                <style>
+                  <class name="settings-button"/>
+                </style>
+                <style>
+                  <class name="settings-button"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <style>
+      <class name="container"/>
+    </style>
+  </template>
+</interface>

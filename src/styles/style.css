@@ -57,6 +57,16 @@ label.normal-text {
   color: #FFFFFF;
 }
 
+label.required-text {
+  font-size: 14px;
+  color: #FF2E00;
+}
+
+label.success-text {
+  font-size: 14px;
+  color: #2bb900;
+}
+
 label.vm-name {
   font-size: 16px;
   /*font-weight: bold;*/
@@ -70,6 +80,10 @@ label.title {
 }
 
 .radiobutton>label {
+  color: #FFFFFF;
+}
+
+checkbutton>label {
   color: #FFFFFF;
 }
 

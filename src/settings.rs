@@ -10,6 +10,7 @@ use std::sync::OnceLock;
 //use crate::service_gobject::ServiceGObject; will be used in the future
 use crate::admin_settings_page::AdminSettingsPage;
 use crate::audio_settings::AudioSettings;
+use crate::bug_report_settings_page::BugReportSettingsPage;
 use crate::control_action::ControlAction;
 use crate::display_settings_page::DisplaySettingsPage;
 use crate::info_settings_page::InfoSettingsPage;
@@ -22,6 +23,8 @@ use crate::settings_gobject::SettingsGObject;
 use crate::wifi_settings_page::WifiSettingsPage;
 
 mod imp {
+    use crate::bug_report_settings_page::BugReportSettingsPage;
+
     use super::*;
 
     #[derive(Default, CompositeTemplate)]
@@ -49,6 +52,8 @@ mod imp {
         pub display_settings_page: TemplateChild<DisplaySettingsPage>,
         #[template_child]
         pub language_region_settings_page: TemplateChild<LanguageRegionSettingsPage>,
+        #[template_child]
+        pub bug_report_page: TemplateChild<BugReportSettingsPage>,
 
         //pub vm_model: RefCell<ListStore>,
 
