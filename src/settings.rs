@@ -23,8 +23,6 @@ use crate::settings_gobject::SettingsGObject;
 use crate::wifi_settings_page::WifiSettingsPage;
 
 mod imp {
-    use crate::bug_report_settings_page::BugReportSettingsPage;
-
     use super::*;
 
     #[derive(Default, CompositeTemplate)]
