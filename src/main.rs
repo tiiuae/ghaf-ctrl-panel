@@ -26,6 +26,8 @@ mod trust_level;
 mod vm_row;
 mod wifi_settings_page;
 mod window;
+mod report;
+mod github;
 
 use self::application::ControlPanelGuiApplication;
 use self::window::ControlPanelGuiWindow;
