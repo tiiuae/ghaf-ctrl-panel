@@ -16,12 +16,15 @@ use crate::info_settings_page::InfoSettingsPage;
 use crate::keyboard_settings_page::KeyboardSettingsPage;
 use crate::language_region_settings_page::LanguageRegionSettingsPage;
 use crate::mouse_settings_page::MouseSettingsPage;
+use crate::report::Report;
 use crate::security_settings_page::SecuritySettingsPage;
 use crate::settings_action::SettingsAction;
 use crate::settings_gobject::SettingsGObject;
 use crate::wifi_settings_page::WifiSettingsPage;
 
 mod imp {
+    use crate::report::Report;
+
     use super::*;
 
     #[derive(Default, CompositeTemplate)]
@@ -49,6 +52,8 @@ mod imp {
         pub display_settings_page: TemplateChild<DisplaySettingsPage>,
         #[template_child]
         pub language_region_settings_page: TemplateChild<LanguageRegionSettingsPage>,
+        #[template_child]
+        pub report_page: TemplateChild<Report>,
 
         //pub vm_model: RefCell<ListStore>,
 
