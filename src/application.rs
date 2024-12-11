@@ -315,6 +315,13 @@ impl ControlPanelGuiApplication {
                     popup.present();
                 }
             }
+            SettingsAction::OpenWireGuard => {
+                let vm: String = value.get().unwrap();
+                self.imp()
+                    .data_provider
+                    .borrow()
+                    .start_app_in_vm(String::from("wireguard-gui"), vm);
+            }
         };
     }
 

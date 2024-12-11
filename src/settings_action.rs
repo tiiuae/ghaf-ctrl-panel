@@ -22,6 +22,7 @@ pub enum SettingsAction {
     ShowAddKeyboardPopup = 11,
     ShowConfirmDisplaySettingsPopup = 12,
     ShowErrorPopup = 13,
+    OpenWireGuard = 14,
 }
 
 impl StaticType for SettingsAction {
@@ -49,6 +50,7 @@ unsafe impl FromValue<'_> for SettingsAction {
             11 => SettingsAction::ShowAddKeyboardPopup,
             12 => SettingsAction::ShowConfirmDisplaySettingsPopup,
             13 => SettingsAction::ShowErrorPopup,
+            14 => SettingsAction::OpenWireGuard,
             _ => panic!("Invalid SettingsAction value"),
         }
     }
@@ -71,6 +73,7 @@ impl ToValue for SettingsAction {
             SettingsAction::ShowAddKeyboardPopup => 11u8,
             SettingsAction::ShowConfirmDisplaySettingsPopup => 12u8,
             SettingsAction::ShowErrorPopup => 13u8,
+            SettingsAction::OpenWireGuard => 14u8,
         };
         v.to_value()
     }

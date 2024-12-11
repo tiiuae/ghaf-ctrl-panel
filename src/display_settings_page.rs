@@ -213,7 +213,6 @@ impl DisplaySettingsPage {
             if let Ok(scale_f) = scale.parse::<f32>() {
                 let scale_percent = (scale_f * 100.0).round();
                 let scale_percent_str = format!("{}%", scale_percent as i32);
-                println!("Scale as percentage: {}", scale_percent_str);
 
                 let supported_scales = self.imp().supported_scales.clone();
 

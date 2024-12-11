@@ -262,11 +262,12 @@ mod imp {
                     }
                     Err(e) => {
                         if e.downcast_ref::<octocrab::Error>().is_none() {
-                            self.summary.set_label(format!("Error when sending report: {}",e).as_str());
+                            self.summary
+                                .set_label(format!("Error when sending report: {}", e).as_str());
                         } else {
                             self.summary.set_label("Error when sending report");
                         }
-                        
+
                         self.summary.remove_css_class("success-text");
                         self.summary.add_css_class("required-text");
                         self.summary.set_visible(true);

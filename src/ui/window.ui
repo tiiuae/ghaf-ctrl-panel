@@ -4,7 +4,7 @@
   <requires lib="Adw" version="1.0"/>
   <template class="ControlPanelGuiWindow" parent="AdwApplicationWindow">
   <property name="title">Ghaf Control panel</property>
-    <property name="default-width">800</property>
+    <property name="default-width">1000</property>
     <property name="default-height">600</property>
     <style><class name="main-window"/></style>
     <child>
@@ -144,6 +144,7 @@
                           <child>
                             <object class="ServiceSettings" id="service_settings_box">
                             <signal name="control-action" handler="on_control_action" swapped="true"/>
+                            <signal name="settings-action" handler="on_settings_action" swapped="true"/>
                             </object> <!-- Settings box object -->
                           </child>
                         </object> <!-- Main box object -->

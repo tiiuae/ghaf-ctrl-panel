@@ -1,9 +1,10 @@
 use glib::subclass::Signal;
-use glib::{Binding, Properties};
+use glib::{Binding, Properties, Variant};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{
-    glib, CompositeTemplate, Image, Label, MenuButton, Popover, Revealer, ToggleButton, Widget,
+    glib, Button, CompositeTemplate, Image, Label, MenuButton, Popover, Revealer, Separator,
+    ToggleButton,
 };
 use std::cell::RefCell;
 use std::sync::OnceLock;
@@ -12,8 +13,11 @@ use crate::audio_settings::AudioSettings;
 use crate::control_action::ControlAction;
 use crate::security_icon::SecurityIcon;
 use crate::service_gobject::ServiceGObject;
+use crate::settings_action::SettingsAction;
 
 mod imp {
+    use crate::settings_action::SettingsAction;
+
     use super::*;
 
     #[derive(Default, CompositeTemplate, Properties)]
@@ -40,6 +44,10 @@ mod imp {
         pub security_icon: TemplateChild<Image>,
         #[template_child]
         pub security_label: TemplateChild<Label>,
+        #[template_child]
+        pub wireguard_section_separator: TemplateChild<Separator>,
+        #[template_child]
+        pub wireguard_button: TemplateChild<Button>,
         #[template_child]
         pub audio_settings_box: TemplateChild<AudioSettings>,
         #[template_child]
@@ -77,13 +85,21 @@ mod imp {
     #[gtk::template_callbacks]
     impl ServiceSettings {
         #[template_callback]
+        fn on_wireguard_button_clicked(&self) {
+            println!("Wireguard GUI will be launched...");
+            //which name: full service name or vm?
+            let vm = Variant::from(self.full_service_name.borrow().to_variant());
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&SettingsAction::OpenWireGuard, &vm]);
+        }
+        #[template_callback]
         fn open_info(&self) {
             let value = self.arrow_button.is_active();
             self.revealer.set_reveal_child(value);
             if (value) {
-                self.arrow_button.set_icon_name("go-up-symbolic");
+                self.arrow_button.set_icon_name("pan-up-symbolic");
             } else {
-                self.arrow_button.set_icon_name("go-down-symbolic");
+                self.arrow_button.set_icon_name("pan-down-symbolic");
             }
         }
         #[template_callback]
@@ -143,6 +159,9 @@ mod imp {
                     Signal::builder("control-action")
                         .param_types([ControlAction::static_type(), String::static_type()])
                         .build(),
+                    Signal::builder("settings-action")
+                        .param_types([SettingsAction::static_type(), Variant::static_type()])
+                        .build(),
                     Signal::builder("vm-mic-changed")
                         .param_types([u32::static_type()])
                         .build(),
@@ -197,15 +216,23 @@ impl ServiceSettings {
         let audio_settings_box = self.imp().audio_settings_box.get();
         let mut bindings = self.imp().bindings.borrow_mut();
 
+        //wireguard label/button
+        self.imp()
+            .wireguard_section_separator
+            .set_visible(object.has_wireguard());
+        self.imp()
+            .wireguard_button
+            .set_visible(object.has_wireguard());
+
         //action popover
-        if !object.is_vm() {
-            self.imp()
-                .action_menu_button
-                .set_popover(Some(&self.imp().popover_menu_2.get()));
-        } else {
+        if object.is_vm() {
             self.imp()
                 .action_menu_button
                 .set_popover(Some(&self.imp().popover_menu.get()));
+        } else {
+            self.imp()
+                .action_menu_button
+                .set_popover(Some(&self.imp().popover_menu_2.get()));
         }
 
         //full service name binding

@@ -387,6 +387,18 @@ pub mod imp {
             }
         }
 
+        pub fn start_app_in_vm(&self, app: String, vm: String) {
+            let app_name = app.clone();
+            let vm_name = vm.clone();
+            self.client_cmd(
+                adminclient!(|client| client.start(app, Some(vm), vec![])),
+                move |res| match res {
+                    Ok(_) => println!("Start app {app_name} in the VM {vm_name} request sent"),
+                    Err(error) => println!("Start app {app_name} in VM {vm_name} request error {error}"),
+                },
+            );
+        }
+
         pub fn pause_service(&self, name: String) {
             self.client_cmd(adminclient!(|client| client.pause(name)), |res| match res {
                 Ok(_) => println!("Pause request sent"),

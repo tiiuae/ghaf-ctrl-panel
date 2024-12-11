@@ -8,6 +8,8 @@ use givc_common::query::{QueryResult, TrustLevel, VMStatus}; //cannot be used as
                                                              //use crate::trust_level::TrustLevel as MyTrustLevel;//type is no recognised in #property
 use givc_common::types::ServiceType;
 
+use crate::wireguard_vms::static_contains;
+
 mod imp {
     use super::*;
 
@@ -21,7 +23,7 @@ mod imp {
         pub details: String,
         pub status: u8,
         pub trust_level: u8,
-        //pub my_trust_level: MyTrustLevel,
+        pub has_wireguard: bool,
     }
 
     #[derive(Default, Properties)]
@@ -35,6 +37,7 @@ mod imp {
         #[property(name = "details", get, set, type = String, member = details)]
         #[property(name = "status", get, set, type = u8, member = status)]
         #[property(name = "trust-level", get, set, type = u8, member = trust_level)]
+        #[property(name = "has-wireguard", get, set, type = bool, member = has_wireguard)]
         //#[property(name = "my-trust-level", get, set, type = MyTrustLevel, member = my_trust_level)]
         pub data: RefCell<ServiceData>,
     }
@@ -68,6 +71,7 @@ impl ServiceGObject {
         let is_app = service_type == ServiceType::App;
 
         let display_name = if is_vm {
+            //vm_name
             let re = Regex::new(r"^microvm@([^@-]+)-.+$").unwrap();
             re.captures(&name.clone())
                 .and_then(|cap| cap.get(1).map(|m| m.as_str().to_string()))
@@ -82,7 +86,7 @@ impl ServiceGObject {
         };
 
         Object::builder()
-            .property("name", name)
+            .property("name", name.clone())
             .property("display-name", display_name)
             .property("is-vm", is_vm)
             .property("is-app", is_app)
@@ -91,6 +95,7 @@ impl ServiceGObject {
             //for demo
             .property("status", status as u8)
             .property("trust-level", 0u8) //trust_level as u8)
+            .property("has-wireguard", static_contains(&name) && is_vm)
             .build()
     }
 
