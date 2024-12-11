@@ -72,7 +72,7 @@
             <object class="GtkToggleButton" id="arrow_button">
             <style><class name="arrow-button"/></style>
             <signal name="toggled" handler="open_info" swapped="true"/>
-            <property name="icon-name">go-down-symbolic</property>
+            <property name="icon-name">pan-down-symbolic</property>
             <property name="margin-top">10</property>
             <property name="margin-bottom">10</property>
             <property name="width-request">8</property>
@@ -140,6 +140,54 @@
             <property name="halign">start</property>
             </object>
           </child>
+        </object>
+      </child>
+      <child>
+        <object class="GtkSeparator" id="wireguard_section_separator">
+        <property name="margin-start">10</property>
+        </object>
+      </child>
+      <child>
+        <object class="GtkButton" id="wireguard_button">
+        <style><class name="settings-button"/></style>
+        <signal name="clicked" handler="on_wireguard_button_clicked" swapped="true"/>
+        <property name="margin-start">20</property>
+        <property name="margin-end">10</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">10</property>
+        <property name="halign">start</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="vexpand">false</property>
+            <property name="hexpand">true</property>
+            <property name="margin-start">5</property>
+            <property name="margin-end">5</property>
+            <property name="margin-top">5</property>
+            <property name="margin-bottom">5</property>
+            <property name="spacing">20</property>
+            <property name="halign">start</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label">Wireguard</property>
+                <property name="halign">start</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="hexpand">true</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImage">
+                <property name="icon_name">pan-end-symbolic</property>
+                <property name="icon_size">1</property>
+                <property name="halign">end</property>
+                <property name="margin-end">0</property>
+              </object>
+            </child>
+          </object>
+        </child>
         </object>
       </child>
       <child>

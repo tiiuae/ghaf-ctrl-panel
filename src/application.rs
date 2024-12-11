@@ -315,6 +315,7 @@ impl ControlPanelGuiApplication {
                     popup.present();
                 }
             }
+            SettingsAction::OpenWireGuard => { /*start wireguard via givc*/ }
         };
     }
 

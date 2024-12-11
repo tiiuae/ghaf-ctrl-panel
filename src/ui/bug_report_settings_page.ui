@@ -55,7 +55,6 @@
                     <property name="width-request">300</property>
                     <child>
                       <object class="GtkCheckButton" id="bug">
-                        <property name="group">bug</property>
                         <property name="label">Bug</property>
                         <signal name="toggled" handler="on_a1_toggled" swapped="yes"/>
                         <style>
@@ -176,7 +175,6 @@
                     <property name="width-request">300</property>
                     <child>
                       <object class="GtkCheckButton" id="app">
-                        <property name="group">app</property>
                         <property name="label">App</property>
                         <signal name="toggled" handler="on_a2_toggled" swapped="yes"/>
                         <style>
@@ -288,7 +286,6 @@
                     <property name="width-request">300</property>
                     <child>
                       <object class="GtkCheckButton" id="a_3">
-                        <property name="group">a_3</property>
                         <property name="label">AppFlowy</property>
                         <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
                         <style>

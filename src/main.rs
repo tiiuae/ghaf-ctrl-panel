@@ -28,6 +28,7 @@ mod trust_level;
 mod vm_row;
 mod wifi_settings_page;
 mod window;
+mod wireguard_vms;
 
 use self::application::ControlPanelGuiApplication;
 use self::window::ControlPanelGuiWindow;
@@ -38,6 +39,8 @@ use gtk::prelude::*;
 use gtk::{gio, glib};
 
 use givc_client::endpoint::TlsConfig;
+
+use crate::wireguard_vms::initialize_wvm_list;
 
 const ADMIN_SERVICE_ADDR: &str = "192.168.101.10";
 const ADMIN_SERVICE_PORT: u16 = 9001;
@@ -62,6 +65,9 @@ struct Args {
 
     #[arg(long, env = "HOST_KEY", default_value = "/run/givc/key.pem")]
     key: Option<PathBuf>,
+
+    #[arg(long, default_value = "/etc/ctrl-panel/wireguard-gui-vms.txt")]
+    wireguardlist: Option<PathBuf>,
 
     #[arg(long, default_value_t = false)]
     notls: bool,
@@ -99,6 +105,9 @@ fn main() /*-> glib::ExitCode*/
             },
         ))
     };
+
+    //read file with wireguard VMs
+    initialize_wvm_list(args.wireguardlist.expect("wireguard vm list file required"));
 
     // Load resources
     gio::resources_register_include!("control_panel_gui.gresource")
