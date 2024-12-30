@@ -31,7 +31,6 @@
                 <property name="hexpand">true</property>
                 <property name="margin-bottom">10</property>
                 <property name="margin-end">10</property>
-                <property name="margin-start">10</property>
                 <property name="margin-top">15</property>
                 <property name="orientation">vertical</property>
                 <property name="vexpand">true</property>
@@ -39,7 +38,6 @@
                   <object class="GtkLabel" id="q_1">
                     <property name="halign">start</property>
                     <property name="label">I am reporting</property>
-                    <property name="margin-start">15</property>
                     <style>
                       <class name="normal-text"/>
                     </style>
@@ -49,7 +47,6 @@
                   <object class="GtkBox" id="report_questionnaire_box_1">
                     <property name="margin-bottom">10</property>
                     <property name="margin-end">10</property>
-                    <property name="margin-start">10</property>
                     <property name="margin-top">10</property>
                     <property name="orientation">vertical</property>
                     <property name="width-request">300</property>
@@ -134,7 +131,6 @@
                   <object class="GtkLabel" id="required_1">
                     <property name="halign">start</property>
                     <property name="label">The question is required.</property>
-                    <property name="margin-start">15</property>
                     <property name="visible">False</property>
                     <style>
                       <class name="required-text"/>
@@ -151,7 +147,6 @@
                 <property name="hexpand">true</property>
                 <property name="margin-bottom">10</property>
                 <property name="margin-end">10</property>
-                <property name="margin-start">10</property>
                 <property name="margin-top">15</property>
                 <property name="orientation">vertical</property>
                 <property name="vexpand">true</property>
@@ -159,7 +154,6 @@
                   <object class="GtkLabel" id="q_2">
                     <property name="halign">start</property>
                     <property name="label">This feedback relates to</property>
-                    <property name="margin-start">15</property>
                     <style>
                       <class name="normal-text"/>
                     </style>
@@ -169,7 +163,6 @@
                   <object class="GtkBox" id="report_questionnaire_box_2">
                     <property name="margin-bottom">10</property>
                     <property name="margin-end">10</property>
-                    <property name="margin-start">10</property>
                     <property name="margin-top">10</property>
                     <property name="orientation">vertical</property>
                     <property name="width-request">300</property>
@@ -244,7 +237,6 @@
                   <object class="GtkLabel" id="required_2">
                     <property name="halign">start</property>
                     <property name="label">The question is required.</property>
-                    <property name="margin-start">15</property>
                     <property name="visible">False</property>
                     <style>
                       <class name="required-text"/>
@@ -261,7 +253,6 @@
                 <property name="hexpand">True</property>
                 <property name="margin-bottom">10</property>
                 <property name="margin-end">10</property>
-                <property name="margin-start">10</property>
                 <property name="margin-top">15</property>
                 <property name="orientation">vertical</property>
                 <property name="vexpand">True</property>
@@ -270,7 +261,6 @@
                   <object class="GtkLabel" id="q_3">
                     <property name="halign">start</property>
                     <property name="label">What app?</property>
-                    <property name="margin-start">15</property>
                     <style>
                       <class name="normal-text"/>
                     </style>
@@ -280,7 +270,6 @@
                   <object class="GtkBox" id="report_questionnaire_box_3">
                     <property name="margin-bottom">10</property>
                     <property name="margin-end">10</property>
-                    <property name="margin-start">10</property>
                     <property name="margin-top">10</property>
                     <property name="orientation">vertical</property>
                     <property name="width-request">300</property>
@@ -531,7 +520,6 @@
             <child>
               <object class="GtkBox">
                 <property name="margin-end">20</property>
-                <property name="margin-start">25</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkBox">
@@ -657,7 +645,6 @@
                       <object class="GtkLabel" id="required_7">
                         <property name="halign">start</property>
                         <property name="label">The question is required.</property>
-                        <property name="margin-start">5</property>
                         <property name="visible">False</property>
                         <style>
                           <class name="required-text"/>
