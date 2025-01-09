@@ -196,6 +196,7 @@ pub mod imp {
 
                 if let Ok((channel, initial)) = event_rx.recv().await {
                     store.remove_all();
+                    println!("Initial list {:?}", initial);
                     store.extend(initial.into_iter().map(|service| {
                         ServiceGObject::new(
                             service.name,
@@ -394,7 +395,9 @@ pub mod imp {
                 adminclient!(|client| client.start(app, Some(vm), vec![])),
                 move |res| match res {
                     Ok(_) => println!("Start app {app_name} in the VM {vm_name} request sent"),
-                    Err(error) => println!("Start app {app_name} in VM {vm_name} request error {error}"),
+                    Err(error) => {
+                        println!("Start app {app_name} in VM {vm_name} request error {error}")
+                    }
                 },
             );
         }
