@@ -420,20 +420,10 @@ pub mod imp {
         }
 
         pub fn stop_service(&self, name: String) {
-            let store = self.store.clone();
-            if let Some(obj) = store.iter().find(|obj| obj.name() == name) {
-                let mut name_to_use = name;
-                if obj.is_app() {
-                    name_to_use = obj.display_name();
-                }
-                self.client_cmd(
-                    adminclient!(|client| client.stop(name_to_use)),
-                    |res| match res {
-                        Ok(_) => println!("Stop request sent"),
-                        Err(error) => println!("Stop request error {error}"),
-                    },
-                );
-            }
+            self.client_cmd(adminclient!(|client| client.stop(name)), |res| match res {
+                Ok(_) => println!("Stop request sent"),
+                Err(error) => println!("Stop request error {error}"),
+            });
         }
 
         pub fn restart_service(&self, _name: String) {
