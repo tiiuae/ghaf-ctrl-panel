@@ -207,7 +207,7 @@ impl ControlPanelGuiApplication {
         let window = self.active_window().unwrap();
         let about = adw::AboutWindow::builder()
             .transient_for(&window)
-            .application_name("Ghaf Control panel")
+            .application_name("Ghaf Control Panel")
             .application_icon("org.gnome.controlpanelgui")
             .developer_name("dmitry")
             .developers(vec!["dmitry"])

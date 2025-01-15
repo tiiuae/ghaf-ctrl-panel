@@ -47,7 +47,7 @@ const ADMIN_SERVICE_PORT: u16 = 9001;
 
 #[derive(Parser, Debug)]
 #[command(name = "ctrl-panel")]
-#[command(about = "Ghaf Control panel", long_about = None)]
+#[command(about = "Ghaf Control Panel", long_about = None)]
 struct Args {
     #[arg(long)]
     addr: Option<String>,
