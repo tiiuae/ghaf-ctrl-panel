@@ -384,6 +384,16 @@ pub mod imp {
                     );
                 } else {
                     //another function for VMs and services?
+                    let name_clone = name.clone();
+                    self.client_cmd(
+                        adminclient!(|client| client.start(name, None, vec![])),
+                        move |res| match res {
+                            Ok(_) => println!("Start {name_clone} request sent"),
+                            Err(error) => {
+                                println!("Start {name_clone} request error {error}")
+                            }
+                        },
+                    );
                 }
             }
         }
