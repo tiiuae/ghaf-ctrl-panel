@@ -109,6 +109,9 @@ mod imp {
             obj.bind_property("footer-visible", &self.footer.get(), "visible")
                 .flags(glib::BindingFlags::DEFAULT)
                 .build();
+
+            //and get devices
+            obj.get_audio_devices();
         }
 
         fn signals() -> &'static [Signal] {
@@ -160,6 +163,10 @@ impl AudioSettings {
     pub fn new() -> Self {
         //glib::Object::new::<Self>()
         glib::Object::builder().build()
+    }
+
+    pub fn get_audio_devices(&self) {
+        //call AudioControl's method
     }
 
     pub fn open_advanced_settings_widget(&self) {

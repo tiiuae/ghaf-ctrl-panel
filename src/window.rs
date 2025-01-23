@@ -154,10 +154,16 @@ impl ControlPanelGuiWindow {
             println!("Destroy window");
         }));
 
-        self.setup_service_rows();
+        //get application reference
+        let app = self.get_app_ref();
+
+        self.setup_service_rows(app.get_store()); //ListStore doc: "GLib type: GObject with reference counted clone semantics."
         self.setup_factory();
         //vm view by default
         self.imp().vm_view_button.set_active(true);
+
+        //set audio devices list
+        self.set_audio_devices();
     }
 
     #[inline(always)]
@@ -170,11 +176,7 @@ impl ControlPanelGuiWindow {
             .into()
     }
 
-    fn setup_service_rows(&self) {
-        let app = self.get_app_ref();
-
-        let model = app.get_store(); //ListStore doc: "GLib type: GObject with reference counted clone semantics."
-
+    fn setup_service_rows(&self, model: ListStore) {
         self.imp().settings_box.set_vm_model(model.clone());
 
         //Create filter: VM services, default
@@ -359,6 +361,10 @@ impl ControlPanelGuiWindow {
 
     fn set_vm_details(&self, obj: &ServiceGObject) {
         self.imp().service_settings_box.bind(obj);
+    }
+
+    fn set_audio_devices(&self) {
+        self.imp().settings_box.set_audio_devices();
     }
 
     //pub API

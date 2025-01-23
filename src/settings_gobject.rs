@@ -1,7 +1,6 @@
 use gtk::glib::subclass::prelude::*;
 use gtk::glib::{self, Object, Properties};
 use gtk::prelude::*;
-use gtk::subclass::prelude::*;
 use std::cell::RefCell;
 
 pub mod imp {

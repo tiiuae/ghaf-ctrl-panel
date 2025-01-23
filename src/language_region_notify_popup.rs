@@ -2,10 +2,9 @@ use glib::subclass::Signal;
 use glib::Binding;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{gio, glib, CompositeTemplate, Spinner};
+use gtk::{gio, glib, CompositeTemplate};
 use std::cell::RefCell;
 use std::sync::OnceLock;
-use std::time::Duration;
 
 mod imp {
     use super::*;

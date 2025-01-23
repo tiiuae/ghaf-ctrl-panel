@@ -8,8 +8,8 @@ use std::cell::RefCell;
 use std::sync::OnceLock;
 
 use crate::data_gobject::DataGObject;
-use crate::data_provider::imp::TypedListStore;
 use crate::settings_gobject::SettingsGObject;
+use crate::typed_list_store::imp::TypedListStore;
 
 //+list of supported resolutions/modes ?
 

@@ -16,8 +16,6 @@ use crate::service_gobject::ServiceGObject;
 use crate::settings_action::SettingsAction;
 
 mod imp {
-    use crate::settings_action::SettingsAction;
-
     use super::*;
 
     #[derive(Default, CompositeTemplate, Properties)]
@@ -96,7 +94,7 @@ mod imp {
         fn open_info(&self) {
             let value = self.arrow_button.is_active();
             self.revealer.set_reveal_child(value);
-            if (value) {
+            if value {
                 self.arrow_button.set_icon_name("pan-up-symbolic");
             } else {
                 self.arrow_button.set_icon_name("pan-down-symbolic");
@@ -363,7 +361,7 @@ impl ServiceSettings {
             .sync_create()
             .transform_to(move |_, value: &glib::Value| {
                 let is_vm = value.get::<bool>().unwrap_or(false);
-                if (is_vm) {
+                if is_vm {
                     Some(glib::Value::from("VM Controls"))
                 } else {
                     Some(glib::Value::from("Service Controls"))

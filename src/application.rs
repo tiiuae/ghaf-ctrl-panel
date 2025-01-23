@@ -1,4 +1,5 @@
 use adw::subclass::prelude::*;
+use gio::ListStore;
 use glib::Variant;
 use gtk::prelude::*;
 use gtk::CssProvider;
@@ -7,6 +8,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::add_network_popup::AddNetworkPopup;
+use crate::audio_control::imp::AudioControl;
 use crate::confirm_display_settings_popup::ConfirmDisplaySettingsPopup;
 use crate::connection_config::ConnectionConfig;
 use crate::control_action::ControlAction;
@@ -24,6 +26,7 @@ mod imp {
     #[derive(Debug, Default)]
     pub struct ControlPanelGuiApplication {
         pub data_provider: Rc<RefCell<DataProvider>>,
+        pub audio_control: RefCell<AudioControl>,
     }
 
     #[glib::object_subclass]
@@ -138,6 +141,9 @@ impl ControlPanelGuiApplication {
             .set_service_address(address, port);
         app.imp().data_provider.borrow().set_tls_info(tls_info);
 
+        //test dbus service
+        app.imp().audio_control.borrow().fetch_audio_devices();
+
         app
     }
 
@@ -222,8 +228,12 @@ impl ControlPanelGuiApplication {
         self.imp().data_provider.borrow().reconnect(None);
     }
 
-    pub fn get_store(&self) -> gio::ListStore {
+    pub fn get_store(&self) -> ListStore {
         self.imp().data_provider.borrow().get_store()
+    }
+
+    pub fn get_audio_devices(&self) -> ListStore {
+        self.imp().audio_control.borrow().get_devices_list()
     }
 
     pub fn control_service(&self, action: ControlAction, name: String) {

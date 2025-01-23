@@ -224,4 +224,6 @@ impl Settings {
     pub fn restore_default_display_settings(&self) {
         self.imp().display_settings_page.restore_default();
     }
+
+    pub fn set_audio_devices(&self) {}
 }

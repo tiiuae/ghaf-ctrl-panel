@@ -1,6 +1,8 @@
 mod add_network_popup;
 mod admin_settings_page;
 mod application;
+mod audio_control;
+mod audio_device_gobject;
 mod audio_settings;
 mod bug_report_settings_page;
 mod confirm_display_settings_popup;
@@ -25,6 +27,7 @@ mod settings;
 mod settings_action;
 mod settings_gobject;
 mod trust_level;
+mod typed_list_store;
 mod vm_row;
 mod wifi_settings_page;
 mod window;

@@ -1,14 +1,12 @@
 use std::cell::RefCell;
-use std::ops::{Deref, DerefMut};
+use std::ops::Deref;
 use std::process::Command;
 use std::rc::Rc;
-use std::sync::Arc;
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
 use gio::ListStore;
-use glib::Object;
-use gtk::{self, gio, glib, prelude::*};
+use gtk::{self, gio, glib};
 
 use async_channel::Sender;
 use givc_client::endpoint::TlsConfig;
@@ -19,15 +17,13 @@ use tokio::runtime::Builder;
 
 use crate::data_gobject::DataGObject;
 use crate::service_gobject::ServiceGObject;
+use crate::typed_list_store::imp::TypedListStore;
 //use crate::settings_gobject::SettingsGObject;//will be in use in the future
 
 use crate::{ADMIN_SERVICE_ADDR, ADMIN_SERVICE_PORT};
 
 pub mod imp {
     use super::*;
-
-    #[derive(Debug, Clone)]
-    pub struct TypedListStore<T: IsA<Object>>(ListStore, std::marker::PhantomData<T>);
 
     pub struct LanguageRegionEntry {
         pub code: String,
@@ -54,41 +50,6 @@ pub mod imp {
         pub current_timezone: Option<String>,
         pub languages: Vec<LanguageRegionEntry>,
         pub current_language: Option<String>,
-    }
-
-    impl<T: IsA<Object>> TypedListStore<T> {
-        pub fn new() -> Self {
-            Self(ListStore::new::<T>(), std::marker::PhantomData)
-        }
-
-        pub fn get(&self, index: u32) -> Option<T> {
-            self.item(index).and_then(|item| item.downcast().ok())
-        }
-
-        pub fn iter(&self) -> impl Iterator<Item = T> {
-            let s = self.clone();
-            (0..).map_while(move |idx| s.get(idx))
-        }
-    }
-
-    impl<T: IsA<Object>, L: IsA<ListStore>> From<L> for TypedListStore<T> {
-        fn from(store: L) -> Self {
-            Self(store.upcast(), std::marker::PhantomData)
-        }
-    }
-
-    impl<T: IsA<Object>> Deref for TypedListStore<T> {
-        type Target = ListStore;
-
-        fn deref(&self) -> &Self::Target {
-            &self.0
-        }
-    }
-
-    impl<T: IsA<Object>> DerefMut for TypedListStore<T> {
-        fn deref_mut(&mut self) -> &mut Self::Target {
-            &mut self.0
-        }
     }
 
     type Task = Box<
@@ -512,7 +473,6 @@ pub mod imp {
         }
 
         fn get_current_timezone() -> Result<String, Box<dyn std::error::Error>> {
-            use std::path::{Component::*, Path, PathBuf};
             let p = Self::path_join("/etc", std::fs::read_link("/etc/localtime")?);
             p.strip_prefix("/etc/zoneinfo")?
                 .to_str()

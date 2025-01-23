@@ -5,7 +5,6 @@ use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{gio, glib, Button, CompositeTemplate, Label};
 use std::cell::RefCell;
-use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
 
