@@ -595,6 +595,18 @@ entry>text {
   color: #FFFFFF;
 }
 
+/*Textview*/
+
+textview.description-active{
+  background-color: #353535;
+  color: #FFFFFF;
+}
+
+textview.description-deactive{
+  background-color: #353535;
+  color: #9f9f9f;
+}
+
 /*Tab widget (GtkNotebook)*/
 .tab-widget {
   background-color: #2B2B2B;

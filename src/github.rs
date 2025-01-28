@@ -19,7 +19,7 @@ pub struct GithubConfig {
 
 pub static CONFIG: OnceLock<GithubConfig> = OnceLock::new();
 
-pub fn load_config() -> Result<GithubConfig, String> {
+pub fn get_config_path() -> String {
     let variable_name = "GITHUB_CONFIG";
     let variable = env::var(variable_name);
     let path = match variable {
@@ -29,30 +29,41 @@ pub fn load_config() -> Result<GithubConfig, String> {
             "/home/ghaf/.config/ctrl-panel/config.toml"
         }
     };
+    path.to_string()
+}
+
+pub fn load_config() -> Result<GithubConfig, String> {
+    let path = get_config_path();
 
     let config = match config::Config::builder()
         .add_source(config::File::from(PathBuf::from(path)))
         .build()
     {
         Ok(c) => c,
-        Err(e) => return Err("Failed to load config".to_string()),
+        Err(_e) => return Err("Failed to load config".to_string()),
     };
 
     let result = match config.try_deserialize::<GithubConfig>() {
         Ok(r) => r,
-        Err(e) => return Err("Failed to parse config".to_string()),
+        Err(_e) => return Err("Failed to parse config".to_string()),
     };
 
     Ok(result)
 }
 
-pub async fn create_github_issue(
-    content: &str,
-) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let conf = match load_config() {
+pub fn set_config() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let _ = match load_config() {
         Ok(c) => CONFIG.set(c),
         Err(e) => return Err(e.into()),
     };
+    Ok(())
+}
+
+pub async fn create_github_issue(
+    title: &str,
+    content: &str,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let _ = set_config();
 
     let settings = CONFIG.get().unwrap();
 
@@ -103,7 +114,7 @@ pub async fn create_github_issue(
 
     octocrab
         .issues(&settings.owner, &settings.repo)
-        .create("New Bug Report")
+        .create(title)
         .body(&final_body)
         .send()
         .await?;
