@@ -315,6 +315,9 @@ impl DisplaySettingsPage {
                     let stdout = String::from_utf8_lossy(&output.stdout);
                     println!("wlr-randr scale output: {}", stdout);
 
+                    //now it is not needed, the task SSRCSP-6073 is closed
+                    //self.reload_taskbar();
+
                     result = true;
                 } else {
                     let stderr = String::from_utf8_lossy(&output.stderr);
@@ -326,6 +329,32 @@ impl DisplaySettingsPage {
             }
         }
         result
+    }
+
+    //can be used if SSRCSP-6073 is opened again
+    pub fn reload_taskbar(&self) {
+        let output = Command::new("systemctl")
+            .arg("--user")
+            .arg("reload")
+            .arg("ewwbar")
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output();
+
+        match output {
+            Ok(output) => {
+                if output.status.success() {
+                    let stdout = String::from_utf8_lossy(&output.stdout);
+                    println!("Taskbar has been reloaded: {}", stdout);
+                } else {
+                    let stderr = String::from_utf8_lossy(&output.stderr);
+                    eprintln!("Taskbar reloading error: {}", stderr);
+                }
+            }
+            Err(e) => {
+                eprintln!("Failed to execute taskbar reloading: {}", e);
+            }
+        }
     }
 }
 
