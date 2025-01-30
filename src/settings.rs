@@ -225,5 +225,7 @@ impl Settings {
         self.imp().display_settings_page.restore_default();
     }
 
-    pub fn set_audio_devices(&self) {}
+    pub fn set_audio_devices(&self, devices: ListStore) {
+        self.imp().audio_settings_page.set_audio_devices(devices);
+    }
 }

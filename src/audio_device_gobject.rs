@@ -57,7 +57,7 @@ pub mod imp {
 
     #[derive(Default)]
     pub struct AudioDeviceData {
-        id: i32,
+        pub id: i32,
         pub dev_type: i32,
         pub name: String,
         pub volume: i32,
@@ -67,7 +67,7 @@ pub mod imp {
     #[derive(Default, Properties)]
     #[properties(wrapper_type = super::AudioDeviceGObject)]
     pub struct AudioDeviceGObject {
-        #[property(name = "id", get, type = i32, member = id)]
+        #[property(name = "id", get, set, type = i32, member = id)]
         #[property(name = "dev-type", get, set, type = i32, member = dev_type)]
         #[property(name = "name", get, set, type = String, member = name)]
         #[property(name = "volume", get, set, type = i32, member = volume)]

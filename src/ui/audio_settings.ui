@@ -56,19 +56,19 @@
     <child>
       <object class="GtkDropDown" id="mic_switch">
       <style><class name="dropdown-button"/></style>
-      <signal name="notify::selected" handler="on_mic_changed" swapped="true"/>
+      <!--<signal name="notify::selected" handler="on_mic_changed" swapped="true"/>-->
       <property name="halign">start</property>
       <property name="valign">center</property>
       <property name="width-request">220</property>
       <property name="height-request">30</property>
-      <property name="model">
+      <!--<property name="model">
         <object class="GtkStringList">
           <items>
             <item translatable="yes">Mic1</item>
             <item translatable="yes">Mic2</item>
           </items>
         </object>
-      </property>
+      </property>-->
       </object>
     </child>
     <child>
@@ -102,19 +102,19 @@
     <child>
       <object class="GtkDropDown" id="speaker_switch">
       <style><class name="dropdown-button"/></style>
-      <signal name="notify::selected" handler="on_speaker_changed" swapped="true"/>
+     <!--<signal name="notify::selected" handler="on_speaker_changed" swapped="true"/>-->
       <property name="halign">start</property>
       <property name="valign">center</property>
       <property name="width-request">220</property>
       <property name="height-request">30</property>
-      <property name="model">
+      <!--<property name="model">
         <object class="GtkStringList">
           <items>
             <item translatable="yes">Speaker1</item>
             <item translatable="yes">Speaker2</item>
           </items>
         </object>
-      </property>
+      </property>-->
       </object>
     </child>
     <child>

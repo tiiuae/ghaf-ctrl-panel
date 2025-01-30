@@ -406,6 +406,16 @@ box.info-box {
   color: #FFFFFF;
 }
 
+.dropdown-button>popover>contents>*>*>*>row>label {
+  color: #FFFFFF;
+}
+
+.dropdown-label {
+  color:#FFFFFF;
+  margin: 0;
+  padding: 0;
+}
+
 /*Scale slider styling*/
 scale {
   background-color: transparent;

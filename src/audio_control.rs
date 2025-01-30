@@ -6,20 +6,27 @@ use std::thread;
 use tokio::runtime::Runtime;
 use zbus::{Connection, Proxy};
 
+use crate::audio_device_gobject::imp::AudioDeviceType;
 use crate::audio_device_gobject::AudioDeviceGObject;
 use crate::typed_list_store::imp::TypedListStore;
 
 pub mod imp {
     use super::*;
 
-    #[derive(Debug, Default)]
+    #[derive(Debug)]
     pub struct AudioControl {
         pub devices: TypedListStore<AudioDeviceGObject>,
     }
 
+    impl Default for AudioControl {
+        fn default() -> Self {
+            Self::new()
+        }
+    }
+
     impl AudioControl {
         pub fn new() -> Self {
-            let init_list = Self::fill_by_mock_data();
+            let init_list = Self::fill_by_mock_data(); //ListStore::new::<AudioDeviceGObject>();
 
             Self {
                 devices: init_list.into(),
@@ -28,7 +35,38 @@ pub mod imp {
 
         fn fill_by_mock_data() -> ListStore {
             let init_store = ListStore::new::<AudioDeviceGObject>();
-            /*Mock data?*/
+            let vec = vec![
+                AudioDeviceGObject::new(
+                    1,
+                    AudioDeviceType::Sink as i32,
+                    "Speakers".to_string(),
+                    75,
+                    false,
+                ),
+                AudioDeviceGObject::new(
+                    2,
+                    AudioDeviceType::Sink as i32,
+                    "Headphones".to_string(),
+                    50,
+                    false,
+                ),
+                AudioDeviceGObject::new(
+                    3,
+                    AudioDeviceType::SinkInput as i32,
+                    "Microphone".to_string(),
+                    100,
+                    false,
+                ),
+                AudioDeviceGObject::new(
+                    4,
+                    AudioDeviceType::SinkInput as i32,
+                    "External Mic".to_string(),
+                    85,
+                    true,
+                ),
+            ];
+
+            init_store.extend_from_slice(&vec);
             init_store
         }
 

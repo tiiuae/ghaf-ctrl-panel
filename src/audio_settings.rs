@@ -1,15 +1,29 @@
 use dbus::blocking::{Connection, Proxy};
+use gio::ListStore;
 use glib::subclass::Signal;
-use glib::{Binding, Properties};
+use glib::{Binding, Object, Properties};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, Box, CompositeTemplate, DropDown, Scale};
+use gtk::{
+    gio, glib, Box, CompositeTemplate, CustomFilter, DropDown, FilterListModel, Label, ListItem,
+    Scale, SignalListItemFactory, SingleSelection,
+};
+use imp::AudioDeviceUserType;
 use std::cell::RefCell;
 use std::sync::OnceLock;
 use std::time::Duration;
 
+use crate::audio_device_gobject::imp::AudioDeviceType;
+use crate::audio_device_gobject::AudioDeviceGObject;
+
 mod imp {
     use super::*;
+
+    #[derive(PartialEq)]
+    pub enum AudioDeviceUserType {
+        Mic = 0,
+        Speaker = 1,
+    }
 
     #[derive(Default, CompositeTemplate, Properties)]
     #[properties(wrapper_type = super::AudioSettings)]
@@ -109,9 +123,6 @@ mod imp {
             obj.bind_property("footer-visible", &self.footer.get(), "visible")
                 .flags(glib::BindingFlags::DEFAULT)
                 .build();
-
-            //and get devices
-            obj.get_audio_devices();
         }
 
         fn signals() -> &'static [Signal] {
@@ -165,8 +176,203 @@ impl AudioSettings {
         glib::Object::builder().build()
     }
 
-    pub fn get_audio_devices(&self) {
-        //call AudioControl's method
+    pub fn set_audio_devices(&self, devices: ListStore) {
+        //setup factory
+        self.setup_factory(AudioDeviceUserType::Mic);
+        self.setup_factory(AudioDeviceUserType::Speaker);
+
+        //Create filter: outputs
+        let outputs_filter = CustomFilter::new(|item: &Object| {
+            if let Some(obj) = item.downcast_ref::<AudioDeviceGObject>() {
+                return (obj.dev_type() == AudioDeviceType::Sink as i32)
+                    || (obj.dev_type() == AudioDeviceType::SourceOutput as i32);
+            }
+            false
+        });
+
+        //Create filter: inputs
+        let inputs_filter = CustomFilter::new(|item: &Object| {
+            if let Some(obj) = item.downcast_ref::<AudioDeviceGObject>() {
+                return (obj.dev_type() == AudioDeviceType::Source as i32)
+                    || (obj.dev_type() == AudioDeviceType::SinkInput as i32);
+            }
+            false
+        });
+
+        let count = devices.n_items();
+        println!("Devices came to audio settings: {count}");
+
+        //setup model for outputs
+        let output_filter_model =
+            FilterListModel::new(Some(devices.clone()), Some(outputs_filter));
+        let output_model = SingleSelection::new(Some(output_filter_model));
+
+        //setup model for inputs
+        let input_filter_model = FilterListModel::new(Some(devices), Some(inputs_filter));
+        let input_model = SingleSelection::new(Some(input_filter_model));
+
+        output_model.connect_selection_changed(
+            glib::clone!(@strong self as widget => move |selection_model, _, _| {
+                if let Some(selected_item) = selection_model.selected_item() {
+                    println!("Selected: {}", selection_model.selected());
+                    if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
+                        widget.imp().speaker_volume.set_value(obj.volume() as f64);
+                    }
+                } else {
+                    println!("No item selected");
+                }
+            }),
+        );
+        output_model.connect_items_changed(
+            glib::clone!(@strong self as widget => move |selection_model, position, removed, added| {
+                println!("Items changed at position {}, removed: {}, added: {}", position, removed, added);
+                if let Some(selected_item) = selection_model.selected_item() {
+                    if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
+                        widget.imp().speaker_volume.set_value(obj.volume() as f64);
+                    }
+                } else {
+                    println!("No item selected");
+                }
+            })
+        );
+        input_model.connect_selection_changed(
+            glib::clone!(@strong self as widget => move |selection_model, _, _| {
+                if let Some(selected_item) = selection_model.selected_item() {
+                    println!("Selected: {}", selection_model.selected());
+                    if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
+                        widget.imp().mic_volume.set_value(obj.volume() as f64);
+                    }
+                } else {
+                    println!("No item selected");
+                }
+            }),
+        );
+        input_model.connect_items_changed(
+            glib::clone!(@strong self as widget => move |selection_model, position, removed, added| {
+                println!("Items changed at position {}, removed: {}, added: {}", position, removed, added);
+                if let Some(selected_item) = selection_model.selected_item() {
+                    if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
+                        widget.imp().mic_volume.set_value(obj.volume() as f64);
+                    }
+                } else {
+                    println!("No item selected");
+                }
+            })
+        );
+        self.imp().speaker_switch.set_model(Some(&output_model));
+        self.imp().mic_switch.set_model(Some(&input_model));
+
+        //set default selection
+        input_model.selection_changed(0u32, input_model.n_items());
+        output_model.selection_changed(0u32, output_model.n_items());
+    }
+
+    pub fn setup_factory(&self, user_type: AudioDeviceUserType) {
+        let (switch, volume) = if user_type == AudioDeviceUserType::Speaker {
+            (
+                self.imp().speaker_switch.get(),
+                self.imp().speaker_volume.get(),
+            )
+        } else {
+            (self.imp().mic_switch.get(), self.imp().mic_volume.get())
+        };
+        //setup factory
+        let factory = SignalListItemFactory::new();
+
+        factory.connect_setup(move |_, list_item| {
+            // Create `Label`
+            let label = Label::new(None);
+            label.set_property("halign", gtk::Align::Start);
+            //label.add_css_class("dropdown-label");
+            list_item
+                .downcast_ref::<ListItem>()
+                .expect("Needs to be ListItem")
+                .set_child(Some(&label));
+        });
+
+        // Tell factory how to bind `Label` to a `AudioDeviceGObject`
+        factory.connect_bind(move |_, list_item| {
+            // Get `AudioDeviceGObject` from `ListItem`
+            let object = list_item
+                .downcast_ref::<ListItem>()
+                .expect("Needs to be ListItem")
+                .item()
+                .and_downcast::<AudioDeviceGObject>()
+                .expect("The item has to be an `AudioDeviceGObject`.");
+
+            // Get `Label` from `ListItem`
+            let label = list_item
+                .downcast_ref::<ListItem>()
+                .expect("Needs to be ListItem")
+                .child()
+                .and_downcast::<Label>()
+                .expect("The child has to be a `Label`.");
+
+            label.set_label(&object.name());
+            volume.set_value(object.volume() as f64);
+        });
+
+        factory.connect_unbind(move |_, list_item| {
+            // Get `Label` from `ListItem`
+            let label = list_item
+                .downcast_ref::<ListItem>()
+                .expect("Needs to be ListItem")
+                .child()
+                .and_downcast::<Label>()
+                .expect("The child has to be a `Label`.");
+
+            label.set_label("");
+        });
+
+        switch.set_factory(Some(&factory));
+    }
+
+    //attempt to keep default row, no success yet
+    pub fn setup_factory_2(&self, user_type: AudioDeviceUserType) {
+        // Select the correct dropdown and volume control
+        let (switch, volume) = if user_type == AudioDeviceUserType::Speaker {
+            (self.imp().speaker_switch.get(), self.imp().speaker_volume.get())
+        } else {
+            (self.imp().mic_switch.get(), self.imp().mic_volume.get())
+        };
+    
+        // Create the factory
+        let factory = SignalListItemFactory::new();
+    
+        // Setup: Keep the default row, do not replace it
+        factory.connect_setup(|_, _list_item| {});
+    
+        // Bind: Locate and update the correct label inside the row
+        let volume_clone = volume.clone();
+        factory.connect_bind(move |_, list_item| {
+            let list_item = list_item
+                .downcast_ref::<ListItem>()
+                .expect("Expected a ListItem");
+    
+            if let Some(device) = list_item.item().and_downcast::<AudioDeviceGObject>() {
+                if let Some(row) = list_item.child() {
+                    // Use the recursive function to find the label
+                    if let Some(label) = find_label(&row) {
+                        label.set_label(&device.name());
+                    }
+                }
+    
+                // Update the correct volume slider
+                volume_clone.set_value(device.volume() as f64);
+            }
+        });
+    
+        // Unbind: Clear the label when the item is removed
+        factory.connect_unbind(|_, list_item| {
+            if let Some(row) = list_item.child() {
+                if let Some(label) = find_label(&row) {
+                    label.set_label(""); // Clear text
+                }
+            }
+        });
+    
+        // Set the factory for the dropdown
+        switch.set_factory(Some(&factory));
     }
 
     pub fn open_advanced_settings_widget(&self) {
@@ -193,54 +399,22 @@ impl AudioSettings {
             Err(e) => eprintln!("Failed to send D-Bus message: {}", e),
         }
     }
+}
 
-    /*
-    pub fn bind(&self, vm_object: &ServiceGObject) {
-        let title = self.imp().title_label.get();
-        let subtitle = self.imp().subtitle_label.get();
-        let mut bindings = self.imp().bindings.borrow_mut();
-
-
-        let title_binding = vm_object
-            .bind_property("name", &title, "label")
-            //.bidirectional()
-            .sync_create()
-            .build();
-        // Save binding
-        bindings.push(title_binding);
-
-        let subtitle_binding = vm_object
-            .bind_property("details", &subtitle, "label")
-            .sync_create()
-            .build();
-        // Save binding
-        bindings.push(subtitle_binding);
-
-        // Bind `task_object.completed` to `task_row.content_label.attributes`
-        let content_label_binding = task_object
-            .bind_property("completed", &content_label, "attributes")
-            .sync_create()
-            .transform_to(|_, active| {
-                let attribute_list = AttrList::new();
-                if active {
-                    // If "active" is true, content of the label will be strikethrough
-                    let attribute = AttrInt::new_strikethrough(true);
-                    attribute_list.insert(attribute);
-                }
-                Some(attribute_list.to_value())
-            })
-            .build();
-        // Save binding
-        bindings.push(content_label_binding);
+// Recursive function to find the first Label inside a widget
+fn find_label(widget: &gtk::Widget) -> Option<gtk::Label> {
+    if let Some(label) = widget.downcast_ref::<gtk::Label>() {
+        println!("Label child found!");
+        return Some(label.clone());
     }
-    // ANCHOR_END: bind
 
-    // ANCHOR: unbind
-    pub fn unbind(&self) {
-        // Unbind all stored bindings
-        for binding in self.imp().bindings.borrow_mut().drain(..) {
-            binding.unbind();
+    for child in widget.first_child().into_iter() {
+        if let Some(found_label) = find_label(&child) {
+            println!("Label child found!");
+            return Some(found_label);
         }
     }
-    */
+
+    println!("No label child found");
+    None
 }
