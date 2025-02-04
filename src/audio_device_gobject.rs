@@ -1,5 +1,5 @@
 use glib::{
-    value::{FromValue, ToValue, Value},
+    value::{FromValue, Value},
     Type,
 };
 use gtk::glib::subclass::prelude::*;

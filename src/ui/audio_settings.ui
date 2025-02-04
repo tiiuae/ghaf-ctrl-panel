@@ -56,7 +56,7 @@
     <child>
       <object class="GtkDropDown" id="mic_switch">
       <style><class name="dropdown-button"/></style>
-      <!--<signal name="notify::selected" handler="on_mic_changed" swapped="true"/>-->
+      <signal name="notify::selected" handler="on_mic_changed" swapped="true"/>
       <property name="halign">start</property>
       <property name="valign">center</property>
       <property name="width-request">220</property>
@@ -89,6 +89,7 @@
         </object>
       </property>
       <property name="draw_value">true</property>
+      <property name="digits">0</property>
       </object>
     </child>
     <child>
@@ -102,7 +103,7 @@
     <child>
       <object class="GtkDropDown" id="speaker_switch">
       <style><class name="dropdown-button"/></style>
-     <!--<signal name="notify::selected" handler="on_speaker_changed" swapped="true"/>-->
+      <signal name="notify::selected" handler="on_speaker_changed" swapped="true"/>
       <property name="halign">start</property>
       <property name="valign">center</property>
       <property name="width-request">220</property>
@@ -135,6 +136,7 @@
         </object>
       </property>
       <property name="draw_value">true</property>
+      <property name="digits">0</property>
       </object>
     </child>
     <child>
