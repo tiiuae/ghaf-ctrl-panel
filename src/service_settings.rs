@@ -130,21 +130,31 @@ mod imp {
             self.popover_menu_2.popdown();
         }
         #[template_callback]
-        fn on_mic_changed(&self, value: u32) {
-            println!("Mic changed: {}", value);
+        fn on_mic_changed(&self, _value: i32) {
+            //println!("Mic changed: {}", value);
+            //+ new action: VM mic
         }
         #[template_callback]
-        fn on_speaker_changed(&self, value: u32) {
-            println!("Speaker changed: {}", value);
+        fn on_speaker_changed(&self, _value: i32) {
+            //println!("Speaker changed: {}", value);
+            //+ new action: VM speaker
         }
         #[template_callback]
-        fn on_mic_volume_changed(&self, value: f64) {
-            println!("Mic volume: {}", value);
+        fn on_mic_volume_changed(&self, _value: Variant) {
+            //println!("Mic volume: {}", value);
+            //+ new action: VM volume
         }
         #[template_callback]
-        fn on_speaker_volume_changed(&self, value: f64) {
-            println!("Speaker volume: {}", value);
-            //send message to client mod via channel in DataProvider
+        fn on_speaker_volume_changed(&self, _value: Variant) {
+            //println!("Speaker volume: {}", value);
+            //+ new action: VM volume
+        }
+        #[template_callback]
+        fn on_open_advanced_audio_settings(&self) {
+            let action = SettingsAction::OpenAdvancedAudioSettingsWidget;
+            let empty = Variant::from(None::<()>.as_ref());
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &empty]);
         }
     } //end #[gtk::template_callbacks]
 
@@ -167,10 +177,10 @@ mod imp {
                         .param_types([u32::static_type()])
                         .build(),
                     Signal::builder("vm-mic-volume-changed")
-                        .param_types([f64::static_type()])
+                        .param_types([u32::static_type()])
                         .build(),
                     Signal::builder("vm-speaker-volume-changed")
-                        .param_types([f64::static_type()])
+                        .param_types([u32::static_type()])
                         .build(),
                 ]
             })

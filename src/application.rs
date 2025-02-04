@@ -277,10 +277,32 @@ impl ControlPanelGuiApplication {
             SettingsAction::DateNTime => todo!(),
             SettingsAction::MouseSpeed => todo!(),
             SettingsAction::KeyboardLayout => todo!(),
-            SettingsAction::Speaker => todo!(),
-            SettingsAction::SpeakerVolume => todo!(),
-            SettingsAction::Mic => todo!(),
-            SettingsAction::MicVolume => todo!(),
+            SettingsAction::Speaker => {
+                let id = value.get::<i32>().unwrap();
+                println!("Speaker changed: {}", id);
+                self.imp().audio_control.borrow().set_default_device(id);
+            }
+            SettingsAction::SpeakerVolume => {
+                let vec = value.get::<Vec<i32>>().unwrap();
+                println!("Speaker volume: {}", vec[2]);
+                self.imp()
+                    .audio_control
+                    .borrow()
+                    .set_device_volume(vec[0], vec[1], vec[2]);
+            }
+            SettingsAction::Mic => {
+                let id = value.get::<i32>().unwrap();
+                println!("Mic changed: {}", id);
+                self.imp().audio_control.borrow().set_default_device(id);
+            }
+            SettingsAction::MicVolume => {
+                let vec = value.get::<Vec<i32>>().unwrap();
+                println!("Mic volume: {}", vec[2]);
+                self.imp()
+                    .audio_control
+                    .borrow()
+                    .set_device_volume(vec[0], vec[1], vec[2]);
+            }
             SettingsAction::ShowAddNetworkPopup => {
                 let app = self.clone();
                 let window = self.active_window().unwrap();
@@ -331,6 +353,12 @@ impl ControlPanelGuiApplication {
                     .data_provider
                     .borrow()
                     .start_app_in_vm(String::from("wireguard-gui"), vm);
+            }
+            SettingsAction::OpenAdvancedAudioSettingsWidget => {
+                self.imp()
+                    .audio_control
+                    .borrow()
+                    .open_advanced_settings_widget();
             }
         };
     }

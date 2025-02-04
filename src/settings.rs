@@ -131,6 +131,39 @@ mod imp {
             self.obj()
                 .emit_by_name::<()>("settings-action", &[&action, &message]);
         }
+        #[template_callback]
+        fn on_mic_changed(&self, value: i32) {
+            let action = SettingsAction::Mic;
+            let variant = value.to_variant(); //should be id!
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &variant]);
+        }
+        #[template_callback]
+        fn on_speaker_changed(&self, value: i32) {
+            let action = SettingsAction::Speaker;
+            let variant = value.to_variant();
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &variant]);
+        }
+        #[template_callback]
+        fn on_mic_volume_changed(&self, value: Variant) {
+            let action = SettingsAction::MicVolume;
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &value]);
+        }
+        #[template_callback]
+        fn on_speaker_volume_changed(&self, value: Variant) {
+            let action = SettingsAction::SpeakerVolume;
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &value]);
+        }
+        #[template_callback]
+        fn on_open_advanced_audio_settings(&self) {
+            let action = SettingsAction::OpenAdvancedAudioSettingsWidget;
+            let empty = Variant::from(None::<()>.as_ref());
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &empty]);
+        }
     } //end #[gtk::template_callbacks]
 
     impl ObjectImpl for Settings {

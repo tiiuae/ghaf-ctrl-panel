@@ -235,6 +235,7 @@
         <signal name="speaker-changed" handler="on_speaker_changed" swapped="true"/>
         <signal name="mic-volume-changed" handler="on_mic_volume_changed" swapped="true"/>
         <signal name="speaker-volume-changed" handler="on_speaker_volume_changed" swapped="true"/>
+        <signal name="open-advanced-audio-settings" handler="on_open_advanced_audio_settings" swapped="true"/>
         <property name="footer-visible">false</property>
         </object>
       </child>
