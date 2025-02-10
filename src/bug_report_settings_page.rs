@@ -170,7 +170,7 @@ mod imp {
 
         #[template_callback]
         fn on_description_changed(&self) {
-            const DEFAULT_TEXT: &'static str = "Enter your answer";
+            const DEFAULT_TEXT: &str = "Enter your answer";
             let desc = self.get_description_text();
             if desc.trim() == DEFAULT_TEXT {
                 self.description.remove_css_class("description-deactive");
@@ -293,7 +293,6 @@ mod imp {
                         self.summary.remove_css_class("success-text");
                         self.summary.add_css_class("required-text");
                         self.summary.set_visible(true);
-                        return;
                     }
                 }
             }
@@ -448,7 +447,7 @@ mod imp {
                 }
             }
 
-            return format!("{} {} {} {}", manufacturer, version, product, sku);
+            format!("{} {} {} {}", manufacturer, version, product, sku)
         }
 
         #[inline]

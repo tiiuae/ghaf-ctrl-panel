@@ -106,7 +106,7 @@ impl InfoSettingsPage {
             Some(model),
             Some(CustomFilter::new(|item: &Object| {
                 if let Some(obj) = item.downcast_ref::<ServiceGObject>() {
-                    if (obj.is_vm() && (obj.status() == (VMStatus::Running as u8))) {
+                    if obj.is_vm() && (obj.status() == (VMStatus::Running as u8)) {
                         return true;
                     }
                 }

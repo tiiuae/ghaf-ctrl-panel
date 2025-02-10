@@ -13,7 +13,6 @@ use crate::audio_settings::AudioSettings;
 use crate::control_action::ControlAction;
 use crate::security_icon::SecurityIcon;
 use crate::service_gobject::ServiceGObject;
-use crate::settings_action::SettingsAction;
 
 mod imp {
     use super::*;
@@ -86,7 +85,7 @@ mod imp {
         fn on_wireguard_button_clicked(&self) {
             println!("Wireguard GUI will be launched...");
             //which name: full service name or vm?
-            let vm = Variant::from(self.full_service_name.borrow().to_variant());
+            let vm = self.full_service_name.borrow().to_variant();
             self.obj()
                 .emit_by_name::<()>("settings-action", &[&SettingsAction::OpenWireGuard, &vm]);
         }

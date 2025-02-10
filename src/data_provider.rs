@@ -222,34 +222,34 @@ pub mod imp {
         }
 
         fn fill_by_mock_data() -> ListStore {
-            let init_store = ListStore::new::<ServiceGObject>();
-            let mut vec: Vec<ServiceGObject> = Vec::new();
-            vec.push(ServiceGObject::new(
-                "microvm@zathura-vm.service".to_string(),
-                String::from("This is the file.pdf and very very long description"),
-                VMStatus::Running,
-                TrustLevel::NotSecure,
-                ServiceType::VM,
-                None,
-            ));
-            vec.push(ServiceGObject::new(
-                "chrome@1.service".to_string(),
-                String::from("Google Chrome"),
-                VMStatus::Paused,
-                TrustLevel::Secure,
-                ServiceType::App,
-                Some(String::from("TestVM")),
-            ));
-            vec.push(ServiceGObject::new(
-                "appflowy@1.service".to_string(),
-                String::from("AppFlowy"),
-                VMStatus::Running,
-                TrustLevel::Secure,
-                ServiceType::Svc,
-                None,
-            ));
-            init_store.extend_from_slice(&vec);
-            init_store
+            [
+                ServiceGObject::new(
+                    "microvm@zathura-vm.service".to_string(),
+                    String::from("This is the file.pdf and very very long description"),
+                    VMStatus::Running,
+                    TrustLevel::NotSecure,
+                    ServiceType::VM,
+                    None,
+                ),
+                ServiceGObject::new(
+                    "chrome@1.service".to_string(),
+                    String::from("Google Chrome"),
+                    VMStatus::Paused,
+                    TrustLevel::Secure,
+                    ServiceType::App,
+                    Some(String::from("TestVM")),
+                ),
+                ServiceGObject::new(
+                    "appflowy@1.service".to_string(),
+                    String::from("AppFlowy"),
+                    VMStatus::Running,
+                    TrustLevel::Secure,
+                    ServiceType::Svc,
+                    None,
+                ),
+            ]
+            .into_iter()
+            .collect::<ListStore>()
         }
 
         pub fn get_store(&self) -> ListStore {

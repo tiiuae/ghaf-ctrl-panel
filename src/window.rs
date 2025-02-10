@@ -73,27 +73,19 @@ mod imp {
     impl ControlPanelGuiWindow {
         #[template_callback]
         fn switch_to_app_view(&self) {
-            if (self.stack.visible_child_name() != Some("services_view".into())) {
-                self.stack.set_visible_child_name("services_view");
-            }
+            self.stack.set_visible_child_name("services_view");
         }
         #[template_callback]
         fn switch_to_vm_view(&self) {
-            if (self.stack.visible_child_name() != Some("services_view".into())) {
-                self.stack.set_visible_child_name("services_view");
-            }
+            self.stack.set_visible_child_name("services_view");
         }
         #[template_callback]
         fn switch_to_services_view(&self) {
-            if (self.stack.visible_child_name() != Some("services_view".into())) {
-                self.stack.set_visible_child_name("services_view");
-            }
+            self.stack.set_visible_child_name("services_view");
         }
         #[template_callback]
         fn switch_to_settings_view(&self) {
-            if (self.stack.visible_child_name() != Some("settings_view".into())) {
-                self.stack.set_visible_child_name("settings_view");
-            }
+            self.stack.set_visible_child_name("settings_view");
         }
 
         #[template_callback]
@@ -217,7 +209,7 @@ impl ControlPanelGuiWindow {
                         let title = obj.name();
                         let subtitle = obj.details();
                         println!("Property {title}, {subtitle}");
-                        window.set_vm_details(&obj);
+                        window.set_vm_details(obj);
                     }
                 } else {
                     println!("No item selected");
@@ -229,7 +221,7 @@ impl ControlPanelGuiWindow {
                 println!("Items changed at position {}, removed: {}, added: {}", position, removed, added);
                 if let Some(selected_item) = selection_model.selected_item() {
                     if let Some(obj) = selected_item.downcast_ref::<ServiceGObject>() {
-                        window.set_vm_details(&obj);
+                        window.set_vm_details(obj);
                     }
                 } else {
                     println!("No item selected");
@@ -249,12 +241,7 @@ impl ControlPanelGuiWindow {
         let filter_model_clone_app = filter_model.clone();
         let selection_model_clone_app = selection_model.clone();
 
-        let count = self
-            .imp()
-            .services_list_view
-            .model()
-            .expect("no model!")
-            .n_items();
+        let count = selection_model.n_items();
 
         self.imp().vm_view_button.connect_toggled(move |button| {
             if button.is_active() {
@@ -285,9 +272,9 @@ impl ControlPanelGuiWindow {
 
     fn set_default_selection(selection_model: &SingleSelection, count: u32) {
         println!("Selection is about to change");
-        if (count <= 0) {
+        if count == 0 {
             return;
-        };
+        }
         selection_model.set_selected(0);
         selection_model.selection_changed(0u32, count);
     }
