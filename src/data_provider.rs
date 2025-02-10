@@ -298,16 +298,23 @@ pub mod imp {
             }
         }
 
-        async fn client_cmd_async(&self, task: Task) -> Result<(), String> {
+        fn client_cmd_async(
+            &self,
+            task: Task,
+        ) -> impl std::future::Future<Output = Result<(), String>> {
             let (res_tx, res_rx) = async_channel::bounded(1);
-            let Some(tr) = self.task_runner.borrow().as_ref().cloned() else {
-                return Err("Not connected to admin".into());
-            };
-            // On error res_tx is dropped and res_rx.recv() will fail below
-            let _ = tr.send((task, res_tx)).await;
-            match res_rx.recv().await {
-                Ok(res) => res,
-                Err(err) => Err(err.to_string()),
+            let tr = self.task_runner.borrow().as_ref().cloned();
+
+            async move {
+                let Some(tr) = tr else {
+                    return Err("Not connected to admin".into());
+                };
+                let _ = tr.send((task, res_tx)).await;
+                // On error res_tx is dropped and res_rx.recv() will fail below
+                match res_rx.recv().await {
+                    Ok(res) => res,
+                    Err(err) => Err(err.to_string()),
+                }
             }
         }
 
@@ -420,14 +427,18 @@ pub mod imp {
             println!("Update request");
         }
 
-        pub async fn set_locale(&self, locale: String) -> Result<(), String> {
+        pub fn set_locale(
+            &self,
+            locale: String,
+        ) -> impl std::future::Future<Output = Result<(), String>> {
             self.client_cmd_async(adminclient!(|client| client.set_locale(locale)))
-                .await
         }
 
-        pub async fn set_timezone(&self, timezone: String) -> Result<(), String> {
+        pub fn set_timezone(
+            &self,
+            timezone: String,
+        ) -> impl std::future::Future<Output = Result<(), String>> {
             self.client_cmd_async(adminclient!(|client| client.set_timezone(timezone)))
-                .await
         }
 
         pub fn add_network(&self, _name: String, _security: String, _password: String) {

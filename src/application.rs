@@ -258,16 +258,12 @@ impl ControlPanelGuiApplication {
                 popup.set_transient_for(self.active_window().as_ref());
                 popup.set_modal(true);
                 glib::spawn_future_local(async move {
-                    if let Err(err) = app.imp().data_provider.borrow().set_locale(locale).await {
+                    let fut = app.imp().data_provider.borrow().set_locale(locale);
+                    if let Err(err) = fut.await {
                         println!("Locale setting failed: {err}");
                     }
-                    if let Err(err) = app
-                        .imp()
-                        .data_provider
-                        .borrow()
-                        .set_timezone(timezone)
-                        .await
-                    {
+                    let fut = app.imp().data_provider.borrow().set_timezone(timezone);
+                    if let Err(err) = fut.await {
                         println!("Timezone setting failed: {err}");
                     }
 
