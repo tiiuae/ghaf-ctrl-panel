@@ -2,7 +2,7 @@ use gio::ListStore;
 use glib::subclass::Signal;
 use glib::{Binding, Object, Properties, Variant};
 use gtk::prelude::*;
-use gtk::subclass::{adjustment, prelude::*};
+use gtk::subclass::prelude::*;
 use gtk::{
     gio, glib, Box, CompositeTemplate, CustomFilter, DropDown, FilterListModel, Label, ListItem,
     Scale, SignalListItemFactory, SingleSelection,
@@ -245,7 +245,7 @@ impl AudioSettings {
         let input_model = SingleSelection::new(Some(input_filter_model));
         input_model.set_autoselect(false); //to select only on click, not on hover
 
-        /*/selection and items changed signals don't work automatically for some reason
+        /*/selection changed signal doesn't work automatically for some reason
         output_model.connect_selection_changed(
             glib::clone!(@strong self as widget => move |selection_model, _, _| {
                 if let Some(selected_item) = selection_model.selected_item() {
@@ -260,7 +260,7 @@ impl AudioSettings {
         );*/
         output_model.connect_items_changed(
             glib::clone!(@strong self as widget => move |selection_model, position, removed, added| {
-                println!("Items changed at position {}, removed: {}, added: {}", position, removed, added);
+                println!("Output model: Items changed at position {}, removed: {}, added: {}", position, removed, added);
                 if let Some(selected_item) = selection_model.selected_item() {
                     if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
                         widget.bind_speaker_volume_property(obj);
@@ -284,7 +284,7 @@ impl AudioSettings {
         );*/
         input_model.connect_items_changed(
             glib::clone!(@strong self as widget => move |selection_model, position, removed, added| {
-                println!("Items changed at position {}, removed: {}, added: {}", position, removed, added);
+                println!("Input model: Items changed at position {}, removed: {}, added: {}", position, removed, added);
                 if let Some(selected_item) = selection_model.selected_item() {
                     if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
                         widget.bind_mic_volume_property(obj);

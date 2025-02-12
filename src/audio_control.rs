@@ -229,7 +229,7 @@ pub mod imp {
                     "/org/ghaf/Audio",
                     "org.ghaf.Audio",
                 ))
-                .expect("AudioControl(set_default_device_): Failed to create proxy");
+                .expect("AudioControl(set_default_device): Failed to create proxy");
 
             Runtime::new().unwrap().block_on(async {
                 if let Err(e) = proxy.call_method("SetDefaultDevice", &(id)).await {
@@ -248,7 +248,7 @@ pub mod imp {
                     "/org/ghaf/Audio",
                     "org.ghaf.Audio",
                 ))
-                .expect("AudioControl(set_default_device_): Failed to create proxy");
+                .expect("AudioControl(open_advanced_settings_widget): Failed to create proxy");
 
             Runtime::new().unwrap().block_on(async {
                 if let Err(e) = proxy.call_method("Open", &()).await {
@@ -258,6 +258,34 @@ pub mod imp {
                     );
                 }
             });
+        }
+
+        pub fn unsubscribe_from_updates(&self) {
+            let proxy = Runtime::new()
+                .unwrap()
+                .block_on(Proxy::new(
+                    &self.connection,
+                    "org.ghaf.Audio",
+                    "/org/ghaf/Audio",
+                    "org.ghaf.Audio",
+                ))
+                .expect("AudioControl(unsubscribe_from_updates): Failed to create proxy");
+
+            Runtime::new().unwrap().block_on(async {
+                if let Err(e) = proxy
+                    .call_method("UnsubscribeFromDeviceUpdatedSignal", &())
+                    .await
+                {
+                    eprintln!("AudioControl: Failed to unsubscribe from updates: {}", e);
+                }
+            });
+        }
+    }
+
+    impl Drop for AudioControl {
+        fn drop(&mut self) {
+            println!("AudioControl: Unsubscribe from DeviceUpdatedSignal on dropping");
+            self.unsubscribe_from_updates();
         }
     }
 }
