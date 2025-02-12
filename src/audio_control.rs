@@ -126,7 +126,8 @@ pub mod imp {
             let devices = self.devices.clone();
             //local future
             glib::spawn_future_local(async move {
-                while let Ok((id, device_type, name, volume, is_muted, event)) = event_rx.recv().await
+                while let Ok((id, device_type, name, volume, is_muted, event)) =
+                    event_rx.recv().await
                 {
                     match event {
                         0 => {
@@ -142,21 +143,21 @@ pub mod imp {
                                 "AudioControl: Device added to the list - ID: {}, Type: {}, Name: {}, Volume: {}, Muted: {}",
                                 id, device_type, name, volume, is_muted
                             );
-                        },
+                        }
                         1 => {
                             // update
                             if let Some(obj) = devices.iter().find(|obj| obj.id() == id) {
                                 obj.update(device_type, name.clone(), volume, is_muted);
                                 println!("AudioControl: Device with ID {id} has been updated");
                             }
-                        },
+                        }
                         2 => {
                             // remove
                             if let Some(pos) = devices.iter().position(|obj| obj.id() == id) {
                                 devices.remove(pos as u32);
                                 println!("AudioControl: Device with ID {id} has been deleted");
                             }
-                        },
+                        }
                         _ => {
                             println!("AudioControl: No such event");
                         }

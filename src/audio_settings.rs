@@ -2,7 +2,7 @@ use gio::ListStore;
 use glib::subclass::Signal;
 use glib::{Binding, Object, Properties, Variant};
 use gtk::prelude::*;
-use gtk::subclass::prelude::*;
+use gtk::subclass::{adjustment, prelude::*};
 use gtk::{
     gio, glib, Box, CompositeTemplate, CustomFilter, DropDown, FilterListModel, Label, ListItem,
     Scale, SignalListItemFactory, SingleSelection,
@@ -43,8 +43,8 @@ mod imp {
         #[property(name = "footer-visible", get, set, type = bool)]
         footer_visible: RefCell<bool>,
 
-        // Vector holding the bindings to properties of `Object`
-        pub bindings: RefCell<Vec<Binding>>,
+        pub speaker_bindings: RefCell<Vec<Binding>>,
+        pub mic_bindings: RefCell<Vec<Binding>>,
     }
 
     #[glib::object_subclass]
@@ -76,8 +76,9 @@ mod imp {
                 if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
                     let id = obj.id();
                     self.obj().emit_by_name::<()>("mic-changed", &[&id]);
-                    // binding instead?
-                    self.mic_volume.set_value(obj.volume() as f64);
+
+                    // binding
+                    self.obj().bind_mic_volume_property(obj);
                 }
             }
         }
@@ -87,8 +88,9 @@ mod imp {
                 if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
                     let id = obj.id();
                     self.obj().emit_by_name::<()>("speaker-changed", &[&id]);
-                    // binding instead?
-                    self.speaker_volume.set_value(obj.volume() as f64);
+
+                    // binding
+                    self.obj().bind_speaker_volume_property(obj);
                 }
             }
         }
@@ -243,13 +245,13 @@ impl AudioSettings {
         let input_model = SingleSelection::new(Some(input_filter_model));
         input_model.set_autoselect(false); //to select only on click, not on hover
 
-        /*/selection signal doesn't work automatically for some reason
+        /*/selection and items changed signals don't work automatically for some reason
         output_model.connect_selection_changed(
             glib::clone!(@strong self as widget => move |selection_model, _, _| {
                 if let Some(selected_item) = selection_model.selected_item() {
                     println!("Selected: {}", selection_model.selected());
                     if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
-                        widget.imp().speaker_volume.set_value(obj.volume() as f64);
+                        bind_speaker_volume_property(obj);
                     }
                 } else {
                     println!("No item selected");
@@ -261,7 +263,7 @@ impl AudioSettings {
                 println!("Items changed at position {}, removed: {}, added: {}", position, removed, added);
                 if let Some(selected_item) = selection_model.selected_item() {
                     if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
-                        widget.imp().speaker_volume.set_value(obj.volume() as f64);
+                        widget.bind_speaker_volume_property(obj);
                     }
                 } else {
                     println!("No item selected");
@@ -273,7 +275,7 @@ impl AudioSettings {
                 if let Some(selected_item) = selection_model.selected_item() {
                     println!("Selected: {}", selection_model.selected());
                     if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
-                        widget.imp().mic_volume.set_value(obj.volume() as f64);
+                        bind_mic_volume_property(obj);
                     }
                 } else {
                     println!("No item selected");
@@ -285,18 +287,79 @@ impl AudioSettings {
                 println!("Items changed at position {}, removed: {}, added: {}", position, removed, added);
                 if let Some(selected_item) = selection_model.selected_item() {
                     if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
-                        widget.imp().mic_volume.set_value(obj.volume() as f64);
+                        widget.bind_mic_volume_property(obj);
                     }
                 } else {
                     println!("No item selected");
                 }
             })
         );
+
         self.imp().speaker_switch.set_model(Some(&output_model));
         self.imp().mic_switch.set_model(Some(&input_model));
 
-        input_model.selection_changed(0u32, input_model.n_items());
-        output_model.selection_changed(0u32, output_model.n_items());
+        //initial selection and binding
+        if (input_model.n_items() > 0) {
+            input_model.selection_changed(0u32, input_model.n_items());
+            if let Some(selected_item) = input_model.selected_item() {
+                if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
+                    self.bind_mic_volume_property(obj);
+                }
+            }
+        }
+
+        if (output_model.n_items() > 0) {
+            output_model.selection_changed(0u32, output_model.n_items());
+            if let Some(selected_item) = output_model.selected_item() {
+                if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
+                    self.bind_speaker_volume_property(obj);
+                }
+            }
+        }
+    }
+
+    pub fn bind_speaker_volume_property(&self, obj: &AudioDeviceGObject) {
+        let mut bindings = self.imp().speaker_bindings.borrow_mut();
+        let adjustment = self.imp().speaker_volume.get().adjustment();
+
+        for binding in bindings.drain(..) {
+            binding.unbind();
+        }
+
+        //volume binding
+        let volume_binding = obj
+            .bind_property("volume", &adjustment, "value")
+            .sync_create()
+            .transform_to(move |_, value: &glib::Value| {
+                let volume = value.get::<i32>().unwrap_or(0);
+                Some(glib::Value::from(volume as f64))
+            })
+            .build();
+        bindings.push(volume_binding);
+
+        //+mute binding
+    }
+
+    pub fn bind_mic_volume_property(&self, obj: &AudioDeviceGObject) {
+        let mut bindings = self.imp().mic_bindings.borrow_mut();
+        let adjustment = self.imp().mic_volume.adjustment();
+
+        for binding in bindings.drain(..) {
+            binding.unbind();
+        }
+
+        //volume binding
+        let volume_binding = obj
+            .bind_property("volume", &adjustment, "value")
+            .sync_create()
+            .transform_to(move |_, value: &glib::Value| {
+                let volume = value.get::<i32>().unwrap_or(0);
+                Some(glib::Value::from(volume as f64))
+            })
+            .build();
+        bindings.push(volume_binding);
+
+        //+mute binding
     }
 
     pub fn setup_factory(&self, user_type: AudioDeviceUserType) {
