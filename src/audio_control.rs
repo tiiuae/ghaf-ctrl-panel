@@ -146,14 +146,22 @@ pub mod imp {
                         }
                         1 => {
                             // update
-                            if let Some(obj) = devices.iter().find(|obj| obj.id() == id) {
+                            if let Some(obj) = devices
+                                .iter()
+                                //id and type as composite key
+                                .find(|obj| (obj.id() == id) && (obj.dev_type() == device_type))
+                            {
                                 obj.update(device_type, name.clone(), volume, is_muted);
                                 println!("AudioControl: Device with ID {id} has been updated");
                             }
                         }
                         2 => {
                             // remove
-                            if let Some(pos) = devices.iter().position(|obj| obj.id() == id) {
+                            if let Some(pos) = devices
+                                .iter()
+                                //id and type as composite key
+                                .position(|obj| (obj.id() == id) && (obj.dev_type() == device_type))
+                            {
                                 devices.remove(pos as u32);
                                 println!("AudioControl: Device with ID {id} has been deleted");
                             }
