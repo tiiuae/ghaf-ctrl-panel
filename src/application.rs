@@ -278,9 +278,9 @@ impl ControlPanelGuiApplication {
             SettingsAction::MouseSpeed => todo!(),
             SettingsAction::KeyboardLayout => todo!(),
             SettingsAction::Speaker => {
-                let id = value.get::<i32>().unwrap();
-                println!("Speaker changed: {}", id);
-                self.imp().audio_control.borrow().set_default_device(id);
+                let vec = value.get::<Vec<i32>>().unwrap();
+                println!("Speaker changed: {}", vec[0]);
+                self.imp().audio_control.borrow().set_default_device(vec[0], vec[1]);
             }
             SettingsAction::SpeakerVolume => {
                 let vec = value.get::<Vec<i32>>().unwrap();
@@ -291,9 +291,9 @@ impl ControlPanelGuiApplication {
                     .set_device_volume(vec[0], vec[1], vec[2]);
             }
             SettingsAction::Mic => {
-                let id = value.get::<i32>().unwrap();
-                println!("Mic changed: {}", id);
-                self.imp().audio_control.borrow().set_default_device(id);
+                let vec = value.get::<Vec<i32>>().unwrap();
+                println!("Mic changed: {}", vec[0]);
+                self.imp().audio_control.borrow().set_default_device(vec[0], vec[1]);
             }
             SettingsAction::MicVolume => {
                 let vec = value.get::<Vec<i32>>().unwrap();

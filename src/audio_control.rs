@@ -113,7 +113,11 @@ pub mod imp {
                                     id, device_type, name, volume, is_muted, is_default, event
                                 );
 
-                                let _ = event_tx.send((id, device_type, name, volume, is_muted, event)).await;
+                                if name.to_lowercase().contains("monitor") {
+                                    println!("AudioControl: Monitor ignored {}, {}, {}!", id, device_type, name);
+                                } else {
+                                    let _ = event_tx.send((id, device_type, name, volume, is_muted, event)).await;
+                                }
                             }
                             Err(e) => {
                                 eprintln!("AudioControl: Failed to parse signal: {}", e);
@@ -227,7 +231,7 @@ pub mod imp {
             });
         }
 
-        pub fn set_default_device(&self, id: i32) {
+        pub fn set_default_device(&self, id: i32, dev_type: i32) {
             //same connection, new proxy
             let proxy = Runtime::new()
                 .unwrap()
@@ -240,7 +244,7 @@ pub mod imp {
                 .expect("AudioControl(set_default_device): Failed to create proxy");
 
             Runtime::new().unwrap().block_on(async {
-                if let Err(e) = proxy.call_method("SetDefaultDevice", &(id)).await {
+                if let Err(e) = proxy.call_method("MakeDeviceDefault", &(id, dev_type)).await {
                     eprintln!("AudioControl: Failed to set default device: {}", e);
                 }
             });

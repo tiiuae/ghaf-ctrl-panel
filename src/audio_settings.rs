@@ -74,8 +74,9 @@ mod imp {
         fn on_mic_changed(&self) {
             if let Some(selected_item) = self.mic_switch.selected_item() {
                 if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
-                    let id = obj.id();
-                    self.obj().emit_by_name::<()>("mic-changed", &[&id]);
+                    let vec = vec![obj.id(), obj.dev_type()];
+                    let variant = vec.to_variant();
+                    self.obj().emit_by_name::<()>("mic-changed", &[&variant]);
 
                     // binding
                     self.obj().bind_mic_volume_property(obj);
@@ -86,8 +87,9 @@ mod imp {
         fn on_speaker_changed(&self) {
             if let Some(selected_item) = self.speaker_switch.selected_item() {
                 if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
-                    let id = obj.id();
-                    self.obj().emit_by_name::<()>("speaker-changed", &[&id]);
+                    let vec = vec![obj.id(), obj.dev_type()];
+                    let variant = vec.to_variant();
+                    self.obj().emit_by_name::<()>("speaker-changed", &[&variant]);
 
                     // binding
                     self.obj().bind_speaker_volume_property(obj);
@@ -164,10 +166,10 @@ mod imp {
             SIGNALS.get_or_init(|| {
                 vec![
                     Signal::builder("mic-changed")
-                        .param_types([i32::static_type()])
+                        .param_types([Variant::static_type()])
                         .build(),
                     Signal::builder("speaker-changed")
-                        .param_types([i32::static_type()])
+                        .param_types([Variant::static_type()])
                         .build(),
                     Signal::builder("mic-volume-changed")
                         .param_types([Variant::static_type()])

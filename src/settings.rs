@@ -132,18 +132,16 @@ mod imp {
                 .emit_by_name::<()>("settings-action", &[&action, &message]);
         }
         #[template_callback]
-        fn on_mic_changed(&self, value: i32) {
+        fn on_mic_changed(&self, value: Variant) {
             let action = SettingsAction::Mic;
-            let variant = value.to_variant(); //should be id!
             self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &variant]);
+                .emit_by_name::<()>("settings-action", &[&action, &value]);
         }
         #[template_callback]
-        fn on_speaker_changed(&self, value: i32) {
+        fn on_speaker_changed(&self, value: Variant) {
             let action = SettingsAction::Speaker;
-            let variant = value.to_variant();
             self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &variant]);
+                .emit_by_name::<()>("settings-action", &[&action, &value]);
         }
         #[template_callback]
         fn on_mic_volume_changed(&self, value: Variant) {
