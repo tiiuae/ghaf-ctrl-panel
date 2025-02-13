@@ -1,5 +1,5 @@
 use adw::subclass::prelude::*;
-use gio::ListStore;
+use gio::{ListModel, ListStore};
 use glib::Variant;
 use gtk::prelude::*;
 use gtk::CssProvider;
@@ -18,7 +18,9 @@ use crate::error_popup::ErrorPopup;
 use crate::language_region_notify_popup::LanguageRegionNotifyPopup;
 use crate::settings_action::SettingsAction;
 use crate::ControlPanelGuiWindow;
+use givc_client::client::StatsResponse;
 use givc_client::endpoint::TlsConfig;
+use givc_common::address::EndpointAddress;
 
 mod imp {
     use super::*;
@@ -48,7 +50,6 @@ mod imp {
         fn dispose(&self) {
             println!("App obj destroyed!");
             self.data_provider.borrow().disconnect();
-            drop(self.data_provider.borrow());
         }
     }
 
@@ -65,7 +66,7 @@ mod imp {
             let window = if let Some(window) = application.active_window() {
                 window
             } else {
-                let window = ControlPanelGuiWindow::new(&*application);
+                let window = ControlPanelGuiWindow::new(&application);
 
                 let win = window.clone();
                 glib::spawn_future_local(async move {
@@ -82,7 +83,11 @@ mod imp {
                             .find_map(|(idx, lang)| (lang.code == cur).then_some(idx))
                     });
                     win.set_locale_model(
-                        languages.into_iter().map(DataGObject::from).collect(),
+                        languages
+                            .into_iter()
+                            .map(DataGObject::from)
+                            .collect::<ListStore>()
+                            .upcast(),
                         index,
                     );
 
@@ -93,7 +98,11 @@ mod imp {
                             .find_map(|(idx, tz)| (tz.code == cur).then_some(idx))
                     });
                     win.set_timezone_model(
-                        timezones.into_iter().map(DataGObject::from).collect(),
+                        timezones
+                            .into_iter()
+                            .map(DataGObject::from)
+                            .collect::<ListStore>()
+                            .upcast(),
                         index,
                     );
                 });
@@ -125,7 +134,7 @@ impl ControlPanelGuiApplication {
     pub fn new(
         application_id: &str,
         flags: &gio::ApplicationFlags,
-        address: String,
+        addr: String,
         port: u16,
         tls_info: Option<(String, TlsConfig)>,
     ) -> Self {
@@ -138,7 +147,7 @@ impl ControlPanelGuiApplication {
         app.imp()
             .data_provider
             .borrow()
-            .set_service_address(address, port);
+            .set_service_address(EndpointAddress::Tcp { addr, port });
         app.imp().data_provider.borrow().set_tls_info(tls_info);
 
         //test dbus service
@@ -188,7 +197,10 @@ impl ControlPanelGuiApplication {
             .data_provider
             .borrow()
             .get_current_service_address();
-        let config = ConnectionConfig::new(address.0, address.1);
+        let EndpointAddress::Tcp { addr, port } = address else {
+            todo!()
+        };
+        let config = ConnectionConfig::new(addr, port);
         config.set_transient_for(Some(&window));
         config.set_modal(true);
 
@@ -196,7 +208,7 @@ impl ControlPanelGuiApplication {
 
         config.connect_local("new-config-applied", false, move |values| {
             //the value[0] is self
-            let addr = values[1].get::<String>().unwrap();
+            let addr = values[1].get().unwrap();
             let port = values[2].get::<u32>().unwrap();
             println!("New config applied: address {addr}, port {port}");
             app.imp()
@@ -228,12 +240,20 @@ impl ControlPanelGuiApplication {
         self.imp().data_provider.borrow().reconnect(None);
     }
 
-    pub fn get_store(&self) -> ListStore {
+    pub fn get_store(&self) -> ListModel {
         self.imp().data_provider.borrow().get_store()
     }
 
-    pub fn get_audio_devices(&self) -> ListStore {
-        self.imp().audio_control.borrow().get_devices_list()
+    pub fn get_audio_devices(&self) -> ListModel {
+        self.imp()
+            .audio_control
+            .borrow()
+            .get_devices_list()
+            .upcast()
+    }
+
+    pub async fn get_stats(&self, vm_name: String) -> Result<StatsResponse, String> {
+        self.imp().data_provider.borrow().get_stats(vm_name).await
     }
 
     pub fn control_service(&self, action: ControlAction, name: String) {
@@ -313,9 +333,9 @@ impl ControlPanelGuiApplication {
                 popup.set_modal(true);
                 popup.connect_local("new-network", false, move |values| {
                     //the value[0] is self
-                    let name = values[1].get::<String>().unwrap();
-                    let security = values[2].get::<String>().unwrap();
-                    let password = values[3].get::<String>().unwrap();
+                    let name = values[1].get().unwrap();
+                    let security = values[2].get().unwrap();
+                    let password = values[3].get().unwrap();
                     println!("New network: {name}, {security}, {password}");
                     app.imp()
                         .data_provider
@@ -374,7 +394,6 @@ impl ControlPanelGuiApplication {
 
     pub fn clean_n_quit(&self) {
         self.imp().data_provider.borrow().disconnect();
-        drop(self.imp().data_provider.borrow());
         self.quit();
     }
 }

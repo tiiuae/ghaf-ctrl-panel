@@ -1,6 +1,6 @@
 use glib::subclass::Signal;
 use glib::{Binding, Variant};
-use gtk::gio::ListStore;
+use gtk::gio::ListModel;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, ListBox, Stack};
@@ -221,20 +221,20 @@ impl Settings {
         glib::Object::builder().build()
     }
 
-    pub fn set_locale_model(&self, model: ListStore, selected: Option<usize>) {
+    pub fn set_locale_model(&self, model: ListModel, selected: Option<usize>) {
         self.imp()
             .language_region_settings_page
             .set_locale_model(model, selected)
     }
 
-    pub fn set_timezone_model(&self, model: ListStore, selected: Option<usize>) {
+    pub fn set_timezone_model(&self, model: ListModel, selected: Option<usize>) {
         self.imp()
             .language_region_settings_page
             .set_timezone_model(model, selected)
     }
 
-    pub fn set_vm_model(&self, model: ListStore) {
-        self.imp().info_settings_page.set_vm_model(model)
+    pub fn set_vm_model<M: IsA<ListModel>>(&self, model: M) {
+        self.imp().info_settings_page.set_vm_model(model.upcast())
     }
     pub fn init(&self) {
         let this = self.clone();
@@ -270,7 +270,7 @@ impl Settings {
         self.imp().display_settings_page.restore_default();
     }
 
-    pub fn set_audio_devices(&self, devices: ListStore) {
+    pub fn set_audio_devices(&self, devices: ListModel) {
         self.imp().audio_settings_page.set_audio_devices(devices);
     }
 }

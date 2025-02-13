@@ -1,11 +1,11 @@
 use glib::subclass::Signal;
-use glib::{Binding, Object};
-use gtk::gio::ListStore;
+use glib::Binding;
+use gtk::gio::ListModel;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{
-    glib, CompositeTemplate, CustomFilter, FilterListModel, ListItem, ListView, NoSelection,
-    ProgressBar, SignalListItemFactory,
+    glib, CompositeTemplate, FilterListModel, ListItem, ListView, NoSelection, ProgressBar,
+    SignalListItemFactory,
 };
 use std::cell::RefCell;
 use std::sync::OnceLock;
@@ -13,8 +13,8 @@ use std::sync::OnceLock;
 use crate::control_action::ControlAction;
 use crate::service_gobject::ServiceGObject;
 use crate::settings_gobject::SettingsGObject;
+use crate::typed_list_store::imp::TypedCustomFilter;
 use crate::vm_row::VMRow;
-use givc_common::query::VMStatus;
 
 mod imp {
     use super::*;
@@ -95,22 +95,17 @@ impl InfoSettingsPage {
         self.imp().network_bar.set_fraction(1.0);
     }
 
-    pub fn set_vm_model(&self, model: ListStore) {
+    pub fn set_vm_model(&self, model: ListModel) {
         self.setup_service_rows(model.clone());
         self.setup_factory();
     }
 
-    fn setup_service_rows(&self, model: ListStore) {
+    fn setup_service_rows(&self, model: ListModel) {
         //Set filter: only running VM's
         let filter_model = FilterListModel::new(
             Some(model),
-            Some(CustomFilter::new(|item: &Object| {
-                if let Some(obj) = item.downcast_ref::<ServiceGObject>() {
-                    if obj.is_vm() && (obj.status() == (VMStatus::Running as u8)) {
-                        return true;
-                    }
-                }
-                false
+            Some(TypedCustomFilter::new(|obj: &ServiceGObject| {
+                obj.is_vm() && obj.is_running()
             })),
         );
 

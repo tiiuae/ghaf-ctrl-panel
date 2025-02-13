@@ -109,4 +109,21 @@ impl ServiceGObject {
         //for demo
         //self.set_property("trust-level", query_result.trust_level as u8);
     }
+
+    pub fn is_running(&self) -> bool {
+        self.status() == VMStatus::Running as u8
+    }
+}
+
+impl From<QueryResult> for ServiceGObject {
+    fn from(r: QueryResult) -> Self {
+        Self::new(
+            r.name,
+            r.description,
+            r.status,
+            r.trust_level,
+            r.service_type,
+            r.vm_name,
+        )
+    }
 }

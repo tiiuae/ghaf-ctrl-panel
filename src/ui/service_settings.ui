@@ -239,6 +239,9 @@
         <property name="footer-visible">false</property>
         </object>
       </child>
+      <child>
+        <object class="MemorySettings" id="memory_settings_box"/>
+      </child>
   </template>
   <object class="GtkPopover" id="popover_menu">
   <property name="width-request">220</property>

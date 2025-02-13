@@ -1,11 +1,11 @@
-use gio::ListStore;
+use gio::ListModel;
 use glib::subclass::Signal;
 use glib::{Binding, Object, Properties, Variant};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{
-    gio, glib, Box, CompositeTemplate, CustomFilter, DropDown, FilterListModel, Label, ListItem,
-    Scale, SignalListItemFactory, SingleSelection,
+    gio, glib, Box, CompositeTemplate, DropDown, FilterListModel, Label, ListItem, Scale,
+    SignalListItemFactory, SingleSelection,
 };
 use imp::AudioDeviceUserType;
 use std::cell::RefCell;
@@ -13,6 +13,7 @@ use std::sync::OnceLock;
 
 use crate::audio_device_gobject::imp::AudioDeviceType;
 use crate::audio_device_gobject::AudioDeviceGObject;
+use crate::typed_list_store::imp::TypedCustomFilter;
 
 mod imp {
     use super::*;
@@ -214,25 +215,19 @@ impl AudioSettings {
         glib::Object::builder().build()
     }
 
-    pub fn set_audio_devices(&self, devices: ListStore) {
+    pub fn set_audio_devices(&self, devices: ListModel) {
         //setup factory
         self.setup_factory(AudioDeviceUserType::Mic);
         self.setup_factory(AudioDeviceUserType::Speaker);
 
         //Create filter: outputs
-        let outputs_filter = CustomFilter::new(|item: &Object| {
-            if let Some(obj) = item.downcast_ref::<AudioDeviceGObject>() {
-                return (obj.dev_type() == AudioDeviceType::Sink as i32); //only one for now
-            }
-            false
+        let outputs_filter = TypedCustomFilter::new(|obj: &AudioDeviceGObject| {
+            obj.dev_type() == AudioDeviceType::Sink as i32 //only one for now
         });
 
         //Create filter: inputs
-        let inputs_filter = CustomFilter::new(|item: &Object| {
-            if let Some(obj) = item.downcast_ref::<AudioDeviceGObject>() {
-                return (obj.dev_type() == AudioDeviceType::Source as i32); //only one for now
-            }
-            false
+        let inputs_filter = TypedCustomFilter::new(|obj: &AudioDeviceGObject| {
+            obj.dev_type() == AudioDeviceType::Source as i32 //only one for now
         });
 
         let count = devices.n_items();

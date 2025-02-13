@@ -1,5 +1,5 @@
 use glib::subclass::Signal;
-use glib::{Binding, Properties, Variant};
+use glib::{Binding, Properties, SourceId, Variant};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{
@@ -11,8 +11,11 @@ use std::sync::OnceLock;
 
 use crate::audio_settings::AudioSettings;
 use crate::control_action::ControlAction;
+use crate::data_provider::StatsResponse;
+use crate::memory_settings::MemorySettings;
 use crate::security_icon::SecurityIcon;
 use crate::service_gobject::ServiceGObject;
+use crate::settings_action::SettingsAction;
 
 mod imp {
     use super::*;
@@ -47,6 +50,8 @@ mod imp {
         pub wireguard_button: TemplateChild<Button>,
         #[template_child]
         pub audio_settings_box: TemplateChild<AudioSettings>,
+        #[template_child]
+        pub memory_settings_box: TemplateChild<MemorySettings>,
         #[template_child]
         pub control_label: TemplateChild<Label>,
         #[template_child]
@@ -221,6 +226,7 @@ impl ServiceSettings {
         let security_label = self.imp().security_label.get();
         let control_label = self.imp().control_label.get();
         let audio_settings_box = self.imp().audio_settings_box.get();
+        let memory_settings_box = self.imp().memory_settings_box.get();
         let mut bindings = self.imp().bindings.borrow_mut();
 
         //wireguard label/button
@@ -385,9 +391,21 @@ impl ServiceSettings {
             .sync_create()
             .build();
         bindings.push(audio_settings_visibilty_binding);
+
+        //hide memory settings for services and apps?
+        let memory_settings_visibilty_binding = object
+            .bind_property("is-vm", &memory_settings_box, "visible")
+            .sync_create()
+            .build();
+        bindings.push(memory_settings_visibilty_binding);
+    }
+
+    pub fn set_stats(&self, stats: &StatsResponse) {
+        self.imp().memory_settings_box.show_data(stats);
     }
 
     pub fn unbind(&self) {
+        self.imp().memory_settings_box.clear_data();
         // Unbind all stored bindings
         for binding in self.imp().bindings.borrow_mut().drain(..) {
             binding.unbind();
