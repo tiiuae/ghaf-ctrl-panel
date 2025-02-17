@@ -280,7 +280,10 @@ impl ControlPanelGuiApplication {
             SettingsAction::Speaker => {
                 let vec = value.get::<Vec<i32>>().unwrap();
                 println!("Speaker changed: {}", vec[0]);
-                self.imp().audio_control.borrow().set_default_device(vec[0], vec[1]);
+                self.imp()
+                    .audio_control
+                    .borrow()
+                    .set_default_device(vec[0], vec[1]);
             }
             SettingsAction::SpeakerVolume => {
                 let vec = value.get::<Vec<i32>>().unwrap();
@@ -293,7 +296,10 @@ impl ControlPanelGuiApplication {
             SettingsAction::Mic => {
                 let vec = value.get::<Vec<i32>>().unwrap();
                 println!("Mic changed: {}", vec[0]);
-                self.imp().audio_control.borrow().set_default_device(vec[0], vec[1]);
+                self.imp()
+                    .audio_control
+                    .borrow()
+                    .set_default_device(vec[0], vec[1]);
             }
             SettingsAction::MicVolume => {
                 let vec = value.get::<Vec<i32>>().unwrap();
@@ -349,10 +355,11 @@ impl ControlPanelGuiApplication {
             }
             SettingsAction::OpenWireGuard => {
                 let vm: String = value.get().unwrap();
-                self.imp()
-                    .data_provider
-                    .borrow()
-                    .start_app_in_vm(String::from("wireguard-gui"), vm);
+                self.imp().data_provider.borrow().start_app_in_vm(
+                    String::from("wireguard-gui"),
+                    vm,
+                    vec![],
+                );
             }
             SettingsAction::OpenAdvancedAudioSettingsWidget => {
                 self.imp()

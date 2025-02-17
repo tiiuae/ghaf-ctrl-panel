@@ -66,7 +66,6 @@ pub mod imp {
     #[derive(Debug)]
     pub struct DataProvider {
         store: TypedListStore<ServiceGObject>,
-        //settings: Arc<Mutex<SettingsGObject>>,//will be in use in the future
         pub status: bool,
         service_address: RefCell<(String, u16)>,
         tls_info: RefCell<Option<(String, TlsConfig)>>,
@@ -76,7 +75,9 @@ pub mod imp {
 
     macro_rules! adminclient {
         (|$cl:ident| $block:expr) => {
-            Box::new(move |$cl| Box::pin(async move { $block.await.map_err(|e| e.to_string()) }))
+            Box::new(move |$cl| {
+                Box::pin(async move { $block.await.map(|_response| ()).map_err(|e| e.to_string()) })
+            })
         };
     }
 
@@ -125,7 +126,7 @@ pub mod imp {
                                 result = admin_client.watch() => match result {
                                     Ok(result) => result,
                                     Err(e) => {
-                                        println!("Watch fall failed: {e}");
+                                        println!("Watch call failed: {e}");
                                         return;
                                     }
                                 },
@@ -330,28 +331,36 @@ pub mod imp {
         pub fn start_service(&self, name: String) {
             let store = self.store.clone();
             if let Some(obj) = store.iter().find(|obj| obj.name() == name) {
-                if obj.is_app() {
-                    let app_name = obj.display_name();
+                if obj.is_vm() {
+                    let name_clone = name.clone();
+                    self.client_cmd(adminclient!(|client| client.start_vm(name)), move |res| {
+                        match res {
+                            Ok(_) => println!("Start VM {name_clone} request sent"),
+                            Err(error) => {
+                                println!("Start VM {name_clone} request error {error}")
+                            }
+                        }
+                    });
+                //basicaly, there is no need to start app or service
+                } else if obj.is_app() {
+                    let app_name = obj.display_name(); //not sure
+                    let vm_name = obj.vm_name(); //if it is known
                     self.client_cmd(
-                        adminclient!(|client| client.start(
-                            app_name,
-                            None, /*Some(vm_name)*/
-                            vec![]
-                        )),
+                        adminclient!(|client| client.start_app(app_name, vm_name, vec![])),
                         |res| match res {
                             Ok(_) => println!("Start app request sent"),
                             Err(error) => println!("Start app request error {error}"),
                         },
                     );
                 } else {
-                    //another function for VMs and services?
                     let name_clone = name.clone();
+                    let vm_name = obj.vm_name(); //if it is known
                     self.client_cmd(
-                        adminclient!(|client| client.start(name, None, vec![])),
+                        adminclient!(|client| client.start_service(name, vm_name)),
                         move |res| match res {
-                            Ok(_) => println!("Start {name_clone} request sent"),
+                            Ok(_) => println!("Start service {name_clone} request sent"),
                             Err(error) => {
-                                println!("Start {name_clone} request error {error}")
+                                println!("Start service {name_clone} request error {error}")
                             }
                         },
                     );
@@ -359,11 +368,11 @@ pub mod imp {
             }
         }
 
-        pub fn start_app_in_vm(&self, app: String, vm: String) {
+        pub fn start_app_in_vm(&self, app: String, vm: String, args: Vec<String>) {
             let app_name = app.clone();
             let vm_name = vm.clone();
             self.client_cmd(
-                adminclient!(|client| client.start(app, Some(vm), vec![])),
+                adminclient!(|client| client.start_app(app, vm, args)),
                 move |res| match res {
                     Ok(_) => println!("Start app {app_name} in the VM {vm_name} request sent"),
                     Err(error) => {

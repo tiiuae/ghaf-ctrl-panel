@@ -244,7 +244,10 @@ pub mod imp {
                 .expect("AudioControl(set_default_device): Failed to create proxy");
 
             Runtime::new().unwrap().block_on(async {
-                if let Err(e) = proxy.call_method("MakeDeviceDefault", &(id, dev_type)).await {
+                if let Err(e) = proxy
+                    .call_method("MakeDeviceDefault", &(id, dev_type))
+                    .await
+                {
                     eprintln!("AudioControl: Failed to set default device: {}", e);
                 }
             });
