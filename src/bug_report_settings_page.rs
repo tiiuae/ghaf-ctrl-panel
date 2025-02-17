@@ -21,6 +21,7 @@ mod imp {
         pub issue: String,
         pub related: String,
         pub app: String,
+        pub description_empty: bool,
     }
 
     #[derive(Default, CompositeTemplate, Properties)]
@@ -42,11 +43,7 @@ mod imp {
         #[template_child]
         pub description_textbuffer: TemplateChild<TextBuffer>,
         #[template_child]
-        pub reporter: TemplateChild<Entry>,
-        #[template_child]
         pub ghaf_version: TemplateChild<Entry>,
-        #[template_child]
-        pub email: TemplateChild<Entry>,
         #[template_child]
         pub other_1: TemplateChild<CheckButton>,
         #[template_child]
@@ -64,11 +61,7 @@ mod imp {
         #[template_child]
         pub required_description: TemplateChild<Label>,
         #[template_child]
-        pub required_reporter: TemplateChild<Label>,
-        #[template_child]
         pub required_version: TemplateChild<Label>,
-        #[template_child]
-        pub required_email: TemplateChild<Label>,
         #[template_child]
         pub summary: TemplateChild<Label>,
 
@@ -77,6 +70,7 @@ mod imp {
         #[property(name = "issue", get, set, type = String, member = issue)]
         #[property(name = "related", get, set, type = String, member = related)]
         #[property(name = "app", get, set, type = String, member = app)]
+        #[property(name = "descriptionempty", get, set, type = bool, member = description_empty)]
         pub answers: RefCell<Answers>,
     }
 
@@ -104,6 +98,8 @@ mod imp {
                 self.other_1.set_active(true);
                 self.on_a1_toggled(&self.other_1);
             };
+            self.obj()
+                .set_property("issue", self.entry_1.text().to_string());
         }
 
         #[template_callback]
@@ -112,6 +108,8 @@ mod imp {
                 self.other_2.set_active(true);
                 self.on_a2_toggled(&self.other_2);
             };
+            self.obj()
+                .set_property("related", self.entry_2.text().to_string());
         }
 
         #[template_callback]
@@ -120,6 +118,8 @@ mod imp {
                 self.other_3.set_active(true);
                 self.on_a3_toggled(&self.other_3);
             };
+            self.obj()
+                .set_property("app", self.entry_3.text().to_string());
         }
 
         #[template_callback]
@@ -164,7 +164,9 @@ mod imp {
                 let label = button.label();
 
                 match label.as_deref() {
-                    None => println!("No App"),
+                    None => self
+                        .obj()
+                        .set_property("app", self.entry_3.text().to_string()),
                     Some(text) => self.obj().set_property("app", text.to_string()),
                 };
             }
@@ -178,6 +180,7 @@ mod imp {
                 self.description.remove_css_class("description-deactive");
                 self.description.add_css_class("description-active");
                 self.description_textbuffer.set_text("");
+                self.obj().set_property("descriptionempty", true);
             }
         }
 
@@ -186,10 +189,12 @@ mod imp {
             let mut enable = true;
             let mac_address_path = "/tmp/MACAddress";
             let title = self.title.text().to_string();
-            let description = self.get_description_text();
-            let version = self.reporter.text().to_string();
-            let reporter = self.ghaf_version.text().to_string();
-            let email = self.email.text().to_string();
+            let description = if self.obj().property::<bool>("descriptionempty") {
+                self.get_description_text()
+            } else {
+                String::new()
+            };
+            let version = self.ghaf_version.text().to_string();
 
             let time = Utc::now().to_string();
 
@@ -259,38 +264,16 @@ mod imp {
 
             if version.is_empty() {
                 enable = false;
-                self.required_reporter.set_visible(true);
-                eprintln!("Version is empty");
-            } else {
-                self.required_reporter.set_visible(false);
-            }
-
-            if reporter.is_empty() {
-                enable = false;
                 self.required_version.set_visible(true);
-                eprintln!("Reporter is empty");
+                eprintln!("Ghaf version is empty");
             } else {
                 self.required_version.set_visible(false);
-            }
-
-            if email.is_empty() {
-                enable = false;
-                self.required_email.set_visible(true);
-                eprintln!("Email is empty");
-            } else if !email.contains('@') {
-                enable = false;
-                self.required_email.set_visible(true);
-                eprintln!("Please enter a valid email");
-            } else {
-                self.required_email.set_visible(false);
             }
 
             if enable {
                 // Prepare email content with optional attachment
                 let mut email_body = format!("Time: {}\n\n", time);
                 email_body.push_str("Bug Report\n\n");
-                email_body.push_str(&format!("From: {}\n", reporter));
-                email_body.push_str(&format!("Email: {}\n", email));
                 email_body.push_str(&format!("MAC Address: {}\n", mac));
                 email_body.push_str(&format!("SW Version: {}\n", sw));
                 email_body.push_str(&format!("Issue: {}\n", issue));
