@@ -210,7 +210,7 @@
                         <child>
                           <object class="GtkCheckButton" id="other_2">
                             <property name="group">app</property>
-                            <signal name="toggled" handler="on_a1_toggled" swapped="yes"/>
+                            <signal name="toggled" handler="on_a2_toggled" swapped="yes"/>
                             <style>
                               <class name="normal-text"/>
                             </style>
@@ -488,7 +488,7 @@
                         <child>
                           <object class="GtkCheckButton" id="other_3">
                             <property name="group">a_3</property>
-                            <signal name="toggled" handler="on_a1_toggled" swapped="yes"/>
+                            <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
                             <style>
                               <class name="normal-text"/>
                             </style>
@@ -620,39 +620,6 @@
                     <child>
                       <object class="GtkLabel">
                         <property name="halign">start</property>
-                        <property name="label">Reporter name</property>
-                        <property name="margin-bottom">10</property>
-                        <style>
-                          <class name="normal-text"/>
-                        </style>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="reporter">
-                        <property name="hexpand">True</property>
-                        <property name="placeholder-text">Enter your answer</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="required_reporter">
-                        <property name="halign">start</property>
-                        <property name="label">The question is required.</property>
-                        <property name="margin-top">5</property>
-                        <property name="visible">False</property>
-                        <style>
-                          <class name="required-text"/>
-                        </style>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkBox">
-                    <property name="margin-top">15</property>
-                    <property name="orientation">vertical</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="halign">start</property>
                         <property name="label">Ghaf-version used</property>
                         <property name="margin-bottom">10</property>
                         <style>
@@ -671,38 +638,6 @@
                         <property name="halign">start</property>
                         <property name="label">The question is required.</property>
                         <property name="margin-top">5</property>
-                        <property name="visible">False</property>
-                        <style>
-                          <class name="required-text"/>
-                        </style>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkBox">
-                    <property name="margin-top">15</property>
-                    <property name="orientation">vertical</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="halign">start</property>
-                        <property name="label">Reporter email address</property>
-                        <property name="margin-bottom">10</property>
-                        <style>
-                          <class name="normal-text"/>
-                        </style>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="email">
-                        <property name="hexpand">True</property>
-                        <property name="placeholder-text">Please enter an email</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="required_email">
-                        <property name="halign">start</property>
-                        <property name="label">The question is required.</property>
                         <property name="visible">False</property>
                         <style>
                           <class name="required-text"/>

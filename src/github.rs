@@ -2,13 +2,16 @@
  * Based on https://github.com/vadika/rust-bugreporter
  */
 
-use base64::Engine;
-use chrono::Utc;
+use dialog::DialogBox;
+use http::header::ACCEPT;
 use octocrab::Octocrab;
+use secrecy::{ExposeSecret, SecretString};
 use serde::Deserialize;
-use std::env;
+use std::io::Write;
 use std::path::PathBuf;
-use std::sync::OnceLock;
+use std::sync::Mutex;
+use std::{env, time::Duration};
+use toml_edit::{value, DocumentMut};
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct GithubConfig {
@@ -17,7 +20,48 @@ pub struct GithubConfig {
     pub repo: String,
 }
 
-pub static CONFIG: OnceLock<GithubConfig> = OnceLock::new();
+pub static CONFIG: Mutex<GithubConfig> = Mutex::new(GithubConfig {
+    token: String::new(),
+    owner: String::new(),
+    repo: String::new(),
+});
+
+pub async fn auth() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let client_id = std::env::var("GITHUB_CLIENT_ID")?.to_string();
+    let secret_id = SecretString::from(client_id);
+    let timeout = Duration::from_secs(60);
+
+    let crab = octocrab::Octocrab::builder()
+        .base_uri("https://github.com")?
+        .add_header(ACCEPT, "application/json".to_string())
+        .build()?;
+
+    let codes = crab
+        .authenticate_as_device(&secret_id, ["public_repo"])
+        .await?;
+
+    // Set message box text
+    let message = format!(
+        "{}\n{}",
+        codes.verification_uri.clone(),
+        codes.user_code.clone()
+    );
+
+    let mut backend = dialog::backends::Zenity::new();
+    backend.set_width(250);
+    dialog::Message::new(message)
+        .title("Github Login")
+        .show_with(backend)
+        .expect("Could not display Github dialog box");
+
+    // Atuhentication with timeout
+    let auth = tokio::time::timeout(timeout, codes.poll_until_available(&crab, &secret_id))
+        .await?
+        .unwrap();
+    // Write key to config file
+    set_key(auth.access_token.expose_secret()).unwrap();
+    Ok(())
+}
 
 pub fn get_config_path() -> String {
     let variable_name = "GITHUB_CONFIG";
@@ -53,10 +97,15 @@ pub fn load_config() -> Result<GithubConfig, String> {
 
 pub fn set_config() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let _ = match load_config() {
-        Ok(c) => CONFIG.set(c),
+        Ok(c) => *CONFIG.lock().unwrap() = c,
         Err(e) => return Err(e.into()),
     };
     Ok(())
+}
+
+pub fn get_config() -> GithubConfig {
+    let config = CONFIG.lock().unwrap();
+    config.clone()
 }
 
 pub async fn create_github_issue(
@@ -65,59 +114,52 @@ pub async fn create_github_issue(
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let _ = set_config();
 
-    let settings = CONFIG.get().unwrap();
-
-    let octocrab = Octocrab::builder()
-        .personal_token(settings.token.clone())
-        .build()?;
+    let config = get_config().clone();
 
     let parts: Vec<&str> = content.split("\n\nAttachment:").collect();
-    let (issue_body, attachment_info) = (parts[0], parts.get(1));
+    let (issue_body, _attachment_info) = (parts[0], parts.get(1));
 
-    let mut final_body = issue_body.to_string();
-
-    if let Some(attachment_text) = attachment_info {
-        if let Some(base64_start) = attachment_text.find("Base64 Data:\n") {
-            let base64_data = &attachment_text[base64_start + 12..];
-            let image_data =
-                base64::engine::general_purpose::STANDARD.decode(base64_data.trim())?;
-
-            let timestamp = Utc::now().timestamp();
-            let filename = format!("screenshot_{}.png", timestamp);
-
-            let route = format!(
-                "/repos/{}/{}/contents/{}",
-                settings.owner, settings.repo, filename
-            );
-
-            let encoded_content = base64::engine::general_purpose::STANDARD.encode(&image_data);
-
-            let body = serde_json::json!({
-                "message": "Add screenshot for bug report",
-                "content": encoded_content
-            });
-
-            let response = octocrab._put(route, Some(&body)).await?;
-
-            if response.status().is_success() {
-                let bytes = hyper::body::to_bytes(response.into_body()).await?;
-                let file_info: serde_json::Value = serde_json::from_slice(&bytes)?;
-                if let Some(content) = file_info.get("content") {
-                    if let Some(download_url) = content.get("download_url").and_then(|u| u.as_str())
-                    {
-                        final_body.push_str(&format!("\n\n![Screenshot]({})", download_url));
-                    }
-                }
-            }
+    let issue_sent= send_issue(&config, title, issue_body);
+    match issue_sent.await
+    {
+        Ok(issue) => issue,
+        Err(_e) => {
+            auth().await?;
+            let _ = set_config();
+            let config = get_config().clone();
+            send_issue(&config, title, issue_body).await?
         }
-    }
+    };
 
+    Ok(())
+}
+
+#[inline]
+async fn send_issue(config: &GithubConfig, title: &str, body: &str) -> octocrab::Result<octocrab::models::issues::Issue>{
+    let octocrab = Octocrab::builder()
+        .personal_token(config.token.clone())
+        .build()?;
     octocrab
-        .issues(&settings.owner, &settings.repo)
+        .issues(&config.owner, &config.repo)
         .create(title)
-        .body(&final_body)
+        .body(body.to_string())
         .send()
-        .await?;
+        .await
+}
+
+#[inline]
+fn set_key(token: &str) -> Result<(), std::io::Error> {
+    let token_key = String::from("token");
+    let path = get_config_path();
+    let contents = std::fs::read_to_string(&path)?;
+    let mut doc = contents.parse::<DocumentMut>().unwrap();
+    doc[&token_key] = value(token);
+
+    let mut file = std::fs::OpenOptions::new()
+        .write(true)
+        .truncate(true)
+        .open(&path)?;
+    file.write(doc.to_string().as_bytes())?;
 
     Ok(())
 }
