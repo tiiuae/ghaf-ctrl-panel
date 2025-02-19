@@ -89,7 +89,8 @@ mod imp {
                 if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
                     let vec = vec![obj.id(), obj.dev_type()];
                     let variant = vec.to_variant();
-                    self.obj().emit_by_name::<()>("speaker-changed", &[&variant]);
+                    self.obj()
+                        .emit_by_name::<()>("speaker-changed", &[&variant]);
 
                     // binding
                     self.obj().bind_speaker_volume_property(obj);
