@@ -33,10 +33,39 @@
           <property name="margin-top">10</property>
           <property name="margin-bottom">10</property>
             <child>
+              <object class="GtkLabel" id="update_status_label">
+              <property name="label">No updates available</property>
+              <style><class name="normal-text"/></style>
+              <property name="halign">start</property>
+              <property name="margin-bottom">10</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox" id="update_content">
+              <style><class name="info-box"/></style>
+              <property name="visible">false</property>
+              <property name="halign">start</property>
+              <property name="margin-bottom">10</property>
+              <property name="spacing">10</property>
+              <property name="orientation">vertical</property>
+              <child>
+                <object class="GtkLabel" id="update_version_label">
+                <style><class name="normal-text"/></style>
+                <property name="halign">start</property>
+                </object>
+              </child>
+              <child>
+                 <object class="GtkLabel" id="update_size_label">
+                  <style><class name="normal-text"/></style>
+                  <property name="halign">start</property>
+                  </object>
+              </child>
+              </object>
+            </child>
+            <child>
               <object class="GtkButton">
               <signal name="clicked" handler="on_update_clicked" swapped="true"/>
               <style><class name="settings-button"/></style>
-                <property name="label">Update</property>
                 <property name="width-request">150</property>
                 <property name="height-request">30</property>
                 <property name="halign">start</property>
@@ -62,8 +91,8 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkLabel">
-                        <property name="label">Update</property>
+                      <object class="GtkLabel" id="update_button_label">
+                        <property name="label">Check for updates</property>
                         <property name="halign">center</property>
                       </object>
                     </child>

@@ -119,9 +119,8 @@ pub async fn create_github_issue(
     let parts: Vec<&str> = content.split("\n\nAttachment:").collect();
     let (issue_body, _attachment_info) = (parts[0], parts.get(1));
 
-    let issue_sent= send_issue(&config, title, issue_body);
-    match issue_sent.await
-    {
+    let issue_sent = send_issue(&config, title, issue_body);
+    match issue_sent.await {
         Ok(issue) => issue,
         Err(_e) => {
             auth().await?;
@@ -135,7 +134,11 @@ pub async fn create_github_issue(
 }
 
 #[inline]
-async fn send_issue(config: &GithubConfig, title: &str, body: &str) -> octocrab::Result<octocrab::models::issues::Issue>{
+async fn send_issue(
+    config: &GithubConfig,
+    title: &str,
+    body: &str,
+) -> octocrab::Result<octocrab::models::issues::Issue> {
     let octocrab = Octocrab::builder()
         .personal_token(config.token.clone())
         .build()?;

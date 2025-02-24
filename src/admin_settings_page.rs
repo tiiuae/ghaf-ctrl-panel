@@ -2,7 +2,7 @@ use glib::subclass::Signal;
 use glib::Binding;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Notebook};
+use gtk::{glib, Box, CompositeTemplate, Label, Notebook};
 use std::cell::RefCell;
 use std::sync::OnceLock;
 
@@ -16,6 +16,16 @@ mod imp {
     pub struct AdminSettingsPage {
         #[template_child]
         pub tab_widget: TemplateChild<Notebook>,
+        #[template_child]
+        pub update_content: TemplateChild<Box>,
+        #[template_child]
+        pub update_status_label: TemplateChild<Label>,
+        #[template_child]
+        pub update_version_label: TemplateChild<Label>,
+        #[template_child]
+        pub update_size_label: TemplateChild<Label>,
+        #[template_child]
+        pub update_button_label: TemplateChild<Label>,
 
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
@@ -43,6 +53,13 @@ mod imp {
         fn on_update_clicked(&self) {
             println!("Update clicked!");
             self.obj().emit_by_name::<()>("update-request", &[]);
+            //check for updates and get the result
+            //mock
+            self.update_status_label.set_label("Update available");
+            self.update_version_label.set_label("Version: 1.0.1");
+            self.update_size_label.set_label("Size: 100 Mb");
+            self.update_button_label.set_label("Update");
+            self.update_content.set_visible(true);
         }
     } //end #[gtk::template_callbacks]
 
