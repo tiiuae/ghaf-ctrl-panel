@@ -275,16 +275,6 @@
                     <property name="width-request">300</property>
                     <child>
                       <object class="GtkCheckButton" id="a_3">
-                        <property name="label">AppFlowy</property>
-                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
-                        <style>
-                          <class name="normal-text"/>
-                        </style>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkCheckButton">
-                        <property name="group">a_3</property>
                         <property name="label">Audio Control</property>
                         <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
                         <style>
@@ -315,7 +305,7 @@
                     <child>
                       <object class="GtkCheckButton">
                         <property name="group">a_3</property>
-                        <property name="label">Chromium</property>
+                        <property name="label">Control Panel</property>
                         <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
                         <style>
                           <class name="normal-text"/>
@@ -335,7 +325,7 @@
                     <child>
                       <object class="GtkCheckButton">
                         <property name="group">a_3</property>
-                        <property name="label">Control Panel</property>
+                        <property name="label">Falcon AI</property>
                         <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
                         <style>
                           <class name="normal-text"/>
@@ -365,7 +355,7 @@
                     <child>
                       <object class="GtkCheckButton">
                         <property name="group">a_3</property>
-                        <property name="label">Gnome Text Editor</property>
+                        <property name="label">Google Chrome</property>
                         <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
                         <style>
                           <class name="normal-text"/>
@@ -395,7 +385,7 @@
                     <child>
                       <object class="GtkCheckButton">
                         <property name="group">a_3</property>
-                        <property name="label">Network Settings</property>
+                        <property name="label">Network</property>
                         <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
                         <style>
                           <class name="normal-text"/>
@@ -425,7 +415,7 @@
                     <child>
                       <object class="GtkCheckButton">
                         <property name="group">a_3</property>
-                        <property name="label">Sticky-Notes</property>
+                        <property name="label">Sticky Notes</property>
                         <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
                         <style>
                           <class name="normal-text"/>
@@ -455,7 +445,37 @@
                     <child>
                       <object class="GtkCheckButton">
                         <property name="group">a_3</property>
+                        <property name="label">Text Editor</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
                         <property name="label">Trusted Browser</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">Udiskie</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">Video Editor</property>
                         <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
                         <style>
                           <class name="normal-text"/>
@@ -475,7 +495,17 @@
                     <child>
                       <object class="GtkCheckButton">
                         <property name="group">a_3</property>
-                        <property name="label">Video Editor</property>
+                        <property name="label">Xarchiver</property>
+                        <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
+                        <style>
+                          <class name="normal-text"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="group">a_3</property>
+                        <property name="label">Zoom</property>
                         <signal name="toggled" handler="on_a3_toggled" swapped="yes"/>
                         <style>
                           <class name="normal-text"/>
@@ -568,6 +598,7 @@
                 <child>
                   <object class="GtkBox">
                     <property name="margin-top">15</property>
+                    <property name="margin-bottom">15</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkLabel">
@@ -605,39 +636,7 @@
                         <property name="halign">start</property>
                         <property name="label">The question is required.</property>
                         <property name="margin-top">5</property>
-                        <property name="visible">False</property>
-                        <style>
-                          <class name="required-text"/>
-                        </style>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkBox">
-                    <property name="margin-top">15</property>
-                    <property name="orientation">vertical</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="halign">start</property>
-                        <property name="label">Ghaf-version used</property>
-                        <property name="margin-bottom">10</property>
-                        <style>
-                          <class name="normal-text"/>
-                        </style>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="ghaf_version">
-                        <property name="hexpand">True</property>
-                        <property name="placeholder-text">Enter your answer</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="required_version">
-                        <property name="halign">start</property>
-                        <property name="label">The question is required.</property>
-                        <property name="margin-top">5</property>
+                        <property name="margin-bottom">5</property>
                         <property name="visible">False</property>
                         <style>
                           <class name="required-text"/>

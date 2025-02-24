@@ -43,8 +43,6 @@ mod imp {
         #[template_child]
         pub description_textbuffer: TemplateChild<TextBuffer>,
         #[template_child]
-        pub ghaf_version: TemplateChild<Entry>,
-        #[template_child]
         pub other_1: TemplateChild<CheckButton>,
         #[template_child]
         pub other_2: TemplateChild<CheckButton>,
@@ -60,8 +58,6 @@ mod imp {
         pub required_title: TemplateChild<Label>,
         #[template_child]
         pub required_description: TemplateChild<Label>,
-        #[template_child]
-        pub required_version: TemplateChild<Label>,
         #[template_child]
         pub summary: TemplateChild<Label>,
 
@@ -194,7 +190,6 @@ mod imp {
             } else {
                 String::new()
             };
-            let version = self.ghaf_version.text().to_string();
 
             let time = Utc::now().to_string();
 
@@ -262,14 +257,6 @@ mod imp {
                 self.required_description.set_visible(false);
             }
 
-            if version.is_empty() {
-                enable = false;
-                self.required_version.set_visible(true);
-                eprintln!("Ghaf version is empty");
-            } else {
-                self.required_version.set_visible(false);
-            }
-
             if enable {
                 // Prepare email content with optional attachment
                 let mut email_body = format!("Time: {}\n\n", time);
@@ -284,7 +271,6 @@ mod imp {
                 }
 
                 email_body.push_str(&format!("Description:\n{}\n", description));
-                email_body.push_str(&format!("Ghaf version: {}", version));
 
                 let email_title = format!("{}: {}", issue, title);
 
