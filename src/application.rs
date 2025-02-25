@@ -367,6 +367,12 @@ impl ControlPanelGuiApplication {
                     .borrow()
                     .open_advanced_settings_widget();
             }
+            SettingsAction::CheckForUpdateRequest => {
+                self.imp().data_provider.borrow().check_for_update();
+            }
+            SettingsAction::UpdateRequest => {
+                self.imp().data_provider.borrow().update_request();
+            }
         };
     }
 

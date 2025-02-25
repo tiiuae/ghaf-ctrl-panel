@@ -219,6 +219,8 @@
                         <property name="name">admin</property>
                         <property name="child">
                             <object class="AdminSettingsPage" id="admin_settings_page">
+                            <signal name="check-for-update-request" handler="on_check_for_update_request" swapped="true"/>
+                            <signal name="update-request" handler="on_update_request" swapped="true"/>
                             </object>
                         </property>
                     </object>

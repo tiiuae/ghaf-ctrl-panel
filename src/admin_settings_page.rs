@@ -75,9 +75,10 @@ mod imp {
         fn signals() -> &'static [Signal] {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
             SIGNALS.get_or_init(|| {
-                vec![Signal::builder("update-request")
-                    //.param_types([u32::static_type()])
-                    .build()]
+                vec![
+                    Signal::builder("check-for-update-request").build(),
+                    Signal::builder("update-request").build(),
+                ]
             })
         }
     }

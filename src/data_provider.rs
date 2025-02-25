@@ -412,6 +412,14 @@ pub mod imp {
             //self.admin_client.restart(name);
         }
 
+        pub fn check_for_update(&self) {
+            println!("Check for update request");
+        }
+
+        pub fn update_request(&self) {
+            println!("Update request");
+        }
+
         pub async fn set_locale(&self, locale: String) -> Result<(), String> {
             self.client_cmd_async(adminclient!(|client| client.set_locale(locale)))
                 .await

@@ -162,6 +162,20 @@ mod imp {
             self.obj()
                 .emit_by_name::<()>("settings-action", &[&action, &empty]);
         }
+        #[template_callback]
+        fn on_check_for_update_request(&self) {
+            let action = SettingsAction::CheckForUpdateRequest;
+            let empty = Variant::from(None::<()>.as_ref());
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &empty]);
+        }
+        #[template_callback]
+        fn on_update_request(&self) {
+            let action = SettingsAction::UpdateRequest;
+            let empty = Variant::from(None::<()>.as_ref());
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &empty]);
+        }
     } //end #[gtk::template_callbacks]
 
     impl ObjectImpl for Settings {
