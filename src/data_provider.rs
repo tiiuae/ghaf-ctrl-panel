@@ -332,15 +332,17 @@ pub mod imp {
             let store = self.store.clone();
             if let Some(obj) = store.iter().find(|obj| obj.name() == name) {
                 if obj.is_vm() {
-                    let name_clone = name.clone();
-                    self.client_cmd(adminclient!(|client| client.start_vm(name)), move |res| {
-                        match res {
-                            Ok(_) => println!("Start VM {name_clone} request sent"),
+                    let vm_name = obj.vm_name();
+                    let vm_name_clone = vm_name.clone();
+                    self.client_cmd(
+                        adminclient!(|client| client.start_vm(vm_name)),
+                        move |res| match res {
+                            Ok(_) => println!("Start VM {vm_name_clone} request sent"),
                             Err(error) => {
-                                println!("Start VM {name_clone} request error {error}")
+                                println!("Start VM {vm_name_clone} request error {error}")
                             }
-                        }
-                    });
+                        },
+                    );
                 //basicaly, there is no need to start app or service
                 } else if obj.is_app() {
                     let app_name = obj.display_name(); //not sure
@@ -370,16 +372,24 @@ pub mod imp {
 
         pub fn start_app_in_vm(&self, app: String, vm: String, args: Vec<String>) {
             let app_name = app.clone();
-            let vm_name = vm.clone();
-            self.client_cmd(
-                adminclient!(|client| client.start_app(app, vm, args)),
-                move |res| match res {
-                    Ok(_) => println!("Start app {app_name} in the VM {vm_name} request sent"),
-                    Err(error) => {
-                        println!("Start app {app_name} in VM {vm_name} request error {error}")
-                    }
-                },
-            );
+            let store = self.store.clone();
+            if let Some(obj) = store.iter().find(|obj| obj.name() == vm) {
+                let vm_name = obj.vm_name();
+                let vm_name_clone = vm_name.clone();
+                self.client_cmd(
+                    adminclient!(|client| client.start_app(app, vm_name, args)),
+                    move |res| match res {
+                        Ok(_) => {
+                            println!("Start app {app_name} in the VM {vm_name_clone} request sent")
+                        }
+                        Err(error) => {
+                            println!(
+                                "Start app {app_name} in VM {vm_name_clone} request error {error}"
+                            )
+                        }
+                    },
+                );
+            }
         }
 
         pub fn pause_service(&self, name: String) {
@@ -409,7 +419,6 @@ pub mod imp {
         pub fn restart_service(&self, _name: String) {
             println!("Restart is not implemented on client lib!");
             //no restart in admin_client
-            //self.admin_client.restart(name);
         }
 
         pub fn check_for_update(&self) {
