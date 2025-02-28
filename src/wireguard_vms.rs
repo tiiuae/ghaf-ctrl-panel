@@ -26,7 +26,7 @@ impl WireGuardVMs {
     }
 
     fn contains(&self, query: &String) -> bool {
-        self.list.contains(&query)
+        self.list.contains(query)
     }
 }
 
@@ -45,5 +45,5 @@ pub fn static_contains(query: &String) -> bool {
     WVM_LIST
         .get()
         .expect("WVM_STRINGS is not initialized")
-        .contains(&query)
+        .contains(query)
 }

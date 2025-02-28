@@ -17,6 +17,7 @@ mod info_settings_page;
 mod keyboard_settings_page;
 mod language_region_notify_popup;
 mod language_region_settings_page;
+mod memory_settings;
 mod mouse_settings_page;
 mod security_icon;
 mod security_settings_page;

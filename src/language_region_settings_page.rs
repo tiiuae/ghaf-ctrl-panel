@@ -1,4 +1,4 @@
-use gio::ListStore;
+use gio::ListModel;
 use glib::subclass::Signal;
 use glib::Binding;
 use gtk::prelude::*;
@@ -9,7 +9,7 @@ use std::sync::OnceLock;
 
 use crate::data_gobject::DataGObject;
 use crate::settings_gobject::SettingsGObject;
-use crate::typed_list_store::imp::TypedListStore;
+use crate::typed_list_store::imp::TypedModelExt;
 
 //+list of supported resolutions/modes ?
 
@@ -126,7 +126,7 @@ impl LanguageRegionSettingsPage {
         }
     }
 
-    pub fn set_locale_model(&self, model: ListStore, selected: Option<usize>) {
+    pub fn set_locale_model(&self, model: ListModel, selected: Option<usize>) {
         self.imp().language_switch.set_model(Some(&model));
         if let Some(idx) = selected {
             self.imp().language_switch.set_selected(idx as u32);
@@ -134,17 +134,17 @@ impl LanguageRegionSettingsPage {
     }
 
     pub fn locale_select_find<F: FnMut(&DataGObject) -> bool>(&self, mut filter: F) {
-        if let Some(index) = self.imp().language_switch.model().and_then(|m| {
-            TypedListStore::from(m.downcast::<ListStore>().ok()?)
-                .iter()
-                .enumerate()
-                .find_map(move |(idx, item)| filter(&item).then_some(idx))
-        }) {
+        if let Some(index) = self
+            .imp()
+            .language_switch
+            .model()
+            .and_then(|m| m.typed_iter().position(move |item| filter(&item)))
+        {
             self.imp().language_switch.set_selected(index as u32);
         }
     }
 
-    pub fn set_timezone_model(&self, model: ListStore, selected: Option<usize>) {
+    pub fn set_timezone_model(&self, model: ListModel, selected: Option<usize>) {
         self.imp().timezone_switch.set_model(Some(&model));
         if let Some(idx) = selected {
             self.imp().timezone_switch.set_selected(idx as u32);
@@ -152,12 +152,12 @@ impl LanguageRegionSettingsPage {
     }
 
     pub fn timezone_select_find<F: FnMut(&DataGObject) -> bool>(&self, mut filter: F) {
-        if let Some(index) = self.imp().timezone_switch.model().and_then(|m| {
-            TypedListStore::from(m.downcast::<ListStore>().ok()?)
-                .iter()
-                .enumerate()
-                .find_map(move |(idx, item)| filter(&item).then_some(idx))
-        }) {
+        if let Some(index) = self
+            .imp()
+            .timezone_switch
+            .model()
+            .and_then(|m| m.typed_iter().position(move |item| filter(&item)))
+        {
             self.imp().timezone_switch.set_selected(index as u32);
         }
     }

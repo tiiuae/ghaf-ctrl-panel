@@ -65,7 +65,7 @@ mod imp {
             let is_scale_set = self.obj().set_scale(scale_idx);
 
             //if error occures then show popup and return
-            if (!is_resolution_set || !is_scale_set) {
+            if !is_resolution_set || !is_scale_set {
                 self.obj().emit_by_name::<()>("display-settings-error", &[]);
                 return;
             }
@@ -183,7 +183,7 @@ impl DisplaySettingsPage {
         let current_resolution_regex =
             Regex::new(r"eDP-1[\s\S]*?(\d+x\d+)\s*px[^\n]*current").unwrap();
         //let current_resolution_regex = Regex::new(r"(\d+x\d+)\s+\d+\.\d+\*").unwrap();//for testing
-        if let Some(cap) = current_resolution_regex.captures(&stdout) {
+        if let Some(cap) = current_resolution_regex.captures(stdout) {
             let resolution = &cap[1];
             println!("Current resolution: {}", resolution);
             let supported_resolutions = self.imp().supported_resolutions.clone();
@@ -205,7 +205,7 @@ impl DisplaySettingsPage {
     fn set_current_scale(&self, stdout: &str) {
         //for standart eDP-1
         let current_scale_regex = Regex::new(r"eDP-1[\s\S]*?Scale:\s*([\d.]+)").unwrap();
-        if let Some(cap) = current_scale_regex.captures(&stdout) {
+        if let Some(cap) = current_scale_regex.captures(stdout) {
             let scale = &cap[1];
             println!("Current scale: {}", scale);
 
@@ -303,7 +303,7 @@ impl DisplaySettingsPage {
             .arg("--output")
             .arg("eDP-1")
             .arg("--scale")
-            .arg(&factor.to_string())
+            .arg(factor.to_string())
             .env("PATH", "/run/current-system/sw/bin")
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())

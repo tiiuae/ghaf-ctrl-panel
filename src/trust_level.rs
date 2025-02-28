@@ -1,25 +1,18 @@
 use gtk::glib;
 //use glib::prelude::*;
-use glib::{
-    value::{FromValue, ToValue, Value},
-    Enum, Type,
-};
+use glib::Enum;
 //use strum::EnumString;
 
 // Derive necessary traits for automatic conversion
 #[derive(Debug, Clone, Copy, Enum)]
 #[enum_type(name = "TrustLevel")]
 #[repr(u8)] // Optional: Ensure each variant has a specific discriminant value
+#[derive(Default)]
 pub enum TrustLevel {
+    #[default]
     Secure = 0,
     Warning = 1,
     NotSecure = 2,
-}
-
-impl Default for TrustLevel {
-    fn default() -> Self {
-        TrustLevel::Secure
-    }
 }
 
 /*impl StaticType for TrustLevel {
