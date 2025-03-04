@@ -96,10 +96,7 @@ pub fn load_config() -> Result<GithubConfig, String> {
 }
 
 pub fn set_config() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let _ = match load_config() {
-        Ok(c) => *CONFIG.lock().unwrap() = c,
-        Err(e) => return Err(e.into()),
-    };
+    *CONFIG.lock().unwrap() = load_config()?;
     Ok(())
 }
 
@@ -162,7 +159,7 @@ fn set_key(token: &str) -> Result<(), std::io::Error> {
         .write(true)
         .truncate(true)
         .open(&path)?;
-    file.write(doc.to_string().as_bytes())?;
+    file.write_all(doc.to_string().as_bytes())?;
 
     Ok(())
 }

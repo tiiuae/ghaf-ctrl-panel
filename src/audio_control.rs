@@ -8,7 +8,7 @@ use zbus::{Connection, Proxy};
 
 use crate::audio_device_gobject::imp::AudioDeviceType;
 use crate::audio_device_gobject::AudioDeviceGObject;
-use crate::typed_list_store::imp::TypedListStore;
+use crate::typed_list_store::imp::{TypedListStore, TypedModelExt};
 
 pub mod imp {
     use super::*;

@@ -1,13 +1,3 @@
-use adw::subclass::prelude::*;
-use gio::ListStore;
-use glib::{Object, Variant};
-use gtk::prelude::*;
-use gtk::{
-    gio, glib, CompositeTemplate, CustomFilter, FilterListModel, Image, ListItem, ListView,
-    MenuButton, SignalListItemFactory, SingleSelection, Stack, ToggleButton,
-};
-use std::rc::Rc;
-
 use crate::application::ControlPanelGuiApplication;
 use crate::control_action::ControlAction;
 use crate::service_gobject::ServiceGObject;
@@ -15,6 +5,16 @@ use crate::service_row::ServiceRow;
 use crate::service_settings::ServiceSettings;
 use crate::settings::Settings;
 use crate::settings_action::SettingsAction;
+use crate::typed_list_store::imp::CustomFilterExt;
+use adw::subclass::prelude::*;
+use gio::ListModel;
+use glib::{ControlFlow, SourceId, Variant};
+use gtk::prelude::*;
+use gtk::{
+    gio, glib, CompositeTemplate, CustomFilter, FilterListModel, Image, ListItem, ListView,
+    MenuButton, SignalListItemFactory, SingleSelection, Stack, ToggleButton,
+};
+use std::cell::RefCell;
 
 mod imp {
     use super::*;
@@ -48,6 +48,8 @@ mod imp {
 
         #[template_child]
         pub settings_box: TemplateChild<Settings>,
+
+        pub stats_timer: RefCell<Option<SourceId>>,
     }
 
     #[glib::object_subclass]
@@ -73,37 +75,29 @@ mod imp {
     impl ControlPanelGuiWindow {
         #[template_callback]
         fn switch_to_app_view(&self) {
-            if (self.stack.visible_child_name() != Some("services_view".into())) {
-                self.stack.set_visible_child_name("services_view");
-            }
+            self.stack.set_visible_child_name("services_view");
         }
         #[template_callback]
         fn switch_to_vm_view(&self) {
-            if (self.stack.visible_child_name() != Some("services_view".into())) {
-                self.stack.set_visible_child_name("services_view");
-            }
+            self.stack.set_visible_child_name("services_view");
         }
         #[template_callback]
         fn switch_to_services_view(&self) {
-            if (self.stack.visible_child_name() != Some("services_view".into())) {
-                self.stack.set_visible_child_name("services_view");
-            }
+            self.stack.set_visible_child_name("services_view");
         }
         #[template_callback]
         fn switch_to_settings_view(&self) {
-            if (self.stack.visible_child_name() != Some("settings_view".into())) {
-                self.stack.set_visible_child_name("settings_view");
-            }
+            self.stack.set_visible_child_name("settings_view");
         }
 
         #[template_callback]
         fn on_control_action(&self, action: ControlAction, name: String) {
-            let app = self.obj().get_app_ref();
+            let app = self.obj().get_app();
             app.control_service(action, name);
         }
         #[template_callback]
         fn on_settings_action(&self, action: SettingsAction, value: Variant) {
-            let app = self.obj().get_app_ref();
+            let app = self.obj().get_app();
             app.perform_setting_action(action, value);
         }
     } //end #[gtk::template_callbacks]
@@ -132,7 +126,7 @@ glib::wrapper! {
 }
 
 impl ControlPanelGuiWindow {
-    pub fn new<P: IsA<gtk::Application>>(application: &P) -> Self {
+    pub fn new(application: &ControlPanelGuiApplication) -> Self {
         let window: Self = glib::Object::builder()
             .property("application", application)
             .build();
@@ -145,7 +139,7 @@ impl ControlPanelGuiWindow {
 
         self.connect_close_request(glib::clone!(@strong self as window => move |_| {
             println!("Close window request");
-            let app = window.get_app_ref();
+            let app = window.get_app();
             app.clean_n_quit();
             glib::Propagation::Stop // Returning Stop allows the window to be destroyed
         }));
@@ -155,7 +149,7 @@ impl ControlPanelGuiWindow {
         }));
 
         //get application reference
-        let app = self.get_app_ref();
+        let app = self.get_app();
 
         self.setup_service_rows(app.get_store()); //ListStore doc: "GLib type: GObject with reference counted clone semantics."
         self.setup_factory();
@@ -167,41 +161,24 @@ impl ControlPanelGuiWindow {
     }
 
     #[inline(always)]
-    fn get_app_ref(&self) -> Rc<ControlPanelGuiApplication> {
-        let binding = self.application().expect("Failed to get application");
-        binding
-            .downcast_ref::<ControlPanelGuiApplication>()
+    fn get_app(&self) -> ControlPanelGuiApplication {
+        self.application()
+            .expect("Failed to get application")
+            .downcast()
             .expect("ControlPanelGuiApplication is expected!")
-            .clone()
-            .into()
     }
 
-    fn setup_service_rows(&self, model: ListStore) {
+    fn setup_service_rows(&self, model: ListModel) {
         self.imp().settings_box.set_vm_model(model.clone());
 
         //Create filter: VM services, default
-        let vm_filter = CustomFilter::new(|item: &Object| {
-            if let Some(obj) = item.downcast_ref::<ServiceGObject>() {
-                return obj.is_vm();
-            }
-            false
-        });
+        let vm_filter = CustomFilter::typed(|o: &ServiceGObject| o.is_vm());
 
-        //Create filter: Apps
-        let app_filter = CustomFilter::new(|item: &Object| {
-            if let Some(obj) = item.downcast_ref::<ServiceGObject>() {
-                return obj.is_app();
-            }
-            false
-        });
+        //Create filter: app services, default
+        let app_filter = CustomFilter::typed(|o: &ServiceGObject| o.is_app());
 
         //Create filter: other services
-        let services_filter = CustomFilter::new(|item: &Object| {
-            if let Some(obj) = item.downcast_ref::<ServiceGObject>() {
-                return !obj.is_vm() && !obj.is_app();
-            }
-            false
-        });
+        let services_filter = CustomFilter::typed(|o: &ServiceGObject| !o.is_app() && !o.is_vm());
 
         //VM filter by default
         let filter_model = FilterListModel::new(Some(model), Some(vm_filter.clone()));
@@ -211,14 +188,11 @@ impl ControlPanelGuiWindow {
         // Connect to the selection-changed and items-changed signals
         selection_model.connect_selection_changed(
             glib::clone!(@strong self as window => move |selection_model, _, _| {
-                if let Some(selected_item) = selection_model.selected_item() {
-                    println!("Selected: {}", selection_model.selected());
-                    if let Some(obj) = selected_item.downcast_ref::<ServiceGObject>() {//???
+                if let Some(obj) = selection_model.selected_item().and_downcast() {
+                        window.set_vm_details(&obj);
                         let title = obj.name();
                         let subtitle = obj.details();
                         println!("Property {title}, {subtitle}");
-                        window.set_vm_details(&obj);
-                    }
                 } else {
                     println!("No item selected");
                 }
@@ -227,10 +201,8 @@ impl ControlPanelGuiWindow {
         selection_model.connect_items_changed(
             glib::clone!(@strong self as window => move |selection_model, position, removed, added| {
                 println!("Items changed at position {}, removed: {}, added: {}", position, removed, added);
-                if let Some(selected_item) = selection_model.selected_item() {
-                    if let Some(obj) = selected_item.downcast_ref::<ServiceGObject>() {
+                if let Some(obj) = selection_model.selected_item().and_downcast() {
                         window.set_vm_details(&obj);
-                    }
                 } else {
                     println!("No item selected");
                 }
@@ -249,12 +221,7 @@ impl ControlPanelGuiWindow {
         let filter_model_clone_app = filter_model.clone();
         let selection_model_clone_app = selection_model.clone();
 
-        let count = self
-            .imp()
-            .services_list_view
-            .model()
-            .expect("no model!")
-            .n_items();
+        let count = selection_model.n_items();
 
         self.imp().vm_view_button.connect_toggled(move |button| {
             if button.is_active() {
@@ -285,9 +252,9 @@ impl ControlPanelGuiWindow {
 
     fn set_default_selection(selection_model: &SingleSelection, count: u32) {
         println!("Selection is about to change");
-        if (count <= 0) {
+        if count == 0 {
             return;
-        };
+        }
         selection_model.set_selected(0);
         selection_model.selection_changed(0u32, count);
     }
@@ -360,10 +327,30 @@ impl ControlPanelGuiWindow {
     }
 
     fn set_vm_details(&self, obj: &ServiceGObject) {
-        self.imp().service_settings_box.bind(obj);
+        if let Some(source) = self.imp().stats_timer.take() {
+            source.remove();
+        }
+        let ssb = self.imp().service_settings_box.get().clone();
+        let win = self.clone();
+        ssb.bind(obj);
+        let obj = obj.clone();
+
+        if obj.is_vm() {
+            *self.imp().stats_timer.borrow_mut() =
+                Some(glib::timeout_add_seconds_local(5, move || {
+                    let win = win.clone();
+                    let obj = obj.clone();
+                    glib::spawn_future_local(async move {
+                        if let Ok(stats) = win.get_app().get_stats(obj.vm_name()).await {
+                            win.imp().service_settings_box.set_stats(&stats);
+                        }
+                    });
+                    ControlFlow::Continue
+                }));
+        }
     }
 
-    fn set_audio_devices(&self, devices: ListStore) {
+    fn set_audio_devices(&self, devices: ListModel) {
         self.imp().settings_box.set_audio_devices(devices);
     }
 
@@ -372,11 +359,11 @@ impl ControlPanelGuiWindow {
         self.imp().settings_box.restore_default_display_settings();
     }
 
-    pub fn set_locale_model(&self, store: ListStore, selected: Option<usize>) {
+    pub fn set_locale_model(&self, store: ListModel, selected: Option<usize>) {
         self.imp().settings_box.set_locale_model(store, selected);
     }
 
-    pub fn set_timezone_model(&self, store: ListStore, selected: Option<usize>) {
+    pub fn set_timezone_model(&self, store: ListModel, selected: Option<usize>) {
         self.imp().settings_box.set_timezone_model(store, selected);
     }
 }
