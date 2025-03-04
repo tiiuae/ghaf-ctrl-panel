@@ -5,14 +5,14 @@ use crate::service_row::ServiceRow;
 use crate::service_settings::ServiceSettings;
 use crate::settings::Settings;
 use crate::settings_action::SettingsAction;
-use crate::typed_list_store::imp::TypedCustomFilter;
+use crate::typed_list_store::imp::CustomFilterExt;
 use adw::subclass::prelude::*;
 use gio::ListModel;
 use glib::{ControlFlow, SourceId, Variant};
 use gtk::prelude::*;
 use gtk::{
-    gio, glib, CompositeTemplate, FilterListModel, Image, ListItem, ListView, MenuButton,
-    SignalListItemFactory, SingleSelection, Stack, ToggleButton,
+    gio, glib, CompositeTemplate, CustomFilter, FilterListModel, Image, ListItem, ListView,
+    MenuButton, SignalListItemFactory, SingleSelection, Stack, ToggleButton,
 };
 use std::cell::RefCell;
 
@@ -172,14 +172,13 @@ impl ControlPanelGuiWindow {
         self.imp().settings_box.set_vm_model(model.clone());
 
         //Create filter: VM services, default
-        let vm_filter = TypedCustomFilter::new(|o: &ServiceGObject| o.is_vm());
+        let vm_filter = CustomFilter::typed(|o: &ServiceGObject| o.is_vm());
 
         //Create filter: app services, default
-        let app_filter = TypedCustomFilter::new(|o: &ServiceGObject| o.is_app());
+        let app_filter = CustomFilter::typed(|o: &ServiceGObject| o.is_app());
 
         //Create filter: other services
-        let services_filter =
-            TypedCustomFilter::new(|o: &ServiceGObject| !o.is_app() && !o.is_vm());
+        let services_filter = CustomFilter::typed(|o: &ServiceGObject| !o.is_app() && !o.is_vm());
 
         //VM filter by default
         let filter_model = FilterListModel::new(Some(model), Some(vm_filter.clone()));

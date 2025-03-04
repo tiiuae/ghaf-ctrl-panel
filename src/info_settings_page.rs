@@ -4,8 +4,8 @@ use gtk::gio::ListModel;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{
-    glib, CompositeTemplate, FilterListModel, ListItem, ListView, NoSelection, ProgressBar,
-    SignalListItemFactory,
+    glib, CompositeTemplate, CustomFilter, FilterListModel, ListItem, ListView, NoSelection,
+    ProgressBar, SignalListItemFactory,
 };
 use std::cell::RefCell;
 use std::sync::OnceLock;
@@ -13,7 +13,7 @@ use std::sync::OnceLock;
 use crate::control_action::ControlAction;
 use crate::service_gobject::ServiceGObject;
 use crate::settings_gobject::SettingsGObject;
-use crate::typed_list_store::imp::TypedCustomFilter;
+use crate::typed_list_store::imp::CustomFilterExt;
 use crate::vm_row::VMRow;
 
 mod imp {
@@ -104,7 +104,7 @@ impl InfoSettingsPage {
         //Set filter: only running VM's
         let filter_model = FilterListModel::new(
             Some(model),
-            Some(TypedCustomFilter::new(|obj: &ServiceGObject| {
+            Some(CustomFilter::typed(|obj: &ServiceGObject| {
                 obj.is_vm() && obj.is_running()
             })),
         );

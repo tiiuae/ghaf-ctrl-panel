@@ -4,8 +4,8 @@ use glib::{Binding, Object, Properties, Variant};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{
-    gio, glib, Box, CompositeTemplate, DropDown, FilterListModel, Label, ListItem, Scale,
-    SignalListItemFactory, SingleSelection,
+    gio, glib, Box, CompositeTemplate, CustomFilter, DropDown, FilterListModel, Label, ListItem,
+    Scale, SignalListItemFactory, SingleSelection,
 };
 use imp::AudioDeviceUserType;
 use std::cell::RefCell;
@@ -13,7 +13,7 @@ use std::sync::OnceLock;
 
 use crate::audio_device_gobject::imp::AudioDeviceType;
 use crate::audio_device_gobject::AudioDeviceGObject;
-use crate::typed_list_store::imp::TypedCustomFilter;
+use crate::typed_list_store::imp::CustomFilterExt;
 
 mod imp {
     use super::*;
@@ -221,12 +221,12 @@ impl AudioSettings {
         self.setup_factory(AudioDeviceUserType::Speaker);
 
         //Create filter: outputs
-        let outputs_filter = TypedCustomFilter::new(|obj: &AudioDeviceGObject| {
+        let outputs_filter = CustomFilter::typed(|obj: &AudioDeviceGObject| {
             obj.dev_type() == AudioDeviceType::Sink as i32 //only one for now
         });
 
         //Create filter: inputs
-        let inputs_filter = TypedCustomFilter::new(|obj: &AudioDeviceGObject| {
+        let inputs_filter = CustomFilter::typed(|obj: &AudioDeviceGObject| {
             obj.dev_type() == AudioDeviceType::Source as i32 //only one for now
         });
 

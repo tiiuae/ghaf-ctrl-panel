@@ -87,10 +87,12 @@ pub mod imp {
         }
     }
 
-    pub struct TypedCustomFilter();
+    pub trait CustomFilterExt {
+        fn typed<F: Fn(&T) -> bool + 'static, T: IsA<Object>>(f: F) -> CustomFilter;
+    }
 
-    impl TypedCustomFilter {
-        pub fn new<F: Fn(&T) -> bool + 'static, T: IsA<Object>>(f: F) -> CustomFilter {
+    impl CustomFilterExt for CustomFilter {
+        fn typed<F: Fn(&T) -> bool + 'static, T: IsA<Object>>(f: F) -> CustomFilter {
             CustomFilter::new(move |obj| obj.downcast_ref().is_some_and(&f))
         }
     }

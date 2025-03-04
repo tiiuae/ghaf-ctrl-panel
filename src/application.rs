@@ -253,7 +253,8 @@ impl ControlPanelGuiApplication {
     }
 
     pub async fn get_stats(&self, vm_name: String) -> Result<StatsResponse, String> {
-        self.imp().data_provider.borrow().get_stats(vm_name).await
+        let fut = self.imp().data_provider.borrow().get_stats(vm_name);
+        fut.await
     }
 
     pub fn control_service(&self, action: ControlAction, name: String) {

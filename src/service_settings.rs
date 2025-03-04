@@ -1,5 +1,5 @@
 use glib::subclass::Signal;
-use glib::{Binding, Properties, SourceId, Variant};
+use glib::{Binding, Properties, Variant};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{
