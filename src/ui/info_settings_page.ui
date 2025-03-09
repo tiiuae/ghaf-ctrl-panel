@@ -22,6 +22,17 @@
         <property name="halign">start</property>
         </object>
       </child>
+      <child>
+        <object class="GtkLabel" id="device_id">
+        <style><class name="normal-text"/></style>
+        <property name="label">Logging ID</property>
+        <property name="margin-start">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">10</property>
+        <property name="halign">start</property>
+        </object>
+      </child>
       <!-- Progress bars box-->
       <child>
         <object class="GtkBox" id="resources_info_box">

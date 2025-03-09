@@ -183,7 +183,7 @@ mod imp {
         #[template_callback]
         fn on_submit(&self) {
             let mut enable = true;
-            let mac_address_path = "/tmp/MACAddress";
+            let device_id_path = "/etc/common/device-id";
             let title = self.title.text().to_string();
             let description = if self.obj().property::<bool>("descriptionempty") {
                 self.get_description_text()
@@ -197,10 +197,10 @@ mod imp {
             let related = self.obj().property::<String>("related");
             let app = self.obj().property::<String>("app");
 
-            let mac = match self.get_mac_address(mac_address_path) {
-                Some(mac) => mac,
+            let id = match self.get_device_id(device_id_path) {
+                Some(id) => id,
                 None => {
-                    eprintln!("Can't get MAC Address");
+                    eprintln!("Can't get device ID");
                     String::from("")
                 }
             };
@@ -261,7 +261,7 @@ mod imp {
                 // Prepare email content with optional attachment
                 let mut email_body = format!("Time: {}\n\n", time);
                 email_body.push_str("Bug Report\n\n");
-                email_body.push_str(&format!("MAC Address: {}\n", mac));
+                email_body.push_str(&format!("Logging ID: {}\n", id));
                 email_body.push_str(&format!("SW Version: {}\n", sw));
                 email_body.push_str(&format!("Issue: {}\n", issue));
                 email_body.push_str(&format!("Relates to: {}\n", related));
@@ -300,10 +300,10 @@ mod imp {
         }
 
         #[inline]
-        fn get_mac_address(&self, path: &str) -> Option<String> {
+        fn get_device_id(&self, path: &str) -> Option<String> {
             match fs::read_to_string(path) {
-                Ok(mac_address) => {
-                    return Some(mac_address);
+                Ok(device_id) => {
+                    return Some(device_id);
                 }
                 Err(_) => {
                     eprintln!("Failed to read: {}", path);

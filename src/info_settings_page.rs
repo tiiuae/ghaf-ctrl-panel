@@ -5,7 +5,7 @@ use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{
     glib, CompositeTemplate, CustomFilter, FilterListModel, ListItem, ListView, NoSelection,
-    ProgressBar, SignalListItemFactory,
+    Label, ProgressBar, SignalListItemFactory,
 };
 use std::cell::RefCell;
 use std::sync::OnceLock;
@@ -15,6 +15,7 @@ use crate::service_gobject::ServiceGObject;
 use crate::settings_gobject::SettingsGObject;
 use crate::vm_row::VMRow;
 use givc_common::query::VMStatus;
+use std::fs;
 
 mod imp {
     use super::*;
@@ -22,6 +23,8 @@ mod imp {
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/info_settings_page.ui")]
     pub struct InfoSettingsPage {
+        #[template_child]
+        pub device_id: TemplateChild<Label>,
         #[template_child]
         pub memory_bar: TemplateChild<ProgressBar>,
         #[template_child]
@@ -89,6 +92,16 @@ impl InfoSettingsPage {
         glib::Object::builder().build()
     }
     pub fn init(&self) {
+
+        // Read device id
+        let mut logging_id: String = "Logging ID:    ".to_owned();
+        if let Ok(dev_id) = fs::read_to_string("/etc/common/device-id") {
+            logging_id.push_str(&dev_id);
+        } else {
+            logging_id.push_str("Not found");
+        }
+        self.imp().device_id.set_text(&logging_id);
+
         //initial values to test styling
         self.imp().memory_bar.set_fraction(0.5);
         self.imp().cpu_bar.set_fraction(0.5);
