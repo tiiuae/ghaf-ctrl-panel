@@ -34,7 +34,7 @@
         commonArgs = {
           inherit src;
           strictDeps = true;
-        
+
           nativeBuildInputs = [
              pkgs.pkg-config
              pkgs.glib
@@ -109,5 +109,9 @@
              pkgs.dbus
           ];
         };
-      });
+      }) // {
+        overlays.default = final: prev: {
+          ctrl-panel = self.packages.${prev.stdenv.hostPlatform.system}.default;
+        };
+      };
 }
