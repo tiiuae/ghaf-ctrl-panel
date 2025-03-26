@@ -106,7 +106,7 @@ pub mod imp {
                     println!("AudioControl: Subscribed to device updates.");
 
                     while let Some(signal) = stream.next().await {
-                        match signal.body::<(i32, i32, String, i32, bool, bool, i32)>() {
+                        match signal.body().deserialize::<(i32, i32, String, i32, bool, bool, i32)>() {
                             Ok((id, device_type, name, volume, is_muted, is_default, event)) => {
                                 println!(
                                     "AudioControl: DeviceUpdated - ID: {}, Type: {}, Name: {}, Volume: {}, Muted: {}, Default: {}, Event: {}",
