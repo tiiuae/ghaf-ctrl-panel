@@ -19,7 +19,8 @@ use crate::language_region_notify_popup::LanguageRegionNotifyPopup;
 use crate::settings_action::SettingsAction;
 use crate::ControlPanelGuiWindow;
 use givc_client::endpoint::TlsConfig;
-
+use log::debug;
+use regex::Regex;
 mod imp {
     use super::*;
 
@@ -354,12 +355,21 @@ impl ControlPanelGuiApplication {
                 }
             }
             SettingsAction::OpenWireGuard => {
-                let vm: String = value.get().unwrap();
-                self.imp().data_provider.borrow().start_app_in_vm(
-                    String::from("wireguard-gui"),
-                    vm,
-                    vec![],
-                );
+                let vm: String = value.get().unwrap(); // microvm@business-vm.service
+                let re = Regex::new(r"microvm@(.*?)\.service").unwrap();
+                debug!("wireguard vm {}", vm); // Output: business-vm
+
+                if let Some(captures) = re.captures(&vm.as_str()) {
+                    if let Some(matched) = captures.get(1) {
+                        let vm_name = matched.as_str();
+                        debug!("wireguard app name {}", vm_name); // Output: business-vm
+                        self.imp().data_provider.borrow().start_app_in_vm(
+                            "wireguard-gui".to_string(),
+                            vm_name.to_string(),
+                            vec![],
+                        );
+                    }
+                }
             }
             SettingsAction::OpenAdvancedAudioSettingsWidget => {
                 self.imp()

@@ -169,7 +169,7 @@
             <property name="halign">start</property>
             <child>
               <object class="GtkLabel">
-                <property name="label">Wireguard</property>
+                <property name="label">Wireguard GUI</property>
                 <property name="halign">start</property>
               </object>
             </child>

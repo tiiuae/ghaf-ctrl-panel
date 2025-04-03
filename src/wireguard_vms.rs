@@ -1,3 +1,4 @@
+use log::{debug, error, info};
 use std::fs;
 use std::path::PathBuf;
 use std::sync::OnceLock;
@@ -11,11 +12,11 @@ impl WireGuardVMs {
         match fs::read_to_string(&file_path) {
             Ok(content) => {
                 let list = content.lines().map(|line| line.to_string()).collect();
-                println!("Wireguard VMs file has been read, list: {:?}", list);
+                info!("Wireguard VMs file has been read, list: {:?}", list);
                 WireGuardVMs { list }
             }
             Err(e) => {
-                eprintln!("Failed to read the file '{}': {}", file_path.display(), e);
+                error!("Failed to read the file '{}': {}", file_path.display(), e);
                 WireGuardVMs { list: Vec::new() }
             }
         }
@@ -42,8 +43,11 @@ pub fn get_static_list() -> &'static Vec<String> {
 }
 
 pub fn static_contains(query: &String) -> bool {
-    WVM_LIST
+    let is_contains = WVM_LIST
         .get()
         .expect("WVM_STRINGS is not initialized")
-        .contains(&query)
+        .contains(&query);
+
+    debug!("Checking if {} is in the list:{}", query, is_contains);
+    is_contains
 }

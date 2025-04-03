@@ -4,8 +4,8 @@ use gtk::gio::ListStore;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{
-    glib, CompositeTemplate, CustomFilter, FilterListModel, ListItem, ListView, NoSelection,
-    Label, ProgressBar, SignalListItemFactory,
+    glib, CompositeTemplate, CustomFilter, FilterListModel, Label, ListItem, ListView, NoSelection,
+    ProgressBar, SignalListItemFactory,
 };
 use std::cell::RefCell;
 use std::sync::OnceLock;
@@ -92,7 +92,6 @@ impl InfoSettingsPage {
         glib::Object::builder().build()
     }
     pub fn init(&self) {
-
         // Read device id
         let mut logging_id: String = "Logging ID:    ".to_owned();
         if let Ok(dev_id) = fs::read_to_string("/etc/common/device-id") {

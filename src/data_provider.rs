@@ -21,7 +21,7 @@ use crate::typed_list_store::imp::TypedListStore;
 //use crate::settings_gobject::SettingsGObject;//will be in use in the future
 
 use crate::{ADMIN_SERVICE_ADDR, ADMIN_SERVICE_PORT};
-
+use log::{debug, error, info};
 pub mod imp {
     use super::*;
 
@@ -345,11 +345,13 @@ pub mod imp {
                 } else if obj.is_app() {
                     let app_name = obj.display_name(); //not sure
                     let vm_name = obj.vm_name(); //if it is known
+                    let cloned_vm_name = vm_name.clone();
+                    let cloned_app_name = app_name.clone();
                     self.client_cmd(
                         adminclient!(|client| client.start_app(app_name, vm_name, vec![])),
-                        |res| match res {
-                            Ok(_) => println!("Start app request sent"),
-                            Err(error) => println!("Start app request error {error}"),
+                        move|res| match res {
+                            Ok(_) => info!("Start app request sent: {cloned_app_name}, {cloned_vm_name}"),
+                            Err(error) => error!("Start app request error {error}, {cloned_app_name}, {cloned_vm_name}"),
                         },
                     );
                 } else {
@@ -370,13 +372,13 @@ pub mod imp {
 
         pub fn start_app_in_vm(&self, app: String, vm: String, args: Vec<String>) {
             let app_name = app.clone();
-            let vm_name = vm.clone();
+            let vm_name: String = vm.clone();
             self.client_cmd(
                 adminclient!(|client| client.start_app(app, vm, args)),
                 move |res| match res {
-                    Ok(_) => println!("Start app {app_name} in the VM {vm_name} request sent"),
+                    Ok(_) => info!("Start app {app_name} in the VM {vm_name} request sent"),
                     Err(error) => {
-                        println!("Start app {app_name} in VM {vm_name} request error {error}")
+                        error!("Start app {app_name} in VM {vm_name} request error {error}")
                     }
                 },
             );

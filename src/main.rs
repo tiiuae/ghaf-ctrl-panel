@@ -35,18 +35,27 @@ mod wireguard_vms;
 
 use self::application::ControlPanelGuiApplication;
 use self::window::ControlPanelGuiWindow;
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use std::path::PathBuf;
 
+use givc_client::endpoint::TlsConfig;
 use gtk::prelude::*;
 use gtk::{gio, glib};
-
-use givc_client::endpoint::TlsConfig;
+use log::debug;
+use syslog::{BasicLogger, Facility, Formatter3164};
 
 use crate::wireguard_vms::initialize_wvm_list;
+use env_logger::Builder;
 
 const ADMIN_SERVICE_ADDR: &str = "192.168.101.10";
 const ADMIN_SERVICE_PORT: u16 = 9001;
+
+#[derive(ValueEnum, Default, Debug, Clone, Copy, PartialEq)]
+pub enum LogOutput {
+    #[default]
+    Syslog,
+    Stdout,
+}
 
 #[derive(Parser, Debug)]
 #[command(name = "ctrl-panel")]
@@ -74,14 +83,57 @@ struct Args {
 
     #[arg(long, default_value_t = false)]
     notls: bool,
+
+    /// Log severity
+    #[arg(long, default_value_t = log::Level::Info)]
+    pub log_level: log::Level,
+
+    /// Log output
+    #[arg(long, value_enum, default_value_t = Default::default())]
+    pub log_output: LogOutput,
+}
+
+fn initialize_logger(args: &Args) {
+    // Initialize env_logger
+    let log_output = args.log_output;
+    let log_level = args.log_level.to_level_filter();
+    if LogOutput::Stdout == log_output {
+        // You can set the level in code here
+        Builder::new()
+            .filter_level(log_level) // Set to Debug level in code
+            .init();
+        println!("Logging to stdout");
+    } else if LogOutput::Syslog == log_output {
+        println!("Logging to syslog");
+        let formatter = Formatter3164 {
+            facility: Facility::LOG_USER,
+            hostname: None,
+            process: "ghaf-ctrl-panel".into(),
+            pid: 0,
+        };
+        let logger = match syslog::unix(formatter) {
+            Err(e) => {
+                println!("impossible to connect to syslog: {:?}", e);
+                return;
+            }
+            Ok(logger) => logger,
+        };
+        log::set_boxed_logger(Box::new(BasicLogger::new(logger)))
+            .map(|()| log::set_max_level(log_level))
+            .expect("Failed to set logger");
+    } else {
+        panic!("Invalid log output");
+    }
+
+    debug!("Logger initialized");
 }
 
 fn main() /*-> glib::ExitCode*/
 {
     //std::env::set_var("RUST_BACKTRACE", "full");
-
     // Parse the command-line arguments
     let args = Args::parse();
+    initialize_logger(&args);
 
     let addr = if let Some(addr) = args.addr {
         addr

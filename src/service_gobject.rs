@@ -9,6 +9,7 @@ use givc_common::query::{QueryResult, TrustLevel, VMStatus}; //cannot be used as
 use givc_common::types::ServiceType;
 
 use crate::wireguard_vms::static_contains;
+use log::{debug, error, info, trace, warn};
 
 mod imp {
     use super::*;
@@ -85,17 +86,22 @@ impl ServiceGObject {
             String::from("")
         };
 
+        debug!("ServiceGObject::new: name: {}, display_name: {}, is_vm: {}, is_app: {}, vm_name: {:?}, details: {}, status: {:?}", name, display_name, is_vm, is_app, vm_name, details, status);
+
         Object::builder()
             .property("name", name.clone())
             .property("display-name", display_name)
             .property("is-vm", is_vm)
             .property("is-app", is_app)
-            .property("vm-name", vm_name.unwrap_or("".to_string()))
+            .property("vm-name", vm_name.clone().unwrap_or("".to_string()))
             .property("details", details)
             //for demo
             .property("status", status as u8)
             .property("trust-level", 0u8) //trust_level as u8)
-            .property("has-wireguard", static_contains(&name) && is_vm)
+            .property(
+                "has-wireguard",
+                static_contains(&vm_name.unwrap_or_default()) && is_vm,
+            )
             .build()
     }
 
