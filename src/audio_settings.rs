@@ -262,7 +262,7 @@ impl AudioSettings {
             }),
         );*/
         output_model.connect_items_changed(
-            glib::clone!(@strong self as widget => move |selection_model, position, removed, added| {
+            glib::clone!(#[strong(rename_to = widget)] self, move |selection_model, position, removed, added| {
                 println!("Output model: Items changed at position {}, removed: {}, added: {}", position, removed, added);
                 if let Some(selected_item) = selection_model.selected_item() {
                     if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
@@ -286,7 +286,7 @@ impl AudioSettings {
             }),
         );*/
         input_model.connect_items_changed(
-            glib::clone!(@strong self as widget => move |selection_model, position, removed, added| {
+            glib::clone!(#[strong(rename_to = widget)] self, move |selection_model, position, removed, added| {
                 println!("Input model: Items changed at position {}, removed: {}, added: {}", position, removed, added);
                 if let Some(selected_item) = selection_model.selected_item() {
                     if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
