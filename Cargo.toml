@@ -33,7 +33,7 @@ givc-client = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main" }
 givc-common = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main" }
 
 [build-dependencies]
-glib-build-tools = "0.18"
+glib-build-tools = "0.20"
 
 [[bin]]
 name = "ctrl-panel"
