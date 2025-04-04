@@ -278,29 +278,41 @@ mod imp {
                 email_body.push_str(&format!("Description:\n{}\n", description));
 
                 let email_title = format!("{}: {}", issue, title);
+                let (tx, rx) = async_channel::bounded(1);
 
-                let rt = tokio::runtime::Runtime::new().unwrap();
-                match rt.block_on(create_github_issue(&email_title, &email_body)) {
-                    Ok(_) => {
-                        self.summary.set_label("Report sent successfully");
-                        self.summary.remove_css_class("required-text");
-                        self.summary.add_css_class("success-text");
-                        self.summary.set_visible(true);
-                    }
-                    Err(e) => {
-                        if e.downcast_ref::<octocrab::Error>().is_none() {
-                            self.summary
-                                .set_label(format!("Error when sending report: {}", e).as_str());
-                        } else {
-                            self.summary.set_label("Error when sending report");
+                std::thread::spawn(move || {
+                    let rt = tokio::runtime::Runtime::new().unwrap();
+                    let _ =
+                        tx.send_blocking(rt.block_on(create_github_issue(email_title, email_body)));
+                });
+
+                gtk::glib::spawn_future_local(async move {
+                    let this = this.imp();
+
+                    match rx.recv().await {
+                        Ok(Ok(issue)) => {
+                            eprintln!("Issue {} created", issue.url);
+                            this.summary.set_label("Report sent successfully");
+                            this.summary.remove_css_class("required-text");
+                            this.summary.add_css_class("success-text");
+                            this.summary.set_visible(true);
                         }
+                        e => {
+                            eprintln!("Issue sending failed: {e:?}");
+                            if let Ok(Err(e)) = e {
+                                this.summary
+                                    .set_label(&format!("Error when sending report{e}"));
+                            } else {
+                                this.summary
+                                    .set_label(&format!("Error when sending report"));
+                            }
 
-                        self.summary.remove_css_class("success-text");
-                        self.summary.add_css_class("required-text");
-                        self.summary.set_visible(true);
-                        return;
+                            this.summary.remove_css_class("success-text");
+                            this.summary.add_css_class("required-text");
+                            this.summary.set_visible(true);
+                        }
                     }
-                }
+                });
             }
         }
 
