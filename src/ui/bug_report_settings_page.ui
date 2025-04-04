@@ -612,9 +612,9 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkTextBuffer" id="description_textbuffer">
+                      <object class="GtkTextBuffer" id="description_textbuffer"></object>
+                      <object class="GtkTextBuffer" id="placeholder_textbuffer">
                         <property name="text" translatable="yes">Enter your answer</property>
-                        <signal name="insert-text" handler="on_description_changed" swapped="yes"/>
                       </object>
                     </child>
                     <child>
@@ -625,10 +625,11 @@
                         <property name="pixels-inside-wrap">5</property>
                         <property name="right-margin">5</property>
                         <property name="top-margin">5</property>
-                        <property name="buffer">description_textbuffer</property>
+                        <property name="buffer">placeholder_textbuffer</property>
                         <style>
                           <class name="description-deactive"/>
                         </style>
+			<signal name="notify::has-focus" handler="on_description_focus_changed" after="yes" swapped="yes"/>
                       </object>
                     </child>
                     <child>
