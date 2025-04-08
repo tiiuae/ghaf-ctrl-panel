@@ -17,7 +17,7 @@ log = "0.4.27"
 syslog = "7.0.0"
 
 env_logger = "0.11.8"
-tokio = {version = "1.0", features = ["rt", "time", "macros"]}
+tokio = {version = "1.43", features = ["rt", "time", "macros"]}
 async-channel = "2.3.1"
 
 serde_json = "1.0"
