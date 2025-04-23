@@ -261,9 +261,14 @@ impl AudioSettings {
                 }
             }),
         );*/
-        output_model.connect_items_changed(
-            glib::clone!(#[strong(rename_to = widget)] self, move |selection_model, position, removed, added| {
-                println!("Output model: Items changed at position {}, removed: {}, added: {}", position, removed, added);
+        output_model.connect_items_changed(glib::clone!(
+            #[strong(rename_to = widget)]
+            self,
+            move |selection_model, position, removed, added| {
+                println!(
+                    "Output model: Items changed at position {}, removed: {}, added: {}",
+                    position, removed, added
+                );
                 if let Some(selected_item) = selection_model.selected_item() {
                     if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
                         widget.bind_speaker_volume_property(obj);
@@ -271,8 +276,8 @@ impl AudioSettings {
                 } else {
                     println!("No item selected");
                 }
-            })
-        );
+            }
+        ));
         /*input_model.connect_selection_changed(
             glib::clone!(@strong self as widget => move |selection_model, _, _| {
                 if let Some(selected_item) = selection_model.selected_item() {
@@ -285,9 +290,14 @@ impl AudioSettings {
                 }
             }),
         );*/
-        input_model.connect_items_changed(
-            glib::clone!(#[strong(rename_to = widget)] self, move |selection_model, position, removed, added| {
-                println!("Input model: Items changed at position {}, removed: {}, added: {}", position, removed, added);
+        input_model.connect_items_changed(glib::clone!(
+            #[strong(rename_to = widget)]
+            self,
+            move |selection_model, position, removed, added| {
+                println!(
+                    "Input model: Items changed at position {}, removed: {}, added: {}",
+                    position, removed, added
+                );
                 if let Some(selected_item) = selection_model.selected_item() {
                     if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
                         widget.bind_mic_volume_property(obj);
@@ -295,8 +305,8 @@ impl AudioSettings {
                 } else {
                     println!("No item selected");
                 }
-            })
-        );
+            }
+        ));
 
         self.imp().speaker_switch.set_model(Some(&output_model));
         self.imp().mic_switch.set_model(Some(&input_model));

@@ -2,33 +2,63 @@
  * Based on https://github.com/vadika/rust-bugreporter
  */
 
-use dialog::DialogBox;
+use adw::prelude::*;
+use futures::FutureExt;
 use http::header::ACCEPT;
-use octocrab::Octocrab;
-use secrecy::{ExposeSecret, SecretString};
-use serde::Deserialize;
-use std::io::Write;
-use std::path::PathBuf;
+use octocrab::{models::issues::Issue, Octocrab};
+use secrecy::{ExposeSecret, SecretBox, SecretString};
+use serde::{Deserialize, Serialize, Serializer};
+use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::{env, time::Duration};
-use toml_edit::{value, DocumentMut};
+use thiserror::Error as ThisError;
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(ThisError, Debug)]
+pub enum Error {
+    Cancelled,
+    TimedOut,
+    NotAuthenticated,
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
+    #[error(transparent)]
+    Octocrab(#[from] octocrab::Error),
+    #[error(transparent)]
+    Var(#[from] std::env::VarError),
+    #[error(transparent)]
+    Channel(#[from] async_channel::RecvError),
+    #[error(transparent)]
+    TomlDe(#[from] toml::de::Error),
+    #[error(transparent)]
+    TomlSer(#[from] toml::ser::Error),
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        match self {
+            Error::Cancelled => write!(f, ": Authentication cancelled"),
+            Error::TimedOut => write!(f, ": Authentication timed out"),
+            _ => Ok(()),
+        }
+    }
+}
+
+fn expose<S>(t: &Option<SecretString>, s: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    s.serialize_str(t.as_ref().unwrap().expose_secret())
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GithubConfig {
-    pub token: String,
+    #[serde(skip_serializing_if = "Option::is_none", serialize_with = "expose")]
+    pub token: Option<SecretString>,
     pub owner: String,
     pub repo: String,
 }
 
-pub static CONFIG: Mutex<GithubConfig> = Mutex::new(GithubConfig {
-    token: String::new(),
-    owner: String::new(),
-    repo: String::new(),
-});
-
-pub async fn auth() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let client_id = std::env::var("GITHUB_CLIENT_ID")?.to_string();
-    let secret_id = SecretString::from(client_id);
+pub async fn auth(config: &mut GithubConfig) -> Result<(), Error> {
+    let client_id = std::env::var("GITHUB_CLIENT_ID")?.into();
     let timeout = Duration::from_secs(60);
 
     let crab = octocrab::Octocrab::builder()
@@ -37,132 +67,114 @@ pub async fn auth() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .build()?;
 
     let codes = crab
-        .authenticate_as_device(&secret_id, ["public_repo"])
+        .authenticate_as_device(&client_id, ["public_repo"])
         .await?;
 
     // Set message box text
     let message = format!(
-        "{}\n{}",
-        codes.verification_uri.clone(),
-        codes.user_code.clone()
+        "<a href=\"{0}\">{0}</a>\n{1}",
+        codes.verification_uri, codes.user_code
     );
 
-    let mut backend = dialog::backends::Zenity::new();
-    backend.set_width(250);
-    dialog::Message::new(message)
-        .title("Github Login")
-        .show_with(backend)
-        .expect("Could not display Github dialog box");
+    // rx.recv() will resolve when _tx is dropped
+    let (_tx, rx) = async_channel::bounded::<()>(1);
+    let (cancel_tx, cancel_rx) = async_channel::bounded::<()>(1);
+
+    // GObjects are not Send + Sync, hence cannot be held across await. First create a future that
+    // is run in main thread, and use the local variant from there.
+    gtk::glib::spawn_future(async move {
+        gtk::glib::spawn_future_local(async move {
+            let dlg = adw::MessageDialog::new(gtk::Window::NONE, Some("Github Login"), None);
+            let (cncl_tx, cncl_rx) = async_channel::bounded::<()>(1);
+            let _cancel_tx = cancel_tx;
+            dlg.set_body(&message);
+            dlg.add_response("cancel", "Cancel");
+            dlg.set_body_use_markup(true);
+            dlg.connect_response(None, move |_dlg, _ers| {
+                let _ = cncl_tx.send_blocking(());
+            });
+            dlg.show();
+            futures::select! {
+                _ = rx.recv().fuse() => (),
+                _ = cncl_rx.recv().fuse() => (),
+            };
+            dlg.destroy();
+        });
+    });
 
     // Atuhentication with timeout
-    let auth = tokio::time::timeout(timeout, codes.poll_until_available(&crab, &secret_id))
-        .await?
-        .unwrap();
-    // Write key to config file
-    set_key(auth.access_token.expose_secret()).unwrap();
+
+    let auth = tokio::select! {
+        e = codes.poll_until_available(&crab, &client_id) => e?,
+        _ = tokio::time::sleep(timeout) => Err(Error::TimedOut)?,
+        _ = cancel_rx.recv() => Err(Error::Cancelled)?,
+    };
+    set_key(config, auth.access_token)?;
+
     Ok(())
 }
 
-pub fn get_config_path() -> String {
+pub fn get_config_path() -> PathBuf {
     let variable_name = "GITHUB_CONFIG";
-    let variable = env::var(variable_name);
-    let path = match variable {
-        Ok(ref val) => val,
-        Err(e) => {
-            println!("Missing environment variable: {}, {}", variable_name, e);
-            "/home/ghaf/.config/ctrl-panel/config.toml"
+    let variable = env::var_os(variable_name);
+    match variable {
+        Some(val) => PathBuf::from(val),
+        None => {
+            println!("Missing environment variable: {variable_name}");
+            Path::new(&env::var_os("HOME").unwrap_or_else(|| "/home/ghaf".into()))
+                .join(".config/ctrl-panel/config.toml")
         }
-    };
-    path.to_string()
+    }
 }
 
-pub fn load_config() -> Result<GithubConfig, String> {
+pub fn load_config() -> Result<GithubConfig, Error> {
     let path = get_config_path();
 
-    let config = match config::Config::builder()
-        .add_source(config::File::from(PathBuf::from(path)))
-        .build()
-    {
-        Ok(c) => c,
-        Err(_e) => return Err("Failed to load config".to_string()),
-    };
-
-    let result = match config.try_deserialize::<GithubConfig>() {
-        Ok(r) => r,
-        Err(_e) => return Err("Failed to parse config".to_string()),
-    };
-
-    Ok(result)
+    Ok(toml::from_str(&std::fs::read_to_string(path)?)?)
 }
 
-pub fn set_config() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let _ = match load_config() {
-        Ok(c) => *CONFIG.lock().unwrap() = c,
-        Err(e) => return Err(e.into()),
-    };
-    Ok(())
-}
+pub async fn create_github_issue(title: String, content: String) -> Result<Issue, Error> {
+    let mut config = load_config()?;
 
-pub fn get_config() -> GithubConfig {
-    let config = CONFIG.lock().unwrap();
-    config.clone()
-}
+    let issue_body = content
+        .split_once("\n\nAttachment:")
+        .map(|(a, _)| a)
+        .unwrap_or(&content);
 
-pub async fn create_github_issue(
-    title: &str,
-    content: &str,
-) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let _ = set_config();
-
-    let config = get_config().clone();
-
-    let parts: Vec<&str> = content.split("\n\nAttachment:").collect();
-    let (issue_body, _attachment_info) = (parts[0], parts.get(1));
-
-    let issue_sent = send_issue(&config, title, issue_body);
-    match issue_sent.await {
-        Ok(issue) => issue,
+    match send_issue(&config, &title, &issue_body).await {
         Err(_e) => {
-            auth().await?;
-            let _ = set_config();
-            let config = get_config().clone();
-            send_issue(&config, title, issue_body).await?
+            auth(&mut config).await?;
+            let config = load_config()?;
+            send_issue(&config, &title, &issue_body).await
         }
-    };
-
-    Ok(())
+        ok => ok,
+    }
 }
 
-#[inline]
-async fn send_issue(
-    config: &GithubConfig,
-    title: &str,
-    body: &str,
-) -> octocrab::Result<octocrab::models::issues::Issue> {
+async fn send_issue(config: &GithubConfig, title: &str, body: &str) -> Result<Issue, Error> {
     let octocrab = Octocrab::builder()
-        .personal_token(config.token.clone())
+        .personal_token(
+            config
+                .token
+                .as_ref()
+                .ok_or(Error::NotAuthenticated)?
+                .clone(),
+        )
         .build()?;
-    octocrab
+    Ok(octocrab
         .issues(&config.owner, &config.repo)
         .create(title)
         .body(body.to_string())
         .send()
-        .await
+        .await?)
 }
 
 #[inline]
-fn set_key(token: &str) -> Result<(), std::io::Error> {
-    let token_key = String::from("token");
+fn set_key(config: &mut GithubConfig, token: SecretString) -> Result<(), Error> {
+    config.token = Some(token);
     let path = get_config_path();
-    let contents = std::fs::read_to_string(&path)?;
-    let mut doc = contents.parse::<DocumentMut>().unwrap();
-    doc[&token_key] = value(token);
 
-    let mut file = std::fs::OpenOptions::new()
-        .write(true)
-        .truncate(true)
-        .open(&path)?;
-    file.write(doc.to_string().as_bytes())?;
+    std::fs::write(&path, toml::to_string(config)?.as_bytes())?;
 
     Ok(())
 }

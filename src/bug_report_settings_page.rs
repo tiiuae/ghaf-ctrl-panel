@@ -4,7 +4,9 @@ use glib::subclass::Signal;
 use glib::{Binding, Properties};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, Box, CheckButton, CompositeTemplate, Entry, Label, TextBuffer, TextView};
+use gtk::{
+    glib, Box, CheckButton, CompositeTemplate, Entry, Label, StateFlags, TextBuffer, TextView,
+};
 use std::cell::RefCell;
 use std::fs;
 use std::process::{Command, Stdio};
@@ -43,6 +45,8 @@ mod imp {
         #[template_child]
         pub description_textbuffer: TemplateChild<TextBuffer>,
         #[template_child]
+        pub placeholder_textbuffer: TemplateChild<TextBuffer>,
+        #[template_child]
         pub other_1: TemplateChild<CheckButton>,
         #[template_child]
         pub other_2: TemplateChild<CheckButton>,
@@ -66,7 +70,6 @@ mod imp {
         #[property(name = "issue", get, set, type = String, member = issue)]
         #[property(name = "related", get, set, type = String, member = related)]
         #[property(name = "app", get, set, type = String, member = app)]
-        #[property(name = "descriptionempty", get, set, type = bool, member = description_empty)]
         pub answers: RefCell<Answers>,
     }
 
@@ -169,14 +172,19 @@ mod imp {
         }
 
         #[template_callback]
-        fn on_description_changed(&self) {
-            const DEFAULT_TEXT: &'static str = "Enter your answer";
-            let desc = self.get_description_text();
-            if desc.trim() == DEFAULT_TEXT {
+        fn on_description_focus_changed(&self) {
+            if self.description.has_focus() {
+                self.description
+                    .set_buffer(Some(&self.description_textbuffer.get()));
                 self.description.remove_css_class("description-deactive");
                 self.description.add_css_class("description-active");
-                self.description_textbuffer.set_text("");
-                self.obj().set_property("descriptionempty", true);
+            } else if self.description_textbuffer.start_iter()
+                == self.description_textbuffer.end_iter()
+            {
+                self.description
+                    .set_buffer(Some(&self.placeholder_textbuffer.get()));
+                self.description.remove_css_class("description-active");
+                self.description.add_css_class("description-deactive");
             }
         }
 
@@ -185,11 +193,8 @@ mod imp {
             let mut enable = true;
             let device_id_path = "/etc/common/device-id";
             let title = self.title.text().to_string();
-            let description = if self.obj().property::<bool>("descriptionempty") {
-                self.get_description_text()
-            } else {
-                String::new()
-            };
+            let this = self.obj().clone();
+            let description = self.get_description_text();
 
             let time = Utc::now().to_string();
 
@@ -273,29 +278,41 @@ mod imp {
                 email_body.push_str(&format!("Description:\n{}\n", description));
 
                 let email_title = format!("{}: {}", issue, title);
+                let (tx, rx) = async_channel::bounded(1);
 
-                let rt = tokio::runtime::Runtime::new().unwrap();
-                match rt.block_on(create_github_issue(&email_title, &email_body)) {
-                    Ok(_) => {
-                        self.summary.set_label("Report sent successfully");
-                        self.summary.remove_css_class("required-text");
-                        self.summary.add_css_class("success-text");
-                        self.summary.set_visible(true);
-                    }
-                    Err(e) => {
-                        if e.downcast_ref::<octocrab::Error>().is_none() {
-                            self.summary
-                                .set_label(format!("Error when sending report: {}", e).as_str());
-                        } else {
-                            self.summary.set_label("Error when sending report");
+                std::thread::spawn(move || {
+                    let rt = tokio::runtime::Runtime::new().unwrap();
+                    let _ =
+                        tx.send_blocking(rt.block_on(create_github_issue(email_title, email_body)));
+                });
+
+                gtk::glib::spawn_future_local(async move {
+                    let this = this.imp();
+
+                    match rx.recv().await {
+                        Ok(Ok(issue)) => {
+                            eprintln!("Issue {} created", issue.url);
+                            this.summary.set_label("Report sent successfully");
+                            this.summary.remove_css_class("required-text");
+                            this.summary.add_css_class("success-text");
+                            this.summary.set_visible(true);
                         }
+                        e => {
+                            eprintln!("Issue sending failed: {e:?}");
+                            if let Ok(Err(e)) = e {
+                                this.summary
+                                    .set_label(&format!("Error when sending report{e}"));
+                            } else {
+                                this.summary
+                                    .set_label(&format!("Error when sending report"));
+                            }
 
-                        self.summary.remove_css_class("success-text");
-                        self.summary.add_css_class("required-text");
-                        self.summary.set_visible(true);
-                        return;
+                            this.summary.remove_css_class("success-text");
+                            this.summary.add_css_class("required-text");
+                            this.summary.set_visible(true);
+                        }
                     }
-                }
+                });
             }
         }
 
