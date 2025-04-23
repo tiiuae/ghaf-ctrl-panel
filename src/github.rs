@@ -8,7 +8,7 @@ use http::header::ACCEPT;
 use octocrab::{models::issues::Issue, Octocrab};
 use secrecy::{ExposeSecret, SecretBox, SecretString};
 use serde::{Deserialize, Serialize, Serializer};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::{env, time::Duration};
 use thiserror::Error as ThisError;
@@ -120,10 +120,11 @@ pub fn get_config_path() -> PathBuf {
     let variable_name = "GITHUB_CONFIG";
     let variable = env::var_os(variable_name);
     match variable {
-        Some(ref val) => PathBuf::from(val),
+        Some(val) => PathBuf::from(val),
         None => {
             println!("Missing environment variable: {variable_name}");
-            PathBuf::from("/home/ghaf/.config/ctrl-panel/config.toml")
+            Path::new(&env::var_os("HOME").unwrap_or_else(|| "/home/ghaf".into()))
+                .join(".config/ctrl-panel/config.toml")
         }
     }
 }
