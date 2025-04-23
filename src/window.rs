@@ -143,14 +143,20 @@ impl ControlPanelGuiWindow {
     fn init(&self) {
         self.set_destroy_with_parent(true);
 
-        self.connect_close_request(glib::clone!(#[strong(rename_to = window)] self, move |_| {
-            println!("Close window request");
-            let app = window.get_app_ref();
-            app.clean_n_quit();
-            glib::Propagation::Stop // Returning Stop allows the window to be destroyed
-        }));
+        self.connect_close_request(glib::clone!(
+            #[strong(rename_to = window)]
+            self,
+            move |_| {
+                println!("Close window request");
+                let app = window.get_app_ref();
+                app.clean_n_quit();
+                glib::Propagation::Stop // Returning Stop allows the window to be destroyed
+            }
+        ));
 
-        self.connect_destroy(|_| {println!("Destroy window"); });
+        self.connect_destroy(|_| {
+            println!("Destroy window");
+        });
 
         //get application reference
         let app = self.get_app_ref();
@@ -207,11 +213,14 @@ impl ControlPanelGuiWindow {
         // Wrap model with selection and pass it to the list view
         let selection_model = SingleSelection::new(Some(filter_model.clone()));
         // Connect to the selection-changed and items-changed signals
-        selection_model.connect_selection_changed(
-            glib::clone!(#[strong(rename_to = window)] self, move |selection_model, _, _| {
+        selection_model.connect_selection_changed(glib::clone!(
+            #[strong(rename_to = window)]
+            self,
+            move |selection_model, _, _| {
                 if let Some(selected_item) = selection_model.selected_item() {
                     println!("Selected: {}", selection_model.selected());
-                    if let Some(obj) = selected_item.downcast_ref::<ServiceGObject>() {//???
+                    if let Some(obj) = selected_item.downcast_ref::<ServiceGObject>() {
+                        //???
                         let title = obj.name();
                         let subtitle = obj.details();
                         println!("Property {title}, {subtitle}");
@@ -220,11 +229,16 @@ impl ControlPanelGuiWindow {
                 } else {
                     println!("No item selected");
                 }
-            }),
-        );
-        selection_model.connect_items_changed(
-            glib::clone!(#[strong(rename_to = window)] self, move |selection_model, position, removed, added| {
-                println!("Items changed at position {}, removed: {}, added: {}", position, removed, added);
+            }
+        ));
+        selection_model.connect_items_changed(glib::clone!(
+            #[strong(rename_to = window)]
+            self,
+            move |selection_model, position, removed, added| {
+                println!(
+                    "Items changed at position {}, removed: {}, added: {}",
+                    position, removed, added
+                );
                 if let Some(selected_item) = selection_model.selected_item() {
                     if let Some(obj) = selected_item.downcast_ref::<ServiceGObject>() {
                         window.set_vm_details(&obj);
@@ -232,8 +246,8 @@ impl ControlPanelGuiWindow {
                 } else {
                     println!("No item selected");
                 }
-            })
-        );
+            }
+        ));
 
         self.imp()
             .services_list_view
