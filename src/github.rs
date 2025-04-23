@@ -57,9 +57,7 @@ pub struct GithubConfig {
     pub repo: String,
 }
 
-pub static CONFIG: Mutex<Option<GithubConfig>> = Mutex::new(None);
-
-pub async fn auth() -> Result<(), Error> {
+pub async fn auth(config: &mut GithubConfig) -> Result<(), Error> {
     let client_id = std::env::var("GITHUB_CLIENT_ID")?.into();
     let timeout = Duration::from_secs(60);
 
@@ -111,7 +109,7 @@ pub async fn auth() -> Result<(), Error> {
         _ = tokio::time::sleep(timeout) => Err(Error::TimedOut)?,
         _ = cancel_rx.recv() => Err(Error::Cancelled)?,
     };
-    set_key(auth.access_token)?;
+    set_key(config, auth.access_token)?;
 
     Ok(())
 }
@@ -135,22 +133,8 @@ pub fn load_config() -> Result<GithubConfig, Error> {
     Ok(toml::from_str(&std::fs::read_to_string(path)?)?)
 }
 
-pub fn set_config() -> Result<(), Error> {
-    let _ = match load_config() {
-        Ok(c) => *CONFIG.lock().unwrap() = Some(c),
-        Err(e) => return Err(e.into()),
-    };
-    Ok(())
-}
-
-pub fn get_config() -> GithubConfig {
-    let config = CONFIG.lock().unwrap();
-    config.as_ref().cloned().unwrap()
-}
-
 pub async fn create_github_issue(title: String, content: String) -> Result<Issue, Error> {
-    let _ = set_config();
-    let config = get_config().clone();
+    let mut config = load_config()?;
 
     let issue_body = content
         .split_once("\n\nAttachment:")
@@ -159,9 +143,8 @@ pub async fn create_github_issue(title: String, content: String) -> Result<Issue
 
     match send_issue(&config, &title, &issue_body).await {
         Err(_e) => {
-            auth().await?;
-            let _ = set_config();
-            let config = get_config();
+            auth(&mut config).await?;
+            let config = load_config()?;
             send_issue(&config, &title, &issue_body).await
         }
         ok => ok,
@@ -187,12 +170,11 @@ async fn send_issue(config: &GithubConfig, title: &str, body: &str) -> Result<Is
 }
 
 #[inline]
-fn set_key(token: SecretString) -> Result<(), Error> {
-    let mut guard = CONFIG.lock().unwrap();
-    guard.as_mut().unwrap().token = Some(token);
+fn set_key(config: &mut GithubConfig, token: SecretString) -> Result<(), Error> {
+    config.token = Some(token);
     let path = get_config_path();
 
-    std::fs::write(&path, toml::to_string(guard.as_ref().unwrap())?.as_bytes())?;
+    std::fs::write(&path, toml::to_string(config)?.as_bytes())?;
 
     Ok(())
 }
