@@ -10,6 +10,7 @@ use std::rc::Rc;
 
 use crate::application::ControlPanelGuiApplication;
 use crate::control_action::ControlAction;
+use crate::data_provider::StatsResponse;
 use crate::service_gobject::ServiceGObject;
 use crate::service_row::ServiceRow;
 use crate::service_settings::ServiceSettings;
@@ -128,7 +129,7 @@ mod imp {
 glib::wrapper! {
     pub struct ControlPanelGuiWindow(ObjectSubclass<imp::ControlPanelGuiWindow>)
         @extends gtk::Widget, gtk::Window, gtk::ApplicationWindow, adw::ApplicationWindow,
-        @implements gio::ActionGroup, gio::ActionMap;
+        @implements gio::ActionGroup, gio::ActionMap, gtk::Root;
 }
 
 impl ControlPanelGuiWindow {
@@ -178,6 +179,29 @@ impl ControlPanelGuiWindow {
             .expect("ControlPanelGuiApplication is expected!")
             .clone()
             .into()
+    }
+
+    pub fn get_stats(&self, vm: impl Into<String>) -> async_channel::Receiver<StatsResponse> {
+        let (tx, rx) = async_channel::bounded(10);
+        let vm = vm.into();
+
+        glib::spawn_future_local(glib::clone!(
+            #[strong(rename_to = win)]
+            self,
+            async move {
+                let app = win.get_app_ref();
+                loop {
+                    if let Some(stats) = app.get_stats(vm.clone()).await {
+                        if tx.send(stats).await.is_err() {
+                            break;
+                        }
+                    }
+                    glib::timeout_future_seconds(5).await;
+                }
+            }
+        ));
+
+        rx
     }
 
     fn setup_service_rows(&self, model: ListStore) {

@@ -54,12 +54,13 @@
             </object>
           </child>
           <child>
-            <object class="GtkProgressBar" id="memory_bar">
+            <object class="Plot" id="memory_plot">
               <property name="visible">True</property>
               <property name="can_focus">False</property>
               <property name="width-request">320</property>
-              <property name="height-request">20</property>
+              <property name="height-request">80</property>
               <property name="halign">start</property>
+	      <property name="plot-color">purple</property>
             </object>
           </child>
           <child>
@@ -72,12 +73,13 @@
             </object>
           </child>
           <child>
-            <object class="GtkProgressBar" id="cpu_bar">
+            <object class="Plot" id="cpu_plot">
               <property name="visible">True</property>
               <property name="can_focus">False</property>
               <property name="width-request">320</property>
-              <property name="height-request">20</property>
+              <property name="height-request">80</property>
               <property name="halign">start</property>
+	      <property name="plot-color">green</property>
             </object>
           </child>
           <child>

@@ -11,9 +11,12 @@ use std::cell::RefCell;
 use std::sync::OnceLock;
 
 use crate::control_action::ControlAction;
+use crate::plot::Plot;
+use crate::serie::Serie;
 use crate::service_gobject::ServiceGObject;
 use crate::settings_gobject::SettingsGObject;
 use crate::vm_row::VMRow;
+use crate::window::ControlPanelGuiWindow;
 use givc_common::query::VMStatus;
 use std::fs;
 
@@ -26,9 +29,9 @@ mod imp {
         #[template_child]
         pub device_id: TemplateChild<Label>,
         #[template_child]
-        pub memory_bar: TemplateChild<ProgressBar>,
+        pub memory_plot: TemplateChild<Plot>,
         #[template_child]
-        pub cpu_bar: TemplateChild<ProgressBar>,
+        pub cpu_plot: TemplateChild<Plot>,
         #[template_child]
         pub network_bar: TemplateChild<ProgressBar>,
         #[template_child]
@@ -36,6 +39,9 @@ mod imp {
 
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
+
+        pub cpu_serie: Serie,
+        pub mem_serie: Serie,
     }
 
     #[glib::object_subclass]
@@ -72,6 +78,7 @@ mod imp {
             })
         }
     }
+
     impl WidgetImpl for InfoSettingsPage {}
     impl BoxImpl for InfoSettingsPage {}
 }
@@ -91,6 +98,7 @@ impl InfoSettingsPage {
     pub fn new() -> Self {
         glib::Object::builder().build()
     }
+
     pub fn init(&self) {
         // Read device id
         let mut logging_id: String = "Logging ID:    ".to_owned();
@@ -102,9 +110,49 @@ impl InfoSettingsPage {
         self.imp().device_id.set_text(&logging_id);
 
         //initial values to test styling
-        self.imp().memory_bar.set_fraction(0.5);
-        self.imp().cpu_bar.set_fraction(0.5);
+        self.imp().cpu_plot.add_serie(&self.imp().cpu_serie);
+        self.imp()
+            .cpu_plot
+            .set_view(None, None, Some(0.0), Some(1.0));
+        self.imp()
+            .cpu_plot
+            .set_label_format(|f| format!("{pct:.0}%", pct = f * 100.));
+
+        self.imp().memory_plot.add_serie(&self.imp().mem_serie);
+        self.imp().memory_plot.set_view(None, None, Some(0.0), None);
+        self.imp()
+            .memory_plot
+            .set_label_format(|f| format!("{mb:.0} MB", mb = f / 1_048_576.));
+
         self.imp().network_bar.set_fraction(1.0);
+
+        #[allow(clippy::cast_precision_loss)]
+        glib::spawn_future_local(glib::clone!(
+            #[strong(rename_to = info)]
+            self,
+            async move {
+                let mut i = 1f32;
+                if let Some(win) = info
+                    .root()
+                    .and_then(|root| root.downcast::<ControlPanelGuiWindow>().ok())
+                {
+                    let stats = win.get_stats("ghaf-host");
+                    while let Ok(stats) = stats.recv().await {
+                        if let Some(process) = stats.process {
+                            info.imp()
+                                .cpu_serie
+                                .push(i, process.user_cycles as f32 / process.total_cycles as f32);
+                        }
+                        if let Some(memory) = stats.memory {
+                            info.imp()
+                                .mem_serie
+                                .push(i, (memory.total - memory.available) as f32);
+                        }
+                        i += 1.;
+                    }
+                }
+            }
+        ));
     }
 
     pub fn set_vm_model(&self, model: ListStore) {

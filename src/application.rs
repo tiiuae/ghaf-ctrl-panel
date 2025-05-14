@@ -13,9 +13,10 @@ use crate::confirm_display_settings_popup::ConfirmDisplaySettingsPopup;
 use crate::connection_config::ConnectionConfig;
 use crate::control_action::ControlAction;
 use crate::data_gobject::DataGObject;
-use crate::data_provider::{DataProvider, LanguageRegionData};
+use crate::data_provider::{DataProvider, LanguageRegionData, StatsResponse};
 use crate::error_popup::ErrorPopup;
 use crate::language_region_notify_popup::LanguageRegionNotifyPopup;
+use crate::plot::Plot;
 use crate::settings_action::SettingsAction;
 use crate::ControlPanelGuiWindow;
 use givc_client::endpoint::TlsConfig;
@@ -132,6 +133,7 @@ impl ControlPanelGuiApplication {
         tls_info: Option<(String, TlsConfig)>,
     ) -> Self {
         let _ = DataGObject::static_type();
+        let _ = Plot::static_type();
         let app: Self = glib::Object::builder()
             .property("application-id", application_id)
             .property("flags", flags)
@@ -239,6 +241,10 @@ impl ControlPanelGuiApplication {
 
     pub fn get_audio_devices(&self) -> ListStore {
         self.imp().audio_control.borrow().get_devices_list()
+    }
+
+    pub async fn get_stats(&self, vm: String) -> Option<StatsResponse> {
+        self.imp().data_provider.borrow().get_stats(vm).await.ok()
     }
 
     pub fn control_service(&self, action: ControlAction, name: String) {
