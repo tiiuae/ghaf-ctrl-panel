@@ -465,7 +465,10 @@ impl AudioSettings {
 
         // Unbind: Clear the label when the item is removed
         factory.connect_unbind(|_, list_item| {
-            if let Some(row) = list_item.child() {
+            if let Some(row) = list_item
+                .downcast_ref::<ListItem>()
+                .and_then(ListItem::child)
+            {
                 if let Some(label) = find_label(&row) {
                     label.set_label(""); // Clear text
                 }

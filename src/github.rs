@@ -93,7 +93,7 @@ pub async fn auth(config: &mut GithubConfig) -> Result<(), Error> {
             dlg.connect_response(None, move |_dlg, _ers| {
                 let _ = cncl_tx.send_blocking(());
             });
-            dlg.show();
+            dlg.present();
             futures::select! {
                 _ = rx.recv().fuse() => (),
                 _ = cncl_rx.recv().fuse() => (),
