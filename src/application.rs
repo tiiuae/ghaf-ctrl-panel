@@ -13,12 +13,13 @@ use crate::confirm_display_settings_popup::ConfirmDisplaySettingsPopup;
 use crate::connection_config::ConnectionConfig;
 use crate::control_action::ControlAction;
 use crate::data_gobject::DataGObject;
-use crate::data_provider::imp::{DataProvider, LanguageRegionData};
+use crate::data_provider::{DataProvider, LanguageRegionData};
 use crate::error_popup::ErrorPopup;
 use crate::language_region_notify_popup::LanguageRegionNotifyPopup;
 use crate::settings_action::SettingsAction;
 use crate::ControlPanelGuiWindow;
 use givc_client::endpoint::TlsConfig;
+use givc_common::address::EndpointAddress;
 use log::debug;
 use regex::Regex;
 mod imp {
@@ -126,7 +127,7 @@ impl ControlPanelGuiApplication {
     pub fn new(
         application_id: &str,
         flags: &gio::ApplicationFlags,
-        address: String,
+        addr: String,
         port: u16,
         tls_info: Option<(String, TlsConfig)>,
     ) -> Self {
@@ -139,7 +140,7 @@ impl ControlPanelGuiApplication {
         app.imp()
             .data_provider
             .borrow()
-            .set_service_address(address, port);
+            .set_service_address(EndpointAddress::Tcp { addr, port });
         app.imp().data_provider.borrow().set_tls_info(tls_info);
 
         //test dbus service
@@ -184,12 +185,15 @@ impl ControlPanelGuiApplication {
 
     pub fn show_config(&self) {
         let window = self.active_window().unwrap();
-        let address = self
+        let EndpointAddress::Tcp { addr, port } = self
             .imp()
             .data_provider
             .borrow()
-            .get_current_service_address();
-        let config = ConnectionConfig::new(address.0, address.1);
+            .get_current_service_address()
+        else {
+            return;
+        };
+        let config = ConnectionConfig::new(addr, port);
         config.set_transient_for(Some(&window));
         config.set_modal(true);
 
@@ -230,7 +234,7 @@ impl ControlPanelGuiApplication {
     }
 
     pub fn get_store(&self) -> ListStore {
-        self.imp().data_provider.borrow().get_store()
+        self.imp().data_provider.borrow().get_model()
     }
 
     pub fn get_audio_devices(&self) -> ListStore {
