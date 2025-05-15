@@ -29,6 +29,9 @@ zbus = "5.5"
 givc-client = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main" }
 givc-common = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main" }
 
+[features]
+mock = []
+
 [build-dependencies]
 glib-build-tools = "0.20"
 

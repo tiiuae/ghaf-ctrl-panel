@@ -130,7 +130,10 @@ pub struct DataProvider {
 
 impl DataProvider {
     pub fn new(addr: String, port: u16) -> Self {
-        let init_store = Self::fill_by_mock_data(); //ListStore::new::<ServiceGObject>();
+        #[cfg(not(feature = "mock"))]
+        let init_store = ListStore::new::<ServiceGObject>();
+        #[cfg(feature = "mock")]
+        let init_store = Self::fill_by_mock_data();
 
         Self {
             store: init_store.into(),
@@ -288,6 +291,7 @@ impl DataProvider {
         });
     }
 
+    #[cfg(feature = "mock")]
     fn fill_by_mock_data() -> ListStore {
         [
             ServiceGObject::new(
@@ -505,11 +509,35 @@ impl DataProvider {
         warn!("Update request");
     }
 
+    #[cfg(not(feature = "mock"))]
     pub fn get_stats(
         &self,
         vm: String,
     ) -> impl std::future::Future<Output = Result<StatsResponse, String>> {
         self.client_cmd_async(adminclient!(|client| client.get_stats(vm)))
+    }
+
+    #[cfg(feature = "mock")]
+    pub fn get_stats(
+        &self,
+        vm: String,
+    ) -> impl std::future::Future<Output = Result<StatsResponse, String>> {
+        use givc_common::pb::stats::{MemoryStats, ProcessStats};
+        async {
+            Ok(StatsResponse {
+                memory: Some(MemoryStats {
+                    total: 100000000,
+                    available: 200000000,
+                    ..Default::default()
+                }),
+                process: Some(ProcessStats {
+                    user_cycles: 100000,
+                    total_cycles: 200000,
+                    ..Default::default()
+                }),
+                ..Default::default()
+            })
+        }
     }
 
     pub fn set_locale(

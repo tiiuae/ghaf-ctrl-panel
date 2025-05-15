@@ -27,7 +27,10 @@ pub mod imp {
 
     impl AudioControl {
         pub fn new() -> Self {
-            let init_list = ListStore::new::<AudioDeviceGObject>(); //Self::fill_by_mock_data();
+            #[cfg(not(feature = "mock"))]
+            let init_list = ListStore::new::<AudioDeviceGObject>();
+            #[cfg(feature = "mock")]
+            let init_list = Self::fill_by_mock_data();
             let connection = Runtime::new()
                 .unwrap()
                 .block_on(Connection::session())
@@ -39,6 +42,7 @@ pub mod imp {
             }
         }
 
+        #[cfg(feature = "mock")]
         fn fill_by_mock_data() -> ListStore {
             let init_store = ListStore::new::<AudioDeviceGObject>();
             let vec = vec![
