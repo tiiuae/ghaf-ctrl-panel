@@ -1,24 +1,28 @@
 use adw::subclass::prelude::*;
-use gio::ListStore;
-use glib::{Object, Variant};
+use gio::ListModel;
 use gtk::prelude::*;
-use gtk::{
-    gio, glib, CompositeTemplate, CustomFilter, FilterListModel, Image, ListItem, ListView,
-    MenuButton, SignalListItemFactory, SingleSelection, Stack, ToggleButton,
-};
-use std::rc::Rc;
+use gtk::{gio, glib};
 
 use crate::application::ControlPanelGuiApplication;
-use crate::control_action::ControlAction;
-use crate::data_provider::StatsResponse;
-use crate::service_gobject::ServiceGObject;
-use crate::service_row::ServiceRow;
-use crate::service_settings::ServiceSettings;
-use crate::settings::Settings;
-use crate::settings_action::SettingsAction;
+pub use crate::application::StatsResponse;
+use crate::prelude::*;
 
 mod imp {
-    use super::*;
+    use adw::subclass::prelude::*;
+    use gio::ListModel;
+    use gtk::prelude::*;
+    use gtk::{
+        gio, glib, CompositeTemplate, CustomFilter, FilterListModel, Image, ListView, MenuButton,
+        SingleSelection, Stack, ToggleButton,
+    };
+
+    use crate::control_action::ControlAction;
+    use crate::prelude::*;
+    use crate::service_gobject::ServiceGObject;
+    use crate::service_row::ServiceRow;
+    use crate::service_settings::ServiceSettings;
+    use crate::settings::Settings;
+    use crate::settings_action::SettingsAction;
 
     #[derive(Debug, Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/window.ui")]
@@ -74,25 +78,28 @@ mod imp {
     impl ControlPanelGuiWindow {
         #[template_callback]
         fn switch_to_app_view(&self) {
-            if (self.stack.visible_child_name() != Some("services_view".into())) {
+            if self.stack.visible_child_name() != Some("services_view".into()) {
                 self.stack.set_visible_child_name("services_view");
             }
         }
+
         #[template_callback]
         fn switch_to_vm_view(&self) {
-            if (self.stack.visible_child_name() != Some("services_view".into())) {
+            if self.stack.visible_child_name() != Some("services_view".into()) {
                 self.stack.set_visible_child_name("services_view");
             }
         }
+
         #[template_callback]
         fn switch_to_services_view(&self) {
-            if (self.stack.visible_child_name() != Some("services_view".into())) {
+            if self.stack.visible_child_name() != Some("services_view".into()) {
                 self.stack.set_visible_child_name("services_view");
             }
         }
+
         #[template_callback]
         fn switch_to_settings_view(&self) {
-            if (self.stack.visible_child_name() != Some("settings_view".into())) {
+            if self.stack.visible_child_name() != Some("settings_view".into()) {
                 self.stack.set_visible_child_name("settings_view");
             }
         }
@@ -102,10 +109,142 @@ mod imp {
             let app = self.obj().get_app_ref();
             app.control_service(action, name);
         }
+
         #[template_callback]
-        fn on_settings_action(&self, action: SettingsAction, value: Variant) {
+        fn on_settings_action(&self, action: SettingsAction) {
             let app = self.obj().get_app_ref();
-            app.perform_setting_action(action, value);
+            app.perform_setting_action(action);
+        }
+
+        pub fn setup_service_rows(&self, model: ListModel) {
+            self.settings_box.set_vm_model(model.clone());
+
+            //Create filter: VM services, default
+            let vm_filter = CustomFilter::typed(|obj: &ServiceGObject| obj.is_vm());
+
+            //Create filter: Apps
+            let app_filter = CustomFilter::typed(|obj: &ServiceGObject| obj.is_app());
+
+            //Create filter: other services
+            let services_filter =
+                CustomFilter::typed(|obj: &ServiceGObject| !obj.is_vm() && !obj.is_app());
+
+            //VM filter by default
+            let filter_model = FilterListModel::new(Some(model), Some(vm_filter.clone()));
+
+            // Wrap model with selection and pass it to the list view
+            let selection_model =
+                SingleSelection::new(Some(filter_model.clone())).wrap::<ServiceGObject>();
+            // Connect to the selection-changed and items-changed signals
+            selection_model.connect_selection_changed(glib::clone!(
+                #[strong(rename_to = window)]
+                self.obj(),
+                #[strong]
+                selection_model,
+                move |_, _, _| {
+                    if let Some(obj) = selection_model.selected_obj() {
+                        let title = obj.name();
+                        let subtitle = obj.details();
+                        debug!("Property {title}, {subtitle}");
+                        window.imp().set_vm_details(&obj);
+                    } else {
+                        debug!("No item selected");
+                    }
+                }
+            ));
+            selection_model.connect_items_changed(glib::clone!(
+                #[strong(rename_to = window)]
+                self.obj(),
+                move |selection_model, position, removed, added| {
+                    debug!(
+                        "Items changed at position {position}, removed: {removed}, added: {added}"
+                    );
+                    if let Some(obj) = selection_model.selected_obj() {
+                        window.imp().set_vm_details(&obj);
+                    } else {
+                        debug!("No item selected");
+                    }
+                }
+            ));
+
+            self.services_list_view.set_model(Some(&*selection_model));
+
+            self.bind_service_settings_box_visibility();
+
+            //bind filter change
+            let filter_model_clone_vm = filter_model.clone();
+            let selection_model_clone_vm = selection_model.clone();
+            let filter_model_clone_app = filter_model.clone();
+            let selection_model_clone_app = selection_model.clone();
+
+            let count = self
+                .services_list_view
+                .model()
+                .expect("no model!")
+                .n_items();
+
+            self.vm_view_button.connect_toggled(move |button| {
+                if button.is_active() {
+                    debug!("Filter is about to change to vm");
+                    filter_model_clone_vm.set_filter(Some(&vm_filter));
+                    Self::set_default_selection(&selection_model_clone_vm, count);
+                }
+            });
+
+            self.app_view_button.connect_toggled(move |button| {
+                if button.is_active() {
+                    debug!("Filter is about to change to app");
+                    filter_model_clone_app.set_filter(Some(&app_filter));
+                    Self::set_default_selection(&selection_model_clone_app, count);
+                }
+            });
+
+            self.services_view_button.connect_toggled(move |button| {
+                if button.is_active() {
+                    debug!("Filter is about to change to services");
+                    filter_model.set_filter(Some(&services_filter));
+                    Self::set_default_selection(&selection_model, count);
+                }
+            });
+        }
+
+        fn bind_service_settings_box_visibility(&self) {
+            let service_settings_box = self.service_settings_box.clone().upcast::<gtk::Widget>();
+            if let Some(model) = self.services_list_view.model() {
+                model
+                    .bind_property("n_items", &service_settings_box, "visible")
+                    .sync_create()
+                    .transform_to(move |_, count: u32| Some(count != 0))
+                    .build();
+            }
+        }
+
+        fn set_default_selection(selection_model: &SingleSelection, count: u32) {
+            debug!("Selection is about to change");
+            if count == 0 {
+                return;
+            }
+            selection_model.set_selected(0);
+            selection_model.selection_changed(0u32, count);
+        }
+
+        pub fn setup_factory(&self) {
+            let factory = TypedSignalListItemFactory::<ServiceGObject, ServiceRow>::new();
+
+            factory.on_setup(|_| ServiceRow::new());
+            factory.on_bind(move |_, row, obj| row.bind(obj));
+            factory.on_unbind(|_, row| row.unbind());
+
+            // Set the factory of the list view
+            self.services_list_view.set_factory(Some(&*factory));
+        }
+
+        fn set_vm_details(&self, obj: &ServiceGObject) {
+            self.service_settings_box.bind(obj);
+        }
+
+        pub(super) fn set_audio_devices(&self, devices: ListModel) {
+            self.settings_box.set_audio_devices(devices);
         }
     } //end #[gtk::template_callbacks]
 
@@ -116,7 +255,7 @@ mod imp {
         }
 
         fn dispose(&self) {
-            println!("Window destroyed!");
+            debug!("Window destroyed!");
         }
     }
 
@@ -143,39 +282,36 @@ impl ControlPanelGuiWindow {
 
     fn init(&self) {
         self.set_destroy_with_parent(true);
+        let app = self.get_app_ref();
 
         self.connect_close_request(glib::clone!(
-            #[strong(rename_to = window)]
-            self,
+            #[strong]
+            app,
             move |_| {
-                println!("Close window request");
-                let app = window.get_app_ref();
-                app.clean_n_quit();
+                debug!("Close window request");
+                app.activate_action("quit", None);
                 glib::Propagation::Stop // Returning Stop allows the window to be destroyed
             }
         ));
 
         self.connect_destroy(|_| {
-            println!("Destroy window");
+            debug!("Destroy window");
         });
 
         //get application reference
-        let app = self.get_app_ref();
 
-        self.setup_service_rows(app.get_store()); //ListStore doc: "GLib type: GObject with reference counted clone semantics."
-        self.setup_factory();
+        self.imp().setup_service_rows(app.get_model()); //ListStore doc: "GLib type: GObject with reference counted clone semantics."
+        self.imp().setup_factory();
         //vm view by default
         self.imp().vm_view_button.set_active(true);
     }
 
-    #[inline(always)]
-    fn get_app_ref(&self) -> Rc<ControlPanelGuiApplication> {
+    #[inline]
+    fn get_app_ref(&self) -> ControlPanelGuiApplication {
         let binding = self.application().expect("Failed to get application");
         binding
-            .downcast_ref::<ControlPanelGuiApplication>()
+            .downcast()
             .expect("ControlPanelGuiApplication is expected!")
-            .clone()
-            .into()
     }
 
     pub fn get_stats(&self, vm: impl Into<String>) -> async_channel::Receiver<StatsResponse> {
@@ -188,7 +324,7 @@ impl ControlPanelGuiWindow {
             async move {
                 let app = win.get_app_ref();
                 loop {
-                    if let Some(stats) = app.get_stats(vm.clone()).await {
+                    if let Ok(stats) = app.get_stats(vm.clone()).await {
                         if tx.send(stats).await.is_err() {
                             break;
                         }
@@ -201,215 +337,20 @@ impl ControlPanelGuiWindow {
         rx
     }
 
-    fn setup_service_rows(&self, model: ListStore) {
-        self.imp().settings_box.set_vm_model(model.clone());
-
-        //Create filter: VM services, default
-        let vm_filter = CustomFilter::new(|item: &Object| {
-            if let Some(obj) = item.downcast_ref::<ServiceGObject>() {
-                return obj.is_vm();
-            }
-            false
-        });
-
-        //Create filter: Apps
-        let app_filter = CustomFilter::new(|item: &Object| {
-            if let Some(obj) = item.downcast_ref::<ServiceGObject>() {
-                return obj.is_app();
-            }
-            false
-        });
-
-        //Create filter: other services
-        let services_filter = CustomFilter::new(|item: &Object| {
-            if let Some(obj) = item.downcast_ref::<ServiceGObject>() {
-                return !obj.is_vm() && !obj.is_app();
-            }
-            false
-        });
-
-        //VM filter by default
-        let filter_model = FilterListModel::new(Some(model), Some(vm_filter.clone()));
-
-        // Wrap model with selection and pass it to the list view
-        let selection_model = SingleSelection::new(Some(filter_model.clone()));
-        // Connect to the selection-changed and items-changed signals
-        selection_model.connect_selection_changed(glib::clone!(
-            #[strong(rename_to = window)]
-            self,
-            move |selection_model, _, _| {
-                if let Some(selected_item) = selection_model.selected_item() {
-                    println!("Selected: {}", selection_model.selected());
-                    if let Some(obj) = selected_item.downcast_ref::<ServiceGObject>() {
-                        //???
-                        let title = obj.name();
-                        let subtitle = obj.details();
-                        println!("Property {title}, {subtitle}");
-                        window.set_vm_details(&obj);
-                    }
-                } else {
-                    println!("No item selected");
-                }
-            }
-        ));
-        selection_model.connect_items_changed(glib::clone!(
-            #[strong(rename_to = window)]
-            self,
-            move |selection_model, position, removed, added| {
-                println!(
-                    "Items changed at position {}, removed: {}, added: {}",
-                    position, removed, added
-                );
-                if let Some(selected_item) = selection_model.selected_item() {
-                    if let Some(obj) = selected_item.downcast_ref::<ServiceGObject>() {
-                        window.set_vm_details(&obj);
-                    }
-                } else {
-                    println!("No item selected");
-                }
-            }
-        ));
-
-        self.imp()
-            .services_list_view
-            .set_model(Some(&selection_model));
-
-        self.bind_service_settings_box_visibility();
-
-        //bind filter change
-        let filter_model_clone_vm = filter_model.clone();
-        let selection_model_clone_vm = selection_model.clone();
-        let filter_model_clone_app = filter_model.clone();
-        let selection_model_clone_app = selection_model.clone();
-
-        let count = self
-            .imp()
-            .services_list_view
-            .model()
-            .expect("no model!")
-            .n_items();
-
-        self.imp().vm_view_button.connect_toggled(move |button| {
-            if button.is_active() {
-                println!("Filter is about to change to vm");
-                filter_model_clone_vm.set_filter(Some(&vm_filter));
-                Self::set_default_selection(&selection_model_clone_vm, count);
-            }
-        });
-
-        self.imp().app_view_button.connect_toggled(move |button| {
-            if button.is_active() {
-                println!("Filter is about to change to app");
-                filter_model_clone_app.set_filter(Some(&app_filter));
-                Self::set_default_selection(&selection_model_clone_app, count);
-            }
-        });
-
-        self.imp()
-            .services_view_button
-            .connect_toggled(move |button| {
-                if button.is_active() {
-                    println!("Filter is about to change to services");
-                    filter_model.set_filter(Some(&services_filter));
-                    Self::set_default_selection(&selection_model, count);
-                }
-            });
-    }
-
-    fn set_default_selection(selection_model: &SingleSelection, count: u32) {
-        println!("Selection is about to change");
-        if (count <= 0) {
-            return;
-        };
-        selection_model.set_selected(0);
-        selection_model.selection_changed(0u32, count);
-    }
-
-    fn bind_service_settings_box_visibility(&self) {
-        let imp = self.imp();
-        let service_settings_box = imp.service_settings_box.clone().upcast::<gtk::Widget>();
-        if let Some(model) = imp.services_list_view.model() {
-            model
-                .bind_property("n_items", &service_settings_box, "visible")
-                .sync_create()
-                .transform_to(move |_, value: &glib::Value| {
-                    let count = value.get::<u32>().unwrap_or(0);
-                    Some(glib::Value::from(count != 0))
-                })
-                .build();
-        }
-    }
-
-    fn setup_factory(&self) {
-        // Create a new factory
-        let factory = SignalListItemFactory::new();
-
-        // Create an empty `ServiceRow` during setup
-        factory.connect_setup(move |_, list_item| {
-            // Create `ServiceRow`
-            let service_row = ServiceRow::new();
-            list_item
-                .downcast_ref::<ListItem>()
-                .expect("Needs to be ListItem")
-                .set_child(Some(&service_row));
-        });
-
-        // Tell factory how to bind `ServiceRow` to a `ServiceGObject`
-        factory.connect_bind(move |_, list_item| {
-            // Get `ServiceGObject` from `ListItem`
-            let object = list_item
-                .downcast_ref::<ListItem>()
-                .expect("Needs to be ListItem")
-                .item()
-                .and_downcast::<ServiceGObject>()
-                .expect("The item has to be an `ServiceGObject`.");
-
-            // Get `ServiceRow` from `ListItem`
-            let service_row = list_item
-                .downcast_ref::<ListItem>()
-                .expect("Needs to be ListItem")
-                .child()
-                .and_downcast::<ServiceRow>()
-                .expect("The child has to be a `ServiceRow`.");
-
-            service_row.bind(&object);
-        });
-
-        // Tell factory how to unbind `ServiceRow` from `ServiceGObject`
-        factory.connect_unbind(move |_, list_item| {
-            // Get `ServiceRow` from `ListItem`
-            let service_row = list_item
-                .downcast_ref::<ListItem>()
-                .expect("Needs to be ListItem")
-                .child()
-                .and_downcast::<ServiceRow>()
-                .expect("The child has to be a `ServiceRow`.");
-
-            service_row.unbind();
-        });
-
-        // Set the factory of the list view
-        self.imp().services_list_view.set_factory(Some(&factory));
-    }
-
-    fn set_vm_details(&self, obj: &ServiceGObject) {
-        self.imp().service_settings_box.bind(obj);
-    }
-
-    pub fn set_audio_devices(&self, devices: ListStore) {
-        self.imp().settings_box.set_audio_devices(devices);
-    }
-
     //pub API
     pub fn restore_default_display_settings(&self) {
         self.imp().settings_box.restore_default_display_settings();
     }
 
-    pub fn set_locale_model(&self, store: ListStore, selected: Option<usize>) {
-        self.imp().settings_box.set_locale_model(store, selected);
+    pub fn set_locale_model(&self, model: impl IsA<ListModel>, selected: Option<usize>) {
+        self.imp().settings_box.set_locale_model(model, selected);
     }
 
-    pub fn set_timezone_model(&self, store: ListStore, selected: Option<usize>) {
-        self.imp().settings_box.set_timezone_model(store, selected);
+    pub fn set_timezone_model(&self, model: impl IsA<ListModel>, selected: Option<usize>) {
+        self.imp().settings_box.set_timezone_model(model, selected);
+    }
+
+    pub fn set_audio_devices(&self, devices: ListModel) {
+        self.imp().set_audio_devices(devices);
     }
 }

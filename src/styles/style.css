@@ -679,3 +679,7 @@ textview.description-deactive{
   min-width: 8px;
   min-height: 8px;
 }
+
+plot {
+  color: #ffffff;
+}

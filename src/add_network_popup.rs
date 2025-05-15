@@ -1,13 +1,14 @@
-use glib::subclass::Signal;
-use glib::Binding;
-use gtk::prelude::*;
-use gtk::subclass::prelude::*;
-use gtk::{gio, glib, Button, CompositeTemplate, Entry};
-use std::cell::RefCell;
-use std::sync::OnceLock;
+use gtk::gio;
+use gtk::glib;
 
 mod imp {
-    use super::*;
+    use glib::subclass::Signal;
+    use glib::Binding;
+    use gtk::prelude::*;
+    use gtk::subclass::prelude::*;
+    use gtk::{glib, Button, CompositeTemplate, Entry};
+    use std::cell::RefCell;
+    use std::sync::OnceLock;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/add_network_popup.ui")]
@@ -68,10 +69,6 @@ mod imp {
         fn constructed(&self) {
             // Call "constructed" on parent
             self.parent_constructed();
-
-            // Setup
-            let obj = self.obj();
-            obj.init();
         }
 
         fn signals() -> &'static [Signal] {
@@ -107,6 +104,4 @@ impl AddNetworkPopup {
     pub fn new() -> Self {
         glib::Object::builder().build()
     }
-
-    pub fn init(&self) {}
 }

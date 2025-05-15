@@ -1,10 +1,10 @@
-use gtk::glib::subclass::prelude::*;
-use gtk::glib::{self, Object, Properties};
-use gtk::prelude::*;
-use std::cell::RefCell;
+use gtk::glib::{self, Object};
 
 pub mod imp {
-    use super::*;
+    use gtk::glib::subclass::prelude::*;
+    use gtk::glib::{self, Properties};
+    use gtk::prelude::*;
+    use std::cell::RefCell;
 
     #[derive(Default)]
     pub struct SettingsData {

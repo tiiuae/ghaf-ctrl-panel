@@ -1,18 +1,16 @@
-use gio::ListStore;
-use glib::subclass::Signal;
-use glib::{Binding, Object, Properties, SignalHandlerId, Variant};
-use gtk::prelude::*;
-use gtk::subclass::prelude::*;
-use gtk::{gio, glib, CompositeTemplate, Scale, ToggleButton};
-use std::cell::{Cell, RefCell};
-use std::rc::Rc;
-use std::sync::OnceLock;
-
-use crate::audio_device_gobject::imp::AudioDeviceType;
-use crate::audio_device_gobject::AudioDeviceGObject;
+use gtk::glib;
 
 mod imp {
-    use super::*;
+    #![allow(clippy::cast_possible_truncation)]
+    use glib::subclass::Signal;
+    use glib::{Binding, Properties, SignalHandlerId};
+    use gtk::prelude::*;
+    use gtk::subclass::prelude::*;
+    use gtk::{glib, CompositeTemplate, Scale, ToggleButton};
+    use std::cell::{Cell, RefCell};
+    use std::sync::OnceLock;
+
+    use crate::audio_device_gobject::AudioDeviceGObject;
 
     #[derive(Default, CompositeTemplate, Properties)]
     #[properties(wrapper_type = super::VolumeWidget)]
@@ -87,14 +85,14 @@ mod imp {
             if let Some(device) = device.as_ref() {
                 self.volume.set(device.volume());
                 self.muted.set(device.muted());
-                self.volume_scale.set_value(device.volume() as f64);
+                self.volume_scale.set_value(f64::from(device.volume()));
                 self.mute.set_active(!device.muted());
 
                 bindings.extend([
                     device
                         .bind_property("volume", &self.volume_scale.adjustment(), "value")
                         .sync_create()
-                        .transform_to(|_, volume: i32| Some(volume as f64))
+                        .transform_to(|_, volume: i32| Some(f64::from(volume)))
                         .build(),
                     device
                         .bind_property("muted", &*self.mute, "active")

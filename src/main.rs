@@ -19,7 +19,7 @@ mod language_region_notify_popup;
 mod language_region_settings_page;
 mod mouse_settings_page;
 mod plot;
-mod security_icon;
+mod prelude;
 mod security_settings_page;
 mod serie;
 mod service_gobject;
@@ -31,6 +31,7 @@ mod settings_gobject;
 mod trust_level;
 mod typed_list_store;
 mod vm_row;
+mod vm_status;
 mod volume_widget;
 mod wifi_settings_page;
 mod window;
@@ -44,11 +45,11 @@ use std::path::PathBuf;
 use givc_client::endpoint::TlsConfig;
 use gtk::prelude::*;
 use gtk::{gio, glib};
-use log::debug;
-use syslog::{BasicLogger, Facility, Formatter3164};
+use syslog::{BasicLogger, Formatter3164};
 
 use crate::wireguard_vms::initialize_wvm_list;
 use env_logger::Builder;
+use prelude::*;
 
 const ADMIN_SERVICE_ADDR: &str = "192.168.101.10";
 const ADMIN_SERVICE_PORT: u16 = 9001;
@@ -84,7 +85,7 @@ struct Args {
     #[arg(long, default_value = "/etc/ctrl-panel/wireguard-gui-vms.txt")]
     wireguardlist: Option<PathBuf>,
 
-    #[arg(long, default_value_t = false)]
+    #[arg(long, default_value_t)]
     notls: bool,
 
     /// Log severity
@@ -92,40 +93,38 @@ struct Args {
     pub log_level: log::Level,
 
     /// Log output
-    #[arg(long, value_enum, default_value_t = Default::default())]
+    #[arg(long, value_enum, default_value_t)]
     pub log_output: LogOutput,
 }
 
 fn initialize_logger(args: &Args) {
     // Initialize env_logger
-    let log_output = args.log_output;
     let log_level = args.log_level.to_level_filter();
-    if LogOutput::Stdout == log_output {
-        // You can set the level in code here
-        Builder::new()
-            .filter_level(log_level) // Set to Debug level in code
-            .init();
-        println!("Logging to stdout");
-    } else if LogOutput::Syslog == log_output {
-        println!("Logging to syslog");
-        let formatter = Formatter3164 {
-            facility: Facility::LOG_USER,
-            hostname: None,
-            process: "ghaf-ctrl-panel".into(),
-            pid: 0,
-        };
-        let logger = match syslog::unix(formatter) {
-            Err(e) => {
-                println!("impossible to connect to syslog: {:?}", e);
-                return;
-            }
-            Ok(logger) => logger,
-        };
-        log::set_boxed_logger(Box::new(BasicLogger::new(logger)))
-            .map(|()| log::set_max_level(log_level))
-            .expect("Failed to set logger");
-    } else {
-        panic!("Invalid log output");
+    match args.log_output {
+        LogOutput::Stdout => {
+            // You can set the level in code here
+            Builder::new()
+                .filter_level(log_level) // Set to Debug level in code
+                .init();
+            debug!("Logging to stdout");
+        }
+        LogOutput::Syslog => {
+            debug!("Logging to syslog");
+            let formatter = Formatter3164 {
+                process: "ghaf-ctrl-panel".into(),
+                ..Default::default()
+            };
+            let logger = match syslog::unix(formatter) {
+                Err(e) => {
+                    error!("Failed to connect to syslog: {e}");
+                    return;
+                }
+                Ok(logger) => logger,
+            };
+            log::set_boxed_logger(Box::new(BasicLogger::new(logger)))
+                .expect("Failed to set logger");
+            log::set_max_level(log_level);
+        }
     }
 
     debug!("Logger initialized");
@@ -165,7 +164,7 @@ fn main() /*-> glib::ExitCode*/
     };
 
     //read file with wireguard VMs
-    initialize_wvm_list(args.wireguardlist.expect("wireguard vm list file required"));
+    initialize_wvm_list(&args.wireguardlist.expect("wireguard vm list file required"));
 
     // Load resources
     gio::resources_register_include!("control_panel_gui.gresource")
@@ -176,7 +175,7 @@ fn main() /*-> glib::ExitCode*/
     // desktop features such as file opening and single-instance applications.
     let app = ControlPanelGuiApplication::new(
         "org.gnome.controlpanelgui",
-        &gio::ApplicationFlags::empty(),
+        gio::ApplicationFlags::empty(),
         addr,
         port,
         tls_info,
@@ -187,6 +186,5 @@ fn main() /*-> glib::ExitCode*/
     // is the code you see when you do `echo $?` after running a command in a
     // terminal.
     //put empty array as args, cause we need our ones to be processed
-    let empty: Vec<String> = vec![];
-    app.run_with_args(&empty);
+    app.run_with_args(&[""; 0]);
 }
