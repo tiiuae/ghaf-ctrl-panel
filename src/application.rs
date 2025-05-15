@@ -8,7 +8,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::add_network_popup::AddNetworkPopup;
-use crate::audio_control::imp::AudioControl;
+use crate::audio_control::AudioControl;
 use crate::confirm_display_settings_popup::ConfirmDisplaySettingsPopup;
 use crate::connection_config::ConnectionConfig;
 use crate::control_action::ControlAction;
@@ -23,6 +23,22 @@ use givc_client::endpoint::TlsConfig;
 use givc_common::address::EndpointAddress;
 use log::debug;
 use regex::Regex;
+
+trait AudioVariantExt {
+    fn def_params(&self) -> (i32, i32);
+    fn vol_params(&self) -> (i32, i32, i32);
+}
+
+impl AudioVariantExt for Variant {
+    fn def_params(&self) -> (i32, i32) {
+        self.get().unwrap()
+    }
+
+    fn vol_params(&self) -> (i32, i32, i32) {
+        self.get().unwrap()
+    }
+}
+
 mod imp {
     use super::*;
 
@@ -289,36 +305,36 @@ impl ControlPanelGuiApplication {
             SettingsAction::MouseSpeed => todo!(),
             SettingsAction::KeyboardLayout => todo!(),
             SettingsAction::Speaker => {
-                let vec = value.get::<Vec<i32>>().unwrap();
-                println!("Speaker changed: {}", vec[0]);
+                let (id, dev_type) = value.def_params();
+                println!("Speaker changed: {}", id);
                 self.imp()
                     .audio_control
                     .borrow()
-                    .set_default_device(vec[0], vec[1]);
+                    .set_default_device(id, dev_type);
             }
             SettingsAction::SpeakerVolume => {
-                let vec = value.get::<Vec<i32>>().unwrap();
-                println!("Speaker volume: {}", vec[2]);
+                let (id, dev_type, vol) = value.vol_params();
+                println!("Speaker volume: {}", vol);
                 self.imp()
                     .audio_control
                     .borrow()
-                    .set_device_volume(vec[0], vec[1], vec[2]);
+                    .set_device_volume(id, dev_type, vol);
             }
             SettingsAction::Mic => {
-                let vec = value.get::<Vec<i32>>().unwrap();
-                println!("Mic changed: {}", vec[0]);
+                let (id, dev_type) = value.def_params();
+                println!("Mic changed: {}", id);
                 self.imp()
                     .audio_control
                     .borrow()
-                    .set_default_device(vec[0], vec[1]);
+                    .set_default_device(id, dev_type);
             }
             SettingsAction::MicVolume => {
-                let vec = value.get::<Vec<i32>>().unwrap();
-                println!("Mic volume: {}", vec[2]);
+                let (id, dev_type, vol) = value.vol_params();
+                println!("Mic volume: {}", vol);
                 self.imp()
                     .audio_control
                     .borrow()
-                    .set_device_volume(vec[0], vec[1], vec[2]);
+                    .set_device_volume(id, dev_type, vol);
             }
             SettingsAction::ShowAddNetworkPopup => {
                 let app = self.clone();

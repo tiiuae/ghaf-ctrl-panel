@@ -74,8 +74,7 @@ mod imp {
         fn on_mic_changed(&self) {
             if let Some(selected_item) = self.mic_switch.selected_item() {
                 if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
-                    let vec = vec![obj.id(), obj.dev_type()];
-                    let variant = vec.to_variant();
+                    let variant = (obj.id(), obj.dev_type()).to_variant();
                     self.obj().emit_by_name::<()>("mic-changed", &[&variant]);
 
                     // binding
@@ -87,8 +86,7 @@ mod imp {
         fn on_speaker_changed(&self) {
             if let Some(selected_item) = self.speaker_switch.selected_item() {
                 if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
-                    let vec = vec![obj.id(), obj.dev_type()];
-                    let variant = vec.to_variant();
+                    let variant = (obj.id(), obj.dev_type()).to_variant();
                     self.obj()
                         .emit_by_name::<()>("speaker-changed", &[&variant]);
 
@@ -103,10 +101,7 @@ mod imp {
                 if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
                     let value = scale.value() as i32;
                     if (value != obj.volume()) {
-                        let id = obj.id();
-                        let dev_type = obj.dev_type();
-                        let vec = vec![id, dev_type, value];
-                        let variant = vec.to_variant();
+                        let variant = (obj.id(), obj.dev_type(), value).to_variant();
                         self.obj()
                             .emit_by_name::<()>("mic-volume-changed", &[&variant]);
                         //save new value
@@ -121,10 +116,7 @@ mod imp {
                 if let Some(obj) = selected_item.downcast_ref::<AudioDeviceGObject>() {
                     let value = scale.value() as i32;
                     if (value != obj.volume()) {
-                        let id = obj.id();
-                        let dev_type = obj.dev_type();
-                        let vec = vec![id, dev_type, value];
-                        let variant = vec.to_variant();
+                        let variant = (obj.id(), obj.dev_type(), value).to_variant();
                         self.obj()
                             .emit_by_name::<()>("speaker-volume-changed", &[&variant]);
                         //save new value
