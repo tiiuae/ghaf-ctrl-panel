@@ -1,35 +1,41 @@
-use glib::subclass::Signal;
-use glib::{Binding, Variant};
-use gtk::gio::ListStore;
+use gtk::gio::ListModel;
+use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, ListBox, Stack};
-use std::cell::RefCell;
-use std::sync::OnceLock;
 
 //use crate::service_gobject::ServiceGObject; will be used in the future
-use crate::admin_settings_page::AdminSettingsPage;
-use crate::audio_settings::AudioSettings;
-use crate::bug_report_settings_page::BugReportSettingsPage;
 use crate::control_action::ControlAction;
-use crate::display_settings_page::DisplaySettingsPage;
-use crate::info_settings_page::InfoSettingsPage;
-use crate::keyboard_settings_page::KeyboardSettingsPage;
-use crate::language_region_settings_page::LanguageRegionSettingsPage;
-use crate::mouse_settings_page::MouseSettingsPage;
-use crate::security_settings_page::SecuritySettingsPage;
-use crate::settings_action::SettingsAction;
 use crate::settings_gobject::SettingsGObject;
-use crate::wifi_settings_page::WifiSettingsPage;
 
 mod imp {
-    use super::*;
+    use glib::subclass::Signal;
+    use glib::Binding;
+    use gtk::prelude::*;
+    use gtk::subclass::prelude::*;
+    use gtk::{glib, CompositeTemplate, ListBox, Stack};
+    use std::cell::RefCell;
+    use std::sync::OnceLock;
+
+    //use crate::service_gobject::ServiceGObject; will be used in the future
+    use crate::admin_settings_page::AdminSettingsPage;
+    use crate::audio_device_gobject::AudioDeviceType;
+    use crate::audio_settings::AudioSettings;
+    use crate::bug_report_settings_page::BugReportSettingsPage;
+    use crate::control_action::ControlAction;
+    use crate::display_settings_page::DisplaySettingsPage;
+    use crate::info_settings_page::InfoSettingsPage;
+    use crate::keyboard_settings_page::KeyboardSettingsPage;
+    use crate::language_region_settings_page::LanguageRegionSettingsPage;
+    use crate::mouse_settings_page::MouseSettingsPage;
+    use crate::security_settings_page::SecuritySettingsPage;
+    use crate::settings_action::SettingsAction;
+    use crate::wifi_settings_page::WifiSettingsPage;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/settings.ui")]
     pub struct Settings {
         #[template_child]
-        pub settings_list_box: TemplateChild<ListBox>,
+        pub list_box: TemplateChild<ListBox>,
         #[template_child]
         pub stack: TemplateChild<Stack>,
         #[template_child]
@@ -53,7 +59,7 @@ mod imp {
         #[template_child]
         pub bug_report_page: TemplateChild<BugReportSettingsPage>,
 
-        //pub vm_model: RefCell<ListStore>,
+        //pub vm_model: RefCell<ListModel>,
 
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
@@ -85,24 +91,21 @@ mod imp {
         #[template_callback]
         fn on_show_add_network_popup(&self) {
             let action = SettingsAction::ShowAddNetworkPopup;
-            let empty = Variant::from(None::<()>.as_ref());
-            self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &empty]);
+            self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
         #[template_callback]
         fn on_show_add_new_keyboard_popup(&self) {
             let action = SettingsAction::ShowAddKeyboardPopup;
-            let empty = Variant::from(None::<()>.as_ref());
-            self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &empty]);
+            self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
 
         #[template_callback]
         fn on_locale_timezone_default(&self) {
-            let action = SettingsAction::RegionNLanguage;
-            let variant = ("en_US.utf8", "UTC").to_variant();
-            self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &variant]);
+            let action = SettingsAction::RegionNLanguage {
+                locale: "en_US.utf8".into(),
+                timezone: "UTC".into(),
+            };
+            self.obj().emit_by_name::<()>("settings-action", &[&action]);
             self.language_region_settings_page
                 .locale_select_find(|obj| obj.name() == "en_US.utf8");
             self.language_region_settings_page
@@ -111,86 +114,92 @@ mod imp {
 
         #[template_callback]
         fn on_locale_timezone_changed(&self, locale: String, timezone: String) {
-            let action = SettingsAction::RegionNLanguage;
-            let variant = (locale, timezone).to_variant();
-            self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &variant]);
+            let action = SettingsAction::RegionNLanguage { locale, timezone };
+            self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
 
         #[template_callback]
         fn on_show_confirm_display_settings_popup(&self) {
             let action = SettingsAction::ShowConfirmDisplaySettingsPopup;
-            let empty = Variant::from(None::<()>.as_ref());
-            self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &empty]);
+            self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
+
         #[template_callback]
         fn on_show_error_popup(&self) {
-            let action = SettingsAction::ShowErrorPopup;
-            let message = Variant::from(String::from("Display settings cannot be set."));
-            self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &message]);
-        }
-        #[template_callback]
-        fn on_mic_changed(&self, value: Variant) {
-            let action = SettingsAction::Mic;
-            self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &value]);
-        }
-        #[template_callback]
-        fn on_speaker_changed(&self, value: Variant) {
-            let action = SettingsAction::Speaker;
-            self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &value]);
-        }
-        #[template_callback]
-        fn on_mic_volume_changed(&self, value: Variant) {
-            let action = SettingsAction::MicVolume;
-            self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &value]);
+            let action = SettingsAction::ShowErrorPopup {
+                message: "Display settings cannot be set.".into(),
+            };
+            self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
 
         #[template_callback]
-        fn on_mic_mute_changed(&self, value: Variant) {
-            let action = SettingsAction::MicMute;
-            self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &value]);
+        fn on_mic_changed(&self, id: i32, dev_type: AudioDeviceType) {
+            let action = SettingsAction::Mic { id, dev_type };
+            self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
 
         #[template_callback]
-        fn on_speaker_volume_changed(&self, value: Variant) {
-            let action = SettingsAction::SpeakerVolume;
-            self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &value]);
+        fn on_speaker_changed(&self, id: i32, dev_type: AudioDeviceType) {
+            let action = SettingsAction::Speaker { id, dev_type };
+            self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
 
         #[template_callback]
-        fn on_speaker_mute_changed(&self, value: Variant) {
-            let action = SettingsAction::SpeakerMute;
-            self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &value]);
+        fn on_mic_volume_changed(&self, id: i32, dev_type: AudioDeviceType, volume: i32) {
+            let action = SettingsAction::MicVolume {
+                id,
+                dev_type,
+                volume,
+            };
+            self.obj().emit_by_name::<()>("settings-action", &[&action]);
+        }
+
+        #[template_callback]
+        fn on_mic_mute_changed(&self, id: i32, dev_type: AudioDeviceType, muted: bool) {
+            let action = SettingsAction::MicMute {
+                id,
+                dev_type,
+                muted,
+            };
+            self.obj().emit_by_name::<()>("settings-action", &[&action]);
+        }
+
+        #[template_callback]
+        fn on_speaker_volume_changed(&self, id: i32, dev_type: AudioDeviceType, volume: i32) {
+            let action = SettingsAction::SpeakerVolume {
+                id,
+                dev_type,
+                volume,
+            };
+            self.obj().emit_by_name::<()>("settings-action", &[&action]);
+        }
+
+        #[template_callback]
+        fn on_speaker_mute_changed(&self, id: i32, dev_type: AudioDeviceType, muted: bool) {
+            let action = SettingsAction::SpeakerMute {
+                id,
+                dev_type,
+                muted,
+            };
+            self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
 
         #[template_callback]
         fn on_open_advanced_audio_settings(&self) {
             let action = SettingsAction::OpenAdvancedAudioSettingsWidget;
-            let empty = Variant::from(None::<()>.as_ref());
-            self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &empty]);
+            self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
+
         #[template_callback]
         fn on_check_for_update_request(&self) {
             let action = SettingsAction::CheckForUpdateRequest;
-            let empty = Variant::from(None::<()>.as_ref());
-            self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &empty]);
+            self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
+
         #[template_callback]
         fn on_update_request(&self) {
             let action = SettingsAction::UpdateRequest;
-            let empty = Variant::from(None::<()>.as_ref());
-            self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &empty]);
+            self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
     } //end #[gtk::template_callbacks]
 
@@ -211,7 +220,7 @@ mod imp {
                         .param_types([ControlAction::static_type(), String::static_type()])
                         .build(),
                     Signal::builder("settings-action")
-                        .param_types([SettingsAction::static_type(), Variant::static_type()])
+                        .param_types([SettingsAction::static_type()])
                         .build(),
                 ]
             })
@@ -237,21 +246,22 @@ impl Settings {
         glib::Object::builder().build()
     }
 
-    pub fn set_locale_model(&self, model: ListStore, selected: Option<usize>) {
+    pub fn set_locale_model(&self, model: impl IsA<ListModel>, selected: Option<usize>) {
         self.imp()
             .language_region_settings_page
-            .set_locale_model(model, selected)
+            .set_locale_model(model, selected);
     }
 
-    pub fn set_timezone_model(&self, model: ListStore, selected: Option<usize>) {
+    pub fn set_timezone_model(&self, model: impl IsA<ListModel>, selected: Option<usize>) {
         self.imp()
             .language_region_settings_page
-            .set_timezone_model(model, selected)
+            .set_timezone_model(model, selected);
     }
 
-    pub fn set_vm_model(&self, model: ListStore) {
-        self.imp().info_settings_page.set_vm_model(model)
+    pub fn set_vm_model(&self, model: impl IsA<ListModel>) {
+        self.imp().info_settings_page.set_vm_model(model);
     }
+
     pub fn init(&self) {
         let this = self.clone();
         self.imp()
@@ -264,8 +274,8 @@ impl Settings {
                 None
             });
 
-        if let Some(row) = self.imp().settings_list_box.row_at_index(0) {
-            self.imp().settings_list_box.select_row(Some(&row));
+        if let Some(row) = self.imp().list_box.row_at_index(0) {
+            self.imp().list_box.select_row(Some(&row));
         }
     }
 
@@ -286,7 +296,7 @@ impl Settings {
         self.imp().display_settings_page.restore_default();
     }
 
-    pub fn set_audio_devices(&self, devices: ListStore) {
+    pub fn set_audio_devices(&self, devices: ListModel) {
         self.imp().audio_settings_page.set_audio_devices(devices);
     }
 }

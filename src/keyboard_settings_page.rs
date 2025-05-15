@@ -1,15 +1,18 @@
-use glib::subclass::Signal;
-use glib::Binding;
-use gtk::prelude::*;
+use gtk::glib;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, DropDown, ListView};
-use std::cell::RefCell;
-use std::sync::OnceLock;
 
 use crate::settings_gobject::SettingsGObject;
 
 mod imp {
-    use super::*;
+    use glib::subclass::Signal;
+    use glib::Binding;
+    use gtk::prelude::*;
+    use gtk::subclass::prelude::*;
+    use gtk::{glib, CompositeTemplate, DropDown, ListView};
+    use std::cell::RefCell;
+    use std::sync::OnceLock;
+
+    use crate::prelude::*;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/keyboard_settings_page.ui")]
@@ -43,7 +46,7 @@ mod imp {
     impl KeyboardSettingsPage {
         #[template_callback]
         fn on_add_clicked(&self) {
-            println!("Add new keyboard!");
+            debug!("Add new keyboard!");
             self.obj()
                 .emit_by_name::<()>("show-add-new-keyboard-popup", &[]);
         }
@@ -53,10 +56,6 @@ mod imp {
         fn constructed(&self) {
             // Call "constructed" on parent
             self.parent_constructed();
-
-            // Setup
-            let obj = self.obj();
-            obj.init();
         }
 
         fn signals() -> &'static [Signal] {
@@ -90,8 +89,6 @@ impl KeyboardSettingsPage {
     pub fn new() -> Self {
         glib::Object::builder().build()
     }
-
-    pub fn init(&self) {}
 
     pub fn bind(&self, _settings_object: &SettingsGObject) {
         //unbind previous ones

@@ -1,15 +1,18 @@
-use glib::subclass::Signal;
-use glib::Binding;
-use gtk::prelude::*;
+use gtk::glib;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Scale, Switch};
-use std::cell::RefCell;
-use std::sync::OnceLock;
 
 use crate::settings_gobject::SettingsGObject;
 
 mod imp {
-    use super::*;
+    use glib::subclass::Signal;
+    use glib::Binding;
+    use gtk::prelude::*;
+    use gtk::subclass::prelude::*;
+    use gtk::{glib, CompositeTemplate, Scale, Switch};
+    use std::cell::RefCell;
+    use std::sync::OnceLock;
+
+    use crate::prelude::*;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/mouse_settings_page.ui")]
@@ -44,13 +47,13 @@ mod imp {
         #[template_callback]
         fn on_mouse_speed_changed(&self, scale: &Scale) {
             let value = scale.value();
-            println!("Mouse speed changed: {}", value);
+            debug!("Mouse speed changed: {value}");
             self.obj()
                 .emit_by_name::<()>("mouse-speed-changed", &[&value]);
         }
         #[template_callback]
         fn on_button_switch_state_changed(&self, value: bool) -> bool {
-            println!("Mouse buttons switched: {}", value);
+            debug!("Mouse buttons switched: {value}");
             self.obj()
                 .emit_by_name::<()>("mouse-buttons-changed", &[&value]);
             false //propagate event futher
@@ -61,10 +64,6 @@ mod imp {
         fn constructed(&self) {
             // Call "constructed" on parent
             self.parent_constructed();
-
-            // Setup
-            let obj = self.obj();
-            obj.init();
         }
 
         fn signals() -> &'static [Signal] {
@@ -100,8 +99,6 @@ impl MouseSettingsPage {
     pub fn new() -> Self {
         glib::Object::builder().build()
     }
-
-    pub fn init(&self) {}
 
     pub fn bind(&self, _settings_object: &SettingsGObject) {
         //unbind previous ones

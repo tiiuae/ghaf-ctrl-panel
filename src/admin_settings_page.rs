@@ -1,15 +1,17 @@
-use glib::subclass::Signal;
-use glib::Binding;
-use gtk::prelude::*;
+use gtk::glib;
 use gtk::subclass::prelude::*;
-use gtk::{glib, Box, CompositeTemplate, Label, Notebook};
-use std::cell::RefCell;
-use std::sync::OnceLock;
 
 use crate::settings_gobject::SettingsGObject;
 
 mod imp {
-    use super::*;
+    use crate::prelude::*;
+    use glib::subclass::Signal;
+    use glib::Binding;
+    use gtk::prelude::*;
+    use gtk::subclass::prelude::*;
+    use gtk::{glib, Box, CompositeTemplate, Label, Notebook};
+    use std::cell::RefCell;
+    use std::sync::OnceLock;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/admin_settings_page.ui")]
@@ -51,7 +53,7 @@ mod imp {
     impl AdminSettingsPage {
         #[template_callback]
         fn on_update_clicked(&self) {
-            println!("Update clicked!");
+            debug!("Update clicked!");
             self.obj().emit_by_name::<()>("update-request", &[]);
             //check for updates and get the result
             //mock
@@ -67,10 +69,6 @@ mod imp {
         fn constructed(&self) {
             // Call "constructed" on parent
             self.parent_constructed();
-
-            // Setup
-            let obj = self.obj();
-            obj.init();
         }
         fn signals() -> &'static [Signal] {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
@@ -101,8 +99,6 @@ impl AdminSettingsPage {
     pub fn new() -> Self {
         glib::Object::builder().build()
     }
-
-    pub fn init(&self) {}
 
     pub fn bind(&self, _settings_object: &SettingsGObject) {
         //unbind previous ones

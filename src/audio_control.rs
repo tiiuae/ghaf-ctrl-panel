@@ -1,19 +1,16 @@
 use futures::StreamExt;
-use gio::ListStore;
+use gio::ListModel;
 use gtk::{gio, glib, prelude::*};
-use log::{debug, error, warn};
 use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
 use zbus::Connection;
 
-use crate::audio_device_gobject::{imp::AudioDeviceType, AudioDeviceGObject};
-use crate::typed_list_store::imp::TypedListStore;
+use crate::audio_device_gobject::{AudioDeviceGObject, AudioDeviceType};
+use crate::prelude::*;
 
 mod imp {
-    use zbus::proxy;
-
-    #[proxy(
+    #[zbus::proxy(
         interface = "org.ghaf.Audio",
         default_service = "org.ghaf.Audio",
         default_path = "/org/ghaf/Audio"
@@ -113,7 +110,7 @@ impl AudioControl {
     fn fill_by_mock_data(list: &TypedListStore<AudioDeviceGObject>) {
         list.append(&AudioDeviceGObject::new(
             1,
-            AudioDeviceType::Sink as i32,
+            AudioDeviceType::Sink,
             "Speakers".to_string(),
             75,
             false,
@@ -121,7 +118,7 @@ impl AudioControl {
         ));
         list.append(&AudioDeviceGObject::new(
             2,
-            AudioDeviceType::Sink as i32,
+            AudioDeviceType::Sink,
             "Headphones".to_string(),
             50,
             true,
@@ -129,7 +126,7 @@ impl AudioControl {
         ));
         list.append(&AudioDeviceGObject::new(
             3,
-            AudioDeviceType::Source as i32,
+            AudioDeviceType::Source,
             "Microphone".to_string(),
             100,
             false,
@@ -137,7 +134,7 @@ impl AudioControl {
         ));
         list.append(&AudioDeviceGObject::new(
             4,
-            AudioDeviceType::Source as i32,
+            AudioDeviceType::Source,
             "External Mic".to_string(),
             85,
             true,
@@ -145,7 +142,7 @@ impl AudioControl {
         ));
     }
 
-    pub fn fetch_audio_devices(&self, cb: impl Fn(TypedListStore<AudioDeviceGObject>) + 'static) {
+    pub fn fetch_audio_devices(&self, cb: impl Fn(TypedListModel<AudioDeviceGObject>) + 'static) {
         let devices = self.devices.clone();
 
         #[cfg(not(feature = "mock"))]
@@ -172,7 +169,7 @@ impl AudioControl {
                     async move {
                         // TODO: Currently cannot tell when initial device dump is finished
                         glib::timeout_future_seconds(1).await;
-                        cb(devices);
+                        cb(devices.into());
                     }
             ));
 
@@ -193,6 +190,9 @@ impl AudioControl {
                                     Volume: {volume}, Muted: {is_muted}, Default: {is_default}, Event: {event}"
                         );
 
+                        let Some(device_type) = AudioDeviceType::from_repr(device_type) else {
+                            continue;
+                        };
                         if name.to_lowercase().contains("monitor") {
                             debug!("AudioControl: Monitor ignored {id}, {device_type}, {name}!");
                         } else {
@@ -231,7 +231,7 @@ impl AudioControl {
                                 }
                                 2 => {
                                     // remove
-                                    devices.retain(|o| o.downcast_ref::<AudioDeviceGObject>().is_none_or(|o| o.id() != id || o.dev_type() != device_type));
+                                    devices.retain(|o| o.id() != id || o.dev_type() != device_type);
                                 }
                                 _ => {
                                     debug!("AudioControl: No such event");
@@ -252,13 +252,13 @@ impl AudioControl {
             devices,
             async move {
                 glib::timeout_future_seconds(1).await;
-                cb(devices);
+                cb(devices.into());
             }
         ));
     }
 
-    pub fn get_devices_list(&self) -> ListStore {
-        self.devices.deref().clone()
+    pub fn get_devices_list(&self) -> ListModel {
+        self.devices.deref().clone().upcast()
     }
 
     pub fn set_device_volume(&self, id: i32, dev_type: i32, value: i32) {

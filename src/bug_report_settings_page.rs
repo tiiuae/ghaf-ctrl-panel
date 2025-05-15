@@ -1,22 +1,23 @@
-use crate::github::create_github_issue;
-use chrono::Utc;
-use glib::subclass::Signal;
-use glib::{Binding, Properties};
-use gtk::prelude::*;
+use gtk::glib;
 use gtk::subclass::prelude::*;
-use gtk::{
-    glib, Box, CheckButton, CompositeTemplate, Entry, Label, StateFlags, TextBuffer, TextView,
-};
-use std::cell::RefCell;
-use std::fs;
-use std::process::{Command, Stdio};
-use std::sync::OnceLock;
 
-//use crate::vm_gobject::VMGObject; will be used in the future
 use crate::settings_gobject::SettingsGObject;
 
 mod imp {
-    use super::*;
+    use crate::github::create_github_issue;
+    use chrono::Utc;
+    use glib::subclass::Signal;
+    use glib::{Binding, Properties};
+    use gtk::prelude::*;
+    use gtk::subclass::prelude::*;
+    use gtk::{glib, Box, CheckButton, CompositeTemplate, Entry, Label, TextBuffer, TextView};
+    use std::cell::RefCell;
+    use std::fmt::Write;
+    use std::fs;
+    use std::process::{Command, Stdio};
+    use std::sync::OnceLock;
+
+    use crate::prelude::*;
 
     #[derive(Default)]
     pub struct Answers {
@@ -96,7 +97,7 @@ mod imp {
             if !self.other_1.is_active() {
                 self.other_1.set_active(true);
                 self.on_a1_toggled(&self.other_1);
-            };
+            }
             self.obj()
                 .set_property("issue", self.entry_1.text().to_string());
         }
@@ -106,7 +107,7 @@ mod imp {
             if !self.other_2.is_active() {
                 self.other_2.set_active(true);
                 self.on_a2_toggled(&self.other_2);
-            };
+            }
             self.obj()
                 .set_property("related", self.entry_2.text().to_string());
         }
@@ -116,7 +117,7 @@ mod imp {
             if !self.other_3.is_active() {
                 self.other_3.set_active(true);
                 self.on_a3_toggled(&self.other_3);
-            };
+            }
             self.obj()
                 .set_property("app", self.entry_3.text().to_string());
         }
@@ -127,11 +128,9 @@ mod imp {
                 let label = button.label();
 
                 match label.as_deref() {
-                    None => self
-                        .obj()
-                        .set_property("issue", self.entry_1.text().to_string()),
-                    Some(text) => self.obj().set_property("issue", text.to_string()),
-                };
+                    None => self.obj().set_property("issue", self.entry_1.text()),
+                    Some(text) => self.obj().set_property("issue", text),
+                }
             }
         }
 
@@ -153,7 +152,7 @@ mod imp {
                             .set_property("related", self.entry_2.text().to_string());
                         self.qbox_3.set_visible(false);
                     }
-                };
+                }
             }
         }
 
@@ -167,7 +166,7 @@ mod imp {
                         .obj()
                         .set_property("app", self.entry_3.text().to_string()),
                     Some(text) => self.obj().set_property("app", text.to_string()),
-                };
+                }
             }
         }
 
@@ -202,38 +201,28 @@ mod imp {
             let related = self.obj().property::<String>("related");
             let app = self.obj().property::<String>("app");
 
-            let id = match self.get_device_id(device_id_path) {
-                Some(id) => id,
-                None => {
-                    eprintln!("Can't get device ID");
-                    String::from("")
-                }
+            let id = if let Some(id) = Self::get_device_id(device_id_path) {
+                id
+            } else {
+                error!("Can't get device ID");
+                String::new()
             };
-            let sw = match self.get_sw_version() {
-                Some(sw) => sw,
-                None => {
-                    eprintln!("Can't get SW Version");
-                    String::from("")
-                }
-            };
+            let sw = Self::get_sw_version().unwrap_or_else(|| {
+                error!("Can't get SW Version");
+                String::new()
+            });
 
             // TODO: Get system version when it is available from host
             // let system = self.get_system_version();
 
-            if issue.is_empty() {
-                enable = false;
-                self.required_issue.set_visible(true);
-                eprintln!("Issue is not selected");
-            } else {
-                self.required_issue.set_visible(false);
-            }
-
-            if related.is_empty() {
-                enable = false;
-                self.required_related.set_visible(true);
-                eprintln!("Related is not selected");
-            } else {
-                self.required_related.set_visible(false);
+            for (content, required) in [
+                (&issue, &self.required_issue),
+                (&related, &self.required_related),
+                (&title, &self.required_title),
+                (&description, &self.required_description),
+            ] {
+                enable &= !content.is_empty();
+                required.set_visible(content.is_empty());
             }
 
             if app.is_empty() {
@@ -241,43 +230,29 @@ mod imp {
                     enable = false;
                     self.required_app.set_visible(true);
                 }
-                eprintln!("App is not selected");
+                error!("App is not selected");
             } else {
                 self.required_app.set_visible(false);
             }
 
-            if title.is_empty() {
-                enable = false;
-                self.required_title.set_visible(true);
-                eprintln!("Title is empty");
-            } else {
-                self.required_title.set_visible(false);
-            }
-
-            if description.is_empty() {
-                enable = false;
-                self.required_description.set_visible(true);
-                eprintln!("Description is empty");
-            } else {
-                self.required_description.set_visible(false);
-            }
-
             if enable {
                 // Prepare email content with optional attachment
-                let mut email_body = format!("Time: {}\n\n", time);
-                email_body.push_str("Bug Report\n\n");
-                email_body.push_str(&format!("Logging ID: {}\n", id));
-                email_body.push_str(&format!("SW Version: {}\n", sw));
-                email_body.push_str(&format!("Issue: {}\n", issue));
-                email_body.push_str(&format!("Relates to: {}\n", related));
+                let mut email_body = format!(
+                    "Time: {time}\n\n\
+                                              Bug Report\n\n\
+                                              Logging ID: {id}\n\
+                                              SW Version: {sw}\n\
+                                              Issue: {issue}\n\
+                                              Relates to: {related}\n"
+                );
 
                 if !app.is_empty() {
-                    email_body.push_str(&format!("App: {}\n\n", app));
+                    let _ = write!(&mut email_body, "App: {app}\n\n");
                 }
 
-                email_body.push_str(&format!("Description:\n{}\n", description));
+                let _ = write!(&mut email_body, "Description:\n{description}\n");
 
-                let email_title = format!("{}: {}", issue, title);
+                let email_title = format!("{issue}: {title}");
                 let (tx, rx) = async_channel::bounded(1);
 
                 std::thread::spawn(move || {
@@ -291,20 +266,19 @@ mod imp {
 
                     match rx.recv().await {
                         Ok(Ok(issue)) => {
-                            eprintln!("Issue {} created", issue.url);
+                            error!("Issue {url} created", url = issue.url);
                             this.summary.set_label("Report sent successfully");
                             this.summary.remove_css_class("required-text");
                             this.summary.add_css_class("success-text");
                             this.summary.set_visible(true);
                         }
                         e => {
-                            eprintln!("Issue sending failed: {e:?}");
+                            error!("Issue sending failed: {e:?}");
                             if let Ok(Err(e)) = e {
                                 this.summary
                                     .set_label(&format!("Error when sending report{e}"));
                             } else {
-                                this.summary
-                                    .set_label(&format!("Error when sending report"));
+                                this.summary.set_label("Error when sending report");
                             }
 
                             this.summary.remove_css_class("success-text");
@@ -317,20 +291,14 @@ mod imp {
         }
 
         #[inline]
-        fn get_device_id(&self, path: &str) -> Option<String> {
-            match fs::read_to_string(path) {
-                Ok(device_id) => {
-                    return Some(device_id);
-                }
-                Err(_) => {
-                    eprintln!("Failed to read: {}", path);
-                }
-            }
-            None
+        fn get_device_id<P: AsRef<std::path::Path> + std::fmt::Display>(path: P) -> Option<String> {
+            fs::read_to_string(&path)
+                .inspect_err(|_| error!("Failed to read: {path}"))
+                .ok()
         }
 
         #[inline]
-        fn get_sw_version(&self) -> Option<String> {
+        fn get_sw_version() -> Option<String> {
             {
                 let output = Command::new("ghaf-version")
                     .env("PATH", "/run/current-system/sw/bin")
@@ -342,24 +310,26 @@ mod imp {
                     Ok(output) => {
                         if output.status.success() {
                             let stdout = String::from_utf8_lossy(&output.stdout);
-                            println!("ghaf-version: {}", stdout);
-                            return Some(stdout.to_string());
+                            debug!("ghaf-version: {stdout}");
+                            Some(stdout.to_string())
                         } else {
                             let stderr = String::from_utf8_lossy(&output.stderr);
-                            eprintln!("ghaf-version error: {}", stderr);
+                            error!("ghaf-version error: {stderr}");
+                            None
                         }
                     }
                     Err(e) => {
-                        eprintln!("Failed to execute ghaf-version: {}", e);
+                        error!("Failed to execute ghaf-version: {e}");
+                        None
                     }
                 }
-                None
             }
         }
 
         // TODO: This will be used when the system version is readible from VM
+        #[allow(dead_code)]
         #[inline]
-        fn _get_system_version(&self) -> String {
+        fn _get_system_version() -> String {
             let manufacturer: String;
             let version: String;
             let product: String;
@@ -376,16 +346,16 @@ mod imp {
                 Ok(output) => {
                     if output.status.success() {
                         let stdout = String::from_utf8_lossy(&output.stdout);
-                        println!("system-manufacturer: {}", stdout);
+                        debug!("system-manufacturer: {stdout}");
                         manufacturer = stdout.to_string();
                     } else {
                         let stderr = String::from_utf8_lossy(&output.stderr);
-                        eprintln!("system-manufacturer: {}", stderr);
+                        error!("system-manufacturer: {stderr}");
                         manufacturer = String::from("no-manufacturer");
                     }
                 }
                 Err(e) => {
-                    eprintln!("Failed to execute dmidecode: {}", e);
+                    error!("Failed to execute dmidecode: {e}");
                     manufacturer = String::from("manufacturer-failed");
                 }
             }
@@ -401,16 +371,16 @@ mod imp {
                 Ok(output) => {
                     if output.status.success() {
                         let stdout = String::from_utf8_lossy(&output.stdout);
-                        println!("system-version: {}", stdout);
+                        debug!("system-version: {stdout}");
                         version = stdout.to_string();
                     } else {
                         let stderr = String::from_utf8_lossy(&output.stderr);
-                        eprintln!("system-version: {}", stderr);
+                        error!("system-version: {stderr}");
                         version = String::from("no-version");
                     }
                 }
                 Err(e) => {
-                    eprintln!("Failed to execute dmidecode: {}", e);
+                    error!("Failed to execute dmidecode: {e}");
                     version = String::from("version-failed");
                 }
             }
@@ -426,16 +396,16 @@ mod imp {
                 Ok(output) => {
                     if output.status.success() {
                         let stdout = String::from_utf8_lossy(&output.stdout);
-                        println!("product: {}", stdout);
+                        debug!("product: {stdout}");
                         product = stdout.to_string();
                     } else {
                         let stderr = String::from_utf8_lossy(&output.stderr);
-                        eprintln!("product: {}", stderr);
+                        error!("product: {stderr}");
                         product = String::from("no-product");
                     }
                 }
                 Err(e) => {
-                    eprintln!("Failed to execute dmidecode: {}", e);
+                    error!("Failed to execute dmidecode: {e}");
                     product = String::from("product-failed");
                 }
             }
@@ -451,21 +421,21 @@ mod imp {
                 Ok(output) => {
                     if output.status.success() {
                         let stdout = String::from_utf8_lossy(&output.stdout);
-                        println!("sku-number: {}", stdout);
+                        debug!("sku-number: {stdout}");
                         sku = stdout.to_string();
                     } else {
                         let stderr = String::from_utf8_lossy(&output.stderr);
-                        eprintln!("sku-number: {}", stderr);
+                        error!("sku-number: {stderr}");
                         sku = String::from("no-sku-number");
                     }
                 }
                 Err(e) => {
-                    eprintln!("Failed to execute dmidecode: {}", e);
+                    error!("Failed to execute dmidecode: {e}");
                     sku = String::from("sku-number-failed");
                 }
             }
 
-            return format!("{} {} {} {}", manufacturer, version, product, sku);
+            format!("{manufacturer} {version} {product} {sku}")
         }
 
         #[inline]
@@ -485,10 +455,6 @@ mod imp {
         fn constructed(&self) {
             // Call "constructed" on parent
             self.parent_constructed();
-
-            // Setup
-            let obj = self.obj();
-            obj.init();
         }
         fn signals() -> &'static [Signal] {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
@@ -523,8 +489,6 @@ impl BugReportSettingsPage {
             .property("app", "")
             .build()
     }
-
-    pub fn init(&self) {}
 
     pub fn bind(&self, _settings_object: &SettingsGObject) {
         //unbind previous ones

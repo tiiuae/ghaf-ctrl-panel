@@ -6,12 +6,13 @@ use adw::prelude::*;
 use futures::FutureExt;
 use http::header::ACCEPT;
 use octocrab::{models::issues::Issue, Octocrab};
-use secrecy::{ExposeSecret, SecretBox, SecretString};
+use secrecy::{ExposeSecret, SecretString};
 use serde::{Deserialize, Serialize, Serializer};
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
 use std::{env, time::Duration};
 use thiserror::Error as ThisError;
+
+use crate::prelude::*;
 
 #[derive(ThisError, Debug)]
 pub enum Error {
@@ -42,6 +43,7 @@ impl std::fmt::Display for Error {
     }
 }
 
+#[allow(clippy::ref_option)]
 fn expose<S>(t: &Option<SecretString>, s: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
@@ -106,7 +108,7 @@ pub async fn auth(config: &mut GithubConfig) -> Result<(), Error> {
 
     let auth = tokio::select! {
         e = codes.poll_until_available(&crab, &client_id) => e?,
-        _ = tokio::time::sleep(timeout) => Err(Error::TimedOut)?,
+        () = tokio::time::sleep(timeout) => Err(Error::TimedOut)?,
         _ = cancel_rx.recv() => Err(Error::Cancelled)?,
     };
     set_key(config, auth.access_token)?;
@@ -117,13 +119,13 @@ pub async fn auth(config: &mut GithubConfig) -> Result<(), Error> {
 pub fn get_config_path() -> PathBuf {
     let variable_name = "GITHUB_CONFIG";
     let variable = env::var_os(variable_name);
-    match variable {
-        Some(val) => PathBuf::from(val),
-        None => {
-            println!("Missing environment variable: {variable_name}");
-            Path::new(&env::var_os("HOME").unwrap_or_else(|| "/home/ghaf".into()))
-                .join(".config/ctrl-panel/config.toml")
-        }
+
+    if let Some(val) = variable {
+        PathBuf::from(val)
+    } else {
+        warn!("Missing environment variable: {variable_name}");
+        Path::new(&env::var_os("HOME").unwrap_or_else(|| "/home/ghaf".into()))
+            .join(".config/ctrl-panel/config.toml")
     }
 }
 
@@ -138,14 +140,13 @@ pub async fn create_github_issue(title: String, content: String) -> Result<Issue
 
     let issue_body = content
         .split_once("\n\nAttachment:")
-        .map(|(a, _)| a)
-        .unwrap_or(&content);
+        .map_or(content.as_str(), |(a, _)| a);
 
-    match send_issue(&config, &title, &issue_body).await {
+    match send_issue(&config, &title, issue_body).await {
         Err(_e) => {
             auth(&mut config).await?;
             let config = load_config()?;
-            send_issue(&config, &title, &issue_body).await
+            send_issue(&config, &title, issue_body).await
         }
         ok => ok,
     }

@@ -1,21 +1,14 @@
 use adw::subclass::prelude::*;
-use gio::ListStore;
-use glib::{Properties, Variant};
+use gio::ListModel;
 use gtk::prelude::*;
-use gtk::CssProvider;
-use gtk::{gdk, gio, glib};
-use std::cell::RefCell;
-use std::rc::Rc;
+use gtk::{gio, glib};
 
 use crate::add_network_popup::AddNetworkPopup;
-use crate::audio_control::AudioControl;
 use crate::confirm_display_settings_popup::ConfirmDisplaySettingsPopup;
-use crate::connection_config::ConnectionConfig;
 use crate::control_action::ControlAction;
 use crate::data_gobject::DataGObject;
-use crate::data_provider::{DataProvider, LanguageRegionData, StatsResponse};
+pub use crate::data_provider::StatsResponse;
 use crate::error_popup::ErrorPopup;
-use crate::language_region_notify_popup::LanguageRegionNotifyPopup;
 use crate::plot::Plot;
 use crate::settings_action::SettingsAction;
 use crate::volume_widget::VolumeWidget;
@@ -25,28 +18,24 @@ use givc_common::address::EndpointAddress;
 use log::debug;
 use regex::Regex;
 
-trait AudioVariantExt {
-    fn def_params(&self) -> (i32, i32);
-    fn vol_params(&self) -> (i32, i32, i32);
-    fn mute_params(&self) -> (i32, i32, bool);
-}
-
-impl AudioVariantExt for Variant {
-    fn def_params(&self) -> (i32, i32) {
-        self.get().unwrap()
-    }
-
-    fn vol_params(&self) -> (i32, i32, i32) {
-        self.get().unwrap()
-    }
-
-    fn mute_params(&self) -> (i32, i32, bool) {
-        self.get().unwrap()
-    }
-}
-
 mod imp {
-    use super::*;
+    use adw::subclass::prelude::*;
+    use gio::ListStore;
+    use glib::Properties;
+    use gtk::prelude::*;
+    use gtk::CssProvider;
+    use gtk::{gdk, gio, glib};
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    use crate::audio_control::AudioControl;
+    use crate::connection_config::ConnectionConfig;
+    use crate::data_gobject::DataGObject;
+    use crate::data_provider::{DataProvider, LanguageRegionData};
+    use crate::language_region_notify_popup::LanguageRegionNotifyPopup;
+    use crate::prelude::*;
+    use crate::ControlPanelGuiWindow;
+    use givc_common::address::EndpointAddress;
 
     #[derive(Debug, Default, Properties)]
     #[properties(wrapper_type = super::ControlPanelGuiApplication)]
@@ -70,13 +59,13 @@ mod imp {
         fn constructed(&self) {
             self.parent_constructed();
             let obj = self.obj();
-            obj.setup_gactions();
+            self.setup_gactions();
             obj.set_accels_for_action("app.quit", &["<primary>q"]);
             obj.set_accels_for_action("app.reconnect", &["<primary>r"]);
         }
 
         fn dispose(&self) {
-            println!("App obj destroyed!");
+            debug!("App obj destroyed!");
             self.data_provider.borrow().disconnect();
             drop(self.data_provider.borrow());
         }
@@ -90,7 +79,7 @@ mod imp {
         fn activate(&self) {
             let application = self.obj();
             //load CSS styles
-            application.load_css();
+            Self::load_css();
             // Get the current window or create one if necessary
             let window = if let Some(window) = application.window() {
                 window
@@ -107,32 +96,23 @@ mod imp {
                             timezones,
                             current_timezone,
                         } = DataProvider::get_timezone_locale_info().await;
-                        let index = current_language.and_then(|cur| {
-                            languages
-                                .iter()
-                                .enumerate()
-                                .find_map(|(idx, lang)| (lang.code == cur).then_some(idx))
-                        });
-                        window.set_locale_model(
-                            languages.into_iter().map(DataGObject::from).collect(),
-                            index,
-                        );
 
-                        let index = current_timezone.and_then(|cur| {
-                            timezones
-                                .iter()
-                                .enumerate()
-                                .find_map(|(idx, tz)| (tz.code == cur).then_some(idx))
-                        });
-                        window.set_timezone_model(
-                            timezones.into_iter().map(DataGObject::from).collect(),
-                            index,
-                        );
+                        let index = current_language
+                            .and_then(|cur| languages.iter().position(|lang| lang.code == cur));
+                        let model: ListStore =
+                            languages.into_iter().map(DataGObject::from).collect();
+                        window.set_locale_model(model, index);
+
+                        let index = current_timezone
+                            .and_then(|cur| timezones.iter().position(|tz| tz.code == cur));
+                        let model: ListStore =
+                            timezones.into_iter().map(DataGObject::from).collect();
+                        window.set_timezone_model(model, index);
                     }
                 ));
 
                 self.obj().set_window(&window);
-                window
+                window.upcast()
             };
 
             // Ask the window manager/compositor to present the window
@@ -143,6 +123,123 @@ mod imp {
                 .data_provider
                 .borrow()
                 .establish_connection();
+        }
+    }
+
+    impl ControlPanelGuiApplication {
+        fn load_css() {
+            // Load the CSS file and add it to the provider
+            let provider = CssProvider::new();
+            provider.load_from_resource("/org/gnome/controlpanelgui/styles/style.css");
+
+            // Add the provider to the default screen
+            gtk::style_context_add_provider_for_display(
+                &gdk::Display::default().expect("Could not connect to a display."),
+                &provider,
+                gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+            );
+        }
+
+        pub fn set_locale_timezone(&self, locale: String, timezone: String) {
+            let popup = LanguageRegionNotifyPopup::new();
+            popup.set_transient_for(self.obj().active_window().as_ref());
+            popup.set_modal(true);
+            glib::spawn_future_local(glib::clone!(
+                #[strong(rename_to = app)]
+                self.obj(),
+                async move {
+                    let locset = app.imp().data_provider.borrow().set_locale(locale);
+                    if let Err(err) = locset.await {
+                        warn!("Locale setting failed: {err}");
+                    }
+                    let tzset = app.imp().data_provider.borrow().set_timezone(timezone);
+                    if let Err(err) = tzset.await {
+                        warn!("Timezone setting failed: {err}");
+                    }
+
+                    popup.present();
+                }
+            ));
+        }
+
+        fn build_action<F: Fn(&Self) + 'static>(
+            name: &str,
+            cb: F,
+        ) -> gio::ActionEntry<super::ControlPanelGuiApplication> {
+            type App = super::ControlPanelGuiApplication;
+            gio::ActionEntry::builder(name)
+                .activate(move |app: &App, _, _| cb(app.imp()))
+                .build()
+        }
+
+        fn setup_gactions(&self) {
+            let reconnect_action = Self::build_action("reconnect", Self::reconnect);
+            let show_config_action = Self::build_action("show-config", Self::show_config);
+            let quit_action = Self::build_action("quit", Self::clean_n_quit);
+            let about_action = Self::build_action("about", Self::show_about);
+            self.obj().add_action_entries([
+                reconnect_action,
+                show_config_action,
+                quit_action,
+                about_action,
+            ]);
+        }
+
+        //reconnect with the same config (addr:port)
+        fn reconnect(&self) {
+            self.data_provider.borrow().reconnect(None);
+        }
+
+        fn show_config(&self) {
+            let address = self.data_provider.borrow().get_current_service_address();
+            let EndpointAddress::Tcp { addr, port } = address else {
+                error!("Unsupported endpoint address");
+                return;
+            };
+            let config = ConnectionConfig::new(&addr, port);
+            config.set_transient_for(self.obj().active_window().as_ref());
+            config.set_modal(true);
+
+            config.connect_local(
+                "new-config-applied",
+                false,
+                glib::clone!(
+                    #[strong(rename_to = app)]
+                    self.obj(),
+                    move |values| {
+                        //the value[0] is self
+                        let addr = values[1].get::<String>().unwrap();
+                        let port: u16 = values[2].get::<u32>().unwrap().try_into().unwrap();
+                        debug!("New config applied: address {addr}, port {port}");
+                        app.imp()
+                            .data_provider
+                            .borrow()
+                            .reconnect(Some((addr, port)));
+                        None
+                    }
+                ),
+            );
+
+            config.present();
+        }
+
+        fn clean_n_quit(&self) {
+            self.data_provider.borrow().disconnect();
+            self.obj().quit();
+        }
+
+        fn show_about(&self) {
+            let window = self.obj().active_window().unwrap();
+            let about = adw::AboutWindow::builder()
+                .transient_for(&window)
+                .application_name("Ghaf Control Panel")
+                .application_icon("org.gnome.controlpanelgui")
+                .developer_name("dmitry")
+                .developers(vec!["dmitry"])
+                .copyright("© 2024 dmitry")
+                .build();
+
+            about.present();
         }
     }
 
@@ -159,7 +256,7 @@ glib::wrapper! {
 impl ControlPanelGuiApplication {
     pub fn new(
         application_id: &str,
-        flags: &gio::ApplicationFlags,
+        flags: gio::ApplicationFlags,
         addr: String,
         port: u16,
         tls_info: Option<(String, TlsConfig)>,
@@ -185,110 +282,29 @@ impl ControlPanelGuiApplication {
             .fetch_audio_devices(glib::clone!(
                 #[strong]
                 app,
-                move |list| app.window().unwrap().set_audio_devices((&*list).clone())
+                move |list| app.window().unwrap().set_audio_devices((*list).clone())
             ));
 
         app
     }
 
-    fn load_css(&self) {
-        // Load the CSS file and add it to the provider
-        let provider = CssProvider::new();
-        provider.load_from_resource("/org/gnome/controlpanelgui/styles/style.css");
-
-        // Add the provider to the default screen
-        gtk::style_context_add_provider_for_display(
-            &gdk::Display::default().expect("Could not connect to a display."),
-            &provider,
-            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
-        );
-    }
-
-    fn setup_gactions(&self) {
-        let reconnect_action = gio::ActionEntry::builder("reconnect")
-            .activate(move |app: &Self, _, _| app.reconnect())
-            .build();
-        let show_config_action = gio::ActionEntry::builder("show-config")
-            .activate(move |app: &Self, _, _| app.show_config())
-            .build();
-        let quit_action = gio::ActionEntry::builder("quit")
-            .activate(move |app: &Self, _, _| app.clean_n_quit())
-            .build();
-        let about_action = gio::ActionEntry::builder("about")
-            .activate(move |app: &Self, _, _| app.show_about())
-            .build();
-        self.add_action_entries([
-            reconnect_action,
-            show_config_action,
-            quit_action,
-            about_action,
-        ]);
-    }
-
-    pub fn show_config(&self) {
-        let window = self.active_window().unwrap();
-        let EndpointAddress::Tcp { addr, port } = self
-            .imp()
-            .data_provider
-            .borrow()
-            .get_current_service_address()
-        else {
-            return;
-        };
-        let config = ConnectionConfig::new(addr, port);
-        config.set_transient_for(Some(&window));
-        config.set_modal(true);
-
-        let app = self.clone();
-
-        config.connect_local("new-config-applied", false, move |values| {
-            //the value[0] is self
-            let addr = values[1].get::<String>().unwrap();
-            let port = values[2].get::<u32>().unwrap();
-            println!("New config applied: address {addr}, port {port}");
-            app.imp()
-                .data_provider
-                .borrow()
-                .reconnect(Some((addr, port as u16)));
-            None
-        });
-
-        config.present();
-    }
-
-    fn show_about(&self) {
-        let window = self.active_window().unwrap();
-        let about = adw::AboutWindow::builder()
-            .transient_for(&window)
-            .application_name("Ghaf Control Panel")
-            .application_icon("org.gnome.controlpanelgui")
-            .developer_name("dmitry")
-            .developers(vec!["dmitry"])
-            .copyright("© 2024 dmitry")
-            .build();
-
-        about.present();
-    }
-
-    //reconnect with the same config (addr:port)
-    pub fn reconnect(&self) {
-        self.imp().data_provider.borrow().reconnect(None);
-    }
-
-    pub fn get_store(&self) -> ListStore {
+    pub fn get_model(&self) -> ListModel {
         self.imp().data_provider.borrow().get_model()
     }
 
-    pub fn get_audio_devices(&self) -> ListStore {
+    pub fn get_audio_devices(&self) -> ListModel {
         self.imp().audio_control.borrow().get_devices_list()
     }
 
-    pub async fn get_stats(&self, vm: String) -> Option<StatsResponse> {
-        self.imp().data_provider.borrow().get_stats(vm).await.ok()
+    pub fn get_stats(
+        &self,
+        vm: String,
+    ) -> impl std::future::Future<Output = Result<StatsResponse, String>> {
+        self.imp().data_provider.borrow().get_stats(vm)
     }
 
     pub fn control_service(&self, action: ControlAction, name: String) {
-        println!("Control service {name}, {:?}", action);
+        debug!("Control service {name}, {action:?}");
         match action {
             ControlAction::Start => self.imp().data_provider.borrow().start_service(name),
             ControlAction::Restart => self.imp().data_provider.borrow().restart_service(name),
@@ -298,138 +314,147 @@ impl ControlPanelGuiApplication {
         }
     }
 
-    pub fn perform_setting_action(&self, action: SettingsAction, value: Variant) {
-        match action {
-            SettingsAction::AddNetwork => todo!(),
-            SettingsAction::RemoveNetwork => todo!(),
-            SettingsAction::RegionNLanguage => {
-                let (locale, timezone): (String, String) = value.get().unwrap();
-                let app = self.clone();
-                let popup = LanguageRegionNotifyPopup::new();
-                popup.set_transient_for(self.active_window().as_ref());
-                popup.set_modal(true);
-                glib::spawn_future_local(async move {
-                    if let Err(err) = app.imp().data_provider.borrow().set_locale(locale).await {
-                        println!("Locale setting failed: {err}");
-                    }
-                    if let Err(err) = app
-                        .imp()
-                        .data_provider
-                        .borrow()
-                        .set_timezone(timezone)
-                        .await
-                    {
-                        println!("Timezone setting failed: {err}");
-                    }
-
-                    popup.present();
-                });
-            }
-            SettingsAction::DateNTime => todo!(),
-            SettingsAction::MouseSpeed => todo!(),
-            SettingsAction::KeyboardLayout => todo!(),
-            SettingsAction::Speaker => {
-                let (id, dev_type) = value.def_params();
-                self.imp()
-                    .audio_control
-                    .borrow()
-                    .set_default_device(id, dev_type);
-            }
-            SettingsAction::SpeakerMute => {
-                let (id, dev_type, muted) = value.mute_params();
-                self.imp()
-                    .audio_control
-                    .borrow()
-                    .set_device_mute(id, dev_type, muted);
-            }
-            SettingsAction::SpeakerVolume => {
-                let (id, dev_type, vol) = value.vol_params();
-                self.imp()
-                    .audio_control
-                    .borrow()
-                    .set_device_volume(id, dev_type, vol);
-            }
-            SettingsAction::Mic => {
-                let (id, dev_type) = value.def_params();
-                self.imp()
-                    .audio_control
-                    .borrow()
-                    .set_default_device(id, dev_type);
-            }
-            SettingsAction::MicMute => {
-                let (id, dev_type, muted) = value.mute_params();
-                self.imp()
-                    .audio_control
-                    .borrow()
-                    .set_device_mute(id, dev_type, muted);
-            }
-            SettingsAction::MicVolume => {
-                let (id, dev_type, vol) = value.vol_params();
-                self.imp()
-                    .audio_control
-                    .borrow()
-                    .set_device_volume(id, dev_type, vol);
-            }
-            SettingsAction::ShowAddNetworkPopup => {
-                let app = self.clone();
-                let window = self.active_window().unwrap();
-                let popup = AddNetworkPopup::new();
-                popup.set_transient_for(Some(&window));
-                popup.set_modal(true);
-                popup.connect_local("new-network", false, move |values| {
+    fn show_add_network_popup(&self) {
+        let popup = AddNetworkPopup::new();
+        popup.set_transient_for(self.active_window().as_ref());
+        popup.set_modal(true);
+        popup.connect_local(
+            "new-network",
+            false,
+            glib::clone!(
+                #[strong(rename_to = app)]
+                self,
+                move |values| {
                     //the value[0] is self
-                    let name = values[1].get::<String>().unwrap();
-                    let security = values[2].get::<String>().unwrap();
-                    let password = values[3].get::<String>().unwrap();
-                    println!("New network: {name}, {security}, {password}");
+                    let mut values = values.iter().skip(1).flat_map(glib::Value::get::<String>);
+                    let name = values.next().unwrap();
+                    let security = values.next().unwrap();
+                    let password = values.next().unwrap();
+                    debug!("New network: {name}, {security}, {password}");
                     app.imp()
                         .data_provider
                         .borrow()
                         .add_network(name, security, password);
                     None
-                });
-                popup.present();
-            }
-            SettingsAction::ShowAddKeyboardPopup => {}
-            SettingsAction::ShowConfirmDisplaySettingsPopup => {
-                //let app = self.clone();//center in, resize or scale might be needed
-                let window = self.active_window().unwrap();
-                let popup = ConfirmDisplaySettingsPopup::new();
-                popup.set_transient_for(Some(&window));
-                popup.set_modal(true);
-                popup.connect_local("reset-default", false, move |_| {
-                    if let Some(window) = window.downcast_ref::<ControlPanelGuiWindow>() {
-                        window.restore_default_display_settings();
-                    }
-                    None
-                });
-                popup.present();
-                popup.launch_close_timer(5);
-            }
-            SettingsAction::ShowErrorPopup => {
-                if let Some(error) = value.str() {
-                    let popup = ErrorPopup::new(error);
-                    popup.set_transient_for(self.active_window().as_ref());
-                    popup.set_modal(true);
-                    popup.present();
                 }
-            }
-            SettingsAction::OpenWireGuard => {
-                let vm: String = value.get().unwrap(); // microvm@business-vm.service
-                let re = Regex::new(r"microvm@(.*?)\.service").unwrap();
-                debug!("wireguard vm {}", vm); // Output: business-vm
+            ),
+        );
+        popup.present();
+    }
 
-                if let Some(captures) = re.captures(&vm.as_str()) {
-                    if let Some(matched) = captures.get(1) {
-                        let vm_name = matched.as_str();
-                        debug!("wireguard app name {}", vm_name); // Output: business-vm
-                        self.imp().data_provider.borrow().start_app_in_vm(
-                            "wireguard-gui".to_string(),
-                            vm_name.to_string(),
-                            vec![],
-                        );
-                    }
-                }
+    fn show_confirm_display_settings_popup(&self) {
+        let window = self.active_window();
+        let popup = ConfirmDisplaySettingsPopup::new();
+        popup.set_transient_for(window.as_ref());
+        popup.set_modal(true);
+        popup.connect_local("reset-default", false, move |_| {
+            if let Some(window) = window.and_downcast_ref::<ControlPanelGuiWindow>() {
+                window.restore_default_display_settings();
+            }
+            None
+        });
+        popup.present();
+        popup.launch_close_timer(5);
+    }
+
+    fn open_wireguard(&self, vm: &str) {
+        let re = Regex::new(r"microvm@(.*?)\.service").unwrap();
+        debug!("wireguard vm {vm}"); // Output: business-vm
+
+        if let Some(captures) = re.captures(vm) {
+            if let Some(matched) = captures.get(1) {
+                let vm_name = matched.as_str();
+                debug!("wireguard app name {vm_name}"); // Output: business-vm
+                self.imp().data_provider.borrow().start_app_in_vm(
+                    "wireguard-gui".to_string(),
+                    vm_name.to_string(),
+                    vec![],
+                );
+            }
+        }
+    }
+
+    pub fn perform_setting_action(&self, action: SettingsAction) {
+        match action {
+            SettingsAction::AddNetwork => todo!(),
+            SettingsAction::RemoveNetwork => todo!(),
+            SettingsAction::RegionNLanguage { locale, timezone } => {
+                self.imp().set_locale_timezone(locale, timezone);
+            }
+            SettingsAction::DateNTime => todo!(),
+            SettingsAction::MouseSpeed => todo!(),
+            SettingsAction::KeyboardLayout => todo!(),
+            SettingsAction::Speaker { id, dev_type } => {
+                debug!("Speaker changed: {id}");
+                self.imp()
+                    .audio_control
+                    .borrow()
+                    .set_default_device(id, dev_type as i32);
+            }
+            SettingsAction::SpeakerMute {
+                id,
+                dev_type,
+                muted,
+            } => {
+                debug!("Speaker muted: {id}");
+                self.imp()
+                    .audio_control
+                    .borrow()
+                    .set_device_mute(id, dev_type as i32, muted);
+            }
+            SettingsAction::SpeakerVolume {
+                id,
+                dev_type,
+                volume,
+            } => {
+                debug!("Speaker volume: {volume}");
+                self.imp()
+                    .audio_control
+                    .borrow()
+                    .set_device_volume(id, dev_type as i32, volume);
+            }
+            SettingsAction::Mic { id, dev_type } => {
+                debug!("Mic changed: {id}");
+                self.imp()
+                    .audio_control
+                    .borrow()
+                    .set_default_device(id, dev_type as i32);
+            }
+            SettingsAction::MicMute {
+                id,
+                dev_type,
+                muted,
+            } => {
+                debug!("Mic muted: {id}");
+                self.imp()
+                    .audio_control
+                    .borrow()
+                    .set_device_mute(id, dev_type as i32, muted);
+            }
+            SettingsAction::MicVolume {
+                id,
+                dev_type,
+                volume,
+            } => {
+                debug!("Mic volume: {volume}");
+                self.imp()
+                    .audio_control
+                    .borrow()
+                    .set_device_volume(id, dev_type as i32, volume);
+            }
+            SettingsAction::ShowAddNetworkPopup => self.show_add_network_popup(),
+            SettingsAction::ShowAddKeyboardPopup => todo!(),
+            SettingsAction::ShowConfirmDisplaySettingsPopup => {
+                self.show_confirm_display_settings_popup();
+            }
+            SettingsAction::ShowErrorPopup { message } => {
+                let popup = ErrorPopup::new(&message);
+                popup.set_transient_for(self.active_window().as_ref());
+                popup.set_modal(true);
+                popup.present();
+            }
+            SettingsAction::OpenWireGuard { vm } => {
+                self.open_wireguard(&vm);
             }
             SettingsAction::OpenAdvancedAudioSettingsWidget => {
                 self.imp()
@@ -443,12 +468,6 @@ impl ControlPanelGuiApplication {
             SettingsAction::UpdateRequest => {
                 self.imp().data_provider.borrow().update_request();
             }
-        };
-    }
-
-    pub fn clean_n_quit(&self) {
-        self.imp().data_provider.borrow().disconnect();
-        drop(self.imp().data_provider.borrow());
-        self.quit();
+        }
     }
 }

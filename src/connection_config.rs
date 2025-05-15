@@ -1,13 +1,15 @@
-use glib::subclass::Signal;
-use glib::Binding;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{gio, glib, Button, CompositeTemplate, Entry};
-use std::cell::RefCell;
-use std::sync::OnceLock;
+use gtk::{gio, glib};
 
 mod imp {
-    use super::*;
+    use glib::subclass::Signal;
+    use glib::Binding;
+    use gtk::prelude::*;
+    use gtk::subclass::prelude::*;
+    use gtk::{glib, Button, CompositeTemplate, Entry};
+    use std::cell::RefCell;
+    use std::sync::OnceLock;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/connection_config.ui")]
@@ -59,10 +61,6 @@ mod imp {
         fn constructed(&self) {
             // Call "constructed" on parent
             self.parent_constructed();
-
-            // Setup
-            let obj = self.obj();
-            obj.init();
         }
 
         fn signals() -> &'static [Signal] {
@@ -86,14 +84,14 @@ pub struct ConnectionConfig(ObjectSubclass<imp::ConnectionConfig>)
 
 impl Default for ConnectionConfig {
     fn default() -> Self {
-        Self::new("".to_string(), 1)
+        Self::new("", 1)
     }
 }
 
 impl ConnectionConfig {
-    pub fn new(address: String, port: u16) -> Self {
+    pub fn new(address: &str, port: u16) -> Self {
         let config_widget: Self = glib::Object::builder().build();
-        config_widget.imp().address_entry.set_text(address.as_str());
+        config_widget.imp().address_entry.set_text(address);
         config_widget
             .imp()
             .port_entry
@@ -101,11 +99,12 @@ impl ConnectionConfig {
         config_widget
     }
 
-    pub fn init(&self) {}
-
     pub fn get_config(&self) -> (String, u32) {
         let text = self.imp().port_entry.text().to_string();
-        let port = text.parse::<u32>().unwrap_or(0);
-        (String::from(self.imp().address_entry.buffer().text()), port)
+        let port = text.parse::<u16>().unwrap_or(0);
+        (
+            String::from(self.imp().address_entry.buffer().text()),
+            port.into(),
+        )
     }
 }

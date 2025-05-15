@@ -1,27 +1,29 @@
-use glib::subclass::Signal;
-use glib::{Binding, Object};
-use gtk::gio::ListStore;
+use gtk::gio::ListModel;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{
-    glib, CompositeTemplate, CustomFilter, FilterListModel, Label, ListItem, ListView, NoSelection,
-    ProgressBar, SignalListItemFactory,
-};
-use std::cell::RefCell;
-use std::sync::OnceLock;
+use gtk::{glib, CustomFilter, FilterListModel, NoSelection};
 
 use crate::control_action::ControlAction;
-use crate::plot::Plot;
-use crate::serie::Serie;
+use crate::prelude::*;
 use crate::service_gobject::ServiceGObject;
 use crate::settings_gobject::SettingsGObject;
 use crate::vm_row::VMRow;
-use crate::window::ControlPanelGuiWindow;
-use givc_common::query::VMStatus;
+use crate::vm_status::VMStatus;
+use crate::ControlPanelGuiWindow;
 use std::fs;
 
 mod imp {
-    use super::*;
+    use glib::subclass::Signal;
+    use glib::Binding;
+    use gtk::prelude::*;
+    use gtk::subclass::prelude::*;
+    use gtk::{glib, CompositeTemplate, Label, ListView, ProgressBar};
+    use std::cell::RefCell;
+    use std::sync::OnceLock;
+
+    use crate::control_action::ControlAction;
+    use crate::plot::Plot;
+    use crate::serie::Serie;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/info_settings_page.ui")]
@@ -101,13 +103,12 @@ impl InfoSettingsPage {
 
     pub fn init(&self) {
         // Read device id
-        let mut logging_id: String = "Logging ID:    ".to_owned();
-        if let Ok(dev_id) = fs::read_to_string("/etc/common/device-id") {
-            logging_id.push_str(&dev_id);
-        } else {
-            logging_id.push_str("Not found");
-        }
-        self.imp().device_id.set_text(&logging_id);
+        let logging_id = fs::read_to_string("/etc/common/device-id")
+            .map(std::borrow::Cow::from)
+            .unwrap_or("Not found".into());
+        self.imp()
+            .device_id
+            .set_text(&format!("Logging ID:    {logging_id}"));
 
         //initial values to test styling
         self.imp().cpu_plot.add_serie(&self.imp().cpu_serie);
@@ -155,22 +156,17 @@ impl InfoSettingsPage {
         ));
     }
 
-    pub fn set_vm_model(&self, model: ListStore) {
-        self.setup_service_rows(model.clone());
+    pub fn set_vm_model(&self, model: impl IsA<ListModel>) {
+        self.setup_service_rows(model);
         self.setup_factory();
     }
 
-    fn setup_service_rows(&self, model: ListStore) {
+    fn setup_service_rows(&self, model: impl IsA<ListModel>) {
         //Set filter: only running VM's
         let filter_model = FilterListModel::new(
             Some(model),
-            Some(CustomFilter::new(|item: &Object| {
-                if let Some(obj) = item.downcast_ref::<ServiceGObject>() {
-                    if (obj.is_vm() && (obj.status() == (VMStatus::Running as u8))) {
-                        return true;
-                    }
-                }
-                false
+            Some(CustomFilter::typed(|obj: &ServiceGObject| {
+                obj.is_vm() && obj.status() == VMStatus::Running
             })),
         );
 
@@ -181,65 +177,35 @@ impl InfoSettingsPage {
 
     fn setup_factory(&self) {
         // Create a new factory
-        let factory = SignalListItemFactory::new();
+        let factory = TypedSignalListItemFactory::<ServiceGObject, VMRow>::new();
 
         let this = self.clone();
         // Create an empty `VMRow` during setup
-        factory.connect_setup(move |_, list_item| {
-            // Create `VMRow`
-            let service_row = VMRow::new();
-            //connect signals
-            let widget = this.clone();
-            service_row.connect_local("vm-control-action", false, move |values| {
+        factory.on_setup(move |_| {
+            let row = VMRow::new();
+            let page = this.clone();
+            row.connect_local("vm-control-action", false, move |values| {
                 //the value[0] is self
                 let vm_action = values[1].get::<ControlAction>().unwrap();
-                let vm_name = values[2].get::<String>().unwrap();
-                widget.emit_by_name::<()>("vm-control-action", &[&vm_action, &vm_name]);
+                let vm_name = values[2].get::<&str>().unwrap();
+                page.emit_by_name::<()>("vm-control-action", &[&vm_action, &vm_name]);
                 None
             });
-
-            list_item
-                .downcast_ref::<ListItem>()
-                .expect("Needs to be ListItem")
-                .set_child(Some(&service_row));
+            row
         });
 
         // Tell factory how to bind `VMRow` to a `ServiceGObject`
-        factory.connect_bind(move |_, list_item| {
-            // Get `ServiceGObject` from `ListItem`
-            let service_object = list_item
-                .downcast_ref::<ListItem>()
-                .expect("Needs to be ListItem")
-                .item()
-                .and_downcast::<ServiceGObject>()
-                .expect("The item has to be an `ServiceGObject`.");
-
-            // Get `VMRow` from `ListItem`
-            let service_row = list_item
-                .downcast_ref::<ListItem>()
-                .expect("Needs to be ListItem")
-                .child()
-                .and_downcast::<VMRow>()
-                .expect("The child has to be a `VMRow`.");
-
-            service_row.bind(&service_object);
+        factory.on_bind(move |_, row, obj| {
+            row.bind(obj);
         });
 
         // Tell factory how to unbind `VMRow` from `ServiceGObject`
-        factory.connect_unbind(move |_, list_item| {
-            // Get `VMRow` from `ListItem`
-            let service_row = list_item
-                .downcast_ref::<ListItem>()
-                .expect("Needs to be ListItem")
-                .child()
-                .and_downcast::<VMRow>()
-                .expect("The child has to be a `VMRow`.");
-
-            service_row.unbind();
+        factory.on_unbind(move |_, row| {
+            row.unbind();
         });
 
         // Set the factory of the list view
-        self.imp().vm_list_view.set_factory(Some(&factory));
+        self.imp().vm_list_view.set_factory(Some(&*factory));
     }
 
     pub fn bind(&self, _settings_object: &SettingsGObject) {

@@ -1,13 +1,14 @@
-use glib::subclass::Signal;
-use glib::Binding;
-use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{gio, glib, Button, CompositeTemplate, Label};
-use std::cell::RefCell;
-use std::sync::OnceLock;
+use gtk::{gio, glib};
 
 mod imp {
-    use super::*;
+    use glib::subclass::Signal;
+    use glib::Binding;
+    use gtk::prelude::*;
+    use gtk::subclass::prelude::*;
+    use gtk::{glib, Button, CompositeTemplate, Label};
+    use std::cell::RefCell;
+    use std::sync::OnceLock;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/error_popup.ui")]
@@ -51,10 +52,6 @@ mod imp {
         fn constructed(&self) {
             // Call "constructed" on parent
             self.parent_constructed();
-
-            // Setup
-            let obj = self.obj();
-            obj.init();
         }
 
         fn signals() -> &'static [Signal] {
@@ -84,6 +81,4 @@ impl ErrorPopup {
         popup.imp().message_to_user.set_label(message_to_user);
         popup
     }
-
-    pub fn init(&self) {}
 }

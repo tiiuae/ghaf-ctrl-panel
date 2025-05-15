@@ -1,22 +1,27 @@
-use glib::subclass::Signal;
-use glib::{Binding, Properties, Variant};
+use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{
-    glib, Button, CompositeTemplate, Image, Label, MenuButton, Popover, Revealer, Separator,
-    ToggleButton,
-};
-use std::cell::RefCell;
-use std::sync::OnceLock;
 
-use crate::audio_settings::AudioSettings;
-use crate::control_action::ControlAction;
-use crate::security_icon::SecurityIcon;
 use crate::service_gobject::ServiceGObject;
-use crate::settings_action::SettingsAction;
+use crate::trust_level::TrustLevel;
+use crate::vm_status::VMStatus;
 
 mod imp {
-    use super::*;
+    use glib::subclass::Signal;
+    use glib::{Binding, Properties, Variant};
+    use gtk::prelude::*;
+    use gtk::subclass::prelude::*;
+    use gtk::{
+        glib, Button, CompositeTemplate, Image, Label, MenuButton, Popover, Revealer, Separator,
+        ToggleButton,
+    };
+    use std::cell::RefCell;
+    use std::sync::OnceLock;
+
+    use crate::audio_settings::AudioSettings;
+    use crate::control_action::ControlAction;
+    use crate::prelude::*;
+    use crate::settings_action::SettingsAction;
 
     #[derive(Default, CompositeTemplate, Properties)]
     #[properties(wrapper_type = super::ServiceSettings)]
@@ -84,12 +89,13 @@ mod imp {
     impl ServiceSettings {
         #[template_callback]
         fn on_wireguard_button_clicked(&self) {
-            println!("Wireguard GUI will be launched...");
+            debug!("Wireguard GUI will be launched...");
             //which name: full service name or vm?
-            let vm = Variant::from(self.full_service_name.borrow().to_variant());
+            let vm = self.full_service_name.borrow().to_string();
             self.obj()
-                .emit_by_name::<()>("settings-action", &[&SettingsAction::OpenWireGuard, &vm]);
+                .emit_by_name::<()>("settings-action", &[&SettingsAction::OpenWireGuard { vm }]);
         }
+
         #[template_callback]
         fn open_info(&self) {
             let value = self.arrow_button.is_active();
@@ -100,6 +106,7 @@ mod imp {
                 self.arrow_button.set_icon_name("pan-down-symbolic");
             }
         }
+
         #[template_callback]
         fn on_start_clicked(&self) {
             let full_service_name = self.obj().full_service_name();
@@ -109,6 +116,7 @@ mod imp {
             );
             self.popover_menu.popdown();
         }
+
         #[template_callback]
         fn on_shutdown_clicked(&self) {
             let full_service_name = self.obj().full_service_name();
@@ -119,6 +127,7 @@ mod imp {
             self.popover_menu.popdown();
             self.popover_menu_2.popdown();
         }
+
         #[template_callback]
         fn on_pause_clicked(&self) {
             let full_service_name = self.obj().full_service_name();
@@ -129,32 +138,39 @@ mod imp {
             self.popover_menu.popdown();
             self.popover_menu_2.popdown();
         }
+
+        #[allow(clippy::unused_self)]
         #[template_callback]
         fn on_mic_changed(&self, _value: i32) {
-            //println!("Mic changed: {}", value);
+            //debug!("Mic changed: {}", value);
             //+ new action: VM mic
         }
+
+        #[allow(clippy::unused_self)]
         #[template_callback]
         fn on_speaker_changed(&self, _value: i32) {
-            //println!("Speaker changed: {}", value);
+            //debug!("Speaker changed: {}", value);
             //+ new action: VM speaker
         }
+
+        #[allow(clippy::unused_self)]
         #[template_callback]
         fn on_mic_volume_changed(&self, _value: Variant) {
-            //println!("Mic volume: {}", value);
+            //debug!("Mic volume: {}", value);
             //+ new action: VM volume
         }
+
+        #[allow(clippy::unused_self)]
         #[template_callback]
         fn on_speaker_volume_changed(&self, _value: Variant) {
-            //println!("Speaker volume: {}", value);
+            //debug!("Speaker volume: {}", value);
             //+ new action: VM volume
         }
+
         #[template_callback]
         fn on_open_advanced_audio_settings(&self) {
             let action = SettingsAction::OpenAdvancedAudioSettingsWidget;
-            let empty = Variant::from(None::<()>.as_ref());
-            self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &empty]);
+            self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
     } //end #[gtk::template_callbacks]
 
@@ -168,7 +184,7 @@ mod imp {
                         .param_types([ControlAction::static_type(), String::static_type()])
                         .build(),
                     Signal::builder("settings-action")
-                        .param_types([SettingsAction::static_type(), Variant::static_type()])
+                        .param_types([SettingsAction::static_type()])
                         .build(),
                     Signal::builder("vm-mic-changed")
                         .param_types([u32::static_type()])
@@ -207,6 +223,7 @@ impl ServiceSettings {
         glib::Object::builder().build()
     }
 
+    #[allow(clippy::too_many_lines)]
     pub fn bind(&self, object: &ServiceGObject) {
         //unbind previous ones
         self.unbind();
@@ -271,7 +288,7 @@ impl ServiceSettings {
                 .sync_create()
                 .build();
             bindings.push(name_binding);
-        };
+        }
 
         //arrow/more info button visibilty
         let arrow_visibilty_binding = object
@@ -284,52 +301,21 @@ impl ServiceSettings {
         let extra_info_binding = object
             .bind_property("vm-name", &extra_info, "label")
             .sync_create()
-            .transform_to(move |_, value: &glib::Value| {
-                let vm_name = value.get::<String>().unwrap_or("".to_string());
-                Some(glib::Value::from(
-                    "The app is in the ".to_owned() + &vm_name,
-                ))
-            })
+            .transform_to(move |_, value: &str| Some(format!("The app is in the {value}")))
             .build();
         bindings.push(extra_info_binding);
 
         let status_binding = object
             .bind_property("status", &status, "label")
             .sync_create()
-            .transform_to(move |_, value: &glib::Value| {
-                let status = value.get::<u8>().unwrap_or(0);
-                match status {
-                    //make struct like for icon?
-                    0 => Some(glib::Value::from("Running")),
-                    1 => Some(glib::Value::from("Powered off")),
-                    2 => Some(glib::Value::from("Paused")),
-                    _ => Some(glib::Value::from("Powered off")),
-                }
-            })
+            .transform_to(move |_, status: VMStatus| Some::<&'static str>(status.into()))
             .build();
         bindings.push(status_binding);
 
         let status_icon_binding = object
             .bind_property("status", &status_icon, "resource")
             .sync_create()
-            .transform_to(move |_, value: &glib::Value| {
-                let status = value.get::<u8>().unwrap_or(0);
-                match status {
-                    //make struct like for icon?
-                    0 => Some(glib::Value::from(
-                        "/org/gnome/controlpanelgui/icons/ellipse_green.svg",
-                    )),
-                    1 => Some(glib::Value::from(
-                        "/org/gnome/controlpanelgui/icons/ellipse_red.svg",
-                    )),
-                    2 => Some(glib::Value::from(
-                        "/org/gnome/controlpanelgui/icons/ellipse_yellow.svg",
-                    )),
-                    _ => Some(glib::Value::from(
-                        "/org/gnome/controlpanelgui/icons/ellipse_red.svg",
-                    )),
-                }
-            })
+            .transform_to(move |_, status: VMStatus| Some(status.icon()))
             .build();
         bindings.push(status_icon_binding);
 
@@ -342,25 +328,17 @@ impl ServiceSettings {
         let security_icon_binding = object
             .bind_property("trust-level", &security_icon, "resource")
             .sync_create()
-            .transform_to(move |_, value: &glib::Value| {
-                let trust_level = value.get::<u8>().unwrap_or(0);
-                Some(glib::Value::from(SecurityIcon::new(trust_level).0))
-            })
+            .transform_to(move |_, trust_level: TrustLevel| Some(trust_level.icon()))
             .build();
         bindings.push(security_icon_binding);
 
         let security_label_binding = object
             .bind_property("trust-level", &security_label, "label")
             .sync_create()
-            .transform_to(move |_, value: &glib::Value| {
-                let trust_level = value.get::<u8>().unwrap_or(0);
-                match trust_level {
-                    //make struct like for icon?
-                    0 => Some(glib::Value::from("Secure!")),
-                    1 => Some(glib::Value::from("Security warning!")),
-                    2 => Some(glib::Value::from("Security alert!")),
-                    _ => Some(glib::Value::from("Secure!")),
-                }
+            .transform_to(move |_, trust_level: TrustLevel| match trust_level {
+                TrustLevel::Secure => Some("Secure!"),
+                TrustLevel::Warning => Some("Security warning!"),
+                TrustLevel::NotSecure => Some("Security alert!"),
             })
             .build();
         bindings.push(security_label_binding);
@@ -369,13 +347,12 @@ impl ServiceSettings {
         let controls_title_binding = object
             .bind_property("is-vm", &control_label, "label")
             .sync_create()
-            .transform_to(move |_, value: &glib::Value| {
-                let is_vm = value.get::<bool>().unwrap_or(false);
-                if is_vm {
-                    Some(glib::Value::from("VM Controls"))
+            .transform_to(move |_, is_vm: bool| {
+                Some(if is_vm {
+                    "VM Controls"
                 } else {
-                    Some(glib::Value::from("Service Controls"))
-                }
+                    "Service Controls"
+                })
             })
             .build();
         bindings.push(controls_title_binding);

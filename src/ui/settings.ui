@@ -13,7 +13,7 @@
     <property name="margin-top">0</property>
     <property name="margin-bottom">10</property>
         <child>
-        <object class="GtkListBox" id="settings_list_box">
+        <object class="GtkListBox" id="list_box">
             <style><class name="settings_list"/></style>
             <signal name="row_selected" handler="on_settings_row_selected" swapped="true"/>
             <property name="margin-start">10</property>

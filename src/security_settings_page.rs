@@ -1,12 +1,13 @@
-use glib::Binding;
+use gtk::glib;
 use gtk::subclass::prelude::*;
-use gtk::{glib, Button, CompositeTemplate};
-use std::cell::RefCell;
 
 use crate::settings_gobject::SettingsGObject;
 
 mod imp {
-    use super::*;
+    use glib::Binding;
+    use gtk::subclass::prelude::*;
+    use gtk::{glib, Button, CompositeTemplate};
+    use std::cell::RefCell;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/security_settings_page.ui")]
@@ -48,10 +49,6 @@ mod imp {
         fn constructed(&self) {
             // Call "constructed" on parent
             self.parent_constructed();
-
-            // Setup
-            let obj = self.obj();
-            obj.init();
         }
     }
     impl WidgetImpl for SecuritySettingsPage {}
@@ -73,8 +70,6 @@ impl SecuritySettingsPage {
     pub fn new() -> Self {
         glib::Object::builder().build()
     }
-
-    pub fn init(&self) {}
 
     pub fn bind(&self, _settings_object: &SettingsGObject) {
         //unbind previous ones

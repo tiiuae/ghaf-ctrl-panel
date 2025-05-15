@@ -1,14 +1,15 @@
-use glib::Binding;
+use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate};
-use std::cell::RefCell;
 
-use crate::security_icon::SecurityIcon;
 use crate::service_gobject::ServiceGObject;
+use crate::trust_level::TrustLevel;
 
 mod imp {
-    use super::*;
+    use glib::Binding;
+    use gtk::subclass::prelude::*;
+    use gtk::{glib, CompositeTemplate};
+    use std::cell::RefCell;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/service_row.ui")]
@@ -92,10 +93,7 @@ impl ServiceRow {
         let security_binding = object
             .bind_property("trust-level", &security_icon, "resource")
             .sync_create()
-            .transform_to(move |_, value: &glib::Value| {
-                let trust_level = value.get::<u8>().unwrap_or(0);
-                Some(glib::Value::from(SecurityIcon::new(trust_level).0))
-            })
+            .transform_to(move |_, trust_level: TrustLevel| Some(trust_level.icon()))
             .build();
         // Save binding
         bindings.push(security_binding);

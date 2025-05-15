@@ -1,53 +1,46 @@
-use log::{debug, error, info};
 use std::fs;
-use std::path::PathBuf;
+use std::path::Path;
 use std::sync::OnceLock;
+
+use crate::prelude::*;
 
 pub struct WireGuardVMs {
     list: Vec<String>,
 }
 
 impl WireGuardVMs {
-    fn new(file_path: PathBuf) -> Self {
-        match fs::read_to_string(&file_path) {
+    fn new(file_path: &Path) -> Self {
+        match fs::read_to_string(file_path) {
             Ok(content) => {
-                let list = content.lines().map(|line| line.to_string()).collect();
-                info!("Wireguard VMs file has been read, list: {:?}", list);
+                let list = content.lines().map(ToString::to_string).collect();
+                info!("Wireguard VMs file has been read, list: {list:?}");
                 WireGuardVMs { list }
             }
             Err(e) => {
-                error!("Failed to read the file '{}': {}", file_path.display(), e);
+                error!(
+                    "Failed to read the file '{path}': {e}",
+                    path = file_path.display()
+                );
                 WireGuardVMs { list: Vec::new() }
             }
         }
     }
 
-    fn get_list(&self) -> &Vec<String> {
-        &self.list
-    }
-
-    fn contains(&self, query: &String) -> bool {
-        self.list.contains(&query)
+    fn contains(&self, query: &str) -> bool {
+        self.list.iter().any(|e| e == query)
     }
 }
 
 // Static instance initialized once
 pub static WVM_LIST: OnceLock<WireGuardVMs> = OnceLock::new();
 
-pub fn initialize_wvm_list(file_path: PathBuf) {
+pub fn initialize_wvm_list(file_path: &Path) {
     WVM_LIST.get_or_init(|| WireGuardVMs::new(file_path));
 }
 
-pub fn get_static_list() -> &'static Vec<String> {
-    &WVM_LIST.get().expect("WVM_LIST is not initialized").list
-}
-
-pub fn static_contains(query: &String) -> bool {
-    let is_contains = WVM_LIST
+pub fn static_contains(query: &str) -> bool {
+    WVM_LIST
         .get()
         .expect("WVM_STRINGS is not initialized")
-        .contains(&query);
-
-    debug!("Checking if {} is in the list:{}", query, is_contains);
-    is_contains
+        .contains(query)
 }
