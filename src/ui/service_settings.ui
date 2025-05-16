@@ -123,7 +123,7 @@
         <property name="margin-top">0</property>
         <property name="margin-bottom">10</property>
           <child>
-            <object class="GtkImage" id="security_icon">
+            <object class="SecurityIcon" id="security_icon">
               <property name="visible">true</property>
               <property name="can_focus">false</property>
               <property name="width-request">16</property>

@@ -21,6 +21,7 @@ mod imp {
     use crate::audio_settings::AudioSettings;
     use crate::control_action::ControlAction;
     use crate::prelude::*;
+    use crate::security_icon::SecurityIcon;
     use crate::settings_action::SettingsAction;
 
     #[derive(Default, CompositeTemplate, Properties)]
@@ -44,7 +45,7 @@ mod imp {
         #[template_child]
         pub details_label: TemplateChild<Label>,
         #[template_child]
-        pub security_icon: TemplateChild<Image>,
+        pub security_icon: TemplateChild<SecurityIcon>,
         #[template_child]
         pub security_label: TemplateChild<Label>,
         #[template_child]
@@ -326,9 +327,8 @@ impl ServiceSettings {
         bindings.push(details_binding);
 
         let security_icon_binding = object
-            .bind_property("trust-level", &security_icon, "resource")
+            .bind_property("trust-level", &security_icon, "trust-level")
             .sync_create()
-            .transform_to(move |_, trust_level: TrustLevel| Some(trust_level.icon()))
             .build();
         bindings.push(security_icon_binding);
 

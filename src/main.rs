@@ -20,6 +20,7 @@ mod language_region_settings_page;
 mod mouse_settings_page;
 mod plot;
 mod prelude;
+mod security_icon;
 mod security_settings_page;
 mod serie;
 mod service_gobject;

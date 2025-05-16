@@ -10,6 +10,7 @@ use crate::data_gobject::DataGObject;
 pub use crate::data_provider::StatsResponse;
 use crate::error_popup::ErrorPopup;
 use crate::plot::Plot;
+use crate::security_icon::SecurityIcon;
 use crate::settings_action::SettingsAction;
 use crate::volume_widget::VolumeWidget;
 use crate::ControlPanelGuiWindow;
@@ -264,6 +265,8 @@ impl ControlPanelGuiApplication {
         let _ = DataGObject::static_type();
         let _ = VolumeWidget::static_type();
         let _ = Plot::static_type();
+        let _ = SecurityIcon::static_type();
+
         let app: Self = glib::Object::builder()
             .property("application-id", application_id)
             .property("flags", flags)
