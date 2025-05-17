@@ -1,6 +1,5 @@
 use gtk::glib::{self, Object};
 use gtk::prelude::*;
-use regex::Regex;
 
 use givc_common::query::QueryResult;
 use givc_common::types::ServiceType;
@@ -41,8 +40,8 @@ mod imp {
         #[property(name = "is-app", get, set, type = bool, member = is_app)]
         #[property(name = "vm-name", get, set, type = String, member = vm_name)]
         #[property(name = "details", get, set, type = String, member = details)]
-        #[property(name = "status", get, set, type = VMStatus, member = status, builder(VMStatus::Running))]
-        #[property(name = "trust-level", get, set, type = TrustLevel, member = trust_level, builder(TrustLevel::Secure))]
+        #[property(name = "status", get, set, type = VMStatus, member = status, builder(VMStatus::default()))]
+        #[property(name = "trust-level", get, set, type = TrustLevel, member = trust_level, builder(TrustLevel::default()))]
         #[property(name = "has-wireguard", get, set, type = bool, member = has_wireguard)]
         pub data: RefCell<ServiceData>,
     }
@@ -78,14 +77,20 @@ impl ServiceGObject {
 
         let display_name = if is_vm {
             //vm_name
-            let re = Regex::new(r"^microvm@([^@-]+)-.+$").unwrap();
-            re.captures(&name)
-                .and_then(|cap| cap.get(1).map(|m| m.as_str().to_string()))
+            name.strip_prefix("microvm@")
+                .and_then(|vm| vm.split_once(&['-', '@']))
+                .map(|(vm, _)| vm.to_owned())
                 .unwrap_or_default()
         } else if is_app {
-            let re = Regex::new(r"^([\s\S]*)@\d*?.service").unwrap();
-            re.captures(&name)
-                .and_then(|cap| cap.get(1).map(|m| m.as_str().to_string()))
+            name.strip_suffix(".service")
+                .and_then(|name| name.rsplit_once('@'))
+                .and_then(|(name, number)| {
+                    number
+                        .chars()
+                        .by_ref()
+                        .all(|c| c.is_ascii_digit())
+                        .then(|| name.to_owned())
+                })
                 .unwrap_or_default()
         } else {
             String::new()
@@ -113,15 +118,17 @@ impl ServiceGObject {
             .build()
     }
 
-    pub fn is_equal_to(&self, other: &ServiceGObject) -> bool {
-        self.name() == other.name()
-    }
-
     pub fn update(&self, query_result: QueryResult) {
         self.set_property("details", query_result.description);
-        self.set_property("status", query_result.status as u8);
-        //for demo
-        //self.set_property("trust-level", query_result.trust_level as u8);
+        self.set_property("status", VMStatus::from(query_result.status));
+    }
+
+    pub fn is_vm_running(&self) -> bool {
+        self.is_vm() && self.status() == VMStatus::Running
+    }
+
+    pub fn is_service(&self) -> bool {
+        !self.is_vm() && !self.is_app()
     }
 }
 

@@ -60,7 +60,16 @@
               <property name="width-request">320</property>
               <property name="height-request">80</property>
               <property name="halign">start</property>
-	      <property name="plot-color">purple</property>
+              <child>
+                <object class="Serie" id="mem_used_serie">
+                  <property name="color">darkgreen</property>
+                </object>
+              </child>
+              <child>
+                <object class="Serie" id="mem_needed_serie">
+                  <property name="color">green</property>
+                </object>
+              </child>
             </object>
           </child>
           <child>
@@ -79,7 +88,16 @@
               <property name="width-request">320</property>
               <property name="height-request">80</property>
               <property name="halign">start</property>
-	      <property name="plot-color">green</property>
+              <child>
+                <object class="Serie" id="cpu_sys_serie">
+                  <property name="color">purple</property>
+                </object>
+              </child>
+              <child>
+                <object class="Serie" id="cpu_user_serie">
+                  <property name="color">magenta</property>
+                </object>
+              </child>
             </object>
           </child>
           <child>

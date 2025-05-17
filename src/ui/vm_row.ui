@@ -100,6 +100,23 @@
             </child>
           </object>
         </child>
+        <child>
+          <object class="GtkButton" id="monitor_button">
+          <signal name="clicked" handler="on_vm_monitor_clicked" swapped="true"/>
+          <style><class name="popover-button"/></style>
+          <property name="vexpand">false</property>
+          <property name="hexpand">true</property>
+          <property name="halign">start</property>
+          <property name="width-request">140</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">start</property>
+                <property name="label">Monitor</property>
+                <property name="visible">1</property>
+              </object>
+            </child>
+          </object>
+        </child>
       </object>
     </child>
   </object>

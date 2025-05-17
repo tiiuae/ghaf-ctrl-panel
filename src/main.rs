@@ -29,6 +29,7 @@ mod service_settings;
 mod settings;
 mod settings_action;
 mod settings_gobject;
+mod stats_window;
 mod trust_level;
 mod typed_list_store;
 mod vm_row;

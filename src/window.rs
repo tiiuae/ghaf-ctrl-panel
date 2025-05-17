@@ -120,14 +120,13 @@ mod imp {
             self.settings_box.set_vm_model(model.clone());
 
             //Create filter: VM services, default
-            let vm_filter = CustomFilter::typed(|obj: &ServiceGObject| obj.is_vm());
+            let vm_filter = CustomFilter::typed(ServiceGObject::is_vm);
 
             //Create filter: Apps
-            let app_filter = CustomFilter::typed(|obj: &ServiceGObject| obj.is_app());
+            let app_filter = CustomFilter::typed(ServiceGObject::is_app);
 
             //Create filter: other services
-            let services_filter =
-                CustomFilter::typed(|obj: &ServiceGObject| !obj.is_vm() && !obj.is_app());
+            let services_filter = CustomFilter::typed(ServiceGObject::is_service);
 
             //VM filter by default
             let filter_model = FilterListModel::new(Some(model), Some(vm_filter.clone()));

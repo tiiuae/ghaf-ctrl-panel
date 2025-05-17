@@ -11,13 +11,14 @@ pub use crate::data_provider::StatsResponse;
 use crate::error_popup::ErrorPopup;
 use crate::plot::Plot;
 use crate::security_icon::SecurityIcon;
+use crate::serie::Serie;
 use crate::settings_action::SettingsAction;
+use crate::stats_window::StatsWindow;
 use crate::volume_widget::VolumeWidget;
 use crate::ControlPanelGuiWindow;
 use givc_client::endpoint::TlsConfig;
 use givc_common::address::EndpointAddress;
 use log::debug;
-use regex::Regex;
 
 mod imp {
     use adw::subclass::prelude::*;
@@ -265,6 +266,7 @@ impl ControlPanelGuiApplication {
         let _ = DataGObject::static_type();
         let _ = VolumeWidget::static_type();
         let _ = Plot::static_type();
+        let _ = Serie::static_type();
         let _ = SecurityIcon::static_type();
 
         let app: Self = glib::Object::builder()
@@ -314,6 +316,16 @@ impl ControlPanelGuiApplication {
             ControlAction::Pause => self.imp().data_provider.borrow().pause_service(name),
             ControlAction::Resume => self.imp().data_provider.borrow().resume_service(name),
             ControlAction::Shutdown => self.imp().data_provider.borrow().stop_service(name),
+            ControlAction::Monitor => {
+                if let Some(vm_name) = name
+                    .strip_prefix("microvm@")
+                    .and_then(|vm| vm.strip_suffix(".service"))
+                {
+                    let win = StatsWindow::new(vm_name);
+                    win.set_application(Some(self));
+                    win.set_visible(true);
+                }
+            }
         }
     }
 
@@ -361,19 +373,18 @@ impl ControlPanelGuiApplication {
     }
 
     fn open_wireguard(&self, vm: &str) {
-        let re = Regex::new(r"microvm@(.*?)\.service").unwrap();
         debug!("wireguard vm {vm}"); // Output: business-vm
 
-        if let Some(captures) = re.captures(vm) {
-            if let Some(matched) = captures.get(1) {
-                let vm_name = matched.as_str();
-                debug!("wireguard app name {vm_name}"); // Output: business-vm
-                self.imp().data_provider.borrow().start_app_in_vm(
-                    "wireguard-gui".to_string(),
-                    vm_name.to_string(),
-                    vec![],
-                );
-            }
+        if let Some(vm_name) = vm
+            .strip_prefix("microvm@")
+            .and_then(|vm| vm.strip_suffix(".service"))
+        {
+            debug!("wireguard app name {vm_name}"); // Output: business-vm
+            self.imp().data_provider.borrow().start_app_in_vm(
+                "wireguard-gui".to_string(),
+                vm_name.to_string(),
+                vec![],
+            );
         }
     }
 

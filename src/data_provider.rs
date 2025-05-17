@@ -485,10 +485,12 @@ impl DataProvider {
                 memory: Some(MemoryStats {
                     total: 200_000_000,
                     available: 100_000_000,
+                    free: 50_000_000,
                     ..Default::default()
                 }),
                 process: Some(ProcessStats {
                     user_cycles: 100_000,
+                    sys_cycles: 50_000,
                     total_cycles: 200_000,
                     ..Default::default()
                 }),

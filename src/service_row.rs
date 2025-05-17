@@ -73,7 +73,7 @@ impl ServiceRow {
         let mut bindings = self.imp().bindings.borrow_mut();
         let is_vm = object.is_vm();
 
-        let name_property: &str = if is_vm { "display-name" } else { "name" };
+        let name_property = if is_vm { "display-name" } else { "name" };
 
         let title_binding = object
             .bind_property(name_property, &title, "label")

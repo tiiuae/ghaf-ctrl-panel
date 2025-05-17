@@ -5,8 +5,8 @@ pub type Formatter = Box<dyn Fn(f32) -> String>;
 
 mod imp {
     use crate::serie::Serie;
-    use glib::Properties;
-    use gtk::{cairo, gdk, glib, prelude::*, subclass::prelude::*};
+    use glib::{Object, Properties};
+    use gtk::{cairo, glib, prelude::*, subclass::prelude::*, Builder};
     use std::cell::{Cell, RefCell};
 
     #[derive(Default, Properties)]
@@ -22,17 +22,12 @@ mod imp {
         #[property(get)]
         maxy: Cell<f32>,
 
-        #[allow(clippy::struct_field_names)]
-        #[property(get, set = Plot::set_plot_color)]
-        plot_color: RefCell<String>,
-
         fixed_miny: Cell<Option<f32>>,
         fixed_maxy: Cell<Option<f32>>,
         fixed_minx: Cell<Option<f32>>,
         fixed_maxx: Cell<Option<f32>>,
         label_format: RefCell<Option<super::Formatter>>,
         series: RefCell<Vec<Serie>>,
-        actual_color: Cell<Option<gdk::RGBA>>,
     }
 
     #[glib::object_subclass]
@@ -40,6 +35,7 @@ mod imp {
         const NAME: &'static str = "Plot";
         type Type = super::Plot;
         type ParentType = gtk::DrawingArea;
+        type Interfaces = (gtk::Buildable,);
 
         fn class_init(klass: &mut Self::Class) {
             klass.set_css_name("plot");
@@ -50,8 +46,6 @@ mod imp {
     impl ObjectImpl for Plot {
         fn constructed(&self) {
             self.parent_constructed();
-
-            self.actual_color.set(self.plot_color.borrow().parse().ok());
 
             self.obj().set_draw_func(glib::clone!(
                 #[strong(rename_to = plot)]
@@ -64,12 +58,19 @@ mod imp {
     impl WidgetImpl for Plot {}
     impl DrawingAreaImpl for Plot {}
 
-    impl Plot {
-        fn set_plot_color(&self, plot_color: &str) {
-            plot_color.clone_into(&mut self.plot_color.borrow_mut());
-            self.actual_color.set(plot_color.parse().ok());
+    impl BuildableImpl for Plot {
+        fn add_child(&self, builder: &Builder, child: &Object, type_: Option<&str>) {
+            println!("add_child()");
+            if let Some(serie) = child.downcast_ref() {
+                self.add_serie(serie);
+                println!("add_child({})", serie.color());
+            } else {
+                self.parent_add_child(builder, child, type_);
+            }
         }
+    }
 
+    impl Plot {
         #[allow(clippy::similar_names)]
         #[allow(clippy::cast_lossless)]
         #[allow(clippy::cast_possible_truncation)]
@@ -95,6 +96,40 @@ mod imp {
             let miny = self.fixed_miny.get().unwrap_or(miny) as f64;
             let maxy = self.fixed_maxy.get().unwrap_or(maxy) as f64;
 
+            let xscale = if maxx > minx { w / (maxx - minx) } else { 1.0 };
+            let yscale = if maxy > miny { h / (maxy - miny) } else { 1.0 };
+            let matrix =
+                cairo::Matrix::new(xscale, 0., 0., -yscale, -minx * xscale, h + miny * yscale);
+
+            for serie in self.series.borrow().iter() {
+                let mut iter = serie.values().map(|(x, y)| (x as f64, y as f64));
+                let c = serie.actual_color().unwrap_or(c);
+
+                let Some((x0, y0)) = iter.next() else {
+                    continue;
+                };
+
+                context.set_source_color(&c);
+                context.set_matrix(matrix);
+                context.move_to(x0, y0);
+
+                for (x, y) in iter {
+                    context.line_to(x, y);
+                }
+
+                context.identity_matrix();
+                context.stroke_preserve().ok();
+
+                context.line_to(context.current_point().unwrap().0, h);
+                context.line_to(0., h);
+
+                context.set_source_rgba(c.red().into(), c.green().into(), c.blue().into(), 0.5);
+                context.fill().ok();
+
+                context.set_operator(cairo::Operator::Source);
+            }
+
+            context.set_operator(cairo::Operator::Over);
             let label = self
                 .label_format
                 .borrow()
@@ -113,38 +148,6 @@ mod imp {
             let layout = self.obj().create_pango_layout(Some(&label));
             context.move_to(0., 0.);
             pangocairo::functions::show_layout(context, &layout);
-
-            let c = self.actual_color.get().unwrap_or(c);
-
-            let xscale = if maxx > minx { w / (maxx - minx) } else { 1.0 };
-            let yscale = if maxy > miny { h / (maxy - miny) } else { 1.0 };
-            let matrix =
-                cairo::Matrix::new(xscale, 0., 0., -yscale, -minx * xscale, h + miny * yscale);
-
-            for serie in self.series.borrow().iter() {
-                let mut iter = serie.values().map(|(x, y)| (x as f64, y as f64));
-
-                let Some((x0, y0)) = iter.next() else {
-                    continue;
-                };
-
-                context.set_source_color(&c);
-                context.set_matrix(matrix);
-                context.move_to(x0, y0);
-
-                for (x, y) in iter {
-                    context.line_to(x, y);
-                }
-
-                context.identity_matrix();
-                context.stroke_preserve().ok();
-
-                context.line_to(w, h);
-                context.line_to(0., h);
-
-                context.set_source_rgba(c.red().into(), c.green().into(), c.blue().into(), 0.5);
-                context.fill().ok();
-            }
         }
 
         pub fn add_serie(&self, serie: &Serie) {
@@ -197,6 +200,7 @@ impl Default for Plot {
 
 impl Plot {
     pub fn add_serie(&self, serie: &Serie) {
+        println!("Added serie with color {}", serie.color());
         self.imp().add_serie(serie);
     }
 

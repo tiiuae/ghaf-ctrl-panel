@@ -72,6 +72,14 @@ mod imp {
                 .emit_by_name::<()>("vm-control-action", &[&ControlAction::Pause, &vm_name]);
             self.popover_menu.popdown();
         }
+
+        #[template_callback]
+        fn on_vm_monitor_clicked(&self) {
+            let vm_name = self.title_label.label();
+            self.obj()
+                .emit_by_name::<()>("vm-control-action", &[&ControlAction::Monitor, &vm_name]);
+            self.popover_menu.popdown();
+        }
     } //end #[gtk::template_callbacks]
 
     impl ObjectImpl for VMRow {
