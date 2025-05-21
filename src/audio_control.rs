@@ -1,310 +1,295 @@
 use futures::StreamExt;
 use gio::ListStore;
-use gtk::{gio, glib};
+use gtk::{gio, glib, prelude::*};
+use log::{debug, error};
+use std::cell::RefCell;
 use std::ops::Deref;
-use std::thread;
-use tokio::runtime::Runtime;
-use zbus::{Connection, Proxy};
+use std::rc::Rc;
+use zbus::Connection;
 
-use crate::audio_device_gobject::imp::AudioDeviceType;
-use crate::audio_device_gobject::AudioDeviceGObject;
+use crate::audio_device_gobject::{imp::AudioDeviceType, AudioDeviceGObject};
 use crate::typed_list_store::imp::TypedListStore;
 
-pub mod imp {
-    use super::*;
+mod imp {
+    use zbus::proxy;
 
-    #[derive(Debug)]
-    pub struct AudioControl {
-        pub devices: TypedListStore<AudioDeviceGObject>,
-        connection: Connection,
+    #[proxy(
+        interface = "org.ghaf.Audio",
+        default_service = "org.ghaf.Audio",
+        default_path = "/org/ghaf/Audio"
+    )]
+    pub trait GhafAudio {
+        async fn subscribe_to_device_updated_signal(&self) -> zbus::Result<()>;
+        async fn unsubscribe_from_device_updated_signal(&self) -> zbus::Result<()>;
+        async fn set_device_volume(&self, id: i32, dev_type: i32, value: i32) -> zbus::Result<i32>;
+        async fn make_device_default(&self, id: i32, dev_type: i32) -> zbus::Result<i32>;
+        async fn open(&self) -> zbus::Result<()>;
+
+        #[zbus(signal)]
+        fn device_updated(
+            &self,
+            id: i32,
+            device_type: i32,
+            name: String,
+            volume: i32,
+            is_muted: bool,
+            is_default: bool,
+            event: i32,
+        ) -> zbus::Result<()>;
     }
+}
 
-    impl Default for AudioControl {
-        fn default() -> Self {
-            Self::new()
+type Proxy = imp::GhafAudioProxy<'static>;
+
+#[derive(Debug, Default, Clone)]
+enum ConnectionState {
+    #[default]
+    Disconnected,
+    Connecting(async_channel::Receiver<()>),
+    Connected(Proxy),
+}
+
+impl ConnectionState {
+    fn proxy(&self) -> Option<Proxy> {
+        match self {
+            ConnectionState::Connected(p) => Some(p.clone()),
+            _ => None,
         }
     }
+}
 
-    impl AudioControl {
-        pub fn new() -> Self {
-            #[cfg(not(feature = "mock"))]
-            let init_list = ListStore::new::<AudioDeviceGObject>();
-            #[cfg(feature = "mock")]
-            let init_list = Self::fill_by_mock_data();
-            let connection = Runtime::new()
-                .unwrap()
-                .block_on(Connection::session())
-                .expect("AudioControl: Failed to connect to DBus session bus");
+#[derive(Debug)]
+pub struct AudioControl {
+    devices: TypedListStore<AudioDeviceGObject>,
+    connection: Rc<RefCell<ConnectionState>>,
+}
 
-            Self {
-                devices: init_list.into(),
-                connection,
-            }
-        }
+impl Default for AudioControl {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
+impl AudioControl {
+    pub fn new() -> Self {
+        #[cfg(not(feature = "mock"))]
+        let devices = TypedListStore::new();
         #[cfg(feature = "mock")]
-        fn fill_by_mock_data() -> ListStore {
-            let init_store = ListStore::new::<AudioDeviceGObject>();
-            let vec = vec![
-                AudioDeviceGObject::new(
-                    1,
-                    AudioDeviceType::Sink as i32,
-                    "Speakers".to_string(),
-                    75,
-                    false,
-                ),
-                AudioDeviceGObject::new(
-                    2,
-                    AudioDeviceType::Sink as i32,
-                    "Headphones".to_string(),
-                    50,
-                    false,
-                ),
-                AudioDeviceGObject::new(
-                    3,
-                    AudioDeviceType::Source as i32,
-                    "Microphone".to_string(),
-                    100,
-                    false,
-                ),
-                AudioDeviceGObject::new(
-                    4,
-                    AudioDeviceType::Source as i32,
-                    "External Mic".to_string(),
-                    85,
-                    true,
-                ),
-            ];
-
-            init_store.extend_from_slice(&vec);
-            init_store
-        }
-
-        pub fn fetch_audio_devices(&self) {
-            let connection = self.connection.clone();
-            let (event_tx, event_rx) = async_channel::unbounded();
-
-            thread::spawn(move || {
-                let rt = Runtime::new().expect("AudioControl: Failed to create Tokio runtime");
-
-                rt.block_on(async {
-                    // Create a proxy to the org.ghaf.Audio interface
-                    let proxy = Proxy::new(&connection, "org.ghaf.Audio", "/org/ghaf/Audio", "org.ghaf.Audio")
-                        .await
-                        .expect("AudioControl: Failed to create proxy");
-
-                    // Stream to listen to the DeviceUpdated signal
-                    let mut stream = match proxy.receive_signal("DeviceUpdated").await {
-                        Ok(s) => s,
-                        Err(e) => {
-                            eprintln!("AudioControl: Failed to receive signal: {}", e);
-                            return;
-                        }
+        let devices = Self::fill_by_mock_data();
+        let (tx, rx) = async_channel::bounded(1);
+        let connection = Rc::new(RefCell::new(ConnectionState::Connecting(rx)));
+        glib::spawn_future_local(glib::clone!(
+            #[strong]
+            connection,
+            async move {
+                let _tx = tx;
+                let bus = Connection::session().await;
+                if let Ok(bus) = bus {
+                    let proxy = imp::GhafAudioProxy::new(&bus).await;
+                    *connection.borrow_mut() = if let Ok(proxy) = proxy {
+                        ConnectionState::Connected(proxy)
+                    } else {
+                        ConnectionState::Disconnected
                     };
+                } else {
+                    *connection.borrow_mut() = ConnectionState::Disconnected;
+                }
+            }
+        ));
+        Self {
+            devices,
+            connection,
+        }
+    }
 
-                    // Subscribe to device updates
-                    if let Err(e) = proxy.call_method("SubscribeToDeviceUpdatedSignal", &()).await {
-                        eprintln!("AudioControl: Failed to subscribe to device updates: {}", e);
-                        return;
-                    }
-                    println!("AudioControl: Subscribed to device updates.");
+    #[cfg(feature = "mock")]
+    fn fill_by_mock_data() -> ListStore {
+        [
+            AudioDeviceGObject::new(
+                1,
+                AudioDeviceType::Sink as i32,
+                "Speakers".to_string(),
+                75,
+                false,
+            ),
+            AudioDeviceGObject::new(
+                2,
+                AudioDeviceType::Sink as i32,
+                "Headphones".to_string(),
+                50,
+                false,
+            ),
+            AudioDeviceGObject::new(
+                3,
+                AudioDeviceType::Source as i32,
+                "Microphone".to_string(),
+                100,
+                false,
+            ),
+            AudioDeviceGObject::new(
+                4,
+                AudioDeviceType::Source as i32,
+                "External Mic".to_string(),
+                85,
+                true,
+            ),
+        ]
+        .into_iter()
+        .collect()
+    }
 
-                    while let Some(signal) = stream.next().await {
-                        match signal.body().deserialize::<(i32, i32, String, i32, bool, bool, i32)>() {
-                            Ok((id, device_type, name, volume, is_muted, is_default, event)) => {
-                                println!(
-                                    "AudioControl: DeviceUpdated - ID: {}, Type: {}, Name: {}, Volume: {}, Muted: {}, Default: {}, Event: {}",
-                                    id, device_type, name, volume, is_muted, is_default, event
-                                );
+    pub fn fetch_audio_devices(&self) {
+        let devices = self.devices.clone();
 
-                                if name.to_lowercase().contains("monitor") {
-                                    println!("AudioControl: Monitor ignored {}, {}, {}!", id, device_type, name);
-                                } else {
-                                    let _ = event_tx.send((id, device_type, name, volume, is_muted, event)).await;
+        self.with_proxy(async move |proxy| {
+            // Stream to listen to the DeviceUpdated signal
+            let mut stream = match proxy.receive_device_updated().await {
+                Ok(s) => s,
+                Err(e) => {
+                    error!("AudioControl: Failed to receive signal: {e}");
+                    return;
+                }
+            };
+
+            // Subscribe to device updates
+            if let Err(e) = proxy.subscribe_to_device_updated_signal().await {
+                error!("AudioControl: Failed to subscribe to device updates: {e}");
+                return;
+            }
+            debug!("AudioControl: Subscribed to device updates.");
+
+            while let Some(signal) = stream.next().await {
+                match signal.args() {
+                    Ok(imp::DeviceUpdatedArgs {
+                        id,
+                        device_type,
+                        name,
+                        volume,
+                        is_muted,
+                        is_default,
+                        event,
+                        ..
+                    }) => {
+                        debug!(
+                            "AudioControl: DeviceUpdated - ID: {id}, Type: {device_type}, Name: {name}, \
+                                    Volume: {volume}, Muted: {is_muted}, Default: {is_default}, Event: {event}"
+                        );
+
+                        if name.to_lowercase().contains("monitor") {
+                            debug!("AudioControl: Monitor ignored {id}, {device_type}, {name}!");
+                        } else {
+                            match event {
+                                0 => {
+                                    // add
+                                    devices.append(&AudioDeviceGObject::new(
+                                        id,
+                                        device_type,
+                                        name.clone(),
+                                        volume,
+                                        is_muted,
+                                    ));
+                                    debug!(
+                                        "AudioControl: Device added to the list - ID: {id}, Type: {device_type}, \
+                                             Name: {name}, Volume: {volume}, Muted: {is_muted}"
+                                    );
+                                }
+                                1 => {
+                                    // update
+                                    if let Some(obj) = devices
+                                        .iter()
+                                        //id and type as composite key
+                                        .find(|obj| {
+                                            (obj.id() == id) && (obj.dev_type() == device_type)
+                                        })
+                                    {
+                                        obj.update(device_type, name.clone(), volume, is_muted);
+                                        debug!(
+                                            "AudioControl: Device with ID {id} has been updated"
+                                        );
+                                    }
+                                }
+                                2 => {
+                                    // remove
+                                    devices.retain(|o| o.downcast_ref::<AudioDeviceGObject>().is_none_or(|o| o.id() != id || o.dev_type() != device_type));
+                                }
+                                _ => {
+                                    debug!("AudioControl: No such event");
                                 }
                             }
-                            Err(e) => {
-                                eprintln!("AudioControl: Failed to parse signal: {}", e);
-                            }
                         }
                     }
-                });
-            });
-
-            let devices = self.devices.clone();
-            //local future
-            glib::spawn_future_local(async move {
-                while let Ok((id, device_type, name, volume, is_muted, event)) =
-                    event_rx.recv().await
-                {
-                    match event {
-                        0 => {
-                            // add
-                            devices.append(&AudioDeviceGObject::new(
-                                id,
-                                device_type,
-                                name.clone(),
-                                volume,
-                                is_muted,
-                            ));
-                            println!(
-                                "AudioControl: Device added to the list - ID: {}, Type: {}, Name: {}, Volume: {}, Muted: {}",
-                                id, device_type, name, volume, is_muted
-                            );
-                        }
-                        1 => {
-                            // update
-                            if let Some(obj) = devices
-                                .iter()
-                                //id and type as composite key
-                                .find(|obj| (obj.id() == id) && (obj.dev_type() == device_type))
-                            {
-                                obj.update(device_type, name.clone(), volume, is_muted);
-                                println!("AudioControl: Device with ID {id} has been updated");
-                            }
-                        }
-                        2 => {
-                            // remove
-                            if let Some(pos) = devices
-                                .iter()
-                                //id and type as composite key
-                                .position(|obj| (obj.id() == id) && (obj.dev_type() == device_type))
-                            {
-                                devices.remove(pos as u32);
-                                println!("AudioControl: Device with ID {id} has been deleted");
-                            }
-                        }
-                        _ => {
-                            println!("AudioControl: No such event");
-                        }
+                    Err(e) => {
+                        error!("AudioControl: Failed to parse signal: {e}");
                     }
                 }
-            });
-        }
+            }
+        });
+    }
 
-        pub fn get_devices_list(&self) -> ListStore {
-            self.devices.deref().clone()
-        }
+    pub fn get_devices_list(&self) -> ListStore {
+        self.devices.deref().clone()
+    }
 
-        /*pub fn get_devices_list_by_type(&self, device_type: AudioDeviceType) -> ListStore {
-            // Define the data structure for the ListStore: (i32, String, i32, bool, i32)
-            let list_store = ListStore::new(&[
-                i32::static_type(),
-                String::static_type(),
-                i32::static_type(),
-                bool::static_type(),
-            ]);
+    pub fn set_device_volume(&self, id: i32, dev_type: i32, value: i32) {
+        self.with_proxy(async move |proxy| {
+            if let Err(e) = proxy.set_device_volume(id, dev_type, value).await {
+                error!("AudioControl: Failed to set device volume: {e}");
+            }
+        });
+    }
 
-            // Clone and lock the devices
-            let binding = self.devices.clone();
-            let devices = binding.lock().unwrap();
+    pub fn set_default_device(&self, id: i32, dev_type: i32) {
+        self.with_proxy(async move |proxy| {
+            if let Err(e) = proxy.make_device_default(id, dev_type).await {
+                error!("AudioControl: Failed to set default device: {e}");
+            }
+        });
+    }
 
-            // Iterate, filter, and add rows to the ListStore
-            devices
-                .iter()
-                .filter(|&(_, value)| value.0 == device_type as i32)
-                .for_each(|(_, value)| {
-                    list_store.insert_with_values(
-                        None, // Append the row
-                        &[(0, &value.0), (1, &value.1), (2, &value.2), (3, &value.3)],
-                    );
-                });
+    pub fn open_advanced_settings_widget(&self) {
+        self.with_proxy(async move |proxy| {
+            if let Err(e) = proxy.open().await {
+                error!("AudioControl: Failed to open advansed settings widget: {e}");
+            }
+        });
+    }
 
-            list_store
-        }*/
+    fn unsubscribe_from_updates(&self) {
+        self.with_proxy(async move |proxy| {
+            if let Err(e) = proxy.unsubscribe_from_device_updated_signal().await {
+                error!("AudioControl: Failed to unsubscribe from updates: {e}");
+            }
+        });
+    }
 
-        pub fn set_device_volume(&self, id: i32, dev_type: i32, value: i32) {
-            //same connection, new proxy
-            let proxy = Runtime::new()
-                .unwrap()
-                .block_on(Proxy::new(
-                    &self.connection,
-                    "org.ghaf.Audio",
-                    "/org/ghaf/Audio",
-                    "org.ghaf.Audio",
-                ))
-                .expect("AudioControl(set_device_volume): Failed to create proxy");
+    fn proxy(&self) -> impl std::future::Future<Output = Option<Proxy>> {
+        let conn = self.connection.clone();
 
-            Runtime::new().unwrap().block_on(async {
-                if let Err(e) = proxy
-                    .call_method("SetDeviceVolume", &(id, dev_type, value))
-                    .await
-                {
-                    eprintln!("AudioControl: Failed to set device volume: {}", e);
-                }
-            });
-        }
+        async move {
+            let rx = match &*conn.borrow() {
+                ConnectionState::Disconnected => return None,
+                ConnectionState::Connected(p) => return Some(p.clone()),
+                ConnectionState::Connecting(rx) => rx.clone(),
+            };
 
-        pub fn set_default_device(&self, id: i32, dev_type: i32) {
-            //same connection, new proxy
-            let proxy = Runtime::new()
-                .unwrap()
-                .block_on(Proxy::new(
-                    &self.connection,
-                    "org.ghaf.Audio",
-                    "/org/ghaf/Audio",
-                    "org.ghaf.Audio",
-                ))
-                .expect("AudioControl(set_default_device): Failed to create proxy");
-
-            Runtime::new().unwrap().block_on(async {
-                if let Err(e) = proxy
-                    .call_method("MakeDeviceDefault", &(id, dev_type))
-                    .await
-                {
-                    eprintln!("AudioControl: Failed to set default device: {}", e);
-                }
-            });
-        }
-
-        pub fn open_advanced_settings_widget(&self) {
-            //same connection, new proxy
-            let proxy = Runtime::new()
-                .unwrap()
-                .block_on(Proxy::new(
-                    &self.connection,
-                    "org.ghaf.Audio",
-                    "/org/ghaf/Audio",
-                    "org.ghaf.Audio",
-                ))
-                .expect("AudioControl(open_advanced_settings_widget): Failed to create proxy");
-
-            Runtime::new().unwrap().block_on(async {
-                if let Err(e) = proxy.call_method("Open", &()).await {
-                    eprintln!(
-                        "AudioControl: Failed to open advansed settings widget: {}",
-                        e
-                    );
-                }
-            });
-        }
-
-        pub fn unsubscribe_from_updates(&self) {
-            let proxy = Runtime::new()
-                .unwrap()
-                .block_on(Proxy::new(
-                    &self.connection,
-                    "org.ghaf.Audio",
-                    "/org/ghaf/Audio",
-                    "org.ghaf.Audio",
-                ))
-                .expect("AudioControl(unsubscribe_from_updates): Failed to create proxy");
-
-            Runtime::new().unwrap().block_on(async {
-                if let Err(e) = proxy
-                    .call_method("UnsubscribeFromDeviceUpdatedSignal", &())
-                    .await
-                {
-                    eprintln!("AudioControl: Failed to unsubscribe from updates: {}", e);
-                }
-            });
+            let _ = rx.recv().await;
+            conn.borrow().proxy()
         }
     }
 
-    impl Drop for AudioControl {
-        fn drop(&mut self) {
-            println!("AudioControl: Unsubscribe from DeviceUpdatedSignal on dropping");
-            self.unsubscribe_from_updates();
-        }
+    fn with_proxy(&self, f: impl AsyncFnOnce(imp::GhafAudioProxy) + 'static) {
+        let proxy = self.proxy();
+        glib::spawn_future_local(async move {
+            if let Some(proxy) = proxy.await {
+                f(proxy).await;
+            }
+        });
+    }
+}
+
+impl Drop for AudioControl {
+    fn drop(&mut self) {
+        debug!("AudioControl: Unsubscribe from DeviceUpdatedSignal on dropping");
+        self.unsubscribe_from_updates();
     }
 }
