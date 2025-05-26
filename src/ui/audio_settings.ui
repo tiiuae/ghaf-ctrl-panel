@@ -55,41 +55,21 @@
     </child>
     <child>
       <object class="GtkDropDown" id="mic_switch">
+        <signal name="notify::selected" handler="on_mic_changed" swapped="true"/>
       <style><class name="dropdown-button"/></style>
-      <signal name="notify::selected" handler="on_mic_changed" swapped="true"/>
       <property name="halign">start</property>
       <property name="valign">center</property>
       <property name="width-request">220</property>
       <property name="height-request">30</property>
-      <!--<property name="model">
-        <object class="GtkStringList">
-          <items>
-            <item translatable="yes">Mic1</item>
-            <item translatable="yes">Mic2</item>
-          </items>
-        </object>
-      </property>-->
       </object>
     </child>
     <child>
-      <object class="GtkScale" id="mic_volume">
-      <signal name="value-changed" handler="on_mic_volume_changed" swapped="true"/>
-      <property name="orientation">horizontal</property>
-      <property name="halign">start</property>
-      <property name="valign">center</property>
+      <object class="VolumeWidget" id="mic_volume">
+      <signal name="notify::volume" handler="on_mic_volume_changed" swapped="true"/>
+      <signal name="notify::muted" handler="on_mic_mute_changed" swapped="true"/>
+      <signal name="deselected" handler="on_mic_deselected" swapped="true"/>
       <property name="width-request">220</property>
       <property name="height-request">30</property>
-      <property name="adjustment">
-        <object class="GtkAdjustment">
-        <property name="lower">0</property>
-        <property name="upper">100</property>
-        <property name="step_increment">1</property>
-        <property name="page_increment">10</property>
-        <property name="value">50</property>
-        </object>
-      </property>
-      <property name="draw_value">true</property>
-      <property name="digits">0</property>
       </object>
     </child>
     <child>
@@ -102,84 +82,26 @@
     </child>
     <child>
       <object class="GtkDropDown" id="speaker_switch">
+        <signal name="notify::selected" handler="on_speaker_changed" swapped="true"/>
       <style><class name="dropdown-button"/></style>
-      <signal name="notify::selected" handler="on_speaker_changed" swapped="true"/>
       <property name="halign">start</property>
       <property name="valign">center</property>
       <property name="width-request">220</property>
       <property name="height-request">30</property>
-      <!--<property name="model">
-        <object class="GtkStringList">
-          <items>
-            <item translatable="yes">Speaker1</item>
-            <item translatable="yes">Speaker2</item>
-          </items>
-        </object>
-      </property>-->
       </object>
     </child>
     <child>
-      <object class="GtkScale" id="speaker_volume">
-      <signal name="value-changed" handler="on_speaker_volume_changed" swapped="true"/>
-      <property name="orientation">horizontal</property>
+      <object class="VolumeWidget" id="speaker_volume">
+      <signal name="notify::volume" handler="on_speaker_volume_changed" swapped="true"/>
+      <signal name="notify::muted" handler="on_speaker_mute_changed" swapped="true"/>
+      <signal name="deselected" handler="on_speaker_deselected" swapped="true"/>
       <property name="halign">start</property>
       <property name="valign">center</property>
-      <property name="width-request">220</property>
-      <property name="height-request">30</property>
-      <property name="adjustment">
-        <object class="GtkAdjustment">
-        <property name="lower">0</property>
-        <property name="upper">100</property>
-        <property name="step_increment">1</property>
-        <property name="page_increment">10</property>
-        <property name="value">50</property>
-        </object>
-      </property>
-      <property name="draw_value">true</property>
-      <property name="digits">0</property>
       </object>
     </child>
     <child>
       <object class="GtkBox">
       <property name="vexpand">true</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkBox" id="footer">
-      <property name="orientation">vertical</property>
-      <property name="valign">end</property>
-        <child>
-          <object class="GtkSeparator">
-          </object>
-        </child>
-        <child>
-          <object class="GtkBox">
-          <property name="orientation">horizontal</property>
-            <child>
-              <object class="GtkButton">
-              <property name="label">Reset to defaults</property>
-              <signal name="clicked" handler="on_reset_clicked" swapped="true"/>
-              <style><class name="settings-button"/></style>
-              <property name="width-request">140</property>
-              <property name="height-request">30</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkBox">
-              <property name="hexpand">true</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkButton">
-              <property name="label">Save</property>
-              <signal name="clicked" handler="on_save_clicked" swapped="true"/>
-              <style><class name="settings-button"/></style>
-              <property name="width-request">60</property>
-              <property name="height-request">30</property>
-              </object>
-            </child>
-          </object>
-        </child>
       </object>
     </child>
   </template>

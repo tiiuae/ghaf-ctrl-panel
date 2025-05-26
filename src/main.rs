@@ -31,6 +31,7 @@ mod settings_gobject;
 mod trust_level;
 mod typed_list_store;
 mod vm_row;
+mod volume_widget;
 mod wifi_settings_page;
 mod window;
 mod wireguard_vms;

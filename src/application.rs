@@ -1,6 +1,6 @@
 use adw::subclass::prelude::*;
 use gio::ListStore;
-use glib::Variant;
+use glib::{Properties, Variant};
 use gtk::prelude::*;
 use gtk::CssProvider;
 use gtk::{gdk, gio, glib};
@@ -18,6 +18,7 @@ use crate::error_popup::ErrorPopup;
 use crate::language_region_notify_popup::LanguageRegionNotifyPopup;
 use crate::plot::Plot;
 use crate::settings_action::SettingsAction;
+use crate::volume_widget::VolumeWidget;
 use crate::ControlPanelGuiWindow;
 use givc_client::endpoint::TlsConfig;
 use givc_common::address::EndpointAddress;
@@ -27,6 +28,7 @@ use regex::Regex;
 trait AudioVariantExt {
     fn def_params(&self) -> (i32, i32);
     fn vol_params(&self) -> (i32, i32, i32);
+    fn mute_params(&self) -> (i32, i32, bool);
 }
 
 impl AudioVariantExt for Variant {
@@ -37,15 +39,23 @@ impl AudioVariantExt for Variant {
     fn vol_params(&self) -> (i32, i32, i32) {
         self.get().unwrap()
     }
+
+    fn mute_params(&self) -> (i32, i32, bool) {
+        self.get().unwrap()
+    }
 }
 
 mod imp {
     use super::*;
 
-    #[derive(Debug, Default)]
+    #[derive(Debug, Default, Properties)]
+    #[properties(wrapper_type = super::ControlPanelGuiApplication)]
     pub struct ControlPanelGuiApplication {
-        pub data_provider: Rc<RefCell<DataProvider>>,
-        pub audio_control: RefCell<AudioControl>,
+        pub(super) data_provider: Rc<RefCell<DataProvider>>,
+        pub(super) audio_control: RefCell<AudioControl>,
+
+        #[property(get, set)]
+        window: RefCell<Option<ControlPanelGuiWindow>>,
     }
 
     #[glib::object_subclass]
@@ -55,6 +65,7 @@ mod imp {
         type ParentType = adw::Application;
     }
 
+    #[glib::derived_properties]
     impl ObjectImpl for ControlPanelGuiApplication {
         fn constructed(&self) {
             self.parent_constructed();
@@ -81,42 +92,47 @@ mod imp {
             //load CSS styles
             application.load_css();
             // Get the current window or create one if necessary
-            let window = if let Some(window) = application.active_window() {
+            let window = if let Some(window) = application.window() {
                 window
             } else {
                 let window = ControlPanelGuiWindow::new(&*application);
 
-                let win = window.clone();
-                glib::spawn_future_local(async move {
-                    let LanguageRegionData {
-                        languages,
-                        current_language,
-                        timezones,
-                        current_timezone,
-                    } = DataProvider::get_timezone_locale_info().await;
-                    let index = current_language.and_then(|cur| {
-                        languages
-                            .iter()
-                            .enumerate()
-                            .find_map(|(idx, lang)| (lang.code == cur).then_some(idx))
-                    });
-                    win.set_locale_model(
-                        languages.into_iter().map(DataGObject::from).collect(),
-                        index,
-                    );
+                glib::spawn_future_local(glib::clone!(
+                    #[strong]
+                    window,
+                    async move {
+                        let LanguageRegionData {
+                            languages,
+                            current_language,
+                            timezones,
+                            current_timezone,
+                        } = DataProvider::get_timezone_locale_info().await;
+                        let index = current_language.and_then(|cur| {
+                            languages
+                                .iter()
+                                .enumerate()
+                                .find_map(|(idx, lang)| (lang.code == cur).then_some(idx))
+                        });
+                        window.set_locale_model(
+                            languages.into_iter().map(DataGObject::from).collect(),
+                            index,
+                        );
 
-                    let index = current_timezone.and_then(|cur| {
-                        timezones
-                            .iter()
-                            .enumerate()
-                            .find_map(|(idx, tz)| (tz.code == cur).then_some(idx))
-                    });
-                    win.set_timezone_model(
-                        timezones.into_iter().map(DataGObject::from).collect(),
-                        index,
-                    );
-                });
-                window.upcast()
+                        let index = current_timezone.and_then(|cur| {
+                            timezones
+                                .iter()
+                                .enumerate()
+                                .find_map(|(idx, tz)| (tz.code == cur).then_some(idx))
+                        });
+                        window.set_timezone_model(
+                            timezones.into_iter().map(DataGObject::from).collect(),
+                            index,
+                        );
+                    }
+                ));
+
+                self.obj().set_window(&window);
+                window
             };
 
             // Ask the window manager/compositor to present the window
@@ -149,6 +165,7 @@ impl ControlPanelGuiApplication {
         tls_info: Option<(String, TlsConfig)>,
     ) -> Self {
         let _ = DataGObject::static_type();
+        let _ = VolumeWidget::static_type();
         let _ = Plot::static_type();
         let app: Self = glib::Object::builder()
             .property("application-id", application_id)
@@ -162,7 +179,14 @@ impl ControlPanelGuiApplication {
         app.imp().data_provider.borrow().set_tls_info(tls_info);
 
         //test dbus service
-        app.imp().audio_control.borrow().fetch_audio_devices();
+        app.imp()
+            .audio_control
+            .borrow()
+            .fetch_audio_devices(glib::clone!(
+                #[strong]
+                app,
+                move |list| app.window().unwrap().set_audio_devices((&*list).clone())
+            ));
 
         app
     }
@@ -306,15 +330,20 @@ impl ControlPanelGuiApplication {
             SettingsAction::KeyboardLayout => todo!(),
             SettingsAction::Speaker => {
                 let (id, dev_type) = value.def_params();
-                println!("Speaker changed: {}", id);
                 self.imp()
                     .audio_control
                     .borrow()
                     .set_default_device(id, dev_type);
             }
+            SettingsAction::SpeakerMute => {
+                let (id, dev_type, muted) = value.mute_params();
+                self.imp()
+                    .audio_control
+                    .borrow()
+                    .set_device_mute(id, dev_type, muted);
+            }
             SettingsAction::SpeakerVolume => {
                 let (id, dev_type, vol) = value.vol_params();
-                println!("Speaker volume: {}", vol);
                 self.imp()
                     .audio_control
                     .borrow()
@@ -322,15 +351,20 @@ impl ControlPanelGuiApplication {
             }
             SettingsAction::Mic => {
                 let (id, dev_type) = value.def_params();
-                println!("Mic changed: {}", id);
                 self.imp()
                     .audio_control
                     .borrow()
                     .set_default_device(id, dev_type);
             }
+            SettingsAction::MicMute => {
+                let (id, dev_type, muted) = value.mute_params();
+                self.imp()
+                    .audio_control
+                    .borrow()
+                    .set_device_mute(id, dev_type, muted);
+            }
             SettingsAction::MicVolume => {
                 let (id, dev_type, vol) = value.vol_params();
-                println!("Mic volume: {}", vol);
                 self.imp()
                     .audio_control
                     .borrow()

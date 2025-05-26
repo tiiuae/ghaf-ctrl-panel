@@ -166,9 +166,6 @@ impl ControlPanelGuiWindow {
         self.setup_factory();
         //vm view by default
         self.imp().vm_view_button.set_active(true);
-
-        //set audio devices list
-        self.set_audio_devices(app.get_audio_devices());
     }
 
     #[inline(always)]
@@ -399,7 +396,7 @@ impl ControlPanelGuiWindow {
         self.imp().service_settings_box.bind(obj);
     }
 
-    fn set_audio_devices(&self, devices: ListStore) {
+    pub fn set_audio_devices(&self, devices: ListStore) {
         self.imp().settings_box.set_audio_devices(devices);
     }
 

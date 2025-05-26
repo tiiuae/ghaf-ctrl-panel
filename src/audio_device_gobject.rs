@@ -62,6 +62,7 @@ pub mod imp {
         pub name: String,
         pub volume: i32,
         pub muted: bool,
+        pub is_default: bool,
     }
 
     #[derive(Default, Properties)]
@@ -72,6 +73,7 @@ pub mod imp {
         #[property(name = "name", get, set, type = String, member = name)]
         #[property(name = "volume", get, set, type = i32, member = volume)]
         #[property(name = "muted", get, set, type = bool, member = muted)]
+        #[property(name = "is-default", get, set, type = bool, member = is_default)]
         pub data: RefCell<AudioDeviceData>,
     }
 
@@ -93,25 +95,34 @@ glib::wrapper! {
 
 impl Default for AudioDeviceGObject {
     fn default() -> Self {
-        Self::new(0, 0, "default".to_string(), 0, false)
+        Self::new(0, 0, "default".to_string(), 0, false, false)
     }
 }
 
 impl AudioDeviceGObject {
-    pub fn new(id: i32, dev_type: i32, name: String, volume: i32, muted: bool) -> Self {
+    pub fn new(
+        id: i32,
+        dev_type: i32,
+        name: String,
+        volume: i32,
+        muted: bool,
+        is_default: bool,
+    ) -> Self {
         Object::builder()
             .property("id", id)
             .property("dev-type", dev_type)
             .property("name", name.clone())
             .property("volume", volume)
             .property("muted", muted)
+            .property("is-default", is_default)
             .build()
     }
 
-    pub fn update(&self, dev_type: i32, name: String, volume: i32, muted: bool) {
+    pub fn update(&self, dev_type: i32, name: String, volume: i32, muted: bool, is_default: bool) {
         self.set_property("dev-type", dev_type);
         self.set_property("name", name);
         self.set_property("volume", volume);
         self.set_property("muted", muted);
+        self.set_property("is-default", is_default);
     }
 }

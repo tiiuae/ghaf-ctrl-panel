@@ -526,8 +526,8 @@ impl DataProvider {
         async {
             Ok(StatsResponse {
                 memory: Some(MemoryStats {
-                    total: 100000000,
-                    available: 200000000,
+                    total: 200000000,
+                    available: 100000000,
                     ..Default::default()
                 }),
                 process: Some(ProcessStats {

@@ -22,6 +22,10 @@ pub mod imp {
             let s = self.clone();
             (0..).map_while(move |idx| s.get(idx))
         }
+
+        pub fn append(&self, item: &T) {
+            self.0.append(item);
+        }
     }
 
     impl<T: IsA<Object>, L: IsA<ListStore>> From<L> for TypedListStore<T> {

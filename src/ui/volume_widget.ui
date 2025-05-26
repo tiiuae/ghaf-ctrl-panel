@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="VolumeWidget" parent="GtkBox">
+    <property name="orientation">horizontal</property>
+    <property name="spacing">10</property>
+    <property name="sensitive">false</property>
+    <child>
+      <object class="GtkToggleButton" id="mute">
+        <signal name="toggled" handler="on_mute_changed" swapped="true"/>
+        <property name="visible">True</property>
+        <child>
+          <object class="GtkImage">
+            <property name="visible">True</property>
+            <property name="icon-name">audio-volume-muted</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkScale" id="volume_scale">
+        <signal name="value-changed" handler="on_volume_changed" swapped="true"/>
+        <property name="visible">True</property>
+        <property name="orientation">horizontal</property>
+        <property name="halign">start</property>
+        <property name="valign">center</property>
+        <property name="width-request">220</property>
+        <property name="height-request">30</property>
+        <property name="adjustment">
+          <object class="GtkAdjustment">
+            <property name="lower">0</property>
+            <property name="upper">100</property>
+            <property name="step_increment">1</property>
+            <property name="page_increment">10</property>
+            <property name="value">50</property>
+          </object>
+        </property>
+        <property name="draw_value">true</property>
+        <property name="digits">0</property>
+      </object>
+    </child>
+  </template>
+</interface>

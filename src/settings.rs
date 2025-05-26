@@ -149,12 +149,28 @@ mod imp {
             self.obj()
                 .emit_by_name::<()>("settings-action", &[&action, &value]);
         }
+
+        #[template_callback]
+        fn on_mic_mute_changed(&self, value: Variant) {
+            let action = SettingsAction::MicMute;
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &value]);
+        }
+
         #[template_callback]
         fn on_speaker_volume_changed(&self, value: Variant) {
             let action = SettingsAction::SpeakerVolume;
             self.obj()
                 .emit_by_name::<()>("settings-action", &[&action, &value]);
         }
+
+        #[template_callback]
+        fn on_speaker_mute_changed(&self, value: Variant) {
+            let action = SettingsAction::SpeakerMute;
+            self.obj()
+                .emit_by_name::<()>("settings-action", &[&action, &value]);
+        }
+
         #[template_callback]
         fn on_open_advanced_audio_settings(&self) {
             let action = SettingsAction::OpenAdvancedAudioSettingsWidget;

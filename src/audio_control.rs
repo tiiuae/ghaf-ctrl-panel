@@ -1,7 +1,7 @@
 use futures::StreamExt;
 use gio::ListStore;
 use gtk::{gio, glib, prelude::*};
-use log::{debug, error};
+use log::{debug, error, warn};
 use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
@@ -22,6 +22,7 @@ mod imp {
         async fn subscribe_to_device_updated_signal(&self) -> zbus::Result<()>;
         async fn unsubscribe_from_device_updated_signal(&self) -> zbus::Result<()>;
         async fn set_device_volume(&self, id: i32, dev_type: i32, value: i32) -> zbus::Result<i32>;
+        async fn set_device_mute(&self, id: i32, dev_type: i32, mute: bool) -> zbus::Result<i32>;
         async fn make_device_default(&self, id: i32, dev_type: i32) -> zbus::Result<i32>;
         async fn open(&self) -> zbus::Result<()>;
 
@@ -72,12 +73,10 @@ impl Default for AudioControl {
 
 impl AudioControl {
     pub fn new() -> Self {
-        #[cfg(not(feature = "mock"))]
         let devices = TypedListStore::new();
-        #[cfg(feature = "mock")]
-        let devices = Self::fill_by_mock_data();
         let (tx, rx) = async_channel::bounded(1);
         let connection = Rc::new(RefCell::new(ConnectionState::Connecting(rx)));
+        #[cfg(not(feature = "mock"))]
         glib::spawn_future_local(glib::clone!(
             #[strong]
             connection,
@@ -96,6 +95,14 @@ impl AudioControl {
                 }
             }
         ));
+        #[cfg(feature = "mock")]
+        glib::spawn_future_local(glib::clone!(
+            #[strong]
+            devices,
+            async move {
+                Self::fill_by_mock_data(&devices);
+            }
+        ));
         Self {
             devices,
             connection,
@@ -103,44 +110,45 @@ impl AudioControl {
     }
 
     #[cfg(feature = "mock")]
-    fn fill_by_mock_data() -> ListStore {
-        [
-            AudioDeviceGObject::new(
-                1,
-                AudioDeviceType::Sink as i32,
-                "Speakers".to_string(),
-                75,
-                false,
-            ),
-            AudioDeviceGObject::new(
-                2,
-                AudioDeviceType::Sink as i32,
-                "Headphones".to_string(),
-                50,
-                false,
-            ),
-            AudioDeviceGObject::new(
-                3,
-                AudioDeviceType::Source as i32,
-                "Microphone".to_string(),
-                100,
-                false,
-            ),
-            AudioDeviceGObject::new(
-                4,
-                AudioDeviceType::Source as i32,
-                "External Mic".to_string(),
-                85,
-                true,
-            ),
-        ]
-        .into_iter()
-        .collect()
+    fn fill_by_mock_data(list: &TypedListStore<AudioDeviceGObject>) {
+        list.append(&AudioDeviceGObject::new(
+            1,
+            AudioDeviceType::Sink as i32,
+            "Speakers".to_string(),
+            75,
+            false,
+            false,
+        ));
+        list.append(&AudioDeviceGObject::new(
+            2,
+            AudioDeviceType::Sink as i32,
+            "Headphones".to_string(),
+            50,
+            true,
+            true,
+        ));
+        list.append(&AudioDeviceGObject::new(
+            3,
+            AudioDeviceType::Source as i32,
+            "Microphone".to_string(),
+            100,
+            false,
+            true,
+        ));
+        list.append(&AudioDeviceGObject::new(
+            4,
+            AudioDeviceType::Source as i32,
+            "External Mic".to_string(),
+            85,
+            true,
+            false,
+        ));
     }
 
-    pub fn fetch_audio_devices(&self) {
+    pub fn fetch_audio_devices(&self, cb: impl Fn(TypedListStore<AudioDeviceGObject>) + 'static) {
         let devices = self.devices.clone();
 
+        #[cfg(not(feature = "mock"))]
         self.with_proxy(async move |proxy| {
             // Stream to listen to the DeviceUpdated signal
             let mut stream = match proxy.receive_device_updated().await {
@@ -157,6 +165,16 @@ impl AudioControl {
                 return;
             }
             debug!("AudioControl: Subscribed to device updates.");
+
+            glib::spawn_future_local(glib::clone!(
+                    #[strong]
+                    devices,
+                    async move {
+                        // TODO: Currently cannot tell when initial device dump is finished
+                        glib::timeout_future_seconds(1).await;
+                        cb(devices);
+                    }
+            ));
 
             while let Some(signal) = stream.next().await {
                 match signal.args() {
@@ -181,31 +199,34 @@ impl AudioControl {
                             match event {
                                 0 => {
                                     // add
-                                    devices.append(&AudioDeviceGObject::new(
-                                        id,
-                                        device_type,
-                                        name.clone(),
-                                        volume,
-                                        is_muted,
-                                    ));
                                     debug!(
                                         "AudioControl: Device added to the list - ID: {id}, Type: {device_type}, \
                                              Name: {name}, Volume: {volume}, Muted: {is_muted}"
                                     );
+                                    devices.append(&AudioDeviceGObject::new(
+                                        id,
+                                        device_type,
+                                        name,
+                                        volume,
+                                        is_muted,
+                                        is_default,
+                                    ));
                                 }
                                 1 => {
                                     // update
                                     if let Some(obj) = devices
                                         .iter()
-                                        //id and type as composite key
                                         .find(|obj| {
+                                            //id and type as composite key
                                             (obj.id() == id) && (obj.dev_type() == device_type)
                                         })
                                     {
-                                        obj.update(device_type, name.clone(), volume, is_muted);
+                                        obj.update(device_type, name, volume, is_muted, is_default);
                                         debug!(
                                             "AudioControl: Device with ID {id} has been updated"
                                         );
+                                    } else {
+                                        warn!("AudioControl: could not find device {id}");
                                     }
                                 }
                                 2 => {
@@ -224,6 +245,16 @@ impl AudioControl {
                 }
             }
         });
+
+        #[cfg(feature = "mock")]
+        glib::spawn_future_local(glib::clone!(
+            #[strong]
+            devices,
+            async move {
+                glib::timeout_future_seconds(1).await;
+                cb(devices);
+            }
+        ));
     }
 
     pub fn get_devices_list(&self) -> ListStore {
@@ -233,6 +264,14 @@ impl AudioControl {
     pub fn set_device_volume(&self, id: i32, dev_type: i32, value: i32) {
         self.with_proxy(async move |proxy| {
             if let Err(e) = proxy.set_device_volume(id, dev_type, value).await {
+                error!("AudioControl: Failed to set device volume: {e}");
+            }
+        });
+    }
+
+    pub fn set_device_mute(&self, id: i32, dev_type: i32, mute: bool) {
+        self.with_proxy(async move |proxy| {
+            if let Err(e) = proxy.set_device_mute(id, dev_type, mute).await {
                 error!("AudioControl: Failed to set device volume: {e}");
             }
         });
