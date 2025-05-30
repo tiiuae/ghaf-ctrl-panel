@@ -1,12 +1,12 @@
-use gtk::glib::{self, Object, Properties};
-use gtk::prelude::*;
-use gtk::subclass::prelude::*;
-use std::cell::RefCell;
+use gtk::glib::{self, Object};
 
 //use crate::trust_level::TrustLevel as MyTrustLevel;//type is no recognised in #property
 
 mod imp {
-    use super::*;
+    use gtk::glib::{self, Properties};
+    use gtk::prelude::*;
+    use gtk::subclass::prelude::*;
+    use std::cell::RefCell;
 
     #[derive(Default)]
     pub struct DataData {

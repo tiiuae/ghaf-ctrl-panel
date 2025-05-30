@@ -1,64 +1,30 @@
-use glib::{
-    value::{FromValue, Value},
-    Type,
-};
-use gtk::glib::subclass::prelude::*;
-use gtk::glib::{self, Object, Properties};
+use gtk::glib::{self, Object};
 use gtk::prelude::*;
-use std::cell::RefCell;
 
-pub mod imp {
-    use super::*;
+#[derive(
+    Debug, Clone, Copy, Eq, PartialEq, Default, glib::Enum, strum::FromRepr, strum::Display,
+)]
+#[enum_type(name = "AudioDeviceType")]
+#[repr(i32)]
+pub enum AudioDeviceType {
+    #[default]
+    Sink = 0,
+    Source = 1,
+    SinkInput = 2,
+    SourceOutput = 3,
+}
 
-    #[derive(Debug, Clone, Copy)]
-    #[repr(i32)]
-    pub enum AudioDeviceType {
-        Sink = 0,
-        Source = 1,
-        SinkInput = 2,
-        SourceOutput = 3,
-    }
-
-    impl StaticType for AudioDeviceType {
-        fn static_type() -> Type {
-            i32::static_type()
-        }
-    }
-
-    unsafe impl FromValue<'_> for AudioDeviceType {
-        type Checker = glib::value::GenericValueTypeChecker<Self>;
-
-        unsafe fn from_value(value: &Value) -> Self {
-            match value.get::<i32>().unwrap() {
-                0 => AudioDeviceType::Sink,
-                1 => AudioDeviceType::Source,
-                2 => AudioDeviceType::SinkInput,
-                3 => AudioDeviceType::SourceOutput,
-                _ => panic!("Invalid AudioDeviceType value"),
-            }
-        }
-    }
-
-    impl ToValue for AudioDeviceType {
-        fn to_value(&self) -> Value {
-            let v = match self {
-                AudioDeviceType::Sink => 0i32,
-                AudioDeviceType::Source => 1i32,
-                AudioDeviceType::SinkInput => 2i32,
-                AudioDeviceType::SourceOutput => 3i32,
-            };
-            v.to_value()
-        }
-
-        fn value_type(&self) -> Type {
-            i32::static_type()
-        }
-    }
+mod imp {
+    use super::AudioDeviceType;
+    use gtk::glib::subclass::prelude::*;
+    use gtk::glib::{self, Properties};
+    use gtk::prelude::*;
+    use std::cell::RefCell;
 
     #[derive(Default)]
     pub struct AudioDeviceData {
         pub id: i32,
-        pub dev_type: i32,
+        pub dev_type: AudioDeviceType,
         pub name: String,
         pub volume: i32,
         pub muted: bool,
@@ -69,7 +35,7 @@ pub mod imp {
     #[properties(wrapper_type = super::AudioDeviceGObject)]
     pub struct AudioDeviceGObject {
         #[property(name = "id", get, set, type = i32, member = id)]
-        #[property(name = "dev-type", get, set, type = i32, member = dev_type)]
+        #[property(name = "dev-type", get, set, type = AudioDeviceType, member = dev_type, builder(AudioDeviceType::Sink))]
         #[property(name = "name", get, set, type = String, member = name)]
         #[property(name = "volume", get, set, type = i32, member = volume)]
         #[property(name = "muted", get, set, type = bool, member = muted)]
@@ -95,14 +61,21 @@ glib::wrapper! {
 
 impl Default for AudioDeviceGObject {
     fn default() -> Self {
-        Self::new(0, 0, "default".to_string(), 0, false, false)
+        Self::new(
+            0,
+            AudioDeviceType::Sink,
+            "default".to_string(),
+            0,
+            false,
+            false,
+        )
     }
 }
 
 impl AudioDeviceGObject {
     pub fn new(
         id: i32,
-        dev_type: i32,
+        dev_type: AudioDeviceType,
         name: String,
         volume: i32,
         muted: bool,
@@ -111,18 +84,29 @@ impl AudioDeviceGObject {
         Object::builder()
             .property("id", id)
             .property("dev-type", dev_type)
-            .property("name", name.clone())
+            .property("name", name)
             .property("volume", volume)
             .property("muted", muted)
             .property("is-default", is_default)
             .build()
     }
 
-    pub fn update(&self, dev_type: i32, name: String, volume: i32, muted: bool, is_default: bool) {
+    pub fn update(
+        &self,
+        dev_type: AudioDeviceType,
+        name: String,
+        volume: i32,
+        muted: bool,
+        is_default: bool,
+    ) {
         self.set_property("dev-type", dev_type);
         self.set_property("name", name);
         self.set_property("volume", volume);
         self.set_property("muted", muted);
         self.set_property("is-default", is_default);
+    }
+
+    pub fn is_source(&self) -> bool {
+        self.dev_type() == AudioDeviceType::Source
     }
 }

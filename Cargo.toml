@@ -33,6 +33,9 @@ givc-common = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main" }
 [features]
 mock = []
 
+[lints.clippy]
+pedantic = "deny"
+
 [build-dependencies]
 glib-build-tools = "0.20"
 

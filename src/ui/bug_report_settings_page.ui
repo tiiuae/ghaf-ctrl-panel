@@ -2,6 +2,10 @@
 <interface>
   <requires lib="gtk" version="4.0"/>
   <template class="BugReportSettingsPage" parent="GtkBox">
+  <object class="GtkTextBuffer" id="description_textbuffer"></object>
+  <object class="GtkTextBuffer" id="placeholder_textbuffer">
+    <property name="text" translatable="yes">Enter your answer</property>
+  </object>
   <style><class name="info-box"/></style>
     <property name="vexpand">true</property>
     <property name="hexpand">true</property>
@@ -612,12 +616,6 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkTextBuffer" id="description_textbuffer"></object>
-                      <object class="GtkTextBuffer" id="placeholder_textbuffer">
-                        <property name="text" translatable="yes">Enter your answer</property>
-                      </object>
-                    </child>
-                    <child>
                       <object class="GtkTextView" id="description">
                         <property name="left-margin">5</property>
                         <property name="pixels-above-lines">5</property>
@@ -629,7 +627,7 @@
                         <style>
                           <class name="description-deactive"/>
                         </style>
-			<signal name="notify::has-focus" handler="on_description_focus_changed" after="yes" swapped="yes"/>
+                        <signal name="notify::has-focus" handler="on_description_focus_changed" after="yes" swapped="yes"/>
                       </object>
                     </child>
                     <child>

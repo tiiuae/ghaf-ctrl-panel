@@ -1,16 +1,19 @@
-use glib::subclass::Signal;
-use glib::Binding;
+use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Label, MenuButton, Popover};
-use std::cell::RefCell;
-use std::sync::OnceLock;
 
-use crate::control_action::ControlAction;
 use crate::service_gobject::ServiceGObject;
 
 mod imp {
-    use super::*;
+    use glib::subclass::Signal;
+    use glib::Binding;
+    use gtk::prelude::*;
+    use gtk::subclass::prelude::*;
+    use gtk::{glib, CompositeTemplate, Label, MenuButton, Popover};
+    use std::cell::RefCell;
+    use std::sync::OnceLock;
+
+    use crate::control_action::ControlAction;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/vm_row.ui")]

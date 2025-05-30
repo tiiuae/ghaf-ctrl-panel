@@ -1,16 +1,19 @@
 use crate::settings_gobject::SettingsGObject;
-use glib::subclass::Signal;
-use glib::Binding;
-use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CheckButton, CompositeTemplate, DropDown, StringList};
+use gtk::{glib, StringList};
 use regex::Regex;
-use std::cell::RefCell;
 use std::process::{Command, Stdio};
-use std::sync::OnceLock;
+
+use crate::prelude::*;
 
 mod imp {
-    use super::*;
+    use glib::subclass::Signal;
+    use glib::Binding;
+    use gtk::prelude::*;
+    use gtk::subclass::prelude::*;
+    use gtk::{glib, CheckButton, CompositeTemplate, DropDown, StringList};
+    use std::cell::RefCell;
+    use std::sync::OnceLock;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/display_settings_page.ui")]
@@ -56,6 +59,7 @@ mod imp {
             self.obj()
                 .emit_by_name::<()>("default-display-settings", &[]);
         }
+
         //TODO: revise logic
         #[template_callback]
         fn on_apply_clicked(&self) {
@@ -65,7 +69,7 @@ mod imp {
             let is_scale_set = self.obj().set_scale(scale_idx);
 
             //if error occures then show popup and return
-            if (!is_resolution_set || !is_scale_set) {
+            if !is_resolution_set || !is_scale_set {
                 self.obj().emit_by_name::<()>("display-settings-error", &[]);
                 return;
             }
@@ -92,11 +96,14 @@ mod imp {
         fn signals() -> &'static [Signal] {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
             SIGNALS.get_or_init(|| {
-                vec![
-                    Signal::builder("display-settings-changed").build(),
-                    Signal::builder("default-display-settings").build(),
-                    Signal::builder("display-settings-error").build(),
+                [
+                    "display-settings-changed",
+                    "default-display-settings",
+                    "display-settings-error",
                 ]
+                .into_iter()
+                .map(|sig| Signal::builder(sig).build())
+                .collect()
             })
         }
     }
@@ -132,10 +139,7 @@ impl DisplaySettingsPage {
         //temporary, must be read from somewhere
         let supported_resolutions = self.imp().supported_resolutions.clone();
         //the list is taken from /sys/kernel/debug/dri/0/i915_display_info
-        supported_resolutions.append(&String::from("1920x1200"));
-        supported_resolutions.append(&String::from("1936x1203"));
-        supported_resolutions.append(&String::from("1952x1217"));
-        supported_resolutions.append(&String::from("2104x1236"));
+        supported_resolutions.splice(0, 0, &["1920x1200", "1936x1203", "1952x1217", "2104x1236"]);
         //supported_resolutions.append(&String::from("2560x1600"));//for testing
 
         let switch = self.imp().resolution_switch.get();
@@ -144,9 +148,7 @@ impl DisplaySettingsPage {
 
     fn set_supported_scales(&self) {
         let supported_scales = self.imp().supported_scales.clone();
-        supported_scales.append(&String::from("100%"));
-        supported_scales.append(&String::from("125%"));
-        supported_scales.append(&String::from("150%"));
+        supported_scales.splice(0, 0, &["100%", "125%", "150%"]);
 
         let switch = self.imp().scale_switch.get();
         switch.set_model(Some(&supported_scales));
@@ -168,11 +170,11 @@ impl DisplaySettingsPage {
                     self.set_current_scale(&stdout);
                 } else {
                     let stderr = String::from_utf8_lossy(&output.stderr);
-                    eprintln!("wlr-randr error: {}", stderr);
+                    error!("wlr-randr error: {stderr}");
                 }
             }
             Err(e) => {
-                eprintln!("Failed to execute wlr-randr: {}", e);
+                error!("Failed to execute wlr-randr: {e}");
             }
         }
     }
@@ -183,21 +185,21 @@ impl DisplaySettingsPage {
         let current_resolution_regex =
             Regex::new(r"eDP-1[\s\S]*?(\d+x\d+)\s*px[^\n]*current").unwrap();
         //let current_resolution_regex = Regex::new(r"(\d+x\d+)\s+\d+\.\d+\*").unwrap();//for testing
-        if let Some(cap) = current_resolution_regex.captures(&stdout) {
+        if let Some(cap) = current_resolution_regex.captures(stdout) {
             let resolution = &cap[1];
-            println!("Current resolution: {}", resolution);
+            debug!("Current resolution: {resolution}");
             let supported_resolutions = self.imp().supported_resolutions.clone();
 
             match index_of(&supported_resolutions, resolution) {
                 Some(index) => {
-                    println!("Found {} at index: {}", resolution, index);
+                    debug!("Found {resolution} at index: {index}");
                     let switch = self.imp().resolution_switch.get();
                     switch.set_selected(index);
                 }
-                None => println!("Resolution not found"),
+                None => warn!("Resolution not found"),
             }
         } else {
-            println!("No current resolution found.");
+            warn!("No current resolution found.");
         }
     }
 
@@ -205,30 +207,29 @@ impl DisplaySettingsPage {
     fn set_current_scale(&self, stdout: &str) {
         //for standart eDP-1
         let current_scale_regex = Regex::new(r"eDP-1[\s\S]*?Scale:\s*([\d.]+)").unwrap();
-        if let Some(cap) = current_scale_regex.captures(&stdout) {
+        if let Some(cap) = current_scale_regex.captures(stdout) {
             let scale = &cap[1];
-            println!("Current scale: {}", scale);
+            debug!("Current scale: {scale}");
 
             //transform to percents
-            if let Ok(scale_f) = scale.parse::<f32>() {
-                let scale_percent = (scale_f * 100.0).round();
-                let scale_percent_str = format!("{}%", scale_percent as i32);
+            if let Ok(scale) = scale.parse::<f32>() {
+                let scale_percent = format!("{scale:.0}%");
 
-                let supported_scales = self.imp().supported_scales.clone();
+                let supported_scales = &self.imp().supported_scales;
 
-                match index_of(&supported_scales, scale_percent_str.as_str()) {
+                match index_of(supported_scales, &scale_percent) {
                     Some(index) => {
-                        println!("Found {} at index: {}", scale_percent_str, index);
+                        debug!("Found {scale_percent} at index: {index}");
                         let switch = self.imp().scale_switch.get();
                         switch.set_selected(index);
                     }
-                    None => println!("Scale not found"),
+                    None => warn!("Scale not found"),
                 }
             } else {
-                println!("Failed to parse scale.");
+                warn!("Failed to parse scale.");
             }
         } else {
-            println!("No current scale found.");
+            warn!("No current scale found.");
         }
     }
 
@@ -275,25 +276,25 @@ impl DisplaySettingsPage {
             Ok(output) => {
                 if output.status.success() {
                     let stdout = String::from_utf8_lossy(&output.stdout);
-                    println!("wlr-randr output: {}", stdout);
+                    debug!("wlr-randr output: {stdout}");
 
                     result = true;
                 } else {
                     let stderr = String::from_utf8_lossy(&output.stderr);
-                    eprintln!("wlr-randr error: {}", stderr);
+                    error!("wlr-randr error: {stderr}");
                 }
             }
             Err(e) => {
-                eprintln!("Failed to execute wlr-randr: {}", e);
+                error!("Failed to execute wlr-randr: {e}");
             }
         }
         result
     }
 
+    #[allow(clippy::unused_self)]
     pub fn set_scale(&self, index: u32) -> bool {
         let mut result: bool = false;
         let factor = match index {
-            0 => 1.0,
             1 => 1.25,
             2 => 1.5,
             _ => 1.0,
@@ -303,7 +304,7 @@ impl DisplaySettingsPage {
             .arg("--output")
             .arg("eDP-1")
             .arg("--scale")
-            .arg(&factor.to_string())
+            .arg(factor.to_string())
             .env("PATH", "/run/current-system/sw/bin")
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
@@ -313,7 +314,7 @@ impl DisplaySettingsPage {
             Ok(output) => {
                 if output.status.success() {
                     let stdout = String::from_utf8_lossy(&output.stdout);
-                    println!("wlr-randr scale output: {}", stdout);
+                    debug!("wlr-randr scale output: {stdout}");
 
                     //now it is not needed, the task SSRCSP-6073 is closed
                     //self.reload_taskbar();
@@ -321,17 +322,18 @@ impl DisplaySettingsPage {
                     result = true;
                 } else {
                     let stderr = String::from_utf8_lossy(&output.stderr);
-                    eprintln!("wlr-randr error: {}", stderr);
+                    error!("wlr-randr error: {stderr}");
                 }
             }
             Err(e) => {
-                eprintln!("Failed to execute wlr-randr: {}", e);
+                error!("Failed to execute wlr-randr: {e}");
             }
         }
         result
     }
 
     //can be used if SSRCSP-6073 is opened again
+    #[allow(clippy::unused_self)]
     pub fn reload_taskbar(&self) {
         let output = Command::new("systemctl")
             .arg("--user")
@@ -345,14 +347,14 @@ impl DisplaySettingsPage {
             Ok(output) => {
                 if output.status.success() {
                     let stdout = String::from_utf8_lossy(&output.stdout);
-                    println!("Taskbar has been reloaded: {}", stdout);
+                    debug!("Taskbar has been reloaded: {stdout}");
                 } else {
                     let stderr = String::from_utf8_lossy(&output.stderr);
-                    eprintln!("Taskbar reloading error: {}", stderr);
+                    error!("Taskbar reloading error: {stderr}");
                 }
             }
             Err(e) => {
-                eprintln!("Failed to execute taskbar reloading: {}", e);
+                error!("Failed to execute taskbar reloading: {e}");
             }
         }
     }
@@ -360,11 +362,7 @@ impl DisplaySettingsPage {
 
 #[inline]
 fn index_of(list: &StringList, target: &str) -> Option<u32> {
-    for i in 0..list.n_items() {
-        let string = list.string(i);
-        if string.as_deref() == Some(target) {
-            return Some(i);
-        }
-    }
-    None
+    (0..)
+        .map_while(|i| list.string(i).map(|s| (i, s)))
+        .find_map(|(i, s)| (s == target).then_some(i))
 }

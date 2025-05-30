@@ -1,26 +1,23 @@
 use std::cell::RefCell;
-use std::ops::Deref;
 use std::process::Command;
 use std::rc::Rc;
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
-use gio::{ListModel, ListStore};
-use gtk::{gio, glib, prelude::*};
-use log::{debug, error, warn};
+use gio::ListModel;
+use gtk::{self, gio, glib, prelude::*};
 
 pub use givc_client::client::StatsResponse;
 use givc_client::endpoint::TlsConfig;
-use givc_client::{AdminClient, QueryResult};
+use givc_client::{self, AdminClient};
 use givc_common::address::EndpointAddress;
 use givc_common::pb::admin::StartResponse;
-use givc_common::query::{Event, TrustLevel, VMStatus};
-use givc_common::types::ServiceType;
+use givc_common::query::Event;
 use tokio::runtime::Builder;
 
 use crate::data_gobject::DataGObject;
+use crate::prelude::*;
 use crate::service_gobject::ServiceGObject;
-use crate::typed_list_store::imp::TypedListStore;
 use crate::{ADMIN_SERVICE_ADDR, ADMIN_SERVICE_PORT};
 
 macro_rules! adminclient {
@@ -121,7 +118,6 @@ mod imp {
 #[derive(Debug)]
 pub struct DataProvider {
     store: TypedListStore<ServiceGObject>,
-    pub status: bool,
     service_address: RefCell<EndpointAddress>,
     tls_info: RefCell<Option<(String, TlsConfig)>>,
     join_handle: RefCell<Option<JoinHandle<()>>>,
@@ -131,14 +127,12 @@ pub struct DataProvider {
 impl DataProvider {
     pub fn new(addr: String, port: u16) -> Self {
         #[cfg(not(feature = "mock"))]
-        let init_store = ListStore::new::<ServiceGObject>();
+        let store = TypedListStore::new();
         #[cfg(feature = "mock")]
-        let init_store = Self::fill_by_mock_data();
+        let store = Self::fill_by_mock_data();
 
         Self {
-            store: init_store.into(),
-            //settings: Arc::new(Mutex::new(SettingsGObject::default())),
-            status: false,
+            store,
             service_address: RefCell::new(EndpointAddress::Tcp { addr, port }),
             tls_info: RefCell::new(None),
             join_handle: RefCell::new(None),
@@ -208,26 +202,7 @@ impl DataProvider {
             if let Ok((channel, initial)) = event_rx.recv().await {
                 store.remove_all();
                 debug!("Initial list {initial:?}");
-                store.extend(initial.into_iter().map(
-                    |QueryResult {
-                         name,
-                         description,
-                         status,
-                         service_type,
-                         vm_name,
-                         trust_level,
-                         ..
-                     }: QueryResult| {
-                        ServiceGObject::new(
-                            name,
-                            description,
-                            status,
-                            trust_level,
-                            service_type,
-                            vm_name,
-                        )
-                    },
-                ));
+                store.extend(initial.into_iter().map(Into::into));
 
                 while let Ok(event) = channel.recv().await {
                     match event {
@@ -255,26 +230,7 @@ impl DataProvider {
                         }
                         Event::UnitRegistered(result) => {
                             debug!("Unit registered {result:?}");
-                            store.extend(Some(result).map(
-                                |QueryResult {
-                                     name,
-                                     description,
-                                     status,
-                                     service_type,
-                                     vm_name,
-                                     trust_level,
-                                     ..
-                                 }: QueryResult| {
-                                    ServiceGObject::new(
-                                        name,
-                                        description,
-                                        status,
-                                        trust_level,
-                                        service_type,
-                                        vm_name,
-                                    )
-                                },
-                            ));
+                            store.extend(Some(result.into()));
                         }
                     }
                 }
@@ -292,7 +248,11 @@ impl DataProvider {
     }
 
     #[cfg(feature = "mock")]
-    fn fill_by_mock_data() -> ListStore {
+    fn fill_by_mock_data() -> TypedListStore<ServiceGObject> {
+        use crate::trust_level::TrustLevel;
+        use crate::vm_status::VMStatus;
+        use givc_common::types::ServiceType;
+
         [
             ServiceGObject::new(
                 "microvm@zathura-vm.service".to_string(),
@@ -320,11 +280,11 @@ impl DataProvider {
             ),
         ]
         .into_iter()
-        .collect::<ListStore>()
+        .collect()
     }
 
-    pub fn get_model(&self) -> ListStore {
-        self.store.deref().clone()
+    pub fn get_model(&self) -> ListModel {
+        self.store.upcast_ref::<ListModel>().clone()
     }
 
     pub fn get_current_service_address(&self) -> EndpointAddress {
@@ -341,10 +301,6 @@ impl DataProvider {
     pub fn set_tls_info(&self, value: Option<(String, TlsConfig)>) {
         let mut tls_info = self.tls_info.borrow_mut();
         *tls_info = value;
-    }
-
-    pub fn add_vm(&self, vm: &ServiceGObject) {
-        self.store.append(vm);
     }
 
     pub fn reconnect(&self, addr: Option<(String, u16)>) {
@@ -518,21 +474,22 @@ impl DataProvider {
     }
 
     #[cfg(feature = "mock")]
+    #[allow(clippy::unused_self)]
     pub fn get_stats(
         &self,
-        vm: String,
+        _vm: String,
     ) -> impl std::future::Future<Output = Result<StatsResponse, String>> {
         use givc_common::pb::stats::{MemoryStats, ProcessStats};
         async {
             Ok(StatsResponse {
                 memory: Some(MemoryStats {
-                    total: 200000000,
-                    available: 100000000,
+                    total: 200_000_000,
+                    available: 100_000_000,
                     ..Default::default()
                 }),
                 process: Some(ProcessStats {
-                    user_cycles: 100000,
-                    total_cycles: 200000,
+                    user_cycles: 100_000,
+                    total_cycles: 200_000,
                     ..Default::default()
                 }),
                 ..Default::default()

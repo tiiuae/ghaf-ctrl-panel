@@ -1,16 +1,13 @@
-use crate::glib::subclass::Signal;
-use glib::Binding;
-use gtk::prelude::*;
-use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Image, Switch};
-use std::cell::RefCell;
-use std::sync::OnceLock;
-//use gtk::gio::ListStore; will be needed for list of available networks
-
-use crate::settings_gobject::SettingsGObject;
+use gtk::glib;
 
 mod imp {
-    use super::*;
+    use crate::glib::subclass::Signal;
+    use gtk::prelude::*;
+    use gtk::subclass::prelude::*;
+    use gtk::{glib, CompositeTemplate, Image, Switch};
+    use std::sync::OnceLock;
+
+    use crate::prelude::*;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/wifi_settings_page.ui")]
@@ -23,9 +20,6 @@ mod imp {
         pub security_indicator: TemplateChild<Image>,
         #[template_child]
         pub signal_indicator: TemplateChild<Image>,
-
-        // Vector holding the bindings to properties of `Object`
-        pub bindings: RefCell<Vec<Binding>>,
     }
 
     #[glib::object_subclass]
@@ -46,9 +40,10 @@ mod imp {
 
     #[gtk::template_callbacks]
     impl WifiSettingsPage {
+        #[allow(clippy::unused_self)]
         #[template_callback]
         fn on_switch_state_changed(&self, value: bool) -> bool {
-            println!("Wifi switched: {}", value);
+            debug!("Wifi switched: {value}");
             false //propagate event futher
         }
         #[template_callback]
@@ -61,16 +56,13 @@ mod imp {
         fn constructed(&self) {
             // Call "constructed" on parent
             self.parent_constructed();
-
-            // Setup
-            let obj = self.obj();
-            obj.init();
         }
         fn signals() -> &'static [Signal] {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
             SIGNALS.get_or_init(|| vec![Signal::builder("show-add-network-popup").build()])
         }
     }
+
     impl WidgetImpl for WifiSettingsPage {}
     impl BoxImpl for WifiSettingsPage {}
 }
@@ -89,20 +81,5 @@ impl Default for WifiSettingsPage {
 impl WifiSettingsPage {
     pub fn new() -> Self {
         glib::Object::builder().build()
-    }
-
-    pub fn init(&self) {}
-
-    pub fn bind(&self, _settings_object: &SettingsGObject) {
-        //unbind previous ones
-        self.unbind();
-        //make new
-    }
-
-    pub fn unbind(&self) {
-        // Unbind all stored bindings
-        for binding in self.imp().bindings.borrow_mut().drain(..) {
-            binding.unbind();
-        }
     }
 }
