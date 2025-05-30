@@ -252,7 +252,7 @@ impl AudioControl {
             devices,
             async move {
                 glib::timeout_future_seconds(1).await;
-                cb(devices);
+                cb(devices.into());
             }
         ));
     }

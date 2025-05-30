@@ -12,7 +12,7 @@ mod imp {
     use glib::Binding;
     use gtk::prelude::*;
     use gtk::subclass::prelude::*;
-    use gtk::{glib, CompositeTemplate, DropDown, Scale};
+    use gtk::{glib, CompositeTemplate, DropDown};
     use std::cell::RefCell;
     use std::sync::OnceLock;
 
@@ -146,10 +146,10 @@ mod imp {
         }
 
         #[template_callback]
-        fn on_mic_volume_changed(&self, scale: &Scale) {
+        fn on_mic_volume_changed(&self, _: glib::ParamSpec, volume: &VolumeWidget) {
             if let Some(ref obj) = self.mic_switch.selected_obj::<AudioDeviceGObject>() {
                 #[allow(clippy::cast_possible_truncation)]
-                let value = scale.value().round() as i32;
+                let value = volume.volume();
                 if value != obj.volume() {
                     self.obj().emit_by_name::<()>(
                         "mic-volume-changed",
@@ -172,7 +172,7 @@ mod imp {
                 let value = volume.muted();
                 if value != obj.muted() {
                     self.obj().emit_by_name::<()>(
-                        "spearker-mute-changed",
+                        "speaker-mute-changed",
                         &[&obj.id(), &obj.dev_type(), &value],
                     );
                     #[cfg(feature = "mock")]
@@ -182,10 +182,10 @@ mod imp {
         }
 
         #[template_callback]
-        fn on_speaker_volume_changed(&self, scale: &Scale) {
+        fn on_speaker_volume_changed(&self, _: glib::ParamSpec, volume: &VolumeWidget) {
             if let Some(ref obj) = self.speaker_switch.selected_obj::<AudioDeviceGObject>() {
                 #[allow(clippy::cast_possible_truncation)]
-                let value = scale.value().round() as i32;
+                let value = volume.volume();
                 if value != obj.volume() {
                     self.obj().emit_by_name::<()>(
                         "speaker-volume-changed",
@@ -203,7 +203,7 @@ mod imp {
         }
 
         pub(super) fn speaker_select(&self) -> TypedDropDown<AudioDeviceGObject> {
-            TypedDropDown::from((*self.mic_switch).clone())
+            TypedDropDown::from((*self.speaker_switch).clone())
         }
     } //end #[gtk::template_callbacks]
 
@@ -237,10 +237,18 @@ mod imp {
                         ])
                         .build(),
                     Signal::builder("mic-mute-changed")
-                        .param_types([i32::static_type(), i32::static_type(), bool::static_type()])
+                        .param_types([
+                            i32::static_type(),
+                            AudioDeviceType::static_type(),
+                            bool::static_type(),
+                        ])
                         .build(),
                     Signal::builder("speaker-mute-changed")
-                        .param_types([i32::static_type(), i32::static_type(), bool::static_type()])
+                        .param_types([
+                            i32::static_type(),
+                            AudioDeviceType::static_type(),
+                            bool::static_type(),
+                        ])
                         .build(),
                     Signal::builder("open-advanced-audio-settings").build(),
                 ]

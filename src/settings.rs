@@ -161,8 +161,7 @@ mod imp {
                 dev_type,
                 muted,
             };
-            self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &id, &dev_type, &muted]);
+            self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
 
         #[template_callback]
@@ -182,8 +181,7 @@ mod imp {
                 dev_type,
                 muted,
             };
-            self.obj()
-                .emit_by_name::<()>("settings-action", &[&action, &id, &dev_type, &muted]);
+            self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
 
         #[template_callback]
