@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-    <requires lib="gtk" version="4.0"/>
-    <template class="ConnectionConfig" parent="GtkWindow">
+  <requires lib="gtk" version="4.0"/>
+  <template class="ConnectionConfig" parent="GtkWindow">
     <property name="decorated">false</property>
     <property name="width-request">320</property>
     <property name="height-request">150</property>
     <style><class name="settings-popup"/></style>
     <child>
       <object class="GtkBox">
-      <style><class name="container"/></style>
-      <property name="orientation">vertical</property>
-      <property name="margin_top">10</property>
-      <property name="margin_bottom">10</property>
-      <property name="margin_start">10</property>
-      <property name="margin_end">10</property>
-      <property name="spacing">10</property>
+        <style><class name="container"/></style>
+        <property name="orientation">vertical</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
+        <property name="margin_start">10</property>
+        <property name="margin_end">10</property>
+        <property name="spacing">10</property>
         <child>
           <object class="GtkBox">
             <property name="orientation">horizontal</property>
@@ -61,14 +61,14 @@
             <property name="spacing">10</property>
             <child>
               <object class="GtkButton" id="apply_button">
-              <signal name="clicked" handler="on_apply_clicked" swapped="true"/>
+                <signal name="clicked" handler="on_apply_clicked" swapped="true"/>
                 <property name="label">Apply</property>
                 <style><class name="settings-button"/></style>
               </object>
             </child>
             <child>
               <object class="GtkButton" id="cancel_button">
-              <signal name="clicked" handler="on_cancel_clicked" swapped="true"/>
+                <signal name="clicked" handler="on_cancel_clicked" swapped="true"/>
                 <property name="label">Cancel</property>
                 <style><class name="settings-button"/></style>
               </object>

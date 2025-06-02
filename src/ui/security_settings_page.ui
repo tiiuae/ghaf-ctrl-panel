@@ -13,39 +13,39 @@
     <!--<property name="spacing">10</property>-->
     <child>
       <object class="GtkLabel">
-      <property name="label">Security</property>
-      <style><class name="title"/></style>
-      <property name="margin-end">10</property>
-      <property name="margin-top">10</property>
-      <property name="margin-bottom">10</property>
-      <property name="halign">start</property>
+        <property name="label">Security</property>
+        <style><class name="title"/></style>
+        <property name="margin-end">10</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">10</property>
+        <property name="halign">start</property>
       </object>
     </child>
     <child>
       <object class="GtkBox">
-      <style><class name="info-box"/></style>
-      <property name="orientation">vertical</property>
-      <property name="vexpand">false</property>
-      <property name="hexpand">true</property>
-      <property name="margin-top">10</property>
-      <property name="margin-bottom">10</property>
+        <style><class name="info-box"/></style>
+        <property name="orientation">vertical</property>
+        <property name="vexpand">false</property>
+        <property name="hexpand">true</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">10</property>
         <child>
           <object class="GtkBox">
-          <property name="orientation">horizontal</property>
-          <property name="vexpand">false</property>
-          <property name="hexpand">true</property>
-          <property name="margin-top">10</property>
-          <property name="margin-bottom">10</property>
+            <property name="orientation">horizontal</property>
+            <property name="vexpand">false</property>
+            <property name="hexpand">true</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
             <child>
               <object class="GtkLabel">
-              <style><class name="normal-text"/></style>
-              <property name="label">Identity verification</property>
-              <property name="halign">start</property>
+                <style><class name="normal-text"/></style>
+                <property name="label">Identity verification</property>
+                <property name="halign">start</property>
               </object>
             </child>
             <child>
               <object class="GtkBox">
-              <property name="hexpand">true</property>
+                <property name="hexpand">true</property>
               </object>
             </child>
             <child>
@@ -61,21 +61,21 @@
         </child>
         <child>
           <object class="GtkBox">
-          <property name="orientation">horizontal</property>
-          <property name="vexpand">false</property>
-          <property name="hexpand">true</property>
-          <property name="margin-top">10</property>
-          <property name="margin-bottom">10</property>
+            <property name="orientation">horizontal</property>
+            <property name="vexpand">false</property>
+            <property name="hexpand">true</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
             <child>
               <object class="GtkLabel">
-              <style><class name="normal-text"/></style>
-              <property name="label">Login password</property>
-              <property name="halign">start</property>
+                <style><class name="normal-text"/></style>
+                <property name="label">Login password</property>
+                <property name="halign">start</property>
               </object>
             </child>
             <child>
               <object class="GtkBox">
-              <property name="hexpand">true</property>
+                <property name="hexpand">true</property>
               </object>
             </child>
             <child>
