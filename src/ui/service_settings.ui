@@ -10,7 +10,6 @@
     <property name="margin-end">10</property>
     <property name="margin-top">10</property>
     <property name="margin-bottom">10</property>
-    <!--<property name="spacing">10</property>-->
     <child>
       <object class="GtkBox">
         <style><class name="info-box"/></style>
@@ -77,7 +76,6 @@
             <property name="margin-bottom">10</property>
             <property name="width-request">8</property>
             <property name="height-request">8</property>
-            <!--<style><class name="expander"/></style>-->
           </object>
         </child>
       </object>
@@ -90,7 +88,6 @@
         <property name="margin-bottom">10</property>
         <property name="transition-type">slide-down</property>
         <property name="reveal-child">false</property>
-        <!--<style><class name="expander"/></style>-->
         <child>
           <object class="GtkLabel" id="extra_info">
             <style><class name="normal-text"/></style>

@@ -39,7 +39,6 @@
         <child>
           <object class="GtkDropDown" id="region_language_switch">
             <style><class name="dropdown-button"/></style>
-            <!--<signal name="notify::selected" handler="on_speaker_changed" swapped="true"/>-->
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="width-request">220</property>

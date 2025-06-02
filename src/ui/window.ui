@@ -130,7 +130,6 @@
                             <property name="vscrollbar-policy">GTK_POLICY_EXTERNAL</property>
                             <child>
                               <object class="GtkListView" id="services_list_view">
-                                <!--<property name="can_focus">true</property>-->
                                 <property name="margin-start">10</property>
                                 <property name="margin-end">0</property>
                                 <property name="margin-top">0</property>
