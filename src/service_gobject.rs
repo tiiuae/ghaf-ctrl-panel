@@ -76,11 +76,7 @@ impl ServiceGObject {
         let status = status.into();
 
         let display_name = if is_vm {
-            //vm_name
-            name.strip_prefix("microvm@")
-                .and_then(|vm| vm.split_once(&['-', '@']))
-                .map(|(vm, _)| vm.to_owned())
-                .unwrap_or_default()
+            vm_name.clone().unwrap_or_default()
         } else if is_app {
             name.strip_suffix(".service")
                 .and_then(|name| name.rsplit_once('@'))

@@ -105,9 +105,9 @@ mod imp {
         }
 
         #[template_callback]
-        fn on_control_action(&self, action: ControlAction, name: String) {
+        fn on_control_action(&self, action: ControlAction, object: ServiceGObject) {
             let app = self.obj().get_app_ref();
-            app.control_service(action, name);
+            app.control_service(action, object);
         }
 
         #[template_callback]

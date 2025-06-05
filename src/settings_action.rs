@@ -1,4 +1,5 @@
 use crate::audio_device_gobject::AudioDeviceType;
+use crate::service_gobject::ServiceGObject;
 use gtk::glib;
 
 #[derive(Debug, Clone, glib::Boxed)]
@@ -49,7 +50,7 @@ pub enum SettingsAction {
         message: String,
     },
     OpenWireGuard {
-        vm: String,
+        vm: ServiceGObject,
     },
     OpenAdvancedAudioSettingsWidget,
     CheckForUpdateRequest,
