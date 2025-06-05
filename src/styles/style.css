@@ -682,4 +682,10 @@ textview.description-deactive{
 
 plot {
   color: #ffffff;
+  background-color: #1D1D1D;
+}
+
+statswindow box, statswindow.box {
+  background-color: #1D1D1D;
+  color: #ffffff;
 }

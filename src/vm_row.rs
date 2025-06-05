@@ -14,6 +14,7 @@ mod imp {
     use std::sync::OnceLock;
 
     use crate::control_action::ControlAction;
+    use crate::service_gobject::ServiceGObject;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/vm_row.ui")]
@@ -28,7 +29,8 @@ mod imp {
         pub popover_menu: TemplateChild<Popover>,
 
         // Vector holding the bindings to properties of `Object`
-        pub bindings: RefCell<Vec<Binding>>,
+        pub(super) bindings: RefCell<Vec<Binding>>,
+        pub(super) object: RefCell<Option<ServiceGObject>>,
     }
 
     #[glib::object_subclass]
@@ -49,37 +51,42 @@ mod imp {
 
     #[gtk::template_callbacks]
     impl VMRow {
+        fn emit_action(&self, action: ControlAction) {
+            let Some(object) = self.object.borrow().clone() else {
+                return;
+            };
+            self.obj()
+                .emit_by_name::<()>("vm-control-action", &[&action, &object]);
+            self.popover_menu.popdown();
+        }
+
         #[template_callback]
         fn on_vm_restart_clicked(&self) {
-            let vm_name = self.title_label.label();
-            //emit signal
-            self.obj()
-                .emit_by_name::<()>("vm-control-action", &[&ControlAction::Restart, &vm_name]);
-            //and close menu
-            self.popover_menu.popdown();
+            self.emit_action(ControlAction::Restart);
         }
+
         #[template_callback]
         fn on_vm_shutdown_clicked(&self) {
-            let vm_name = self.title_label.label();
-            self.obj()
-                .emit_by_name::<()>("vm-control-action", &[&ControlAction::Shutdown, &vm_name]);
-            self.popover_menu.popdown();
+            self.emit_action(ControlAction::Shutdown);
         }
+
         #[template_callback]
         fn on_vm_pause_clicked(&self) {
-            let vm_name = self.title_label.label();
-            self.obj()
-                .emit_by_name::<()>("vm-control-action", &[&ControlAction::Pause, &vm_name]);
-            self.popover_menu.popdown();
+            self.emit_action(ControlAction::Pause);
+        }
+
+        #[template_callback]
+        fn on_vm_monitor_clicked(&self) {
+            self.emit_action(ControlAction::Monitor);
         }
     } //end #[gtk::template_callbacks]
 
     impl ObjectImpl for VMRow {
         fn signals() -> &'static [Signal] {
-            static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
+            static SIGNALS: OnceLock<[Signal; 1]> = OnceLock::new();
             SIGNALS.get_or_init(|| {
-                vec![Signal::builder("vm-control-action")
-                    .param_types([ControlAction::static_type(), String::static_type()])
+                [Signal::builder("vm-control-action")
+                    .param_types([ControlAction::static_type(), ServiceGObject::static_type()])
                     .build()]
             })
         }
@@ -111,38 +118,18 @@ impl VMRow {
         let mut bindings = self.imp().bindings.borrow_mut();
 
         let title_binding = vm_object
-            .bind_property("name", &title, "label")
-            //.bidirectional()
+            .bind_property("display-name", &title, "label")
             .sync_create()
             .build();
-        // Save binding
         bindings.push(title_binding);
 
         let subtitle_binding = vm_object
             .bind_property("details", &subtitle, "label")
             .sync_create()
             .build();
-        // Save binding
         bindings.push(subtitle_binding);
 
-        //block was left here as example
-        /*/ Bind `task_object.completed` to `task_row.content_label.attributes`
-        let content_label_binding = task_object
-            .bind_property("completed", &content_label, "attributes")
-            .sync_create()
-            .transform_to(|_, active| {
-                let attribute_list = AttrList::new();
-                if active {
-                    // If "active" is true, content of the label will be strikethrough
-                    let attribute = AttrInt::new_strikethrough(true);
-                    attribute_list.insert(attribute);
-                }
-                Some(attribute_list.to_value())
-            })
-            .build();
-        // Save binding
-        bindings.push(content_label_binding);
-        */
+        *self.imp().object.borrow_mut() = Some(vm_object.clone());
     }
 
     pub fn unbind(&self) {
@@ -150,5 +137,6 @@ impl VMRow {
         for binding in self.imp().bindings.borrow_mut().drain(..) {
             binding.unbind();
         }
+        *self.imp().object.borrow_mut() = None;
     }
 }

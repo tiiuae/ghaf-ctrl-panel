@@ -5,205 +5,205 @@
     <style><class name="container"/></style>
     <property name="orientation">horizontal</property>
     <child>
-    <object class="GtkBox" id="settings_list_outer_box">
-    <style><class name="container"/></style>
-    <property name="orientation">vertical</property>
-    <property name="margin-start">0</property>
-    <property name="margin-end">10</property>
-    <property name="margin-top">0</property>
-    <property name="margin-bottom">10</property>
+      <object class="GtkBox" id="settings_list_outer_box">
+        <style><class name="container"/></style>
+        <property name="orientation">vertical</property>
+        <property name="margin-start">0</property>
+        <property name="margin-end">10</property>
+        <property name="margin-top">0</property>
+        <property name="margin-bottom">10</property>
         <child>
-        <object class="GtkListBox" id="list_box">
+          <object class="GtkListBox" id="list_box">
             <style><class name="settings_list"/></style>
             <signal name="row_selected" handler="on_settings_row_selected" swapped="true"/>
             <property name="margin-start">10</property>
             <property name="margin-end">10</property>
             <property name="margin-top">10</property>
             <property name="margin-bottom">10</property>
-        <property name="width-request">300</property>
-        <style><class name="list-box"/></style>
+            <property name="width-request">300</property>
+            <style><class name="list-box"/></style>
             <child>
-                <object class="AdwActionRow">
+              <object class="AdwActionRow">
                 <property name="name">admin</property>
                 <style><class name="settings-row"/></style>
                 <property name="title">Admin</property>
                 <child type="prefix">
-                    <object class="GtkImage">
+                  <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="resource">/org/gnome/controlpanelgui/icons/icon_admin.svg</property>
                     <property name="width-request">24</property>
                     <property name="height-request">24</property>
-                    </object>
+                  </object>
                 </child>
-                </object>
+              </object>
             </child>
             <child>
-                <object class="AdwActionRow">
+              <object class="AdwActionRow">
                 <property name="name">info</property>
                 <style><class name="settings-row"/></style>
                 <property name="title">Information</property>
                 <child type="prefix">
-                    <object class="GtkImage">
+                  <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="resource">/org/gnome/controlpanelgui/icons/icon_admin.svg</property>
                     <property name="width-request">24</property>
                     <property name="height-request">24</property>
-                    </object>
+                  </object>
                 </child>
-                </object>
+              </object>
             </child>
             <child>
-                <object class="AdwActionRow">
+              <object class="AdwActionRow">
                 <property name="name">security</property>
                 <style><class name="settings-row"/></style>
                 <property name="title">Security</property>
                 <child type="prefix">
-                    <object class="GtkImage">
+                  <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="resource">/org/gnome/controlpanelgui/icons/icon_security.svg</property>
                     <property name="width-request">24</property>
                     <property name="height-request">24</property>
-                    </object>
+                  </object>
                 </child>
-                </object>
+              </object>
             </child>
             <child>
-                <object class="AdwActionRow">
+              <object class="AdwActionRow">
                 <property name="name">wifi</property>
                 <style><class name="settings-row"/></style>
                 <property name="title">Wifi</property>
                 <child type="prefix">
-                    <object class="GtkImage">
+                  <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="resource">/org/gnome/controlpanelgui/icons/icon_wifi.svg</property>
                     <property name="width-request">24</property>
                     <property name="height-request">24</property>
-                    </object>
+                  </object>
                 </child>
-                </object>
+              </object>
             </child>
             <child>
-                <object class="AdwActionRow">
+              <object class="AdwActionRow">
                 <property name="name">keyboard</property>
                 <style><class name="settings-row"/></style>
                 <property name="title">Keyboard</property>
                 <child type="prefix">
-                    <object class="GtkImage">
+                  <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="resource">/org/gnome/controlpanelgui/icons/icon_keyboard.svg</property>
                     <property name="width-request">24</property>
                     <property name="height-request">24</property>
-                    </object>
+                  </object>
                 </child>
-                </object>
+              </object>
             </child>
             <child>
-                <object class="AdwActionRow">
+              <object class="AdwActionRow">
                 <property name="name">mouse</property>
                 <style><class name="settings-row"/></style>
                 <property name="title">Mouse</property>
                 <child type="prefix">
-                    <object class="GtkImage">
+                  <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="resource">/org/gnome/controlpanelgui/icons/icon_mouse.svg</property>
                     <property name="width-request">24</property>
                     <property name="height-request">24</property>
-                    </object>
+                  </object>
                 </child>
-                </object>
+              </object>
             </child>
             <child>
-                <object class="AdwActionRow">
+              <object class="AdwActionRow">
                 <property name="name">display</property>
                 <style><class name="settings-row"/></style>
                 <property name="title">Display</property>
                 <child type="prefix">
-                    <object class="GtkImage">
+                  <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="resource">/org/gnome/controlpanelgui/icons/icon_monitor.svg</property>
                     <property name="width-request">24</property>
                     <property name="height-request">24</property>
-                    </object>
+                  </object>
                 </child>
-                </object>
+              </object>
             </child>
             <child>
-                <object class="AdwActionRow">
+              <object class="AdwActionRow">
                 <property name="name">audio</property>
                 <style><class name="settings-row"/></style>
                 <property name="title">Audio</property>
                 <child type="prefix">
-                    <object class="GtkImage">
+                  <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="resource">/org/gnome/controlpanelgui/icons/icon_audio.svg</property>
                     <property name="width-request">24</property>
                     <property name="height-request">24</property>
-                    </object>
+                  </object>
                 </child>
-                </object>
+              </object>
             </child>
             <child>
-                <object class="AdwActionRow">
+              <object class="AdwActionRow">
                 <property name="name">date_time</property>
                 <style><class name="settings-row"/></style>
                 <property name="title">Date &amp;amp; Time</property>
                 <child type="prefix">
-                    <object class="GtkImage">
+                  <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="resource">/org/gnome/controlpanelgui/icons/icon_clock.svg</property>
                     <property name="width-request">24</property>
                     <property name="height-request">24</property>
-                    </object>
+                  </object>
                 </child>
-                </object>
+              </object>
             </child>
             <child>
-                <object class="AdwActionRow">
+              <object class="AdwActionRow">
                 <property name="name">locale</property>
                 <style><class name="settings-row"/></style>
                 <property name="title">Region &amp;amp; Language</property>
                 <child type="prefix">
-                    <object class="GtkImage">
+                  <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="resource">/org/gnome/controlpanelgui/icons/icon_region_location.svg</property>
                     <property name="width-request">24</property>
                     <property name="height-request">24</property>
-                    </object>
+                  </object>
                 </child>
-                </object>
+              </object>
             </child>
             <child>
-                <object class="AdwActionRow">
+              <object class="AdwActionRow">
                 <property name="name">report</property>
                 <style><class name="settings-row"/></style>
                 <property name="title">Bug Report</property>
                 <child type="prefix">
-                    <object class="GtkImage">
+                  <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="resource">/org/gnome/controlpanelgui/icons/icon_monitor.svg</property>
                     <property name="width-request">24</property>
                     <property name="height-request">24</property>
-                    </object>
+                  </object>
                 </child>
-                </object>
+              </object>
             </child>
-        </object>
+          </object>
         </child>
-    </object> <!-- List of settings -->
+      </object> <!-- List of settings -->
     </child>
     <child>
-    <object class="GtkBox" id="settings_details_box">
+      <object class="GtkBox" id="settings_details_box">
         <style><class name="info-box"/></style>
         <property name="orientation">vertical</property>
         <property name="vexpand">true</property>
@@ -213,130 +213,130 @@
         <property name="margin-top">10</property>
         <property name="margin-bottom">10</property>
         <child>
-            <object class="GtkStack" id="stack">
-                <child> <!-- Admin view child -->
-                    <object class="GtkStackPage">
-                        <property name="name">admin</property>
-                        <property name="child">
-                            <object class="AdminSettingsPage" id="admin_settings_page">
-                            <signal name="check-for-update-request" handler="on_check_for_update_request" swapped="true"/>
-                            <signal name="update-request" handler="on_update_request" swapped="true"/>
-                            </object>
-                        </property>
-                    </object>
-                </child>
-                <child> <!-- Information view child -->
-                    <object class="GtkStackPage">
-                        <property name="name">info</property>
-                        <property name="child">
-                            <object class="InfoSettingsPage" id="info_settings_page">
-                            </object>
-                        </property>
-                    </object>
-                </child>
-                <child> <!-- Security view child -->
-                    <object class="GtkStackPage">
-                        <property name="name">security</property>
-                        <property name="child">
-                            <object class="SecuritySettingsPage" id="security_settings_page">
-                            </object>
-                        </property>
-                    </object>
-                </child>
-                <child> <!-- Wifi view child -->
-                    <object class="GtkStackPage">
-                        <property name="name">wifi</property>
-                        <property name="child">
-                            <object class="WifiSettingsPage" id="wifi_settings_page">
-                            <signal name="show-add-network-popup" handler="on_show_add_network_popup" swapped="true"/>
-                            </object>
-                        </property>
-                    </object>
-                </child>
-                <child> <!-- Keyboard view child -->
-                    <object class="GtkStackPage">
-                        <property name="name">keyboard</property>
-                        <property name="child">
-                            <object class="KeyboardSettingsPage" id="keyboard_settings_page">
-                            <signal name="show-add-new-keyboard-popup" handler="on_show_add_new_keyboard_popup" swapped="true"/>
-                            </object>
-                        </property>
-                    </object>
-                </child>
-                <child> <!-- Mouse view child -->
-                    <object class="GtkStackPage">
-                        <property name="name">mouse</property>
-                        <property name="child">
-                            <object class="MouseSettingsPage" id="mouse_settings_page">
-                            </object>
-                        </property>
-                    </object>
-                </child>
-                <child> <!-- Display view child -->
-                    <object class="GtkStackPage">
-                        <property name="name">display</property>
-                        <property name="child">
-                            <object class="DisplaySettingsPage" id="display_settings_page">
-                            <signal name="display-settings-changed" handler="on_show_confirm_display_settings_popup" swapped="true"/>
-                            <signal name="display-settings-error" handler="on_show_error_popup" swapped="true"/>
-                            </object>
-                        </property>
-                    </object>
-                </child>
-                <child> <!-- Audio view child -->
-                    <object class="GtkStackPage">
-                        <property name="name">audio</property>
-                        <property name="child">
-                            <object class="AudioSettings" id="audio_settings_page">
-                            <signal name="mic-changed" handler="on_mic_changed" swapped="true"/>
-                            <signal name="speaker-changed" handler="on_speaker_changed" swapped="true"/>
-                            <signal name="mic-volume-changed" handler="on_mic_volume_changed" swapped="true"/>
-                            <signal name="speaker-volume-changed" handler="on_speaker_volume_changed" swapped="true"/>
-                            <signal name="mic-mute-changed" handler="on_mic_mute_changed" swapped="true"/>
-                            <signal name="speaker-mute-changed" handler="on_speaker_mute_changed" swapped="true"/>
-                            <signal name="open-advanced-audio-settings" handler="on_open_advanced_audio_settings" swapped="true"/>
-                            </object>
-                        </property>
-                    </object>
-                </child>
-                <child> <!-- Date&Time view child -->
-                    <object class="GtkStackPage">
-                        <property name="name">date_time</property>
-                        <property name="child">
-                            <object class="GtkLabel">
-                            <property name="label">Date &amp; Time</property>
-                            <style><class name="title"/></style>
-                                <property name="margin-start">10</property>
-                                <property name="margin-end">10</property>
-                                <property name="margin-top">10</property>
-                                <property name="margin-bottom">10</property>
-                                <property name="halign">start</property>
-                                <property name="valign">start</property>
-                            </object>
-                        </property>
-                    </object>
-                </child>
-                <child> <!-- Region&Language view child -->
-                    <object class="GtkStackPage">
-                        <property name="name">locale</property>
-                        <property name="child">
-                            <object class="LanguageRegionSettingsPage" id="language_region_settings_page">
-                                <signal name="locale-default" handler="on_locale_timezone_default" swapped="true"/>
-                                <signal name="locale-timezone-changed" handler="on_locale_timezone_changed" swapped="true"/>
-                            </object>
-                        </property>
-                    </object>
-                </child>
-                <child> <!-- Report view child -->
-                    <object class="GtkStackPage">
-                        <property name="name">report</property>
-                        <property name="child">
-                            <object class="BugReportSettingsPage" id="bug_report_page">
-                            </object>
-                        </property>
-                    </object>
-                </child>
-            </object>
+          <object class="GtkStack" id="stack">
+            <child> <!-- Admin view child -->
+              <object class="GtkStackPage">
+                <property name="name">admin</property>
+                <property name="child">
+                  <object class="AdminSettingsPage" id="admin_settings_page">
+                    <signal name="check-for-update-request" handler="on_check_for_update_request" swapped="true"/>
+                    <signal name="update-request" handler="on_update_request" swapped="true"/>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child> <!-- Information view child -->
+              <object class="GtkStackPage">
+                <property name="name">info</property>
+                <property name="child">
+                  <object class="InfoSettingsPage" id="info_settings_page">
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child> <!-- Security view child -->
+              <object class="GtkStackPage">
+                <property name="name">security</property>
+                <property name="child">
+                  <object class="SecuritySettingsPage" id="security_settings_page">
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child> <!-- Wifi view child -->
+              <object class="GtkStackPage">
+                <property name="name">wifi</property>
+                <property name="child">
+                  <object class="WifiSettingsPage" id="wifi_settings_page">
+                    <signal name="show-add-network-popup" handler="on_show_add_network_popup" swapped="true"/>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child> <!-- Keyboard view child -->
+              <object class="GtkStackPage">
+                <property name="name">keyboard</property>
+                <property name="child">
+                  <object class="KeyboardSettingsPage" id="keyboard_settings_page">
+                    <signal name="show-add-new-keyboard-popup" handler="on_show_add_new_keyboard_popup" swapped="true"/>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child> <!-- Mouse view child -->
+              <object class="GtkStackPage">
+                <property name="name">mouse</property>
+                <property name="child">
+                  <object class="MouseSettingsPage" id="mouse_settings_page">
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child> <!-- Display view child -->
+              <object class="GtkStackPage">
+                <property name="name">display</property>
+                <property name="child">
+                  <object class="DisplaySettingsPage" id="display_settings_page">
+                    <signal name="display-settings-changed" handler="on_show_confirm_display_settings_popup" swapped="true"/>
+                    <signal name="display-settings-error" handler="on_show_error_popup" swapped="true"/>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child> <!-- Audio view child -->
+              <object class="GtkStackPage">
+                <property name="name">audio</property>
+                <property name="child">
+                  <object class="AudioSettings" id="audio_settings_page">
+                    <signal name="mic-changed" handler="on_mic_changed" swapped="true"/>
+                    <signal name="speaker-changed" handler="on_speaker_changed" swapped="true"/>
+                    <signal name="mic-volume-changed" handler="on_mic_volume_changed" swapped="true"/>
+                    <signal name="speaker-volume-changed" handler="on_speaker_volume_changed" swapped="true"/>
+                    <signal name="mic-mute-changed" handler="on_mic_mute_changed" swapped="true"/>
+                    <signal name="speaker-mute-changed" handler="on_speaker_mute_changed" swapped="true"/>
+                    <signal name="open-advanced-audio-settings" handler="on_open_advanced_audio_settings" swapped="true"/>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child> <!-- Date&Time view child -->
+              <object class="GtkStackPage">
+                <property name="name">date_time</property>
+                <property name="child">
+                  <object class="GtkLabel">
+                    <property name="label">Date &amp; Time</property>
+                    <style><class name="title"/></style>
+                    <property name="margin-start">10</property>
+                    <property name="margin-end">10</property>
+                    <property name="margin-top">10</property>
+                    <property name="margin-bottom">10</property>
+                    <property name="halign">start</property>
+                    <property name="valign">start</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child> <!-- Region&Language view child -->
+              <object class="GtkStackPage">
+                <property name="name">locale</property>
+                <property name="child">
+                  <object class="LanguageRegionSettingsPage" id="language_region_settings_page">
+                    <signal name="locale-default" handler="on_locale_timezone_default" swapped="true"/>
+                    <signal name="locale-timezone-changed" handler="on_locale_timezone_changed" swapped="true"/>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child> <!-- Report view child -->
+              <object class="GtkStackPage">
+                <property name="name">report</property>
+                <property name="child">
+                  <object class="BugReportSettingsPage" id="bug_report_page">
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
         </child>
       </object> <!-- Settings details box object -->
     </child>

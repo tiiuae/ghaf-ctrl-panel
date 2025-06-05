@@ -42,19 +42,19 @@
     </child>
   </template>
   <object class="GtkPopover" id="popover_menu">
-  <property name="width-request">140</property>
+    <property name="width-request">140</property>
     <child>
       <object class="GtkBox">
-      <style><class name="info-box"/></style>
-      <property name="vexpand">false</property>
-      <property name="hexpand">true</property>
+        <style><class name="info-box"/></style>
+        <property name="vexpand">false</property>
+        <property name="hexpand">true</property>
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkButton" id="start_button">
-          <signal name="clicked" handler="on_vm_restart_clicked" swapped="true"/>
-          <style><class name="popover-button"/></style>
-          <property name="vexpand">false</property>
-          <property name="hexpand">true</property>
+            <signal name="clicked" handler="on_vm_restart_clicked" swapped="true"/>
+            <style><class name="popover-button"/></style>
+            <property name="vexpand">false</property>
+            <property name="hexpand">true</property>
             <property name="halign">start</property>
             <property name="width-request">140</property>
             <child>
@@ -68,10 +68,10 @@
         </child>
         <child>
           <object class="GtkButton" id="pause_button">
-          <signal name="clicked" handler="on_vm_pause_clicked" swapped="true"/>
-          <style><class name="popover-button"/></style>
-          <property name="vexpand">false</property>
-          <property name="hexpand">true</property>
+            <signal name="clicked" handler="on_vm_pause_clicked" swapped="true"/>
+            <style><class name="popover-button"/></style>
+            <property name="vexpand">false</property>
+            <property name="hexpand">true</property>
             <property name="halign">start</property>
             <property name="width-request">140</property>
             <child>
@@ -85,16 +85,33 @@
         </child>
         <child>
           <object class="GtkButton" id="shutdown_button">
-          <signal name="clicked" handler="on_vm_shutdown_clicked" swapped="true"/>
-          <style><class name="popover-button"/></style>
-          <property name="vexpand">false</property>
-          <property name="hexpand">true</property>
-          <property name="halign">start</property>
-          <property name="width-request">140</property>
+            <signal name="clicked" handler="on_vm_shutdown_clicked" swapped="true"/>
+            <style><class name="popover-button"/></style>
+            <property name="vexpand">false</property>
+            <property name="hexpand">true</property>
+            <property name="halign">start</property>
+            <property name="width-request">140</property>
             <child>
               <object class="GtkLabel">
                 <property name="halign">start</property>
                 <property name="label">Shutdown</property>
+                <property name="visible">1</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="monitor_button">
+            <signal name="clicked" handler="on_vm_monitor_clicked" swapped="true"/>
+            <style><class name="popover-button"/></style>
+            <property name="vexpand">false</property>
+            <property name="hexpand">true</property>
+            <property name="halign">start</property>
+            <property name="width-request">140</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">start</property>
+                <property name="label">Monitor</property>
                 <property name="visible">1</property>
               </object>
             </child>

@@ -2,7 +2,7 @@ use gtk::{glib, subclass::prelude::*};
 
 mod imp {
     use glib::{subclass::Signal, Properties};
-    use gtk::{glib, prelude::*, subclass::prelude::*};
+    use gtk::{gdk, glib, prelude::*, subclass::prelude::*};
     use std::cell::{Cell, RefCell};
     use std::collections::VecDeque;
     use std::sync::OnceLock;
@@ -12,7 +12,14 @@ mod imp {
     pub struct Serie {
         #[property(get, set = Serie::set_window)]
         window: Cell<u32>,
+
+        #[property(get, set = Serie::set_color)]
+        color: RefCell<String>,
+
         points: RefCell<VecDeque<(f32, f32)>>,
+
+        #[property(get)]
+        actual_color: Cell<Option<gdk::RGBA>>,
     }
 
     #[glib::object_subclass]
@@ -22,7 +29,12 @@ mod imp {
         type ParentType = glib::Object;
     }
 
+    #[glib::derived_properties]
     impl ObjectImpl for Serie {
+        fn constructed(&self) {
+            self.actual_color.set(self.color.borrow().parse().ok());
+        }
+
         fn signals() -> &'static [Signal] {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
             SIGNALS.get_or_init(|| vec![Signal::builder("changed").build()])
@@ -52,11 +64,17 @@ mod imp {
                 self.obj().emit_by_name("changed", &[])
             }
         }
+
+        fn set_color(&self, color: &str) {
+            color.clone_into(&mut self.color.borrow_mut());
+            self.actual_color.set(color.parse().ok());
+        }
     }
 }
 
 glib::wrapper! {
-    pub struct Serie(ObjectSubclass<imp::Serie>);
+    pub struct Serie(ObjectSubclass<imp::Serie>)
+        @implements gtk::Buildable;
 }
 
 impl Default for Serie {

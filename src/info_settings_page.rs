@@ -3,12 +3,10 @@ use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CustomFilter, FilterListModel, NoSelection};
 
-use crate::control_action::ControlAction;
 use crate::prelude::*;
 use crate::service_gobject::ServiceGObject;
 use crate::settings_gobject::SettingsGObject;
 use crate::vm_row::VMRow;
-use crate::vm_status::VMStatus;
 use crate::ControlPanelGuiWindow;
 use std::fs;
 
@@ -24,6 +22,7 @@ mod imp {
     use crate::control_action::ControlAction;
     use crate::plot::Plot;
     use crate::serie::Serie;
+    use crate::service_gobject::ServiceGObject;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/info_settings_page.ui")]
@@ -42,8 +41,14 @@ mod imp {
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
 
-        pub cpu_serie: Serie,
-        pub mem_serie: Serie,
+        #[template_child]
+        pub cpu_sys_serie: TemplateChild<Serie>,
+        #[template_child]
+        pub cpu_user_serie: TemplateChild<Serie>,
+        #[template_child]
+        pub mem_used_serie: TemplateChild<Serie>,
+        #[template_child]
+        pub mem_needed_serie: TemplateChild<Serie>,
     }
 
     #[glib::object_subclass]
@@ -75,7 +80,7 @@ mod imp {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
             SIGNALS.get_or_init(|| {
                 vec![Signal::builder("vm-control-action")
-                    .param_types([ControlAction::static_type(), String::static_type()])
+                    .param_types([ControlAction::static_type(), ServiceGObject::static_type()])
                     .build()]
             })
         }
@@ -110,8 +115,6 @@ impl InfoSettingsPage {
             .device_id
             .set_text(&format!("Logging ID:    {logging_id}"));
 
-        //initial values to test styling
-        self.imp().cpu_plot.add_serie(&self.imp().cpu_serie);
         self.imp()
             .cpu_plot
             .set_view(None, None, Some(0.0), Some(1.0));
@@ -119,7 +122,6 @@ impl InfoSettingsPage {
             .cpu_plot
             .set_label_format(|f| format!("{pct:.0}%", pct = f * 100.));
 
-        self.imp().memory_plot.add_serie(&self.imp().mem_serie);
         self.imp().memory_plot.set_view(None, None, Some(0.0), None);
         self.imp()
             .memory_plot
@@ -141,12 +143,26 @@ impl InfoSettingsPage {
                     while let Ok(stats) = stats.recv().await {
                         if let Some(process) = stats.process {
                             info.imp()
-                                .cpu_serie
+                                .cpu_user_serie
                                 .push(i, process.user_cycles as f32 / process.total_cycles as f32);
+                            info.imp().cpu_sys_serie.push(
+                                i,
+                                (process.user_cycles + process.sys_cycles) as f32
+                                    / process.total_cycles as f32,
+                            );
                         }
                         if let Some(memory) = stats.memory {
+                            info.imp().memory_plot.set_view(
+                                None,
+                                None,
+                                Some(0.0),
+                                Some(memory.total as f32),
+                            );
                             info.imp()
-                                .mem_serie
+                                .mem_used_serie
+                                .push(i, (memory.total - memory.free) as f32);
+                            info.imp()
+                                .mem_needed_serie
                                 .push(i, (memory.total - memory.available) as f32);
                         }
                         i += 1.;
@@ -165,9 +181,7 @@ impl InfoSettingsPage {
         //Set filter: only running VM's
         let filter_model = FilterListModel::new(
             Some(model),
-            Some(CustomFilter::typed(|obj: &ServiceGObject| {
-                obj.is_vm() && obj.status() == VMStatus::Running
-            })),
+            Some(CustomFilter::typed(ServiceGObject::is_vm_running)),
         );
 
         // Wrap model with no selection and pass it to the list view
@@ -186,9 +200,7 @@ impl InfoSettingsPage {
             let page = this.clone();
             row.connect_local("vm-control-action", false, move |values| {
                 //the value[0] is self
-                let vm_action = values[1].get::<ControlAction>().unwrap();
-                let vm_name = values[2].get::<&str>().unwrap();
-                page.emit_by_name::<()>("vm-control-action", &[&vm_action, &vm_name]);
+                page.emit_by_name::<()>("vm-control-action", &[&values[1], &values[2]]);
                 None
             });
             row

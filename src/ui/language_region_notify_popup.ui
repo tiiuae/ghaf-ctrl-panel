@@ -8,15 +8,15 @@
     <property name="height-request">160</property>
     <child>
       <object class="GtkBox">
-      <style><class name="container"/></style>
-      <property name="orientation">vertical</property>
-      <property name="margin_top">10</property>
-      <property name="margin_bottom">10</property>
-      <property name="margin_start">20</property>
-      <property name="margin_end">20</property>
-      <property name="spacing">10</property>
-      <property name="hexpand">false</property>
-      <property name="vexpand">false</property>
+        <style><class name="container"/></style>
+        <property name="orientation">vertical</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
+        <property name="margin_start">20</property>
+        <property name="margin_end">20</property>
+        <property name="spacing">10</property>
+        <property name="hexpand">false</property>
+        <property name="vexpand">false</property>
         <child>
           <object class="GtkLabel">
             <property name="label">Language &amp; Region settings have been changed</property>
@@ -46,10 +46,10 @@
             </child>
             <child>
               <object class="GtkButton" id="ok_button">
-              <style><class name="settings-button"/></style>
-              <signal name="clicked" handler="on_ok_clicked" swapped="true"/>
-              <property name="label">OK</property>
-              <property name="halign">end</property>
+                <style><class name="settings-button"/></style>
+                <signal name="clicked" handler="on_ok_clicked" swapped="true"/>
+                <property name="label">OK</property>
+                <property name="halign">end</property>
               </object>
             </child>
           </object>

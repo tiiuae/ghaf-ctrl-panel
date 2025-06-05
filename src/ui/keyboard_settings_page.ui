@@ -12,88 +12,87 @@
     <property name="margin-bottom">10</property>
     <child>
       <object class="GtkLabel">
-      <property name="label">Keyboard</property>
-      <style><class name="title"/></style>
-      <property name="margin-end">10</property>
-      <property name="margin-top">10</property>
-      <property name="margin-bottom">10</property>
-      <property name="halign">start</property>
+        <property name="label">Keyboard</property>
+        <style><class name="title"/></style>
+        <property name="margin-end">10</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">10</property>
+        <property name="halign">start</property>
       </object>
     </child>
     <child>
       <object class="GtkBox">
-      <property name="orientation">vertical</property>
-      <property name="vexpand">false</property>
-      <property name="hexpand">true</property>
-      <property name="margin-top">10</property>
-      <property name="margin-bottom">20</property>
+        <property name="orientation">vertical</property>
+        <property name="vexpand">false</property>
+        <property name="hexpand">true</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">20</property>
         <child>
           <object class="GtkLabel">
-          <style><class name="normal-text"/></style>
-          <property name="label">Region &amp; Language</property>
-          <property name="halign">start</property>
-          <property name="margin-top">10</property>
-          <property name="margin-bottom">10</property>
+            <style><class name="normal-text"/></style>
+            <property name="label">Region &amp; Language</property>
+            <property name="halign">start</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
           </object>
         </child>
         <child>
           <object class="GtkDropDown" id="region_language_switch">
-          <style><class name="dropdown-button"/></style>
-          <!--<signal name="notify::selected" handler="on_speaker_changed" swapped="true"/>-->
-          <property name="halign">start</property>
-          <property name="valign">center</property>
-          <property name="width-request">220</property>
-          <property name="height-request">30</property>
-          <property name="model">
-            <object class="GtkStringList">
-              <items>
-                <item translatable="yes">English (UK)</item>
-                <item translatable="yes">Finnish (FIN)</item>
-              </items>
-            </object>
-          </property>
+            <style><class name="dropdown-button"/></style>
+            <property name="halign">start</property>
+            <property name="valign">center</property>
+            <property name="width-request">220</property>
+            <property name="height-request">30</property>
+            <property name="model">
+              <object class="GtkStringList">
+                <items>
+                  <item translatable="yes">English (UK)</item>
+                  <item translatable="yes">Finnish (FIN)</item>
+                </items>
+              </object>
+            </property>
           </object>
         </child>
       </object>
     </child>
     <child>
       <object class="GtkSeparator">
-      <property name="orientation">horizontal</property>
-      <property name="margin-start">0</property>
+        <property name="orientation">horizontal</property>
+        <property name="margin-start">0</property>
       </object>
     </child>
     <child>
       <object class="GtkLabel">
-      <property name="label">Installed Keyboards</property>
-      <style><class name="title"/></style>
-      <property name="margin-end">10</property>
-      <property name="margin-top">10</property>
-      <property name="margin-bottom">10</property>
-      <property name="halign">start</property>
+        <property name="label">Installed Keyboards</property>
+        <style><class name="title"/></style>
+        <property name="margin-end">10</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">10</property>
+        <property name="halign">start</property>
       </object>
     </child>
     <child>
       <object class="GtkBox">
-      <property name="orientation">vertical</property>
-      <property name="vexpand">false</property>
-      <property name="hexpand">true</property>
-      <property name="margin-top">10</property>
-      <property name="margin-bottom">20</property>
+        <property name="orientation">vertical</property>
+        <property name="vexpand">false</property>
+        <property name="hexpand">true</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">20</property>
         <child>
           <object class="GtkListView" id="keyboards_list_view">
           </object>
         </child>
         <child>
           <object class="GtkButton">
-          <style><class name="settings-button"/></style>
-          <property name="label">+  Add new keyboard</property>
-          <signal name="clicked" handler="on_add_clicked" swapped="true"/>
-          <property name="width-request">150</property>
-          <property name="height-request">30</property>
-          <property name="vexpand">false</property>
-          <property name="hexpand">false</property>
-          <property name="halign">start</property>
-          <property name="valign">center</property>
+            <style><class name="settings-button"/></style>
+            <property name="label">+  Add new keyboard</property>
+            <signal name="clicked" handler="on_add_clicked" swapped="true"/>
+            <property name="width-request">150</property>
+            <property name="height-request">30</property>
+            <property name="vexpand">false</property>
+            <property name="hexpand">false</property>
+            <property name="halign">start</property>
+            <property name="valign">center</property>
           </object>
         </child>
       </object>

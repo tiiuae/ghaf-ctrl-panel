@@ -10,69 +10,68 @@
     <property name="margin-end">10</property>
     <property name="margin-top">10</property>
     <property name="margin-bottom">10</property>
-    <!--<property name="spacing">10</property>-->
     <child>
       <object class="GtkBox">
-      <style><class name="info-box"/></style>
-      <property name="orientation">horizontal</property>
-      <property name="vexpand">false</property>
-      <property name="hexpand">true</property>
+        <style><class name="info-box"/></style>
+        <property name="orientation">horizontal</property>
+        <property name="vexpand">false</property>
+        <property name="hexpand">true</property>
         <child>
           <object class="GtkLabel">
-          <property name="label">Wifi</property>
-          <style><class name="title"/></style>
-          <property name="margin-end">10</property>
-          <property name="margin-top">10</property>
-          <property name="margin-bottom">10</property>
-          <property name="halign">start</property>
-          <property name="valign">center</property>
-          <property name="vexpand">false</property>
-          <property name="height-request">20</property>
+            <property name="label">Wifi</property>
+            <style><class name="title"/></style>
+            <property name="margin-end">10</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
+            <property name="halign">start</property>
+            <property name="valign">center</property>
+            <property name="vexpand">false</property>
+            <property name="height-request">20</property>
           </object>
         </child>
         <child>
           <object class="GtkBox">
-          <property name="vexpand">false</property>
-          <property name="hexpand">true</property>
+            <property name="vexpand">false</property>
+            <property name="hexpand">true</property>
           </object>
         </child>
         <child>
           <object class="GtkSwitch" id="switch">
-          <signal name="state-set" handler="on_switch_state_changed" swapped="true"/>
-          <property name="width-request">30</property>
-          <property name="height-request">16</property>
-          <property name="halign">end</property>
-          <property name="valign">center</property>
-          <property name="vexpand">false</property>
+            <signal name="state-set" handler="on_switch_state_changed" swapped="true"/>
+            <property name="width-request">30</property>
+            <property name="height-request">16</property>
+            <property name="halign">end</property>
+            <property name="valign">center</property>
+            <property name="vexpand">false</property>
           </object>
         </child>
       </object>
     </child>
     <child>
       <object class="GtkBox">
-      <style><class name="info-box"/></style>
-      <property name="orientation">vertical</property>
-      <property name="vexpand">false</property>
-      <property name="hexpand">true</property>
-      <property name="margin-top">10</property>
-      <property name="margin-bottom">10</property>
+        <style><class name="info-box"/></style>
+        <property name="orientation">vertical</property>
+        <property name="vexpand">false</property>
+        <property name="hexpand">true</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">10</property>
         <child>
           <object class="GtkBox">
-          <property name="orientation">horizontal</property>
-          <property name="vexpand">false</property>
-          <property name="hexpand">true</property>
-          <property name="margin-top">10</property>
-          <property name="margin-bottom">10</property>
+            <property name="orientation">horizontal</property>
+            <property name="vexpand">false</property>
+            <property name="hexpand">true</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
             <child>
               <object class="GtkLabel">
-              <style><class name="normal-text"/></style>
-              <property name="label">Wifi network name</property>
-              <property name="halign">start</property>
+                <style><class name="normal-text"/></style>
+                <property name="label">Wifi network name</property>
+                <property name="halign">start</property>
               </object>
             </child>
             <child>
               <object class="GtkBox">
-              <property name="hexpand">true</property>
+                <property name="hexpand">true</property>
               </object>
             </child>
             <child>
@@ -95,7 +94,7 @@
             </child>
             <child>
               <object class="GtkImage" id="signal_indicator">
-              <property name="resource">/org/gnome/controlpanelgui/icons/icon_wifi.svg</property>
+                <property name="resource">/org/gnome/controlpanelgui/icons/icon_wifi.svg</property>
                 <property name="width-request">24</property>
                 <property name="height-request">24</property>
                 <property name="halign">end</property>
@@ -115,21 +114,21 @@
         </child>
         <child>
           <object class="GtkSeparator">
-          <property name="margin-start">0</property>
+            <property name="margin-start">0</property>
           </object>
         </child>
         <!--List of available networks-->
         <child>
           <object class="GtkLabel">
-          <property name="label">Available networks</property>
-          <style><class name="title"/></style>
-          <property name="margin-end">10</property>
-          <property name="margin-top">10</property>
-          <property name="margin-bottom">10</property>
-          <property name="halign">start</property>
-          <property name="valign">center</property>
-          <property name="vexpand">false</property>
-          <property name="height-request">20</property>
+            <property name="label">Available networks</property>
+            <style><class name="title"/></style>
+            <property name="margin-end">10</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
+            <property name="halign">start</property>
+            <property name="valign">center</property>
+            <property name="vexpand">false</property>
+            <property name="height-request">20</property>
           </object>
         </child>
         <child>
@@ -138,15 +137,15 @@
         </child>
         <child>
           <object class="GtkButton">
-          <style><class name="settings-button"/></style>
-          <property name="label">+  Add network</property>
-          <signal name="clicked" handler="on_add_clicked" swapped="true"/>
-          <property name="width-request">150</property>
-          <property name="height-request">30</property>
-          <property name="vexpand">false</property>
-          <property name="hexpand">false</property>
-          <property name="halign">start</property>
-          <property name="valign">center</property>
+            <style><class name="settings-button"/></style>
+            <property name="label">+  Add network</property>
+            <signal name="clicked" handler="on_add_clicked" swapped="true"/>
+            <property name="width-request">150</property>
+            <property name="height-request">30</property>
+            <property name="vexpand">false</property>
+            <property name="hexpand">false</property>
+            <property name="halign">start</property>
+            <property name="valign">center</property>
           </object>
         </child>
       </object>

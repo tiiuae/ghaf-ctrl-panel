@@ -10,13 +10,16 @@ use crate::data_gobject::DataGObject;
 pub use crate::data_provider::StatsResponse;
 use crate::error_popup::ErrorPopup;
 use crate::plot::Plot;
+use crate::security_icon::SecurityIcon;
+use crate::serie::Serie;
+use crate::service_gobject::ServiceGObject;
 use crate::settings_action::SettingsAction;
+use crate::stats_window::StatsWindow;
 use crate::volume_widget::VolumeWidget;
 use crate::ControlPanelGuiWindow;
 use givc_client::endpoint::TlsConfig;
 use givc_common::address::EndpointAddress;
 use log::debug;
-use regex::Regex;
 
 mod imp {
     use adw::subclass::prelude::*;
@@ -264,6 +267,9 @@ impl ControlPanelGuiApplication {
         let _ = DataGObject::static_type();
         let _ = VolumeWidget::static_type();
         let _ = Plot::static_type();
+        let _ = Serie::static_type();
+        let _ = SecurityIcon::static_type();
+
         let app: Self = glib::Object::builder()
             .property("application-id", application_id)
             .property("flags", flags)
@@ -303,14 +309,19 @@ impl ControlPanelGuiApplication {
         self.imp().data_provider.borrow().get_stats(vm)
     }
 
-    pub fn control_service(&self, action: ControlAction, name: String) {
-        debug!("Control service {name}, {action:?}");
+    pub fn control_service(&self, action: ControlAction, object: ServiceGObject) {
+        debug!("Control service {name}, {action:?}", name = object.name());
         match action {
-            ControlAction::Start => self.imp().data_provider.borrow().start_service(name),
-            ControlAction::Restart => self.imp().data_provider.borrow().restart_service(name),
-            ControlAction::Pause => self.imp().data_provider.borrow().pause_service(name),
-            ControlAction::Resume => self.imp().data_provider.borrow().resume_service(name),
-            ControlAction::Shutdown => self.imp().data_provider.borrow().stop_service(name),
+            ControlAction::Start => self.imp().data_provider.borrow().start_service(object),
+            ControlAction::Restart => self.imp().data_provider.borrow().restart_service(&object),
+            ControlAction::Pause => self.imp().data_provider.borrow().pause_service(&object),
+            ControlAction::Resume => self.imp().data_provider.borrow().resume_service(&object),
+            ControlAction::Shutdown => self.imp().data_provider.borrow().stop_service(&object),
+            ControlAction::Monitor => {
+                let win = StatsWindow::new(object.vm_name());
+                win.set_application(Some(self));
+                win.set_visible(true);
+            }
         }
     }
 
@@ -357,20 +368,17 @@ impl ControlPanelGuiApplication {
         popup.launch_close_timer(5);
     }
 
-    fn open_wireguard(&self, vm: &str) {
-        let re = Regex::new(r"microvm@(.*?)\.service").unwrap();
-        debug!("wireguard vm {vm}"); // Output: business-vm
+    fn open_wireguard(&self, vm: &ServiceGObject) {
+        debug!("wireguard vm {vm}", vm = vm.name()); // Output: business-vm
 
-        if let Some(captures) = re.captures(vm) {
-            if let Some(matched) = captures.get(1) {
-                let vm_name = matched.as_str();
-                debug!("wireguard app name {vm_name}"); // Output: business-vm
-                self.imp().data_provider.borrow().start_app_in_vm(
-                    "wireguard-gui".to_string(),
-                    vm_name.to_string(),
-                    vec![],
-                );
-            }
+        if vm.is_vm() {
+            let vm_name = vm.vm_name();
+            debug!("wireguard app name {vm_name}"); // Output: business-vm
+            self.imp().data_provider.borrow().start_app_in_vm(
+                "wireguard-gui".into(),
+                vm_name,
+                vec![],
+            );
         }
     }
 

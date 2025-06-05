@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-    <requires lib="gtk" version="4.0"/>
-    <template class="ErrorPopup" parent="GtkWindow">
+  <requires lib="gtk" version="4.0"/>
+  <template class="ErrorPopup" parent="GtkWindow">
     <style><class name="settings-popup"/></style>
     <property name="decorated">false</property>
     <property name="width-request">320</property>
     <property name="height-request">140</property>
     <child>
       <object class="GtkBox">
-      <style><class name="container"/></style>
-      <property name="orientation">vertical</property>
-      <property name="margin_top">10</property>
-      <property name="margin_bottom">10</property>
-      <property name="margin_start">20</property>
-      <property name="margin_end">20</property>
-      <property name="spacing">10</property>
-      <property name="hexpand">false</property>
-      <property name="vexpand">false</property>
+        <style><class name="container"/></style>
+        <property name="orientation">vertical</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
+        <property name="margin_start">20</property>
+        <property name="margin_end">20</property>
+        <property name="spacing">10</property>
+        <property name="hexpand">false</property>
+        <property name="vexpand">false</property>
         <child>
           <object class="GtkLabel">
             <property name="label">Error!</property>
@@ -52,10 +52,10 @@
             </child>
             <child>
               <object class="GtkButton" id="ok_button">
-              <style><class name="settings-button"/></style>
-              <signal name="clicked" handler="on_ok_clicked" swapped="true"/>
-              <property name="label">OK</property>
-              <property name="halign">end</property>
+                <style><class name="settings-button"/></style>
+                <signal name="clicked" handler="on_ok_clicked" swapped="true"/>
+                <property name="label">OK</property>
+                <property name="halign">end</property>
               </object>
             </child>
           </object>

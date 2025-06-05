@@ -14,94 +14,94 @@
     <property name="spacing">10</property>
     <child>
       <object class="GtkBox">
-      <style><class name="info-box"/></style>
-      <property name="orientation">horizontal</property>
-      <property name="margin-start">0</property>
-      <property name="margin-end">0</property>
-      <property name="margin-top">10</property>
-      <property name="margin-bottom">10</property>
-      <property name="hexpand">true</property>
+        <style><class name="info-box"/></style>
+        <property name="orientation">horizontal</property>
+        <property name="margin-start">0</property>
+        <property name="margin-end">0</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">10</property>
+        <property name="hexpand">true</property>
         <child>
           <object class="GtkLabel">
-          <style><class name="title"/></style>
-          <property name="halign">start</property>
-          <property name="label">Audio Settings</property>
+            <style><class name="title"/></style>
+            <property name="halign">start</property>
+            <property name="label">Audio Settings</property>
           </object>
         </child>
         <child>
           <object class="GtkBox">
-          <property name="hexpand">true</property>
-          <property name="orientation">horizontal</property>
+            <property name="hexpand">true</property>
+            <property name="orientation">horizontal</property>
           </object>
         </child>
         <child>
           <object class="GtkButton">
-          <property name="label">Open advanced settings</property>
-          <signal name="clicked" handler="on_advanced_settings_clicked" swapped="true"/>
-          <style><class name="settings-button"/></style>
-          <property name="width-request">140</property>
-          <property name="height-request">30</property>
-          <property name="halign">end</property>
+            <property name="label">Open advanced settings</property>
+            <signal name="clicked" handler="on_advanced_settings_clicked" swapped="true"/>
+            <style><class name="settings-button"/></style>
+            <property name="width-request">140</property>
+            <property name="height-request">30</property>
+            <property name="halign">end</property>
           </object>
         </child>
       </object>
     </child>
     <child>
       <object class="GtkLabel">
-      <style><class name="normal-text"/></style>
-      <property name="halign">start</property>
-      <property name="label">Choose microphone</property>
+        <style><class name="normal-text"/></style>
+        <property name="halign">start</property>
+        <property name="label">Choose microphone</property>
       </object>
     </child>
     <child>
       <object class="GtkDropDown" id="mic_switch">
         <signal name="notify::selected" handler="on_mic_changed" swapped="true"/>
-      <style><class name="dropdown-button"/></style>
-      <property name="halign">start</property>
-      <property name="valign">center</property>
-      <property name="width-request">220</property>
-      <property name="height-request">30</property>
+        <style><class name="dropdown-button"/></style>
+        <property name="halign">start</property>
+        <property name="valign">center</property>
+        <property name="width-request">220</property>
+        <property name="height-request">30</property>
       </object>
     </child>
     <child>
       <object class="VolumeWidget" id="mic_volume">
-      <signal name="notify::volume" handler="on_mic_volume_changed" swapped="true"/>
-      <signal name="notify::muted" handler="on_mic_mute_changed" swapped="true"/>
-      <signal name="deselected" handler="on_mic_deselected" swapped="true"/>
-      <property name="width-request">220</property>
-      <property name="height-request">30</property>
+        <signal name="notify::volume" handler="on_mic_volume_changed" swapped="true"/>
+        <signal name="notify::muted" handler="on_mic_mute_changed" swapped="true"/>
+        <signal name="deselected" handler="on_mic_deselected" swapped="true"/>
+        <property name="width-request">220</property>
+        <property name="height-request">30</property>
       </object>
     </child>
     <child>
       <object class="GtkLabel">
-      <style><class name="normal-text"/></style>
-      <property name="halign">start</property>
-      <property name="margin-top">10</property>
-      <property name="label">Choose speakers</property>
+        <style><class name="normal-text"/></style>
+        <property name="halign">start</property>
+        <property name="margin-top">10</property>
+        <property name="label">Choose speakers</property>
       </object>
     </child>
     <child>
       <object class="GtkDropDown" id="speaker_switch">
         <signal name="notify::selected" handler="on_speaker_changed" swapped="true"/>
-      <style><class name="dropdown-button"/></style>
-      <property name="halign">start</property>
-      <property name="valign">center</property>
-      <property name="width-request">220</property>
-      <property name="height-request">30</property>
+        <style><class name="dropdown-button"/></style>
+        <property name="halign">start</property>
+        <property name="valign">center</property>
+        <property name="width-request">220</property>
+        <property name="height-request">30</property>
       </object>
     </child>
     <child>
       <object class="VolumeWidget" id="speaker_volume">
-      <signal name="notify::volume" handler="on_speaker_volume_changed" swapped="true"/>
-      <signal name="notify::muted" handler="on_speaker_mute_changed" swapped="true"/>
-      <signal name="deselected" handler="on_speaker_deselected" swapped="true"/>
-      <property name="halign">start</property>
-      <property name="valign">center</property>
+        <signal name="notify::volume" handler="on_speaker_volume_changed" swapped="true"/>
+        <signal name="notify::muted" handler="on_speaker_mute_changed" swapped="true"/>
+        <signal name="deselected" handler="on_speaker_deselected" swapped="true"/>
+        <property name="halign">start</property>
+        <property name="valign">center</property>
       </object>
     </child>
     <child>
       <object class="GtkBox">
-      <property name="vexpand">true</property>
+        <property name="vexpand">true</property>
       </object>
     </child>
   </template>

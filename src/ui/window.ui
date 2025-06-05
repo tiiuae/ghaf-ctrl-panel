@@ -3,7 +3,7 @@
   <requires lib="gtk" version="4.0"/>
   <requires lib="Adw" version="1.0"/>
   <template class="ControlPanelGuiWindow" parent="AdwApplicationWindow">
-  <property name="title">Ghaf Control panel</property>
+    <property name="title">Ghaf Control panel</property>
     <property name="default-width">1000</property>
     <property name="default-height">600</property>
     <style><class name="main-window"/></style>
@@ -11,25 +11,25 @@
       <object class="AdwToolbarView">
         <child type="top">
           <object class="AdwHeaderBar" id="header_bar">
-          <style><class name="adw-header-bar"/></style>
+            <style><class name="adw-header-bar"/></style>
             <child type="end">
               <object class="GtkMenuButton" id="header_menu_button">
-              <property name="primary">True</property>
-              <property name="icon-name">open-menu-symbolic</property>
-              <property name="tooltip-text" translatable="yes">Menu</property>
-              <property name="menu-model">primary_menu</property>
+                <property name="primary">True</property>
+                <property name="icon-name">open-menu-symbolic</property>
+                <property name="tooltip-text" translatable="yes">Menu</property>
+                <property name="menu-model">primary_menu</property>
               </object>
             </child>
           </object>
         </child>
-          <child><!-- Outer box child -->
-            <object class="GtkBox" id="outer_box">
+        <child><!-- Outer box child -->
+          <object class="GtkBox" id="outer_box">
             <property name="orientation">vertical</property>
             <property name="hexpand">true</property>
             <property name="vexpand">true</property>
             <style><class name="container"/></style>
-              <child>
-                <object class="GtkBox" id="control_box">
+            <child>
+              <object class="GtkBox" id="control_box">
                 <property name="orientation">horizontal</property>
                 <style><class name="container"/></style>
                 <property name="margin-start">10</property>
@@ -39,24 +39,24 @@
                 <property name="hexpand">true</property>
                 <property name="vexpand">false</property>
                 <property name="spacing">10</property>
-                  <child>
-                    <object class="GtkImage" id="ghaf_logo">
+                <child>
+                  <object class="GtkImage" id="ghaf_logo">
                     <property name="visible">true</property>
                     <property name="can_focus">false</property>
                     <property name="resource">/org/gnome/controlpanelgui/icons/ghaf_logo.svg</property>
                     <property name="width-request">50</property>
                     <property name="height-request">50</property>
                     <property name="halign">start</property>
-                    </object>
-                  </child>
-                  <child>
-                    <object class="GtkBox">
-                        <property name="orientation">horizontal</property>
-                        <property name="hexpand">true</property>
-                    </object>
-                  </child>
-                  <child>
-                    <object class="GtkToggleButton" id="vm_view_button">
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">horizontal</property>
+                    <property name="hexpand">true</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="vm_view_button">
                     <style><class name="header-toggle-button"/></style>
                     <property name="label">Virtual machines</property>
                     <property name="halign">end</property>
@@ -65,10 +65,10 @@
                     <property name="height-request">30</property>
                     <property name="vexpand">false</property>
                     <signal name="toggled" handler="switch_to_vm_view" swapped="true"/>
-                    </object>
-                  </child>
-                  <child>
-                    <object class="GtkToggleButton" id="app_view_button">
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="app_view_button">
                     <style><class name="header-toggle-button"/></style>
                     <property name="label">Applications</property>
                     <property name="halign">end</property>
@@ -78,10 +78,10 @@
                     <property name="vexpand">false</property>
                     <signal name="toggled" handler="switch_to_app_view" swapped="true"/>
                     <property name="group">vm_view_button</property>
-                    </object>
-                  </child>
-                  <child>
-                    <object class="GtkToggleButton" id="services_view_button">
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="services_view_button">
                     <style><class name="header-toggle-button"/></style>
                     <property name="label">Services</property>
                     <property name="halign">end</property>
@@ -91,10 +91,10 @@
                     <property name="vexpand">false</property>
                     <signal name="toggled" handler="switch_to_services_view" swapped="true"/>
                     <property name="group">vm_view_button</property>
-                    </object>
-                  </child>
-                  <child>
-                    <object class="GtkToggleButton" id="settings_view_button">
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="settings_view_button">
                     <style><class name="header-toggle-button"/></style>
                     <property name="label">Settings</property>
                     <property name="halign">end</property>
@@ -104,21 +104,21 @@
                     <property name="vexpand">false</property>
                     <signal name="toggled" handler="switch_to_settings_view" swapped="true"/>
                     <property name="group">vm_view_button</property>
-                    </object>
-                  </child>
-                </object>
-              </child>
-              <child>
-                <object class="GtkStack" id="stack">
-                  <child> <!--VM view child -->
-                    <object class="GtkStackPage"> <!-- 1st stack child /page -->
-                      <property name="name">services_view</property>
-                      <property name="child">
-                        <object class="GtkBox" id="vm_main_box"> <!-- Main box object -->
-                          <style><class name="vm-scroll-view"/></style>
-                          <property name="orientation">horizontal</property>
-                          <child>
-                            <object class="GtkScrolledWindow" id="services_box">
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkStack" id="stack">
+                <child> <!--VM view child -->
+                  <object class="GtkStackPage"> <!-- 1st stack child /page -->
+                    <property name="name">services_view</property>
+                    <property name="child">
+                      <object class="GtkBox" id="vm_main_box"> <!-- Main box object -->
+                        <style><class name="vm-scroll-view"/></style>
+                        <property name="orientation">horizontal</property>
+                        <child>
+                          <object class="GtkScrolledWindow" id="services_box">
                             <style><class name="container"/></style>
                             <property name="margin-start">10</property>
                             <property name="margin-end">10</property>
@@ -128,44 +128,43 @@
                             <property name="max-content-width">300</property>
                             <property name="hscrollbar-policy">GTK_POLICY_NEVER</property>
                             <property name="vscrollbar-policy">GTK_POLICY_EXTERNAL</property>
-                              <child>
-                                <object class="GtkListView" id="services_list_view">
-                                  <!--<property name="can_focus">true</property>-->
-                                  <property name="margin-start">10</property>
-                                  <property name="margin-end">0</property>
-                                  <property name="margin-top">0</property>
-                                  <property name="margin-bottom">0</property>
-                                  <property name="width-request">300</property>
-                                  <style><class name="vm-list-main"/></style>
-                                </object>
-                              </child>
-                            </object> <!-- VM box object (list of VM's)-->
-                          </child>
-                          <child>
-                            <object class="ServiceSettings" id="service_settings_box">
+                            <child>
+                              <object class="GtkListView" id="services_list_view">
+                                <property name="margin-start">10</property>
+                                <property name="margin-end">0</property>
+                                <property name="margin-top">0</property>
+                                <property name="margin-bottom">0</property>
+                                <property name="width-request">300</property>
+                                <style><class name="vm-list-main"/></style>
+                              </object>
+                            </child>
+                          </object> <!-- VM box object (list of VM's)-->
+                        </child>
+                        <child>
+                          <object class="ServiceSettings" id="service_settings_box">
                             <signal name="control-action" handler="on_control_action" swapped="true"/>
                             <signal name="settings-action" handler="on_settings_action" swapped="true"/>
-                            </object> <!-- Settings box object -->
-                          </child>
-                        </object> <!-- Main box object -->
-                      </property> <!-- 1st page child property-->
-                    </object> <!-- 1st stack child /page -->
-                  </child> <!-- 1st stack child /page -->
-                  <!-- 2nd page -->
-                  <child> <!-- Settings child -->
-                    <object class="GtkStackPage">
-                      <property name="name">settings_view</property>
-                      <property name="child">
-                        <object class="Settings" id="settings_box">
+                          </object> <!-- Settings box object -->
+                        </child>
+                      </object> <!-- Main box object -->
+                    </property> <!-- 1st page child property-->
+                  </object> <!-- 1st stack child /page -->
+                </child> <!-- 1st stack child /page -->
+                <!-- 2nd page -->
+                <child> <!-- Settings child -->
+                  <object class="GtkStackPage">
+                    <property name="name">settings_view</property>
+                    <property name="child">
+                      <object class="Settings" id="settings_box">
                         <signal name="vm-control-action" handler="on_control_action" swapped="true"/>
                         <signal name="settings-action" handler="on_settings_action" swapped="true"/>
-                        </object>
-                      </property>
-                    </object>
-                  </child> <!-- Settings view child -->
-                </object> <!-- Stack box object -->
-              </child>
-            </object> <!-- Outer box object -->
+                      </object>
+                    </property>
+                  </object>
+                </child> <!-- Settings view child -->
+              </object> <!-- Stack box object -->
+            </child>
+          </object> <!-- Outer box object -->
         </child>
       </object> <!-- AdwToolbarView -->
     </child>

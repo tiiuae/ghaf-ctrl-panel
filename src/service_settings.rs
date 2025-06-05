@@ -8,7 +8,7 @@ use crate::vm_status::VMStatus;
 
 mod imp {
     use glib::subclass::Signal;
-    use glib::{Binding, Properties, Variant};
+    use glib::{Binding, Variant};
     use gtk::prelude::*;
     use gtk::subclass::prelude::*;
     use gtk::{
@@ -21,10 +21,11 @@ mod imp {
     use crate::audio_settings::AudioSettings;
     use crate::control_action::ControlAction;
     use crate::prelude::*;
+    use crate::security_icon::SecurityIcon;
+    use crate::service_gobject::ServiceGObject;
     use crate::settings_action::SettingsAction;
 
-    #[derive(Default, CompositeTemplate, Properties)]
-    #[properties(wrapper_type = super::ServiceSettings)]
+    #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/service_settings.ui")]
     pub struct ServiceSettings {
         #[template_child]
@@ -44,7 +45,7 @@ mod imp {
         #[template_child]
         pub details_label: TemplateChild<Label>,
         #[template_child]
-        pub security_icon: TemplateChild<Image>,
+        pub security_icon: TemplateChild<SecurityIcon>,
         #[template_child]
         pub security_label: TemplateChild<Label>,
         #[template_child]
@@ -62,11 +63,9 @@ mod imp {
         #[template_child]
         pub popover_menu_2: TemplateChild<Popover>,
 
-        #[property(name = "full-service-name", get, set, type = String)]
-        full_service_name: RefCell<String>,
-
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
+        pub(super) service: RefCell<Option<ServiceGObject>>,
     }
 
     #[glib::object_subclass]
@@ -89,11 +88,13 @@ mod imp {
     impl ServiceSettings {
         #[template_callback]
         fn on_wireguard_button_clicked(&self) {
-            debug!("Wireguard GUI will be launched...");
-            //which name: full service name or vm?
-            let vm = self.full_service_name.borrow().to_string();
-            self.obj()
-                .emit_by_name::<()>("settings-action", &[&SettingsAction::OpenWireGuard { vm }]);
+            if let Some(vm) = self.service.borrow().clone() {
+                debug!("Wireguard GUI will be launched...");
+                self.obj().emit_by_name::<()>(
+                    "settings-action",
+                    &[&SettingsAction::OpenWireGuard { vm }],
+                );
+            }
         }
 
         #[template_callback]
@@ -107,35 +108,28 @@ mod imp {
             }
         }
 
-        #[template_callback]
-        fn on_start_clicked(&self) {
-            let full_service_name = self.obj().full_service_name();
-            self.obj().emit_by_name::<()>(
-                "control-action",
-                &[&ControlAction::Start, &full_service_name],
-            );
+        fn emit_control_action(&self, action: ControlAction) {
+            if let Some(vm) = self.service.borrow().clone() {
+                self.obj()
+                    .emit_by_name::<()>("control-action", &[&action, &vm]);
+            }
             self.popover_menu.popdown();
         }
 
         #[template_callback]
+        fn on_start_clicked(&self) {
+            self.emit_control_action(ControlAction::Start);
+        }
+
+        #[template_callback]
         fn on_shutdown_clicked(&self) {
-            let full_service_name = self.obj().full_service_name();
-            self.obj().emit_by_name::<()>(
-                "control-action",
-                &[&ControlAction::Shutdown, &full_service_name],
-            );
-            self.popover_menu.popdown();
+            self.emit_control_action(ControlAction::Shutdown);
             self.popover_menu_2.popdown();
         }
 
         #[template_callback]
         fn on_pause_clicked(&self) {
-            let full_service_name = self.obj().full_service_name();
-            self.obj().emit_by_name::<()>(
-                "control-action",
-                &[&ControlAction::Pause, &full_service_name],
-            );
-            self.popover_menu.popdown();
+            self.emit_control_action(ControlAction::Pause);
             self.popover_menu_2.popdown();
         }
 
@@ -174,14 +168,13 @@ mod imp {
         }
     } //end #[gtk::template_callbacks]
 
-    #[glib::derived_properties]
     impl ObjectImpl for ServiceSettings {
         fn signals() -> &'static [Signal] {
-            static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
+            static SIGNALS: OnceLock<[Signal; 6]> = OnceLock::new();
             SIGNALS.get_or_init(|| {
-                vec![
+                [
                     Signal::builder("control-action")
-                        .param_types([ControlAction::static_type(), String::static_type()])
+                        .param_types([ControlAction::static_type(), ServiceGObject::static_type()])
                         .build(),
                     Signal::builder("settings-action")
                         .param_types([SettingsAction::static_type()])
@@ -260,13 +253,7 @@ impl ServiceSettings {
                 .set_popover(Some(&self.imp().popover_menu_2.get()));
         }
 
-        //full service name binding
-        let full_service_name_binding = object
-            .bind_property("name", &self.clone(), "full-service-name")
-            .flags(glib::BindingFlags::DEFAULT)
-            .sync_create()
-            .build();
-        bindings.push(full_service_name_binding);
+        *self.imp().service.borrow_mut() = Some(object.clone());
 
         if is_vm_or_app {
             let full_service_name = self.imp().name_slot_2.get();
@@ -326,9 +313,8 @@ impl ServiceSettings {
         bindings.push(details_binding);
 
         let security_icon_binding = object
-            .bind_property("trust-level", &security_icon, "resource")
+            .bind_property("trust-level", &security_icon, "trust-level")
             .sync_create()
-            .transform_to(move |_, trust_level: TrustLevel| Some(trust_level.icon()))
             .build();
         bindings.push(security_icon_binding);
 
@@ -372,5 +358,6 @@ impl ServiceSettings {
         }
         //clean name slot 2
         self.imp().name_slot_2.set_text("");
+        self.imp().service.borrow_mut().take();
     }
 }

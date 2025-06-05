@@ -362,21 +362,17 @@ impl DataProvider {
         });
     }
 
-    pub fn start_service(&self, name: String) {
-        let store = self.store.clone();
-        let Some(obj) = store.iter().find(|obj| obj.name() == name) else {
-            return;
-        };
+    pub fn start_service(&self, obj: ServiceGObject) {
         if obj.is_vm() {
-            let name_clone = name.clone();
+            let vm_name = obj.vm_name(); //if it is known
             self.client_cmd(
-                adminclient!(|client| client.start_vm(name)),
+                adminclient!(|client| client.start_vm(vm_name)),
                 move |res| match res {
                     Ok::<StartResponse, _>(_) => {
-                        debug!("Start VM {name_clone} request sent");
+                        debug!("Start VM {name} request sent", name = obj.name());
                     }
                     Err(error) => {
-                        debug!("Start VM {name_clone} request error {error}");
+                        debug!("Start VM {name} request error {error}", name = obj.name());
                     }
                 },
             );
@@ -392,16 +388,19 @@ impl DataProvider {
                 },
             );
         } else {
-            let name_clone = name.clone();
+            let name = obj.name();
             let vm_name = obj.vm_name(); //if it is known
             self.client_cmd(
                 adminclient!(|client| client.start_service(name, vm_name)),
                 move |res| match res {
                     Ok::<StartResponse, _>(_) => {
-                        debug!("Start service {name_clone} request sent");
+                        debug!("Start service {name} request sent", name = obj.name());
                     }
                     Err(error) => {
-                        debug!("Start service {name_clone} request error {error}");
+                        debug!(
+                            "Start service {name} request error {error}",
+                            name = obj.name()
+                        );
                     }
                 },
             );
@@ -424,14 +423,16 @@ impl DataProvider {
         );
     }
 
-    pub fn pause_service(&self, name: String) {
+    pub fn pause_service(&self, obj: &ServiceGObject) {
+        let name = obj.name();
         self.client_cmd(adminclient!(|client| client.pause(name)), |res| match res {
             Ok(()) => debug!("Pause request sent"),
             Err(error) => debug!("Pause request error {error}"),
         });
     }
 
-    pub fn resume_service(&self, name: String) {
+    pub fn resume_service(&self, obj: &ServiceGObject) {
+        let name = obj.name();
         self.client_cmd(
             adminclient!(|client| client.resume(name)),
             |res: Result<StartResponse, _>| match res {
@@ -441,7 +442,8 @@ impl DataProvider {
         );
     }
 
-    pub fn stop_service(&self, name: String) {
+    pub fn stop_service(&self, obj: &ServiceGObject) {
+        let name = obj.name();
         self.client_cmd(adminclient!(|client| client.stop(name)), |res| match res {
             Ok(()) => debug!("Stop request sent"),
             Err(error) => debug!("Stop request error {error}"),
@@ -449,7 +451,7 @@ impl DataProvider {
     }
 
     #[allow(clippy::unused_self)]
-    pub fn restart_service(&self, _name: String) {
+    pub fn restart_service(&self, _obj: &ServiceGObject) {
         warn!("Restart is not implemented on client lib!");
         //no restart in admin_client
         //self.admin_client.restart(name);
@@ -485,10 +487,12 @@ impl DataProvider {
                 memory: Some(MemoryStats {
                     total: 200_000_000,
                     available: 100_000_000,
+                    free: 50_000_000,
                     ..Default::default()
                 }),
                 process: Some(ProcessStats {
                     user_cycles: 100_000,
+                    sys_cycles: 50_000,
                     total_cycles: 200_000,
                     ..Default::default()
                 }),
