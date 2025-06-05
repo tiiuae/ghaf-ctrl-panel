@@ -75,6 +75,7 @@ mod imp {
                 let app = win.imp().get_app();
                 let mut i = 0.;
 
+                #[allow(clippy::cast_precision_loss)]
                 glib::spawn_future_local(glib::clone!(
                     #[strong(rename_to = win)]
                     win.downgrade(),
@@ -84,7 +85,8 @@ mod imp {
                                 break;
                             };
                             let imp = win.imp();
-                            if let Ok(stats) = app.get_stats(imp.vm.borrow().clone()).await {
+                            let vm = imp.vm.borrow().clone();
+                            if let Ok(stats) = app.get_stats(vm).await {
                                 if let Some(process) = stats.process {
                                     imp.cpu_user_serie.push(
                                         i,

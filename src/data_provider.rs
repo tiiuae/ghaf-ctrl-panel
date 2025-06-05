@@ -363,10 +363,10 @@ impl DataProvider {
     }
 
     pub fn start_service(&self, obj: ServiceGObject) {
-        let name = obj.name();
         if obj.is_vm() {
+            let vm_name = obj.vm_name(); //if it is known
             self.client_cmd(
-                adminclient!(|client| client.start_vm(name)),
+                adminclient!(|client| client.start_vm(vm_name)),
                 move |res| match res {
                     Ok::<StartResponse, _>(_) => {
                         debug!("Start VM {name} request sent", name = obj.name());
@@ -423,7 +423,7 @@ impl DataProvider {
         );
     }
 
-    pub fn pause_service(&self, obj: ServiceGObject) {
+    pub fn pause_service(&self, obj: &ServiceGObject) {
         let name = obj.name();
         self.client_cmd(adminclient!(|client| client.pause(name)), |res| match res {
             Ok(()) => debug!("Pause request sent"),
@@ -431,7 +431,7 @@ impl DataProvider {
         });
     }
 
-    pub fn resume_service(&self, obj: ServiceGObject) {
+    pub fn resume_service(&self, obj: &ServiceGObject) {
         let name = obj.name();
         self.client_cmd(
             adminclient!(|client| client.resume(name)),
@@ -442,7 +442,7 @@ impl DataProvider {
         );
     }
 
-    pub fn stop_service(&self, obj: ServiceGObject) {
+    pub fn stop_service(&self, obj: &ServiceGObject) {
         let name = obj.name();
         self.client_cmd(adminclient!(|client| client.stop(name)), |res| match res {
             Ok(()) => debug!("Stop request sent"),
@@ -451,7 +451,7 @@ impl DataProvider {
     }
 
     #[allow(clippy::unused_self)]
-    pub fn restart_service(&self, _obj: ServiceGObject) {
+    pub fn restart_service(&self, _obj: &ServiceGObject) {
         warn!("Restart is not implemented on client lib!");
         //no restart in admin_client
         //self.admin_client.restart(name);

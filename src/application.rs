@@ -313,10 +313,10 @@ impl ControlPanelGuiApplication {
         debug!("Control service {name}, {action:?}", name = object.name());
         match action {
             ControlAction::Start => self.imp().data_provider.borrow().start_service(object),
-            ControlAction::Restart => self.imp().data_provider.borrow().restart_service(object),
-            ControlAction::Pause => self.imp().data_provider.borrow().pause_service(object),
-            ControlAction::Resume => self.imp().data_provider.borrow().resume_service(object),
-            ControlAction::Shutdown => self.imp().data_provider.borrow().stop_service(object),
+            ControlAction::Restart => self.imp().data_provider.borrow().restart_service(&object),
+            ControlAction::Pause => self.imp().data_provider.borrow().pause_service(&object),
+            ControlAction::Resume => self.imp().data_provider.borrow().resume_service(&object),
+            ControlAction::Shutdown => self.imp().data_provider.borrow().stop_service(&object),
             ControlAction::Monitor => {
                 let win = StatsWindow::new(object.vm_name());
                 win.set_application(Some(self));
