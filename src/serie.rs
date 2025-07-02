@@ -54,6 +54,10 @@ mod imp {
             self.points.borrow().get(idx as usize).copied()
         }
 
+        pub fn clear(&self) {
+            self.points.borrow_mut().clear();
+        }
+
         #[allow(clippy::semicolon_if_nothing_returned)]
         fn set_window(&self, window: u32) {
             self.window.set(window);
@@ -90,5 +94,9 @@ impl Serie {
 
     pub fn values(&self) -> impl Iterator<Item = (f32, f32)> + use<'_> {
         (0..).map_while(|i| self.imp().get(i))
+    }
+
+    pub fn clear(&self) {
+        self.imp().clear();
     }
 }

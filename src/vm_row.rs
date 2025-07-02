@@ -74,11 +74,6 @@ mod imp {
         fn on_vm_pause_clicked(&self) {
             self.emit_action(ControlAction::Pause);
         }
-
-        #[template_callback]
-        fn on_vm_monitor_clicked(&self) {
-            self.emit_action(ControlAction::Monitor);
-        }
     } //end #[gtk::template_callbacks]
 
     impl ObjectImpl for VMRow {

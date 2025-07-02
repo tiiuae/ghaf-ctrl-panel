@@ -12,8 +12,8 @@ mod imp {
     use gio::ListModel;
     use gtk::prelude::*;
     use gtk::{
-        gio, glib, CompositeTemplate, CustomFilter, FilterListModel, Image, ListView, MenuButton,
-        SingleSelection, Stack, ToggleButton,
+        gio, glib, CompositeTemplate, Image, ListView, MenuButton, SingleSelection, Stack,
+        ToggleButton,
     };
 
     use crate::control_action::ControlAction;
@@ -34,10 +34,6 @@ mod imp {
         pub header_menu_button: TemplateChild<MenuButton>,
         #[template_child]
         pub vm_view_button: TemplateChild<ToggleButton>,
-        #[template_child]
-        pub app_view_button: TemplateChild<ToggleButton>,
-        #[template_child]
-        pub services_view_button: TemplateChild<ToggleButton>,
         #[template_child]
         pub settings_view_button: TemplateChild<ToggleButton>,
         #[template_child]
@@ -116,25 +112,11 @@ mod imp {
             app.perform_setting_action(action);
         }
 
-        pub fn setup_service_rows(&self, model: ListModel) {
+        pub fn setup_service_rows(&self, model: &ListModel) {
             self.settings_box.set_vm_model(model.clone());
 
-            //Create filter: VM services, default
-            let vm_filter = CustomFilter::typed(ServiceGObject::is_vm);
-
-            //Create filter: Apps
-            let app_filter = CustomFilter::typed(ServiceGObject::is_app);
-
-            //Create filter: other services
-            let services_filter = CustomFilter::typed(ServiceGObject::is_service);
-
-            //VM filter by default
-            let filter_model = FilterListModel::new(Some(model), Some(vm_filter.clone()));
-
-            // Wrap model with selection and pass it to the list view
             let selection_model =
-                SingleSelection::new(Some(filter_model.clone())).wrap::<ServiceGObject>();
-            // Connect to the selection-changed and items-changed signals
+                SingleSelection::new(Some(model.clone())).wrap::<ServiceGObject>();
             selection_model.connect_selection_changed(glib::clone!(
                 #[strong(rename_to = window)]
                 self.obj(),
@@ -167,51 +149,15 @@ mod imp {
             ));
 
             self.services_list_view.set_model(Some(&*selection_model));
-
             self.bind_service_settings_box_visibility();
-
-            //bind filter change
-            let filter_model_clone_vm = filter_model.clone();
-            let selection_model_clone_vm = selection_model.clone();
-            let filter_model_clone_app = filter_model.clone();
-            let selection_model_clone_app = selection_model.clone();
-
-            let count = self
-                .services_list_view
-                .model()
-                .expect("no model!")
-                .n_items();
-
-            self.vm_view_button.connect_toggled(move |button| {
-                if button.is_active() {
-                    debug!("Filter is about to change to vm");
-                    filter_model_clone_vm.set_filter(Some(&vm_filter));
-                    Self::set_default_selection(&selection_model_clone_vm, count);
-                }
-            });
-
-            self.app_view_button.connect_toggled(move |button| {
-                if button.is_active() {
-                    debug!("Filter is about to change to app");
-                    filter_model_clone_app.set_filter(Some(&app_filter));
-                    Self::set_default_selection(&selection_model_clone_app, count);
-                }
-            });
-
-            self.services_view_button.connect_toggled(move |button| {
-                if button.is_active() {
-                    debug!("Filter is about to change to services");
-                    filter_model.set_filter(Some(&services_filter));
-                    Self::set_default_selection(&selection_model, count);
-                }
-            });
+            Self::set_default_selection(&selection_model, model.n_items());
         }
 
         fn bind_service_settings_box_visibility(&self) {
-            let service_settings_box = self.service_settings_box.clone().upcast::<gtk::Widget>();
+            let service_settings_box = self.service_settings_box.upcast_ref::<gtk::Widget>();
             if let Some(model) = self.services_list_view.model() {
                 model
-                    .bind_property("n_items", &service_settings_box, "visible")
+                    .bind_property("n_items", service_settings_box, "visible")
                     .sync_create()
                     .transform_to(move |_, count: u32| Some(count != 0))
                     .build();
@@ -299,7 +245,7 @@ impl ControlPanelGuiWindow {
 
         //get application reference
 
-        self.imp().setup_service_rows(app.get_model()); //ListStore doc: "GLib type: GObject with reference counted clone semantics."
+        self.imp().setup_service_rows(&app.get_model());
         self.imp().setup_factory();
         //vm view by default
         self.imp().vm_view_button.set_active(true);
@@ -328,7 +274,7 @@ impl ControlPanelGuiWindow {
                             break;
                         }
                     }
-                    glib::timeout_future_seconds(5).await;
+                    glib::timeout_future_seconds(1).await;
                 }
             }
         ));

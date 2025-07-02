@@ -9,5 +9,4 @@ pub enum ControlAction {
     Pause,
     Resume,
     Shutdown,
-    Monitor,
 }

@@ -99,6 +99,7 @@ impl<T: IsA<Object>, L: IsA<SingleSelection> + IsA<ListModel>> TypedSelectionWra
     }
 }
 
+#[allow(dead_code)]
 pub trait TypedStoreWrapperExt<T: IsA<Object>> {
     fn retain<F: Fn(&T) -> bool>(&self, f: F);
     fn append(&self, item: &T);

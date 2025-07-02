@@ -494,6 +494,7 @@ dependencies = [
 name = "control_panel_gui"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "async-channel",
  "chrono",
  "clap",
@@ -511,7 +512,6 @@ dependencies = [
  "regex",
  "secrecy",
  "serde",
- "serde_json",
  "strum",
  "syslog",
  "thiserror",

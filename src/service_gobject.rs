@@ -126,6 +126,22 @@ impl ServiceGObject {
     pub fn is_service(&self) -> bool {
         !self.is_vm() && !self.is_app()
     }
+
+    pub fn sort_key(&self) -> (String, bool, String) {
+        (
+            (!self.is_vm() && !self.is_app())
+                .then(|| {
+                    self.name()
+                        .strip_prefix("givc-")
+                        .and_then(|name| name.strip_suffix(".service"))
+                        .map(ToOwned::to_owned)
+                })
+                .flatten()
+                .unwrap_or_else(|| self.vm_name()),
+            !self.is_vm(),
+            self.name(),
+        )
+    }
 }
 
 impl From<QueryResult> for ServiceGObject {
