@@ -75,6 +75,13 @@ impl ServiceRow {
 
         let name_property = if is_vm { "display-name" } else { "name" };
 
+        let margin_binding = object
+            .bind_property("is-vm", self, "margin-start")
+            .transform_to(move |_, is_vm: bool| Some(if is_vm { 0i32 } else { 16 }))
+            .sync_create()
+            .build();
+        bindings.push(margin_binding);
+
         let title_binding = object
             .bind_property(name_property, &title, "label")
             //.bidirectional()

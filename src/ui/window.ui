@@ -58,39 +58,13 @@
                 <child>
                   <object class="GtkToggleButton" id="vm_view_button">
                     <style><class name="header-toggle-button"/></style>
-                    <property name="label">Virtual machines</property>
-                    <property name="halign">end</property>
-                    <property name="valign">center</property>
-                    <property name="width-request">160</property>
-                    <property name="height-request">30</property>
-                    <property name="vexpand">false</property>
-                    <signal name="toggled" handler="switch_to_vm_view" swapped="true"/>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkToggleButton" id="app_view_button">
-                    <style><class name="header-toggle-button"/></style>
-                    <property name="label">Applications</property>
-                    <property name="halign">end</property>
-                    <property name="valign">center</property>
-                    <property name="width-request">160</property>
-                    <property name="height-request">30</property>
-                    <property name="vexpand">false</property>
-                    <signal name="toggled" handler="switch_to_app_view" swapped="true"/>
-                    <property name="group">vm_view_button</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkToggleButton" id="services_view_button">
-                    <style><class name="header-toggle-button"/></style>
                     <property name="label">Services</property>
                     <property name="halign">end</property>
                     <property name="valign">center</property>
                     <property name="width-request">160</property>
                     <property name="height-request">30</property>
                     <property name="vexpand">false</property>
-                    <signal name="toggled" handler="switch_to_services_view" swapped="true"/>
-                    <property name="group">vm_view_button</property>
+                    <signal name="toggled" handler="switch_to_vm_view" swapped="true"/>
                   </object>
                 </child>
                 <child>

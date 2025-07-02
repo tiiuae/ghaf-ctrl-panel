@@ -140,6 +140,95 @@
       </object>
     </child>
     <child>
+      <object class="GtkBox" id="resources_info_box">
+        <style><class name="info-box"/></style>
+        <property name="orientation">vertical</property>
+        <property name="vexpand">false</property>
+        <property name="hexpand">false</property>
+        <property name="margin-start">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">10</property>
+        <child>
+          <object class="GtkSeparator"/>
+        </child>
+        <child>
+          <object class="GtkLabel" id="memory_label">
+            <style><class name="normal-text"/></style>
+            <property name="label">Memory usage:</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
+            <property name="halign">start</property>
+          </object>
+        </child>
+        <child>
+          <object class="Plot" id="memory_plot">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="width-request">320</property>
+            <property name="height-request">80</property>
+            <property name="halign">start</property>
+            <child>
+              <object class="Serie" id="mem_used_serie">
+                <property name="color">darkgreen</property>
+              </object>
+            </child>
+            <child>
+              <object class="Serie" id="mem_needed_serie">
+                <property name="color">green</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="cpu_label">
+            <style><class name="normal-text"/></style>
+            <property name="label">CPU usage:</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
+            <property name="halign">start</property>
+          </object>
+        </child>
+        <child>
+          <object class="Plot" id="cpu_plot">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="width-request">320</property>
+            <property name="height-request">80</property>
+            <property name="halign">start</property>
+            <child>
+              <object class="Serie" id="cpu_sys_serie">
+                <property name="color">purple</property>
+              </object>
+            </child>
+            <child>
+              <object class="Serie" id="cpu_user_serie">
+                <property name="color">magenta</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="network_label">
+            <style><class name="normal-text"/></style>
+            <property name="label">Network usage:</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
+            <property name="halign">start</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkProgressBar" id="network_bar">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="width-request">320</property>
+            <property name="height-request">20</property>
+            <property name="halign">start</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
       <object class="GtkSeparator" id="wireguard_section_separator">
         <property name="margin-start">10</property>
       </object>
