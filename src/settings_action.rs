@@ -13,7 +13,6 @@ pub enum SettingsAction {
         timezone: String,
     },
     DateNTime,
-    MouseSpeed,
     KeyboardLayout,
     Speaker {
         id: i32,

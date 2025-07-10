@@ -23,7 +23,6 @@ mod imp {
     use crate::info_settings_page::InfoSettingsPage;
     use crate::keyboard_settings_page::KeyboardSettingsPage;
     use crate::language_region_settings_page::LanguageRegionSettingsPage;
-    use crate::mouse_settings_page::MouseSettingsPage;
     use crate::security_settings_page::SecuritySettingsPage;
     use crate::service_gobject::ServiceGObject;
     use crate::settings_action::SettingsAction;
@@ -46,8 +45,6 @@ mod imp {
         pub wifi_settings_page: TemplateChild<WifiSettingsPage>,
         #[template_child]
         pub keyboard_settings_page: TemplateChild<KeyboardSettingsPage>,
-        #[template_child]
-        pub mouse_settings_page: TemplateChild<MouseSettingsPage>,
         #[template_child]
         pub audio_settings_page: TemplateChild<AudioSettings>,
         #[template_child]
