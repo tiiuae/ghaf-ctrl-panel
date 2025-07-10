@@ -3,7 +3,6 @@ use gio::ListModel;
 use gtk::prelude::*;
 use gtk::{gio, glib};
 
-use crate::add_network_popup::AddNetworkPopup;
 use crate::control_action::ControlAction;
 use crate::data_gobject::DataGObject;
 use crate::error_popup::ErrorPopup;
@@ -304,41 +303,6 @@ impl ControlPanelGuiApplication {
         ));
     }
 
-    fn show_add_network_popup(&self) {
-        let popup = AddNetworkPopup::new();
-        popup.set_transient_for(self.active_window().as_ref());
-        popup.set_modal(true);
-        popup.connect_local(
-            "new-network",
-            false,
-            glib::clone!(
-                #[strong(rename_to = app)]
-                self,
-                move |values| {
-                    //the value[0] is self
-                    let mut values = values.iter().skip(1).flat_map(glib::Value::get::<String>);
-                    let name = values.next().unwrap();
-                    let security = values.next().unwrap();
-                    let password = values.next().unwrap();
-                    debug!("New network: {name}, {security}, {password}");
-                    glib::spawn_future_local(glib::clone!(
-                        #[strong(rename_to = app)]
-                        app,
-                        async move {
-                            app.imp()
-                                .service_model
-                                .add_network(name, security, password)
-                                .await
-                                .ok();
-                        }
-                    ));
-                    None
-                }
-            ),
-        );
-        popup.present();
-    }
-
     fn open_wireguard(&self, vm: &ServiceGObject) {
         debug!("wireguard vm {vm}", vm = vm.name()); // Output: business-vm
 
@@ -362,8 +326,6 @@ impl ControlPanelGuiApplication {
     pub fn perform_setting_action(&self, action: SettingsAction) {
         eprintln!("Performing settings action... {action:?}");
         match action {
-            SettingsAction::AddNetwork => todo!(),
-            SettingsAction::RemoveNetwork => todo!(),
             SettingsAction::RegionNLanguage { locale, timezone } => {
                 self.imp().set_locale_timezone(locale, timezone);
             }
@@ -425,7 +387,6 @@ impl ControlPanelGuiApplication {
                     .borrow()
                     .set_device_volume(id, dev_type as i32, volume);
             }
-            SettingsAction::ShowAddNetworkPopup => self.show_add_network_popup(),
             SettingsAction::ShowErrorPopup { message } => {
                 let popup = ErrorPopup::new(&message);
                 popup.set_transient_for(self.active_window().as_ref());
