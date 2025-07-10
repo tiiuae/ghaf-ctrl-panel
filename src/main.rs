@@ -1,4 +1,3 @@
-mod add_network_popup;
 mod admin_settings_page;
 mod application;
 mod audio_control;
@@ -29,7 +28,6 @@ mod typed_list_store;
 mod vm_row;
 mod vm_status;
 mod volume_widget;
-mod wifi_settings_page;
 mod window;
 mod wireguard_vms;
 

@@ -6,8 +6,6 @@ use gtk::glib;
 #[boxed_type(name = "SettingsAction")]
 #[repr(u8)]
 pub enum SettingsAction {
-    AddNetwork,
-    RemoveNetwork,
     RegionNLanguage {
         locale: String,
         timezone: String,
@@ -40,7 +38,6 @@ pub enum SettingsAction {
         dev_type: AudioDeviceType,
         muted: bool,
     },
-    ShowAddNetworkPopup,
     ShowErrorPopup {
         message: String,
     },

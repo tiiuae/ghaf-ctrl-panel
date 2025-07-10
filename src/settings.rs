@@ -24,7 +24,6 @@ mod imp {
     use crate::security_settings_page::SecuritySettingsPage;
     use crate::service_gobject::ServiceGObject;
     use crate::settings_action::SettingsAction;
-    use crate::wifi_settings_page::WifiSettingsPage;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/settings.ui")]
@@ -39,8 +38,6 @@ mod imp {
         pub info_settings_page: TemplateChild<InfoSettingsPage>,
         #[template_child]
         pub security_settings_page: TemplateChild<SecuritySettingsPage>,
-        #[template_child]
-        pub wifi_settings_page: TemplateChild<WifiSettingsPage>,
         #[template_child]
         pub audio_settings_page: TemplateChild<AudioSettings>,
         #[template_child]
@@ -73,11 +70,6 @@ mod imp {
         fn on_settings_row_selected(&self, row: &gtk::ListBoxRow) {
             self.stack
                 .set_visible_child_name(row.widget_name().as_str());
-        }
-        #[template_callback]
-        fn on_show_add_network_popup(&self) {
-            let action = SettingsAction::ShowAddNetworkPopup;
-            self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
 
         #[template_callback]
