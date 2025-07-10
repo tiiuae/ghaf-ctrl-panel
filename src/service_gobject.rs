@@ -64,19 +64,19 @@ glib::wrapper! {
 
 impl ServiceGObject {
     pub fn new(
-        name: String,
-        details: String,
+        name: &str,
+        details: &str,
         status: impl Into<VMStatus>,
         trust_level: impl Into<TrustLevel>,
         service_type: ServiceType,
-        vm_name: Option<String>,
+        vm_name: Option<&str>,
     ) -> Self {
         let is_vm = service_type == ServiceType::VM;
         let is_app = service_type == ServiceType::App;
         let status = status.into();
 
         let display_name = if is_vm {
-            vm_name.clone().unwrap_or_default()
+            vm_name.unwrap_or("")
         } else if is_app {
             name.strip_suffix(".service")
                 .and_then(|name| name.rsplit_once('@'))
@@ -85,11 +85,11 @@ impl ServiceGObject {
                         .chars()
                         .by_ref()
                         .all(|c| c.is_ascii_digit())
-                        .then(|| name.to_owned())
+                        .then_some(name)
                 })
-                .unwrap_or_default()
+                .unwrap_or("")
         } else {
-            String::new()
+            ""
         };
 
         debug!(
@@ -98,7 +98,7 @@ impl ServiceGObject {
                 details: {details}, status: {status}",
         );
 
-        let has_wireguard = is_vm && vm_name.as_ref().is_some_and(|s| static_contains(s));
+        let has_wireguard = is_vm && vm_name.is_some_and(static_contains);
 
         Object::builder()
             .property("name", name)
@@ -157,12 +157,12 @@ impl From<QueryResult> for ServiceGObject {
         }: QueryResult,
     ) -> Self {
         Self::new(
-            name,
-            description,
+            &name,
+            &description,
             status,
             trust_level,
             service_type,
-            vm_name,
+            vm_name.as_deref(),
         )
     }
 }
