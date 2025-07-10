@@ -367,7 +367,6 @@ impl ControlPanelGuiApplication {
             SettingsAction::RegionNLanguage { locale, timezone } => {
                 self.imp().set_locale_timezone(locale, timezone);
             }
-            SettingsAction::DateNTime => todo!(),
             SettingsAction::Speaker { id, dev_type } => {
                 debug!("Speaker changed: {id}");
                 self.imp()

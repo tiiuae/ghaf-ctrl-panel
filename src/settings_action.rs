@@ -12,7 +12,6 @@ pub enum SettingsAction {
         locale: String,
         timezone: String,
     },
-    DateNTime,
     Speaker {
         id: i32,
         dev_type: AudioDeviceType,

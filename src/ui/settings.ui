@@ -104,22 +104,6 @@
             </child>
             <child>
               <object class="AdwActionRow">
-                <property name="name">date_time</property>
-                <style><class name="settings-row"/></style>
-                <property name="title">Date &amp;amp; Time</property>
-                <child type="prefix">
-                  <object class="GtkImage">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="resource">/org/gnome/controlpanelgui/icons/icon_clock.svg</property>
-                    <property name="width-request">24</property>
-                    <property name="height-request">24</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="AdwActionRow">
                 <property name="name">locale</property>
                 <style><class name="settings-row"/></style>
                 <property name="title">Region &amp;amp; Language</property>
@@ -201,23 +185,6 @@
                     <signal name="mic-mute-changed" handler="on_mic_mute_changed" swapped="true"/>
                     <signal name="speaker-mute-changed" handler="on_speaker_mute_changed" swapped="true"/>
                     <signal name="open-advanced-audio-settings" handler="on_open_advanced_audio_settings" swapped="true"/>
-                  </object>
-                </property>
-              </object>
-            </child>
-            <child> <!-- Date&Time view child -->
-              <object class="GtkStackPage">
-                <property name="name">date_time</property>
-                <property name="child">
-                  <object class="GtkLabel">
-                    <property name="label">Date &amp; Time</property>
-                    <style><class name="title"/></style>
-                    <property name="margin-start">10</property>
-                    <property name="margin-end">10</property>
-                    <property name="margin-top">10</property>
-                    <property name="margin-bottom">10</property>
-                    <property name="halign">start</property>
-                    <property name="valign">start</property>
                   </object>
                 </property>
               </object>
