@@ -11,7 +11,6 @@ mod data_gobject;
 mod error_popup;
 mod github;
 mod info_settings_page;
-mod keyboard_settings_page;
 mod language_region_notify_popup;
 mod language_region_settings_page;
 mod locale_provider;

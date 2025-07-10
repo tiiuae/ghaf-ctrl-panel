@@ -368,7 +368,6 @@ impl ControlPanelGuiApplication {
                 self.imp().set_locale_timezone(locale, timezone);
             }
             SettingsAction::DateNTime => todo!(),
-            SettingsAction::KeyboardLayout => todo!(),
             SettingsAction::Speaker { id, dev_type } => {
                 debug!("Speaker changed: {id}");
                 self.imp()
@@ -428,7 +427,6 @@ impl ControlPanelGuiApplication {
                     .set_device_volume(id, dev_type as i32, volume);
             }
             SettingsAction::ShowAddNetworkPopup => self.show_add_network_popup(),
-            SettingsAction::ShowAddKeyboardPopup => todo!(),
             SettingsAction::ShowErrorPopup { message } => {
                 let popup = ErrorPopup::new(&message);
                 popup.set_transient_for(self.active_window().as_ref());

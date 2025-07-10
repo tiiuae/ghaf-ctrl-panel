@@ -13,7 +13,6 @@ pub enum SettingsAction {
         timezone: String,
     },
     DateNTime,
-    KeyboardLayout,
     Speaker {
         id: i32,
         dev_type: AudioDeviceType,
@@ -43,7 +42,6 @@ pub enum SettingsAction {
         muted: bool,
     },
     ShowAddNetworkPopup,
-    ShowAddKeyboardPopup,
     ShowErrorPopup {
         message: String,
     },
