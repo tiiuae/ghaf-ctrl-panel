@@ -4,7 +4,6 @@ use gtk::prelude::*;
 use gtk::{gio, glib};
 
 use crate::add_network_popup::AddNetworkPopup;
-use crate::confirm_display_settings_popup::ConfirmDisplaySettingsPopup;
 use crate::control_action::ControlAction;
 use crate::data_gobject::DataGObject;
 use crate::error_popup::ErrorPopup;
@@ -15,7 +14,6 @@ use crate::service_gobject::ServiceGObject;
 pub use crate::service_model::StatsResponse;
 use crate::settings_action::SettingsAction;
 use crate::volume_widget::VolumeWidget;
-use crate::ControlPanelGuiWindow;
 use givc_client::endpoint::TlsConfig;
 use log::debug;
 
@@ -341,21 +339,6 @@ impl ControlPanelGuiApplication {
         popup.present();
     }
 
-    fn show_confirm_display_settings_popup(&self) {
-        let window = self.active_window();
-        let popup = ConfirmDisplaySettingsPopup::new();
-        popup.set_transient_for(window.as_ref());
-        popup.set_modal(true);
-        popup.connect_local("reset-default", false, move |_| {
-            if let Some(window) = window.and_downcast_ref::<ControlPanelGuiWindow>() {
-                window.restore_default_display_settings();
-            }
-            None
-        });
-        popup.present();
-        popup.launch_close_timer(5);
-    }
-
     fn open_wireguard(&self, vm: &ServiceGObject) {
         debug!("wireguard vm {vm}", vm = vm.name()); // Output: business-vm
 
@@ -447,9 +430,6 @@ impl ControlPanelGuiApplication {
             }
             SettingsAction::ShowAddNetworkPopup => self.show_add_network_popup(),
             SettingsAction::ShowAddKeyboardPopup => todo!(),
-            SettingsAction::ShowConfirmDisplaySettingsPopup => {
-                self.show_confirm_display_settings_popup();
-            }
             SettingsAction::ShowErrorPopup { message } => {
                 let popup = ErrorPopup::new(&message);
                 popup.set_transient_for(self.active_window().as_ref());
