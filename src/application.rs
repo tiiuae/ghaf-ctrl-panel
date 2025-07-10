@@ -368,7 +368,6 @@ impl ControlPanelGuiApplication {
                 self.imp().set_locale_timezone(locale, timezone);
             }
             SettingsAction::DateNTime => todo!(),
-            SettingsAction::MouseSpeed => todo!(),
             SettingsAction::KeyboardLayout => todo!(),
             SettingsAction::Speaker { id, dev_type } => {
                 debug!("Speaker changed: {id}");

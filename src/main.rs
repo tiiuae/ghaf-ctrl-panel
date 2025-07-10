@@ -15,7 +15,6 @@ mod keyboard_settings_page;
 mod language_region_notify_popup;
 mod language_region_settings_page;
 mod locale_provider;
-mod mouse_settings_page;
 mod plot;
 mod prelude;
 mod security_icon;
