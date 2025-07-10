@@ -20,7 +20,6 @@ mod imp {
     use crate::audio_settings::AudioSettings;
     use crate::bug_report_settings_page::BugReportSettingsPage;
     use crate::control_action::ControlAction;
-    use crate::display_settings_page::DisplaySettingsPage;
     use crate::info_settings_page::InfoSettingsPage;
     use crate::keyboard_settings_page::KeyboardSettingsPage;
     use crate::language_region_settings_page::LanguageRegionSettingsPage;
@@ -51,8 +50,6 @@ mod imp {
         pub mouse_settings_page: TemplateChild<MouseSettingsPage>,
         #[template_child]
         pub audio_settings_page: TemplateChild<AudioSettings>,
-        #[template_child]
-        pub display_settings_page: TemplateChild<DisplaySettingsPage>,
         #[template_child]
         pub language_region_settings_page: TemplateChild<LanguageRegionSettingsPage>,
         #[template_child]
@@ -114,20 +111,6 @@ mod imp {
         #[template_callback]
         fn on_locale_timezone_changed(&self, locale: String, timezone: String) {
             let action = SettingsAction::RegionNLanguage { locale, timezone };
-            self.obj().emit_by_name::<()>("settings-action", &[&action]);
-        }
-
-        #[template_callback]
-        fn on_show_confirm_display_settings_popup(&self) {
-            let action = SettingsAction::ShowConfirmDisplaySettingsPopup;
-            self.obj().emit_by_name::<()>("settings-action", &[&action]);
-        }
-
-        #[template_callback]
-        fn on_show_error_popup(&self) {
-            let action = SettingsAction::ShowErrorPopup {
-                message: "Display settings cannot be set.".into(),
-            };
             self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
 
@@ -287,10 +270,6 @@ impl Settings {
         for binding in self.imp().bindings.borrow_mut().drain(..) {
             binding.unbind();
         }
-    }
-
-    pub fn restore_default_display_settings(&self) {
-        self.imp().display_settings_page.restore_default();
     }
 
     pub fn set_audio_devices(&self, devices: ListModel) {

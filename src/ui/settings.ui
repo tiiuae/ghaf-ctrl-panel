@@ -120,22 +120,6 @@
             </child>
             <child>
               <object class="AdwActionRow">
-                <property name="name">display</property>
-                <style><class name="settings-row"/></style>
-                <property name="title">Display</property>
-                <child type="prefix">
-                  <object class="GtkImage">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="resource">/org/gnome/controlpanelgui/icons/icon_monitor.svg</property>
-                    <property name="width-request">24</property>
-                    <property name="height-request">24</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="AdwActionRow">
                 <property name="name">audio</property>
                 <style><class name="settings-row"/></style>
                 <property name="title">Audio</property>
@@ -268,17 +252,6 @@
                 <property name="name">mouse</property>
                 <property name="child">
                   <object class="MouseSettingsPage" id="mouse_settings_page">
-                  </object>
-                </property>
-              </object>
-            </child>
-            <child> <!-- Display view child -->
-              <object class="GtkStackPage">
-                <property name="name">display</property>
-                <property name="child">
-                  <object class="DisplaySettingsPage" id="display_settings_page">
-                    <signal name="display-settings-changed" handler="on_show_confirm_display_settings_popup" swapped="true"/>
-                    <signal name="display-settings-error" handler="on_show_error_popup" swapped="true"/>
                   </object>
                 </property>
               </object>

@@ -283,10 +283,6 @@ impl ControlPanelGuiWindow {
     }
 
     //pub API
-    pub fn restore_default_display_settings(&self) {
-        self.imp().settings_box.restore_default_display_settings();
-    }
-
     pub fn set_locale_model(&self, model: impl IsA<ListModel>, selected: Option<usize>) {
         self.imp().settings_box.set_locale_model(model, selected);
     }

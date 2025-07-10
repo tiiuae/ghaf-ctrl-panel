@@ -45,7 +45,6 @@ pub enum SettingsAction {
     },
     ShowAddNetworkPopup,
     ShowAddKeyboardPopup,
-    ShowConfirmDisplaySettingsPopup,
     ShowErrorPopup {
         message: String,
     },

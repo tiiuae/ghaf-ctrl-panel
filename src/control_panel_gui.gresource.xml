@@ -13,12 +13,10 @@
     <file preprocess="xml-stripblanks">ui/keyboard_settings_page.ui</file>
     <file preprocess="xml-stripblanks">ui/mouse_settings_page.ui</file>
     <file preprocess="xml-stripblanks">ui/admin_settings_page.ui</file>
-    <file preprocess="xml-stripblanks">ui/display_settings_page.ui</file>
     <file preprocess="xml-stripblanks">ui/language_region_settings_page.ui</file>
     <file preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
     <file preprocess="xml-stripblanks">ui/connection_config.ui</file>
     <file preprocess="xml-stripblanks">ui/add_network_popup.ui</file>
-    <file preprocess="xml-stripblanks">ui/confirm_display_settings_popup.ui</file>
     <file preprocess="xml-stripblanks">ui/error_popup.ui</file>
     <file preprocess="xml-stripblanks">ui/language_region_notify_popup.ui</file>
     <file preprocess="xml-stripblanks">ui/bug_report_settings_page.ui</file>
@@ -34,7 +32,6 @@
     <file>icons/icon_wifi.svg</file>
     <file>icons/icon_clock.svg</file>
     <file>icons/icon_region_location.svg</file>
-    <file>icons/icon_monitor.svg</file>
     <file>icons/icon_mouse.svg</file>
     <file>icons/icon_keyboard.svg</file>
     <file>icons/icon_audio.svg</file>
