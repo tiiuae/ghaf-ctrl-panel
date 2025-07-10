@@ -240,11 +240,24 @@ mod imp {
         where
             ServiceGObject: From<T>,
         {
+            use crate::trust_level::TrustLevel;
+            use crate::vm_status::VMStatus;
+            use givc_common::types::ServiceType;
+
             let n = self.services.borrow().len();
             if n == 0 {
-                self.services
-                    .borrow_mut()
-                    .extend(iter.into_iter().map(ServiceGObject::from));
+                self.services.borrow_mut().extend(
+                    iter.into_iter()
+                        .map(ServiceGObject::from)
+                        .chain(Some(ServiceGObject::new(
+                            "ghaf-host",
+                            "Host operating system",
+                            VMStatus::Running,
+                            TrustLevel::Warning,
+                            ServiceType::VM,
+                            Some("ghaf-host"),
+                        ))),
+                );
                 self.services
                     .borrow_mut()
                     .sort_by_cached_key(ServiceGObject::sort_key);
@@ -273,36 +286,36 @@ mod imp {
 
             self.extend([
                 ServiceGObject::new(
-                    "microvm@zathura-vm.service".to_string(),
-                    String::from("This is the file.pdf and very very long description"),
+                    "microvm@zathura-vm.service",
+                    "This is the file.pdf and very very long description",
                     VMStatus::Running,
                     TrustLevel::NotSecure,
                     ServiceType::VM,
-                    Some(String::from("zathura-vm")),
+                    Some("zathura-vm"),
                 ),
                 ServiceGObject::new(
-                    "zathura@1.service".to_string(),
-                    String::from("Zathura"),
+                    "zathura@1.service",
+                    "Zathura",
                     VMStatus::Paused,
                     TrustLevel::Secure,
                     ServiceType::App,
-                    Some(String::from("zathura-vm")),
+                    Some("zathura-vm"),
                 ),
                 ServiceGObject::new(
-                    "chrome@1.service".to_string(),
-                    String::from("Google Chrome"),
+                    "chrome@1.service",
+                    "Google Chrome",
                     VMStatus::Paused,
                     TrustLevel::Secure,
                     ServiceType::App,
-                    Some(String::from("TestVM")),
+                    Some("TestVM"),
                 ),
                 ServiceGObject::new(
-                    "appflowy@1.service".to_string(),
-                    String::from("AppFlowy"),
+                    "appflowy@1.service",
+                    "AppFlowy",
                     VMStatus::Running,
                     TrustLevel::Secure,
                     ServiceType::Svc,
-                    Some(String::from("appflowy-vm")),
+                    Some("appflowy-vm"),
                 ),
             ]);
         }
@@ -337,26 +350,26 @@ mod imp {
                 async move {
                     glib::timeout_future_seconds(3).await;
                     model.imp().extend(Some(ServiceGObject::new(
-                        "microvm@appflowy-vm.service".to_string(),
-                        String::from("AppFlow VM"),
+                        "microvm@appflowy-vm.service",
+                        "AppFlow VM",
                         VMStatus::Running,
                         TrustLevel::NotSecure,
                         ServiceType::VM,
-                        Some(String::from("appflowy-vm")),
+                        Some("appflowy-vm"),
                     )));
                     glib::timeout_future_seconds(3).await;
                     model.imp().extend(Some(ServiceGObject::new(
-                        "zathura@2.service".to_string(),
-                        String::from("Zathura"),
+                        "zathura@2.service",
+                        "Zathura",
                         VMStatus::Paused,
                         TrustLevel::Secure,
                         ServiceType::App,
-                        Some(String::from("zathura-vm")),
+                        Some("zathura-vm"),
                     )));
                     glib::timeout_future_seconds(3).await;
                     model.imp().extend(Some(ServiceGObject::new(
-                        "givc-appflowy-vm.service".to_string(),
-                        String::from("Zathura agent"),
+                        "givc-appflowy-vm.service",
+                        "Zathura agent",
                         VMStatus::Running,
                         TrustLevel::Secure,
                         ServiceType::Mgr,
@@ -598,17 +611,6 @@ impl ServiceModel {
                 ..Default::default()
             })
         }
-    }
-
-    #[allow(clippy::unused_async, clippy::unused_self)]
-    pub async fn add_network(
-        &self,
-        _name: String,
-        _security: String,
-        _password: String,
-    ) -> Result<(), anyhow::Error> {
-        warn!("Not yet implemented!");
-        Ok(())
     }
 
     #[allow(clippy::unused_async, clippy::unused_self)]
