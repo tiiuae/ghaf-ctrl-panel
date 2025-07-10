@@ -18,7 +18,6 @@ mod imp {
     use crate::admin_settings_page::AdminSettingsPage;
     use crate::audio_device_gobject::AudioDeviceType;
     use crate::audio_settings::AudioSettings;
-    use crate::bug_report_settings_page::BugReportSettingsPage;
     use crate::control_action::ControlAction;
     use crate::info_settings_page::InfoSettingsPage;
     use crate::language_region_settings_page::LanguageRegionSettingsPage;
@@ -46,9 +45,6 @@ mod imp {
         pub audio_settings_page: TemplateChild<AudioSettings>,
         #[template_child]
         pub language_region_settings_page: TemplateChild<LanguageRegionSettingsPage>,
-        #[template_child]
-        pub bug_report_page: TemplateChild<BugReportSettingsPage>,
-
         //pub vm_model: RefCell<ListModel>,
 
         // Vector holding the bindings to properties of `Object`

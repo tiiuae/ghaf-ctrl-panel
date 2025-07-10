@@ -1,7 +1,4 @@
 use gtk::glib;
-use gtk::subclass::prelude::*;
-
-use crate::settings_gobject::SettingsGObject;
 
 mod imp {
     use crate::github::create_github_issue;
@@ -29,7 +26,7 @@ mod imp {
 
     #[derive(Default, CompositeTemplate, Properties)]
     #[properties(wrapper_type = super::BugReportSettingsPage)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/bug_report_settings_page.ui")]
+    #[template(resource = "/org/gnome/bugreport/ui/bug_report_settings_page.ui")]
     pub struct BugReportSettingsPage {
         #[template_child]
         pub qbox_3: TemplateChild<Box>,
@@ -488,18 +485,5 @@ impl BugReportSettingsPage {
             .property("related", "")
             .property("app", "")
             .build()
-    }
-
-    pub fn bind(&self, _settings_object: &SettingsGObject) {
-        //unbind previous ones
-        self.unbind();
-        //make new
-    }
-
-    pub fn unbind(&self) {
-        // Unbind all stored bindings
-        for binding in self.imp().bindings.borrow_mut().drain(..) {
-            binding.unbind();
-        }
     }
 }

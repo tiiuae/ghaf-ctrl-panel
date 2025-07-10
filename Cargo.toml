@@ -42,3 +42,7 @@ glib-build-tools = "0.20"
 [[bin]]
 name = "ctrl-panel"
 path = "src/main.rs"
+
+[[bin]]
+name = "bug-reporter"
+path = "src/bugreport.rs"

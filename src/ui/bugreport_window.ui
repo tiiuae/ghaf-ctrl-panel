@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="Adw" version="1.0"/>
+  <template class="BugReportWindow" parent="AdwApplicationWindow">
+    <property name="title">Ghaf Control panel</property>
+    <property name="default-width">1000</property>
+    <property name="default-height">600</property>
+    <style><class name="main-window"/></style>
+    <child>
+      <object class="AdwToolbarView">
+        <child type="top">
+          <object class="AdwHeaderBar" id="header_bar">
+            <style><class name="adw-header-bar"/></style>
+            <child type="end">
+              <object class="GtkMenuButton" id="header_menu_button">
+                <property name="primary">True</property>
+                <property name="icon-name">open-menu-symbolic</property>
+                <property name="tooltip-text" translatable="yes">Menu</property>
+                <property name="menu-model">primary_menu</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child><!-- Outer box child -->
+          <object class="GtkBox" id="outer_box">
+            <property name="orientation">vertical</property>
+            <property name="hexpand">true</property>
+            <property name="vexpand">true</property>
+            <style><class name="container"/></style>
+            <child> <!-- Report view child -->
+              <object class="BugReportSettingsPage" id="bug_report_page"/>
+            </child>
+          </object>
+        </child>
+      </object> <!-- AdwToolbarView -->
+    </child>
+  </template>
+  <menu id="primary_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Reconnect</attribute>
+        <attribute name="action">app.reconnect</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Connection configuration</attribute>
+        <attribute name="action">app.show-config</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Preferences</attribute>
+        <attribute name="action">app.preferences</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Keyboard Shortcuts</attribute>
+        <attribute name="action">win.show-help-overlay</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_About Controlpanerust</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>
