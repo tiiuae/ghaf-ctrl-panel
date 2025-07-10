@@ -17,7 +17,6 @@
     <file preprocess="xml-stripblanks">ui/add_network_popup.ui</file>
     <file preprocess="xml-stripblanks">ui/error_popup.ui</file>
     <file preprocess="xml-stripblanks">ui/language_region_notify_popup.ui</file>
-    <file preprocess="xml-stripblanks">ui/bug_report_settings_page.ui</file>
     <file preprocess="xml-stripblanks">ui/volume_widget.ui</file>
     <file>styles/style.css</file>
     <!-- Icons -->
