@@ -21,7 +21,6 @@ mod imp {
     use crate::bug_report_settings_page::BugReportSettingsPage;
     use crate::control_action::ControlAction;
     use crate::info_settings_page::InfoSettingsPage;
-    use crate::keyboard_settings_page::KeyboardSettingsPage;
     use crate::language_region_settings_page::LanguageRegionSettingsPage;
     use crate::security_settings_page::SecuritySettingsPage;
     use crate::service_gobject::ServiceGObject;
@@ -43,8 +42,6 @@ mod imp {
         pub security_settings_page: TemplateChild<SecuritySettingsPage>,
         #[template_child]
         pub wifi_settings_page: TemplateChild<WifiSettingsPage>,
-        #[template_child]
-        pub keyboard_settings_page: TemplateChild<KeyboardSettingsPage>,
         #[template_child]
         pub audio_settings_page: TemplateChild<AudioSettings>,
         #[template_child]
@@ -84,11 +81,6 @@ mod imp {
         #[template_callback]
         fn on_show_add_network_popup(&self) {
             let action = SettingsAction::ShowAddNetworkPopup;
-            self.obj().emit_by_name::<()>("settings-action", &[&action]);
-        }
-        #[template_callback]
-        fn on_show_add_new_keyboard_popup(&self) {
-            let action = SettingsAction::ShowAddKeyboardPopup;
             self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
 
