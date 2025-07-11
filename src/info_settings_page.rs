@@ -5,7 +5,6 @@ use gtk::{glib, CustomFilter, FilterListModel, NoSelection};
 
 use crate::prelude::*;
 use crate::service_gobject::ServiceGObject;
-use crate::settings_gobject::SettingsGObject;
 use crate::vm_row::VMRow;
 use crate::ControlPanelGuiWindow;
 use std::fs;
@@ -218,18 +217,5 @@ impl InfoSettingsPage {
 
         // Set the factory of the list view
         self.imp().vm_list_view.set_factory(Some(&*factory));
-    }
-
-    pub fn bind(&self, _settings_object: &SettingsGObject) {
-        //unbind previous ones
-        self.unbind();
-        //make new
-    }
-
-    pub fn unbind(&self) {
-        // Unbind all stored bindings
-        for binding in self.imp().bindings.borrow_mut().drain(..) {
-            binding.unbind();
-        }
     }
 }

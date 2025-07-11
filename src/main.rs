@@ -22,7 +22,6 @@ mod service_row;
 mod service_settings;
 mod settings;
 mod settings_action;
-mod settings_gobject;
 mod trust_level;
 mod typed_list_store;
 mod vm_row;
@@ -38,7 +37,7 @@ use std::path::PathBuf;
 
 use givc_client::endpoint::TlsConfig;
 use gtk::prelude::*;
-use gtk::{gio, glib};
+use gtk::gio;
 use syslog::{BasicLogger, Formatter3164};
 
 use crate::wireguard_vms::initialize_wvm_list;

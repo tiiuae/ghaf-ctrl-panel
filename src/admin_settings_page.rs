@@ -1,7 +1,4 @@
 use gtk::glib;
-use gtk::subclass::prelude::*;
-
-use crate::settings_gobject::SettingsGObject;
 
 mod imp {
     use crate::prelude::*;
@@ -98,18 +95,5 @@ impl Default for AdminSettingsPage {
 impl AdminSettingsPage {
     pub fn new() -> Self {
         glib::Object::builder().build()
-    }
-
-    pub fn bind(&self, _settings_object: &SettingsGObject) {
-        //unbind previous ones
-        self.unbind();
-        //make new
-    }
-
-    pub fn unbind(&self) {
-        // Unbind all stored bindings
-        for binding in self.imp().bindings.borrow_mut().drain(..) {
-            binding.unbind();
-        }
     }
 }
