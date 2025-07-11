@@ -1,7 +1,6 @@
-use futures::FutureExt;
-use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
+use gtk::{gio, glib};
 
 use crate::service_gobject::ServiceGObject;
 use crate::trust_level::TrustLevel;
@@ -14,8 +13,8 @@ mod imp {
     use gtk::prelude::*;
     use gtk::subclass::prelude::*;
     use gtk::{
-        glib, Button, CompositeTemplate, Image, Label, MenuButton, Popover, Revealer, Separator,
-        ToggleButton,
+        gio, glib, Button, CompositeTemplate, Image, Label, MenuButton, Popover, Revealer,
+        Separator, ToggleButton,
     };
     use std::cell::RefCell;
     use std::sync::OnceLock;
@@ -28,6 +27,20 @@ mod imp {
     use crate::serie::Serie;
     use crate::service_gobject::ServiceGObject;
     use crate::settings_action::SettingsAction;
+
+    pub(super) struct CancelGuard(gio::Cancellable);
+
+    impl Drop for CancelGuard {
+        fn drop(&mut self) {
+            self.0.cancel()
+        }
+    }
+
+    impl From<gio::Cancellable> for CancelGuard {
+        fn from(c: gio::Cancellable) -> Self {
+            Self(c)
+        }
+    }
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/service_settings.ui")]
@@ -84,7 +97,7 @@ mod imp {
 
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
-        pub stats_keepalive: RefCell<Option<async_channel::Sender<()>>>,
+        pub(super) stats_cancel: RefCell<Option<CancelGuard>>,
         pub(super) service: RefCell<Option<ServiceGObject>>,
     }
 
@@ -293,22 +306,22 @@ impl ServiceSettings {
             self.imp()
                 .action_menu_button
                 .set_popover(Some(&self.imp().popover_menu.get()));
-            let (tx, rx) = async_channel::bounded::<()>(1);
-            self.imp().stats_keepalive.borrow_mut().replace(tx);
+            let c = gio::Cancellable::new();
+            self.imp()
+                .stats_cancel
+                .borrow_mut()
+                .replace(c.clone().into());
             #[allow(clippy::cast_precision_loss)]
-            glib::spawn_future_local(glib::clone!(
-                #[strong(rename_to = settings)]
-                self,
-                #[strong]
-                object,
-                async move {
-                    let mut i = 1f32;
-                    if let Some(win) = settings
-                        .root()
-                        .and_then(|root| root.downcast::<ControlPanelGuiWindow>().ok())
-                    {
-                        let stats = win.get_stats(object.vm_name());
-                        let updater = async move {
+            glib::spawn_future_local(gio::CancellableFuture::new(
+                glib::clone!(
+                    #[strong(rename_to = settings)]
+                    self,
+                    #[strong]
+                    object,
+                    async move {
+                        let mut i = 1f32;
+                        if let Some(win) = settings.root().and_downcast::<ControlPanelGuiWindow>() {
+                            let stats = win.get_stats(object.vm_name());
                             while let Ok(stats) = stats.recv().await {
                                 if let Some(process) = stats.process {
                                     settings.imp().cpu_user_serie.push(
@@ -339,13 +352,10 @@ impl ServiceSettings {
                                 }
                                 i += 1.;
                             }
-                        };
-                        futures::select! {
-                            _ = rx.recv().fuse() => (),
-                            () = updater.fuse() => (),
-                        };
+                        }
                     }
-                }
+                ),
+                c,
             ));
         } else {
             self.imp()
@@ -465,6 +475,6 @@ impl ServiceSettings {
         self.imp().mem_used_serie.get().clear();
         self.imp().mem_needed_serie.get().clear();
 
-        self.imp().stats_keepalive.borrow_mut().take();
+        self.imp().stats_cancel.borrow_mut().take();
     }
 }

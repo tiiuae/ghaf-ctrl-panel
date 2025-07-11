@@ -6,6 +6,7 @@ default-run = "ctrl-panel"
 
 [dependencies]
 adw = { version = "0.7.2", package = "libadwaita", features = ["v1_4"] }
+anyhow = "1.0.98"
 async-channel = "2.3.1"
 chrono = "0.4"
 clap = {version = "4.5.37", features = ["derive", "env"] }
@@ -28,7 +29,6 @@ zbus = "5.6"
 
 givc-client = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main" }
 givc-common = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main" }
-anyhow = "1.0.98"
 
 [features]
 mock = []
