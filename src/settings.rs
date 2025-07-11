@@ -3,8 +3,6 @@ use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
-use crate::settings_gobject::SettingsGObject;
-
 mod imp {
     use glib::subclass::Signal;
     use glib::Binding;
@@ -233,19 +231,6 @@ impl Settings {
 
         if let Some(row) = self.imp().list_box.row_at_index(0) {
             self.imp().list_box.select_row(Some(&row));
-        }
-    }
-
-    pub fn bind(&self, _settings_object: &SettingsGObject) {
-        //unbind previous ones
-        self.unbind();
-        //make new
-    }
-
-    pub fn unbind(&self) {
-        // Unbind all stored bindings
-        for binding in self.imp().bindings.borrow_mut().drain(..) {
-            binding.unbind();
         }
     }
 
