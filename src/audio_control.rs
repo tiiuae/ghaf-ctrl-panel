@@ -1,9 +1,12 @@
-use futures::StreamExt;
-use gio::ListModel;
-use gtk::{gio, glib, prelude::*};
+#![cfg_attr(feature = "mock", allow(unused_imports))]
+
 use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
+
+use futures::StreamExt;
+use gio::ListModel;
+use gtk::{gio, glib, prelude::*};
 use zbus::Connection;
 
 use crate::audio_device_gobject::{AudioDeviceGObject, AudioDeviceType};
@@ -40,6 +43,7 @@ mod imp {
 type Proxy = imp::GhafAudioProxy<'static>;
 
 #[derive(Debug, Default, Clone)]
+#[cfg_attr(feature = "mock", allow(dead_code))]
 enum ConnectionState {
     #[default]
     Disconnected,
@@ -71,6 +75,7 @@ impl Default for AudioControl {
 impl AudioControl {
     pub fn new() -> Self {
         let devices = TypedListStore::new();
+        #[cfg_attr(feature = "mock", allow(unused_variables))]
         let (tx, rx) = async_channel::bounded(1);
         let connection = Rc::new(RefCell::new(ConnectionState::Connecting(rx)));
         #[cfg(not(feature = "mock"))]

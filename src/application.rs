@@ -7,18 +7,16 @@ use crate::add_network_popup::AddNetworkPopup;
 use crate::confirm_display_settings_popup::ConfirmDisplaySettingsPopup;
 use crate::control_action::ControlAction;
 use crate::data_gobject::DataGObject;
-pub use crate::data_provider::StatsResponse;
 use crate::error_popup::ErrorPopup;
 use crate::plot::Plot;
 use crate::security_icon::SecurityIcon;
 use crate::serie::Serie;
 use crate::service_gobject::ServiceGObject;
+pub use crate::service_model::StatsResponse;
 use crate::settings_action::SettingsAction;
-use crate::stats_window::StatsWindow;
 use crate::volume_widget::VolumeWidget;
 use crate::ControlPanelGuiWindow;
 use givc_client::endpoint::TlsConfig;
-use givc_common::address::EndpointAddress;
 use log::debug;
 
 mod imp {
@@ -29,21 +27,21 @@ mod imp {
     use gtk::CssProvider;
     use gtk::{gdk, gio, glib};
     use std::cell::RefCell;
-    use std::rc::Rc;
 
     use crate::audio_control::AudioControl;
     use crate::connection_config::ConnectionConfig;
     use crate::data_gobject::DataGObject;
-    use crate::data_provider::{DataProvider, LanguageRegionData};
     use crate::language_region_notify_popup::LanguageRegionNotifyPopup;
+    use crate::locale_provider::{LanguageRegionData, LocaleProvider};
     use crate::prelude::*;
+    use crate::service_model::ServiceModel;
+
     use crate::ControlPanelGuiWindow;
-    use givc_common::address::EndpointAddress;
 
     #[derive(Debug, Default, Properties)]
     #[properties(wrapper_type = super::ControlPanelGuiApplication)]
     pub struct ControlPanelGuiApplication {
-        pub(super) data_provider: Rc<RefCell<DataProvider>>,
+        pub(super) service_model: ServiceModel,
         pub(super) audio_control: RefCell<AudioControl>,
 
         #[property(get, set)]
@@ -65,12 +63,6 @@ mod imp {
             self.setup_gactions();
             obj.set_accels_for_action("app.quit", &["<primary>q"]);
             obj.set_accels_for_action("app.reconnect", &["<primary>r"]);
-        }
-
-        fn dispose(&self) {
-            debug!("App obj destroyed!");
-            self.data_provider.borrow().disconnect();
-            drop(self.data_provider.borrow());
         }
     }
 
@@ -98,7 +90,7 @@ mod imp {
                             current_language,
                             timezones,
                             current_timezone,
-                        } = DataProvider::get_timezone_locale_info().await;
+                        } = LocaleProvider::get_timezone_locale_info().await;
 
                         let index = current_language
                             .and_then(|cur| languages.iter().position(|lang| lang.code == cur));
@@ -120,12 +112,6 @@ mod imp {
 
             // Ask the window manager/compositor to present the window
             window.present();
-            //connect on start
-            application
-                .imp()
-                .data_provider
-                .borrow()
-                .establish_connection();
         }
     }
 
@@ -151,11 +137,11 @@ mod imp {
                 #[strong(rename_to = app)]
                 self.obj(),
                 async move {
-                    let locset = app.imp().data_provider.borrow().set_locale(locale);
+                    let locset = app.imp().service_model.set_locale(locale);
                     if let Err(err) = locset.await {
                         warn!("Locale setting failed: {err}");
                     }
-                    let tzset = app.imp().data_provider.borrow().set_timezone(timezone);
+                    let tzset = app.imp().service_model.set_timezone(timezone);
                     if let Err(err) = tzset.await {
                         warn!("Timezone setting failed: {err}");
                     }
@@ -176,29 +162,16 @@ mod imp {
         }
 
         fn setup_gactions(&self) {
-            let reconnect_action = Self::build_action("reconnect", Self::reconnect);
             let show_config_action = Self::build_action("show-config", Self::show_config);
             let quit_action = Self::build_action("quit", Self::clean_n_quit);
             let about_action = Self::build_action("about", Self::show_about);
-            self.obj().add_action_entries([
-                reconnect_action,
-                show_config_action,
-                quit_action,
-                about_action,
-            ]);
-        }
-
-        //reconnect with the same config (addr:port)
-        fn reconnect(&self) {
-            self.data_provider.borrow().reconnect(None);
+            self.obj()
+                .add_action_entries([show_config_action, quit_action, about_action]);
         }
 
         fn show_config(&self) {
-            let address = self.data_provider.borrow().get_current_service_address();
-            let EndpointAddress::Tcp { addr, port } = address else {
-                error!("Unsupported endpoint address");
-                return;
-            };
+            let addr = self.service_model.address();
+            let port = self.service_model.port().try_into().unwrap_or(0u16);
             let config = ConnectionConfig::new(&addr, port);
             config.set_transient_for(self.obj().active_window().as_ref());
             config.set_modal(true);
@@ -212,12 +185,10 @@ mod imp {
                     move |values| {
                         //the value[0] is self
                         let addr = values[1].get::<String>().unwrap();
-                        let port: u16 = values[2].get::<u32>().unwrap().try_into().unwrap();
+                        let port = values[2].get::<u32>().unwrap();
                         debug!("New config applied: address {addr}, port {port}");
-                        app.imp()
-                            .data_provider
-                            .borrow()
-                            .reconnect(Some((addr, port)));
+                        app.imp().service_model.set_address(addr);
+                        app.imp().service_model.set_port(port);
                         None
                     }
                 ),
@@ -227,7 +198,6 @@ mod imp {
         }
 
         fn clean_n_quit(&self) {
-            self.data_provider.borrow().disconnect();
             self.obj().quit();
         }
 
@@ -275,11 +245,11 @@ impl ControlPanelGuiApplication {
             .property("flags", flags)
             .build();
 
-        app.imp()
-            .data_provider
-            .borrow()
-            .set_service_address(EndpointAddress::Tcp { addr, port });
-        app.imp().data_provider.borrow().set_tls_info(tls_info);
+        app.imp().service_model.set_address(addr);
+        app.imp().service_model.set_port(u32::from(port));
+        if let Some((addr, tls_info)) = tls_info {
+            app.imp().service_model.set_tls_info(addr, tls_info);
+        }
 
         //test dbus service
         app.imp()
@@ -295,7 +265,7 @@ impl ControlPanelGuiApplication {
     }
 
     pub fn get_model(&self) -> ListModel {
-        self.imp().data_provider.borrow().get_model()
+        self.imp().service_model.clone().upcast()
     }
 
     pub fn get_audio_devices(&self) -> ListModel {
@@ -305,24 +275,35 @@ impl ControlPanelGuiApplication {
     pub fn get_stats(
         &self,
         vm: String,
-    ) -> impl std::future::Future<Output = Result<StatsResponse, String>> {
-        self.imp().data_provider.borrow().get_stats(vm)
+    ) -> impl std::future::Future<Output = Result<StatsResponse, anyhow::Error>> + use<'_> {
+        self.imp().service_model.get_stats(vm)
     }
 
     pub fn control_service(&self, action: ControlAction, object: ServiceGObject) {
         debug!("Control service {name}, {action:?}", name = object.name());
-        match action {
-            ControlAction::Start => self.imp().data_provider.borrow().start_service(object),
-            ControlAction::Restart => self.imp().data_provider.borrow().restart_service(&object),
-            ControlAction::Pause => self.imp().data_provider.borrow().pause_service(&object),
-            ControlAction::Resume => self.imp().data_provider.borrow().resume_service(&object),
-            ControlAction::Shutdown => self.imp().data_provider.borrow().stop_service(&object),
-            ControlAction::Monitor => {
-                let win = StatsWindow::new(object.vm_name());
-                win.set_application(Some(self));
-                win.set_visible(true);
+        glib::spawn_future_local(glib::clone!(
+            #[strong(rename_to = app)]
+            self,
+            async move {
+                match action {
+                    ControlAction::Start => app
+                        .imp()
+                        .service_model
+                        .start_service(object)
+                        .await
+                        .map(|_| ()),
+                    ControlAction::Restart => app
+                        .imp()
+                        .service_model
+                        .restart_service(&object)
+                        .await
+                        .map(|_| ()),
+                    ControlAction::Pause => app.imp().service_model.pause_service(&object).await,
+                    ControlAction::Resume => app.imp().service_model.resume_service(&object).await,
+                    ControlAction::Shutdown => app.imp().service_model.stop_service(&object).await,
+                }
             }
-        }
+        ));
     }
 
     fn show_add_network_popup(&self) {
@@ -342,10 +323,17 @@ impl ControlPanelGuiApplication {
                     let security = values.next().unwrap();
                     let password = values.next().unwrap();
                     debug!("New network: {name}, {security}, {password}");
-                    app.imp()
-                        .data_provider
-                        .borrow()
-                        .add_network(name, security, password);
+                    glib::spawn_future_local(glib::clone!(
+                        #[strong(rename_to = app)]
+                        app,
+                        async move {
+                            app.imp()
+                                .service_model
+                                .add_network(name, security, password)
+                                .await
+                                .ok();
+                        }
+                    ));
                     None
                 }
             ),
@@ -374,15 +362,22 @@ impl ControlPanelGuiApplication {
         if vm.is_vm() {
             let vm_name = vm.vm_name();
             debug!("wireguard app name {vm_name}"); // Output: business-vm
-            self.imp().data_provider.borrow().start_app_in_vm(
-                "wireguard-gui".into(),
-                vm_name,
-                vec![],
-            );
+            glib::spawn_future_local(glib::clone!(
+                #[strong(rename_to = app)]
+                self,
+                async move {
+                    app.imp()
+                        .service_model
+                        .start_app_in_vm("wireguard-gui".into(), vm_name, vec![])
+                        .await
+                        .ok();
+                }
+            ));
         }
     }
 
     pub fn perform_setting_action(&self, action: SettingsAction) {
+        eprintln!("Performing settings action... {action:?}");
         match action {
             SettingsAction::AddNetwork => todo!(),
             SettingsAction::RemoveNetwork => todo!(),
@@ -471,10 +466,14 @@ impl ControlPanelGuiApplication {
                     .open_advanced_settings_widget();
             }
             SettingsAction::CheckForUpdateRequest => {
-                self.imp().data_provider.borrow().check_for_update();
+                glib::spawn_future_local(glib::clone!(
+                    #[strong(rename_to = app)]
+                    self,
+                    async move { app.imp().service_model.check_for_update().await }
+                ));
             }
             SettingsAction::UpdateRequest => {
-                self.imp().data_provider.borrow().update_request();
+                self.imp().service_model.update_request();
             }
         }
     }
