@@ -186,7 +186,7 @@ mod imp {
             self.service_settings_box.bind(obj);
         }
 
-        pub(super) fn set_audio_devices(&self, devices: ListModel) {
+        pub(super) fn set_audio_devices(&self, devices: impl IsA<ListModel>) {
             self.settings_box.set_audio_devices(devices);
         }
     } //end #[gtk::template_callbacks]
@@ -289,7 +289,7 @@ impl ControlPanelGuiWindow {
         self.imp().settings_box.set_timezone_model(model, selected);
     }
 
-    pub fn set_audio_devices(&self, devices: ListModel) {
+    pub fn set_audio_devices(&self, devices: impl IsA<ListModel>) {
         self.imp().set_audio_devices(devices);
     }
 }
