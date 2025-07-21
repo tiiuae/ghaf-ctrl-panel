@@ -13,7 +13,6 @@ mod imp {
     use std::sync::OnceLock;
 
     //use crate::service_gobject::ServiceGObject; will be used in the future
-    use crate::admin_settings_page::AdminSettingsPage;
     use crate::audio_device_gobject::AudioDeviceType;
     use crate::audio_settings::AudioSettings;
     use crate::control_action::ControlAction;
@@ -29,8 +28,6 @@ mod imp {
         pub list_box: TemplateChild<ListBox>,
         #[template_child]
         pub stack: TemplateChild<Stack>,
-        #[template_child]
-        pub admin_settings_page: TemplateChild<AdminSettingsPage>,
         #[template_child]
         pub security_settings_page: TemplateChild<SecuritySettingsPage>,
         #[template_child]
