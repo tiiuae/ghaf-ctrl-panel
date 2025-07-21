@@ -44,27 +44,13 @@
         <property name="vexpand">false</property>
         <property name="hexpand">false</property>
         <child>
-          <object class="GtkImage" id="status_icon">
+          <object class="StatusIcon" id="status_icon">
             <property name="visible">true</property>
             <property name="can_focus">false</property>
             <property name="margin-top">0</property>
             <property name="valign">center</property>
             <property name="vexpand">false</property>
             <property name="hexpand">false</property>
-            <property name="pixel-size">8</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkLabel" id="status_label">
-            <style><class name="normal-text"/></style>
-            <property name="margin-start">10</property>
-            <property name="margin-end">10</property>
-            <property name="margin-top">10</property>
-            <property name="margin-bottom">10</property>
-            <property name="halign">start</property>
-            <property name="valign">center</property>
-            <property name="xalign">0.0</property>
-            <property name="yalign">0.5</property>
           </object>
         </child>
         <child>
@@ -123,8 +109,8 @@
           <object class="SecurityIcon" id="security_icon">
             <property name="visible">true</property>
             <property name="can_focus">false</property>
-            <property name="width-request">16</property>
             <property name="height-request">20</property>
+            <property name="show-label">true</property>
           </object>
         </child>
         <child>

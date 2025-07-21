@@ -3,13 +3,15 @@ use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
 use crate::service_gobject::ServiceGObject;
-use crate::trust_level::TrustLevel;
 
 mod imp {
+    use std::cell::RefCell;
+
     use glib::Binding;
     use gtk::subclass::prelude::*;
     use gtk::{glib, CompositeTemplate};
-    use std::cell::RefCell;
+
+    use crate::security_icon::SecurityIcon;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/org/gnome/controlpanelgui/ui/service_row.ui")]
@@ -23,7 +25,7 @@ mod imp {
         #[template_child]
         pub vm_icon: TemplateChild<gtk::Image>,
         #[template_child]
-        pub security_icon: TemplateChild<gtk::Image>,
+        pub security_icon: TemplateChild<SecurityIcon>,
 
         // Vector holding the bindings to properties of `TaskObject`
         pub bindings: RefCell<Vec<Binding>>,
@@ -98,9 +100,8 @@ impl ServiceRow {
         bindings.push(subtitle_binding);
 
         let security_binding = object
-            .bind_property("trust-level", &security_icon, "resource")
+            .bind_property("trust-level", &security_icon, "trust-level")
             .sync_create()
-            .transform_to(move |_, trust_level: TrustLevel| Some(trust_level.icon()))
             .build();
         // Save binding
         bindings.push(security_binding);

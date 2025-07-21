@@ -22,10 +22,9 @@ mod service_row;
 mod service_settings;
 mod settings;
 mod settings_action;
-mod trust_level;
+mod status_icon;
 mod typed_list_store;
 mod vm_row;
-mod vm_status;
 mod volume_widget;
 mod window;
 mod wireguard_vms;
@@ -36,8 +35,8 @@ use clap::{Parser, ValueEnum};
 use std::path::PathBuf;
 
 use givc_client::endpoint::TlsConfig;
-use gtk::prelude::*;
 use gtk::gio;
+use gtk::prelude::*;
 use syslog::{BasicLogger, Formatter3164};
 
 use crate::wireguard_vms::initialize_wvm_list;

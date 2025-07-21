@@ -1,12 +1,10 @@
 use gtk::glib::{self, Object};
 use gtk::prelude::*;
 
-use givc_common::query::QueryResult;
+use givc_common::query::{QueryResult, TrustLevel, VMStatus};
 use givc_common::types::ServiceType;
 
 use crate::prelude::*;
-use crate::trust_level::TrustLevel;
-use crate::vm_status::VMStatus;
 use crate::wireguard_vms::static_contains;
 
 mod imp {
@@ -15,8 +13,7 @@ mod imp {
     use gtk::subclass::prelude::*;
     use std::cell::RefCell;
 
-    use crate::trust_level::TrustLevel;
-    use crate::vm_status::VMStatus;
+    use givc_common::query::{TrustLevel, VMStatus};
 
     #[derive(Default)]
     pub struct ServiceData {
@@ -120,7 +117,7 @@ impl ServiceGObject {
     }
 
     pub fn is_vm_running(&self) -> bool {
-        self.is_vm() && self.status() == VMStatus::Running
+        self.is_vm() && matches!(self.status(), VMStatus::Running)
     }
 
     pub fn is_service(&self) -> bool {

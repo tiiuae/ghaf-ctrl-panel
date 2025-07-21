@@ -240,8 +240,7 @@ mod imp {
         where
             ServiceGObject: From<T>,
         {
-            use crate::trust_level::TrustLevel;
-            use crate::vm_status::VMStatus;
+            use givc_common::query::{TrustLevel, VMStatus};
             use givc_common::types::ServiceType;
 
             let n = self.services.borrow().len();
@@ -280,8 +279,7 @@ mod imp {
 
         #[cfg(feature = "mock")]
         fn fill_by_mock_data(&self) {
-            use crate::trust_level::TrustLevel;
-            use crate::vm_status::VMStatus;
+            use givc_common::query::{TrustLevel, VMStatus};
             use givc_common::types::ServiceType;
 
             self.extend([
@@ -339,8 +337,7 @@ mod imp {
         #[cfg(feature = "mock")]
         #[allow(clippy::unused_async)]
         async fn reconnect(&self) {
-            use crate::trust_level::TrustLevel;
-            use crate::vm_status::VMStatus;
+            use givc_common::query::{TrustLevel, VMStatus};
             use givc_common::types::ServiceType;
             self.fill_by_mock_data();
 
