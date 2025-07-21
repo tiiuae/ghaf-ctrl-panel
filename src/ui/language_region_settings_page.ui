@@ -31,7 +31,6 @@
         <property name="spacing">10</property>
         <child>
           <object class="GtkLabel">
-            <style><class name="normal-text"/></style>
             <property name="label">Language</property>
             <property name="halign">start</property>
           </object>
@@ -62,7 +61,6 @@
         <property name="spacing">10</property>
         <child>
           <object class="GtkLabel">
-            <style><class name="normal-text"/></style>
             <property name="label">Timezone</property>
             <property name="halign">start</property>
           </object>

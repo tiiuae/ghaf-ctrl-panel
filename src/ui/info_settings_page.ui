@@ -23,7 +23,6 @@
     </child>
     <child>
       <object class="GtkLabel" id="device_id">
-        <style><class name="normal-text"/></style>
         <property name="label">Logging ID</property>
         <property name="margin-start">10</property>
         <property name="margin-end">10</property>
@@ -45,7 +44,6 @@
         <property name="margin-bottom">10</property>
         <child>
           <object class="GtkLabel" id="memory_label">
-            <style><class name="normal-text"/></style>
             <property name="label">Memory usage:</property>
             <property name="margin-top">10</property>
             <property name="margin-bottom">10</property>
@@ -73,7 +71,6 @@
         </child>
         <child>
           <object class="GtkLabel" id="cpu_label">
-            <style><class name="normal-text"/></style>
             <property name="label">CPU usage:</property>
             <property name="margin-top">10</property>
             <property name="margin-bottom">10</property>
@@ -101,7 +98,6 @@
         </child>
         <child>
           <object class="GtkLabel" id="network_label">
-            <style><class name="normal-text"/></style>
             <property name="label">Network usage:</property>
             <property name="margin-top">10</property>
             <property name="margin-bottom">10</property>
@@ -124,7 +120,6 @@
     </child>
     <child>
       <object class="GtkLabel">
-        <style><class name="normal-text"/></style>
         <property name="label">Running systems:</property>
         <property name="margin-start">10</property>
         <property name="margin-end">10</property>

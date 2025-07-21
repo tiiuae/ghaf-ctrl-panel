@@ -37,7 +37,6 @@
             <property name="margin-bottom">10</property>
             <child>
               <object class="GtkLabel">
-                <style><class name="normal-text"/></style>
                 <property name="label">Identity verification</property>
                 <property name="halign">start</property>
               </object>
@@ -67,7 +66,6 @@
             <property name="margin-bottom">10</property>
             <child>
               <object class="GtkLabel">
-                <style><class name="normal-text"/></style>
                 <property name="label">Login password</property>
                 <property name="halign">start</property>
               </object>
