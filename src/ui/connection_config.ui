@@ -22,7 +22,6 @@
             <child>
               <object class="GtkLabel">
                 <property name="label">Address:</property>
-                <style><class name="normal-text"/></style>
                 <property name="width-request">100</property>
                 <property name="halign">start</property>
               </object>
@@ -42,7 +41,6 @@
             <child>
               <object class="GtkLabel">
                 <property name="label">Port:</property>
-                <style><class name="normal-text"/></style>
                 <property name="width-request">100</property>
                 <property name="halign">start</property>
               </object>

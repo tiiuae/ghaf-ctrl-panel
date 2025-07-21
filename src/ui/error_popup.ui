@@ -28,7 +28,6 @@
         <child>
           <object class="GtkLabel" id="message_to_user">
             <property name="max-width-chars">70</property>
-            <style><class name="normal-text"/></style>
             <property name="halign">center</property>
             <property name="wrap">true</property>
           </object>
@@ -36,7 +35,6 @@
 
         <child>
           <object class="GtkLabel" id="countdown_label">
-            <style><class name="normal-text"/></style>
             <property name="halign">center</property>
           </object>
         </child>

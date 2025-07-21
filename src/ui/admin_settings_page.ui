@@ -34,7 +34,6 @@
             <child>
               <object class="GtkLabel" id="update_status_label">
                 <property name="label">No updates available</property>
-                <style><class name="normal-text"/></style>
                 <property name="halign">start</property>
                 <property name="margin-bottom">10</property>
               </object>
@@ -49,13 +48,11 @@
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkLabel" id="update_version_label">
-                    <style><class name="normal-text"/></style>
                     <property name="halign">start</property>
                   </object>
                 </child>
                 <child>
                   <object class="GtkLabel" id="update_size_label">
-                    <style><class name="normal-text"/></style>
                     <property name="halign">start</property>
                   </object>
                 </child>
@@ -116,7 +113,6 @@
             <child>
               <object class="GtkLabel">
                 <property name="label">Content 2</property>
-                <style><class name="normal-text"/></style>
               </object>
             </child>
           </object>
@@ -137,7 +133,6 @@
             <child>
               <object class="GtkLabel">
                 <property name="label">Content 3</property>
-                <style><class name="normal-text"/></style>
               </object>
             </child>
           </object>

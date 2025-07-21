@@ -48,7 +48,6 @@
     </child>
     <child>
       <object class="GtkLabel">
-        <style><class name="normal-text"/></style>
         <property name="halign">start</property>
         <property name="label">Choose microphone</property>
       </object>
@@ -56,7 +55,6 @@
     <child>
       <object class="GtkDropDown" id="mic_switch">
         <signal name="notify::selected" handler="on_mic_changed" swapped="true"/>
-        <style><class name="dropdown-button"/></style>
         <property name="halign">start</property>
         <property name="valign">center</property>
         <property name="width-request">220</property>
@@ -74,7 +72,6 @@
     </child>
     <child>
       <object class="GtkLabel">
-        <style><class name="normal-text"/></style>
         <property name="halign">start</property>
         <property name="margin-top">10</property>
         <property name="label">Choose speakers</property>
@@ -83,7 +80,6 @@
     <child>
       <object class="GtkDropDown" id="speaker_switch">
         <signal name="notify::selected" handler="on_speaker_changed" swapped="true"/>
-        <style><class name="dropdown-button"/></style>
         <property name="halign">start</property>
         <property name="valign">center</property>
         <property name="width-request">220</property>

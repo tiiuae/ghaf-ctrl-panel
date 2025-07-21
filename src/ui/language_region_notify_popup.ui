@@ -30,7 +30,6 @@
             <property name="label">Some changes may require a reboot to take effect.</property>
             <property name="lines">2</property>
             <property name="max-width-chars">70</property>
-            <style><class name="normal-text"/></style>
             <property name="halign">center</property>
             <property name="wrap">true</property>
           </object>

@@ -52,18 +52,16 @@
   color: #FFFFFF;
 }
 
-label.normal-text {
+label {
   font-size: 14px;
   color: #FFFFFF;
 }
 
 label.required-text {
-  font-size: 14px;
   color: #FF2E00;
 }
 
 label.success-text {
-  font-size: 14px;
   color: #2bb900;
 }
 
@@ -75,16 +73,6 @@ label.vm-name {
 
 label.title {
   font-size: 16px;
-  /*font-weight: bold;*/
-  color: #FFFFFF;
-}
-
-.radiobutton>label {
-  color: #FFFFFF;
-}
-
-checkbutton>label {
-  color: #FFFFFF;
 }
 
 separator {
@@ -124,80 +112,24 @@ box.info-box {
 */
 
 /* ServiceRow styling */
-.vm-list-main>row {
+.vm-list-main row {
   background-color: #1D1D1D;
   border: 1px solid #353535;
   border-radius: 3px;
   margin: 5px;
 }
 
-.vm-list-main>row:active {
-  background-color: #2B2B2B;
-  border: 1px solid #353535;
-  border-radius: 3px;
-  margin: 5px;
-}
+.vm-list-main row:active,
+.vm-list-main row:hover,
+.vm-list-main row:focus,
+.vm-list-main row:selected
+{
 
-.vm-list-main>row:hover {
   background-color: #2B2B2B;
-  border: 1px solid #353535;
-  border-radius: 3px;
-  margin: 5px;
-  box-shadow: 4px 6px 8px rgba(0, 0, 0, 0.3);
-  /* horizontal offset, vertical offset, blur radius, color */
-}
-
-.vm-list-main>row:focus {
-  background-color: #2B2B2B;
-  border: 1px solid #353535;
-  border-radius: 3px;
-  margin: 5px;
-}
-
-.vm-list-main>row:selected {
-  background-color: #2B2B2B;
-  border: 1px solid #353535;
-  border-radius: 3px;
-  margin: 5px;
 }
 
 /* ServiceRow on Info page*/
-.running-vm-list>row {
-  background-color: #2B2B2B;
-  border: none;
-  margin: 0;
-  box-shadow: none;
-}
-
-.vm-row-2 {
-  background-color: #2B2B2B;
-  border: none;
-  margin: 0;
-  box-shadow: none;
-}
-
-.vm-row-2:active {
-  background-color: #2B2B2B;
-  border: none;
-  margin: 0;
-  box-shadow: none;
-}
-
-.vm-row-2:hover {
-  background-color: #2B2B2B;
-  border: none;
-  margin: 0;
-  box-shadow: none;
-}
-
-.vm-row-2:focus {
-  background-color: #2B2B2B;
-  border: none;
-  margin: 0;
-  box-shadow: none;
-}
-
-.vm-row-2:selected {
+.running-vm-list row {
   background-color: #2B2B2B;
   border: none;
   margin: 0;
@@ -215,198 +147,78 @@ box.info-box {
   margin: 0;
 }
 
-.settings-row:active {
-  background-color: #1D1D1D;
-  border: none;
-  margin: 0;
-}
-
-.settings-row:hover {
-  background-color: #2B2B2B;
-  border: none;
-  margin: 0;
-}
-
-.settings-row:focus {
-  background-color: #2B2B2B;
-  border: none;
-  margin: 0;
-}
-
+.settings-row:hover,
+.settings-row:focus,
 .settings-row:selected {
   background-color: #2B2B2B;
-  border: none;
-  margin: 0;
 }
 
-.settings-row>box.header {
-  background-color: #1D1D1D;
-}
-
-.settings-row:active>box.header {
-  background-color: #2B2B2B;
-}
-
-.settings-row:focus>box.header {
-  background-color: #2B2B2B;
-}
-
-.settings-row:hover>box.header {
-  background-color: #2B2B2B;
-}
-
-.settings-row:selected>box.header {
-  background-color: #2B2B2B;
-}
-
-.settings-row>box.title {
-  background-color: #1D1D1D;
-}
-
-.settings-row:active>box.title {
-  background-color: #2B2B2B;
-}
-
-.settings-row:focus>box.title {
-  background-color: #2B2B2B;
-}
-
-.settings-row:hover>box.title {
-  background-color: #2B2B2B;
-}
-
-.settings-row:selected>box.title {
-  background-color: #2B2B2B;
-}
-
-.settings-row>*>*>label {
+.settings-row label {
   color: #FFFFFF;
 }
 
-.settings-row:active>*>*>label {
-  color: #FFFFFF;
-}
-
-.settings-row:focus>*>*>label {
+.settings-row:focus label {
   color: #F15025;
 }
 
-.settings-row:hover>*>*>label {
-  color: #FFFFFF;
-}
-
-.settings-row:hover:focus>*>*>label {
-  color: #F15025;
-}
-
-.settings-row:hover:selected>*>*>label {
-  color: #F15025;
-}
-
-.settings-row:selected>*>*>label {
+.settings-row:selected label {
   color: #F15025;
 }
 
 /*Dropdown styling*/
-.dropdown-button {
+dropdown {
   background-color: #353535;
   border: none;
   margin: 0;
 }
 
-.dropdown-button>button.toggle {
+dropdown button.toggle {
   color: #FFFFFF;
 }
 
-.dropdown-button>button {
+dropdown button {
   background-color: #353535;
   border: 1px solid #2B2B2B;
   border-radius: 2px;
   margin: 0;
 }
 
-.dropdown-button>button>box {
-  background-color: #353535;
-  border: none;
-  margin: 0;
-}
-
-.dropdown-button>button>box>*>row {
+dropdown>button>box>*>row {
   background-color: #353535;
   border: none;
   margin: 0;
   box-shadow: none;
 }
 
-.dropdown-button>button>box>*>row:hover {
+dropdown>button>box>*>row:hover {
   background-color: #353535;
   border: none;
   margin: 0;
 }
 
-.dropdown-button>button>box>*>row>*>label {
+dropdown>button>box>*>row>*>label {
   color: #FFFFFF;
 }
 
-.dropdown-button>popover>contents {
+dropdown>popover>contents {
   background-color: #353535;
   border: 1px solid #2B2B2B;
   border-radius: 2px;
   margin: 0;
 }
 
-.dropdown-button>popover>contents>*>*>listview {
-  background-color: #353535;
-}
-
-.dropdown-button>popover>contents>*>*>*>row {
-  background-color: #353535;
+dropdown popover contents row {
   border: none;
   border-radius: 0px;
-  margin: 0;
   box-shadow: none;
 }
 
-.dropdown-button>popover>contents>*>*>*>row:selected {
+dropdown popover contents row:selected,
+dropdown popover contents row:hover {
   background-color: #2B2B2B;
-  border: none;
-  border-radius: 0px;
-  margin: 0;
 }
 
-.dropdown-button>popover>contents>*>*>*>row:hover {
-  background-color: #2B2B2B;
-  border: none;
-  border-radius: 0px;
-  margin: 0;
-}
-
-.dropdown-button>popover>contents>*>*>*>row:selected:hover {
-  background-color: #2B2B2B;
-  border: none;
-  border-radius: 0px;
-  margin: 0;
-}
-
-.dropdown-button>popover>contents>*>*>*>row:selected:focus {
-  background-color: #2B2B2B;
-  border: none;
-  border-radius: 0px;
-  margin: 0;
-}
-
-.dropdown-button>popover>contents>*>*>*>row:focus {
-  background-color: #353535;
-  border: none;
-  border-radius: 0px;
-  margin: 0;
-}
-
-.dropdown-button>popover>contents>*>*>*>row>*>label {
-  color: #FFFFFF;
-}
-
-.dropdown-button>popover>contents>*>*>*>row>label {
+dropdown contents row label {
   color: #FFFFFF;
 }
 
@@ -418,29 +230,18 @@ box.info-box {
 
 /*Scale slider styling*/
 scale {
-  background-color: transparent;
   padding: 1px;
 }
 
-scale>trough {
+scale trough,
+scale trough fill,
+scale trough highlight {
   background-color: #F15025;
   color: #F15025;
   background-image: none;
 }
 
-scale>trough>fill {
-  background-color: #F15025;
-  color: #F15025;
-  background-image: none;
-}
-
-scale>trough>highlight {
-  background-color: #F15025;
-  color: #F15025;
-  background-image: none;
-}
-
-scale>trough>slider {
+scale trough slider {
   background-color: #FFFFFF;
   /*min-width: 20px;
   min-height: 20px;*/
@@ -607,12 +408,12 @@ entry>text {
 
 /*Textview*/
 
-textview.description-active{
+textview {
   background-color: #353535;
   color: #FFFFFF;
 }
 
-textview.description-deactive{
+textview.placeholder {
   background-color: #353535;
   color: #9f9f9f;
 }

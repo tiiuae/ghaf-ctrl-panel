@@ -172,15 +172,13 @@ mod imp {
             if self.description.has_focus() {
                 self.description
                     .set_buffer(Some(&self.description_textbuffer.get()));
-                self.description.remove_css_class("description-deactive");
-                self.description.add_css_class("description-active");
+                self.description.remove_css_class("placeholder");
             } else if self.description_textbuffer.start_iter()
                 == self.description_textbuffer.end_iter()
             {
                 self.description
                     .set_buffer(Some(&self.placeholder_textbuffer.get()));
-                self.description.remove_css_class("description-active");
-                self.description.add_css_class("description-deactive");
+                self.description.add_css_class("placeholder");
             }
         }
 

@@ -10,14 +10,12 @@
     <property name="spacing">10</property>
     <child>
       <object class="GtkLabel" id="title_label">
-        <style><class name="normal-text"/></style>
         <property name="halign">start</property>
         <property name="margin-start">10</property>
       </object>
     </child>
     <child>
       <object class="GtkLabel" id="subtitle_label">
-        <style><class name="normal-text"/></style>
         <property name="halign">start</property>
         <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
       </object>
