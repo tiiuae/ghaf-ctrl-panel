@@ -17,7 +17,7 @@ mod imp {
     use crate::bug_report_settings_page::BugReportSettingsPage;
 
     #[derive(Default, gtk::CompositeTemplate)]
-    #[template(resource = "/org/gnome/bugreport/ui/bugreport_window.ui")]
+    #[template(resource = "/ae/tii/ghaf/bugreport/ui/bugreport_window.ui")]
     pub struct BugReportWindow {
         #[template_child]
         pub bug_report_page: TemplateChild<BugReportSettingsPage>,
@@ -86,7 +86,7 @@ fn main() /*-> glib::ExitCode*/
     gio::resources_register_include!("bugreport.gresource").expect("Failed to register resources.");
 
     let app = adw::Application::new(
-        Some("org.gnome.bugreporter"),
+        Some("ae.tii.ghaf./bugreporter"),
         gio::ApplicationFlags::default(),
     );
 
@@ -144,7 +144,7 @@ fn initialize_logger(args: &Args) {
 fn load_css() {
     // Load the CSS file and add it to the provider
     let provider = CssProvider::new();
-    provider.load_from_resource("/org/gnome/bugreport/styles/style.css");
+    provider.load_from_resource("/ae/tii/ghaf/bugreport/styles/style.css");
 
     // Add the provider to the default screen
     gtk::style_context_add_provider_for_display(

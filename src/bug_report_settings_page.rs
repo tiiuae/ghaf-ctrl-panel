@@ -26,7 +26,7 @@ mod imp {
 
     #[derive(Default, CompositeTemplate, Properties)]
     #[properties(wrapper_type = super::BugReportSettingsPage)]
-    #[template(resource = "/org/gnome/bugreport/ui/bug_report_settings_page.ui")]
+    #[template(resource = "/ae/tii/ghaf/bugreport/ui/bug_report_settings_page.ui")]
     pub struct BugReportSettingsPage {
         #[template_child]
         pub qbox_3: TemplateChild<Box>,

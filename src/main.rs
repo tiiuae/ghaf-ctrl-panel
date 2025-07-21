@@ -163,7 +163,7 @@ fn main() /*-> glib::ExitCode*/
     // application windows, integration with the window manager/compositor, and
     // desktop features such as file opening and single-instance applications.
     let app = ControlPanelGuiApplication::new(
-        "org.gnome.controlpanelgui",
+        "ae.tii.ghaf./controlpanelgui",
         gio::ApplicationFlags::empty(),
         addr,
         port,

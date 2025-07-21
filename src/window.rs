@@ -25,7 +25,7 @@ mod imp {
     use crate::settings_action::SettingsAction;
 
     #[derive(Debug, Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/window.ui")]
+    #[template(resource = "/ae/tii/ghaf/controlpanelgui/ui/window.ui")]
     pub struct ControlPanelGuiWindow {
         // Template widgets
         #[template_child]

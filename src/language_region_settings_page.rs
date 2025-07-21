@@ -21,7 +21,7 @@ mod imp {
     use crate::prelude::*;
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/language_region_settings_page.ui")]
+    #[template(resource = "/ae/tii/ghaf/controlpanelgui/ui/language_region_settings_page.ui")]
     pub struct LanguageRegionSettingsPage {
         #[template_child]
         pub language_switch: TemplateChild<DropDown>,

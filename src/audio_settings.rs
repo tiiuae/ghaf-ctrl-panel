@@ -27,7 +27,7 @@ mod imp {
     }
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/audio_settings.ui")]
+    #[template(resource = "/ae/tii/ghaf/controlpanelgui/ui/audio_settings.ui")]
     pub struct AudioSettings {
         pub name: String,
 

@@ -42,7 +42,7 @@ mod imp {
     }
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/service_settings.ui")]
+    #[template(resource = "/ae/tii/ghaf/controlpanelgui/ui/service_settings.ui")]
     pub struct ServiceSettings {
         #[template_child]
         pub resources_info_box: TemplateChild<gtk::Box>,

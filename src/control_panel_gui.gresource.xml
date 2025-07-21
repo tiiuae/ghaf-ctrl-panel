@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
-  <gresource prefix="/org/gnome/controlpanelgui">
+  <gresource prefix="/ae/tii/ghaf/controlpanelgui">
     <file preprocess="xml-stripblanks">ui/window.ui</file>
     <file preprocess="xml-stripblanks">ui/service_row.ui</file>
     <file preprocess="xml-stripblanks">ui/vm_row.ui</file>
