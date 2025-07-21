@@ -17,7 +17,6 @@ mod imp {
     use crate::audio_device_gobject::AudioDeviceType;
     use crate::audio_settings::AudioSettings;
     use crate::control_action::ControlAction;
-    use crate::info_settings_page::InfoSettingsPage;
     use crate::language_region_settings_page::LanguageRegionSettingsPage;
     use crate::security_settings_page::SecuritySettingsPage;
     use crate::service_gobject::ServiceGObject;
@@ -32,8 +31,6 @@ mod imp {
         pub stack: TemplateChild<Stack>,
         #[template_child]
         pub admin_settings_page: TemplateChild<AdminSettingsPage>,
-        #[template_child]
-        pub info_settings_page: TemplateChild<InfoSettingsPage>,
         #[template_child]
         pub security_settings_page: TemplateChild<SecuritySettingsPage>,
         #[template_child]
@@ -215,20 +212,7 @@ impl Settings {
             .set_timezone_model(model, selected);
     }
 
-    pub fn set_vm_model(&self, model: impl IsA<ListModel>) {
-        self.imp().info_settings_page.set_vm_model(model);
-    }
-
     pub fn init(&self) {
-        let this = self.clone();
-        self.imp()
-            .info_settings_page
-            .connect_local("vm-control-action", false, move |values| {
-                //the value[0] is self
-                this.emit_by_name::<()>("vm-control-action", &[&values[1], &values[2]]);
-                None
-            });
-
         if let Some(row) = self.imp().list_box.row_at_index(0) {
             self.imp().list_box.select_row(Some(&row));
         }
