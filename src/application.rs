@@ -267,10 +267,6 @@ impl ControlPanelGuiApplication {
         self.imp().service_model.clone().upcast()
     }
 
-    pub fn get_audio_devices(&self) -> ListModel {
-        self.imp().audio_control.borrow().get_devices_list()
-    }
-
     pub fn get_stats(
         &self,
         vm: String,

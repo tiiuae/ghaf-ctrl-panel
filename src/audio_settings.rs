@@ -277,7 +277,7 @@ impl AudioSettings {
         glib::Object::builder().build()
     }
 
-    pub fn set_audio_devices(&self, devices: ListModel) {
+    pub fn set_audio_devices(&self, devices: impl IsA<ListModel>) {
         //setup factory
         self.setup_factory(AudioDeviceUserType::Mic);
         self.setup_factory(AudioDeviceUserType::Speaker);

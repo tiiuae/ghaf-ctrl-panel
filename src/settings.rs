@@ -215,7 +215,7 @@ impl Settings {
         }
     }
 
-    pub fn set_audio_devices(&self, devices: ListModel) {
+    pub fn set_audio_devices(&self, devices: impl IsA<ListModel>) {
         self.imp().audio_settings_page.set_audio_devices(devices);
     }
 }

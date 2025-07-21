@@ -1,12 +1,10 @@
 #![cfg_attr(feature = "mock", allow(unused_imports))]
 
 use std::cell::RefCell;
-use std::ops::Deref;
 use std::rc::Rc;
 
 use futures::StreamExt;
-use gio::ListModel;
-use gtk::{gio, glib, prelude::*};
+use gtk::glib;
 use zbus::Connection;
 
 use crate::audio_device_gobject::{AudioDeviceGObject, AudioDeviceType};
@@ -260,10 +258,6 @@ impl AudioControl {
                 cb(devices.into());
             }
         ));
-    }
-
-    pub fn get_devices_list(&self) -> ListModel {
-        self.devices.deref().clone().upcast()
     }
 
     pub fn set_device_volume(&self, id: i32, dev_type: i32, value: i32) {
