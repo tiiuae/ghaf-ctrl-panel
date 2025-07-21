@@ -17,7 +17,6 @@ mod imp {
     use crate::audio_settings::AudioSettings;
     use crate::control_action::ControlAction;
     use crate::language_region_settings_page::LanguageRegionSettingsPage;
-    use crate::security_settings_page::SecuritySettingsPage;
     use crate::service_gobject::ServiceGObject;
     use crate::settings_action::SettingsAction;
 
@@ -28,8 +27,6 @@ mod imp {
         pub list_box: TemplateChild<ListBox>,
         #[template_child]
         pub stack: TemplateChild<Stack>,
-        #[template_child]
-        pub security_settings_page: TemplateChild<SecuritySettingsPage>,
         #[template_child]
         pub audio_settings_page: TemplateChild<AudioSettings>,
         #[template_child]

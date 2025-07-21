@@ -12,7 +12,6 @@ mod locale_provider;
 mod plot;
 mod prelude;
 mod security_icon;
-mod security_settings_page;
 mod serie;
 mod service_gobject;
 mod service_model;
