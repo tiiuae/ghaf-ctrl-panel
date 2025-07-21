@@ -43,7 +43,7 @@
                   <object class="GtkImage" id="ghaf_logo">
                     <property name="visible">true</property>
                     <property name="can_focus">false</property>
-                    <property name="resource">/org/gnome/controlpanelgui/icons/ghaf_logo.svg</property>
+                    <property name="resource">/ae/tii/ghaf/controlpanelgui/icons/ghaf_logo.svg</property>
                     <property name="width-request">50</property>
                     <property name="height-request">50</property>
                     <property name="halign">start</property>

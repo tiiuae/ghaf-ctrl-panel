@@ -14,7 +14,7 @@ mod imp {
     use crate::security_icon::SecurityIcon;
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/service_row.ui")]
+    #[template(resource = "/ae/tii/ghaf/controlpanelgui/ui/service_row.ui")]
     pub struct ServiceRow {
         pub name: String,
 

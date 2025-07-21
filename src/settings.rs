@@ -21,7 +21,7 @@ mod imp {
     use crate::settings_action::SettingsAction;
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/settings.ui")]
+    #[template(resource = "/ae/tii/ghaf/controlpanelgui/ui/settings.ui")]
     pub struct Settings {
         #[template_child]
         pub list_box: TemplateChild<ListBox>,

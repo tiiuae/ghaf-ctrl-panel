@@ -12,7 +12,7 @@ mod imp {
     use std::sync::OnceLock;
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/connection_config.ui")]
+    #[template(resource = "/ae/tii/ghaf/controlpanelgui/ui/connection_config.ui")]
     pub struct ConnectionConfig {
         #[template_child]
         pub address_entry: TemplateChild<Entry>,

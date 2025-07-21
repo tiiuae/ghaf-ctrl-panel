@@ -117,7 +117,7 @@ mod imp {
         fn load_css() {
             // Load the CSS file and add it to the provider
             let provider = CssProvider::new();
-            provider.load_from_resource("/org/gnome/controlpanelgui/styles/style.css");
+            provider.load_from_resource("/ae/tii/ghaf/controlpanelgui/styles/style.css");
 
             // Add the provider to the default screen
             gtk::style_context_add_provider_for_display(
@@ -204,7 +204,7 @@ mod imp {
             let about = adw::AboutWindow::builder()
                 .transient_for(&window)
                 .application_name("Ghaf Control Panel")
-                .application_icon("org.gnome.controlpanelgui")
+                .application_icon("ae.tii.ghaf./controlpanelgui")
                 .developer_name("dmitry")
                 .developers(vec!["dmitry"])
                 .copyright("© 2024 dmitry")

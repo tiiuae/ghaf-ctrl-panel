@@ -11,7 +11,7 @@ mod imp {
     use std::sync::OnceLock;
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/error_popup.ui")]
+    #[template(resource = "/ae/tii/ghaf/controlpanelgui/ui/error_popup.ui")]
     pub struct ErrorPopup {
         #[template_child]
         pub message_to_user: TemplateChild<Label>,

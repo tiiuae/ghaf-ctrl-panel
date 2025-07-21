@@ -53,9 +53,9 @@ mod imp {
         fn set_trust_level(&self, trust_level: TrustLevel) {
             self.trust_level.set(trust_level);
             self.image.set_resource(Some(match trust_level {
-                TrustLevel::Warning => "/org/gnome/controlpanelgui/icons/security_attention.svg",
-                TrustLevel::NotSecure => "/org/gnome/controlpanelgui/icons/security_alert.svg",
-                TrustLevel::Secure => "/org/gnome/controlpanelgui/icons/security_well.svg",
+                TrustLevel::Warning => "/ae/tii/ghaf/controlpanelgui/icons/security_attention.svg",
+                TrustLevel::NotSecure => "/ae/tii/ghaf/controlpanelgui/icons/security_alert.svg",
+                TrustLevel::Secure => "/ae/tii/ghaf/controlpanelgui/icons/security_well.svg",
             }));
             self.label.set_label(match trust_level {
                 TrustLevel::Secure => "Secure!",
