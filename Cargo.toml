@@ -28,7 +28,7 @@ toml = "0.9"
 zbus = "5.6"
 
 givc-client = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main" }
-givc-common = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main" }
+givc-common = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main", features = ["glib"] }
 
 [features]
 mock = []

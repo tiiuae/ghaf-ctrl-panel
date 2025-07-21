@@ -12,6 +12,7 @@ use crate::serie::Serie;
 use crate::service_gobject::ServiceGObject;
 pub use crate::service_model::StatsResponse;
 use crate::settings_action::SettingsAction;
+use crate::status_icon::StatusIcon;
 use crate::volume_widget::VolumeWidget;
 use givc_client::endpoint::TlsConfig;
 use log::debug;
@@ -236,6 +237,7 @@ impl ControlPanelGuiApplication {
         let _ = Plot::static_type();
         let _ = Serie::static_type();
         let _ = SecurityIcon::static_type();
+        let _ = StatusIcon::static_type();
 
         let app: Self = glib::Object::builder()
             .property("application-id", application_id)

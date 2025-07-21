@@ -3,8 +3,6 @@ use gtk::subclass::prelude::*;
 use gtk::{gio, glib};
 
 use crate::service_gobject::ServiceGObject;
-use crate::trust_level::TrustLevel;
-use crate::vm_status::VMStatus;
 use crate::window::ControlPanelGuiWindow;
 
 mod imp {
@@ -13,8 +11,8 @@ mod imp {
     use gtk::prelude::*;
     use gtk::subclass::prelude::*;
     use gtk::{
-        gio, glib, Button, CompositeTemplate, Image, Label, MenuButton, Popover, Revealer,
-        Separator, ToggleButton,
+        gio, glib, Button, CompositeTemplate, Label, MenuButton, Popover, Revealer, Separator,
+        ToggleButton,
     };
     use std::cell::RefCell;
     use std::sync::OnceLock;
@@ -27,6 +25,7 @@ mod imp {
     use crate::serie::Serie;
     use crate::service_gobject::ServiceGObject;
     use crate::settings_action::SettingsAction;
+    use crate::status_icon::StatusIcon;
 
     pub(super) struct CancelGuard(gio::Cancellable);
 
@@ -56,21 +55,17 @@ mod imp {
         #[template_child]
         pub name_slot_2: TemplateChild<Label>,
         #[template_child]
-        pub status_label: TemplateChild<Label>,
-        #[template_child]
         pub arrow_button: TemplateChild<ToggleButton>,
         #[template_child]
         pub revealer: TemplateChild<Revealer>,
         #[template_child]
         pub extra_info: TemplateChild<Label>,
         #[template_child]
-        pub status_icon: TemplateChild<Image>,
+        pub status_icon: TemplateChild<StatusIcon>,
         #[template_child]
         pub details_label: TemplateChild<Label>,
         #[template_child]
         pub security_icon: TemplateChild<SecurityIcon>,
-        #[template_child]
-        pub security_label: TemplateChild<Label>,
         #[template_child]
         pub wireguard_section_separator: TemplateChild<Separator>,
         #[template_child]
@@ -283,11 +278,9 @@ impl ServiceSettings {
         let is_vm_or_app = object.is_vm() || object.is_app();
         let arrow_button = self.imp().arrow_button.get();
         let extra_info = self.imp().extra_info.get();
-        let status_label = self.imp().status_label.get();
         let status_icon = self.imp().status_icon.get();
         let details = self.imp().details_label.get();
         let security_icon = self.imp().security_icon.get();
-        let security_label = self.imp().security_label.get();
         let control_label = self.imp().control_label.get();
         let audio_settings_box = self.imp().audio_settings_box.get();
         let mut bindings = self.imp().bindings.borrow_mut();
@@ -402,17 +395,9 @@ impl ServiceSettings {
             .build();
         bindings.push(extra_info_binding);
 
-        let status_binding = object
-            .bind_property("status", &status_label, "label")
-            .sync_create()
-            .transform_to(move |_, status: VMStatus| Some::<&'static str>(status.into()))
-            .build();
-        bindings.push(status_binding);
-
         let status_icon_binding = object
-            .bind_property("status", &status_icon, "resource")
+            .bind_property("status", &status_icon, "vm-status")
             .sync_create()
-            .transform_to(move |_, status: VMStatus| Some(status.icon()))
             .build();
         bindings.push(status_icon_binding);
 
@@ -427,17 +412,6 @@ impl ServiceSettings {
             .sync_create()
             .build();
         bindings.push(security_icon_binding);
-
-        let security_label_binding = object
-            .bind_property("trust-level", &security_label, "label")
-            .sync_create()
-            .transform_to(move |_, trust_level: TrustLevel| match trust_level {
-                TrustLevel::Secure => Some("Secure!"),
-                TrustLevel::Warning => Some("Security warning!"),
-                TrustLevel::NotSecure => Some("Security alert!"),
-            })
-            .build();
-        bindings.push(security_label_binding);
 
         //change label
         let controls_title_binding = object
