@@ -7,7 +7,6 @@ mod connection_config;
 mod control_action;
 mod data_gobject;
 mod error_popup;
-mod info_settings_page;
 mod language_region_notify_popup;
 mod language_region_settings_page;
 mod locale_provider;

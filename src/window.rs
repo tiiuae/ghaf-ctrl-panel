@@ -113,8 +113,6 @@ mod imp {
         }
 
         pub fn setup_service_rows(&self, model: &ListModel) {
-            self.settings_box.set_vm_model(model.clone());
-
             let selection_model =
                 SingleSelection::new(Some(model.clone())).wrap::<ServiceGObject>();
             selection_model.connect_selection_changed(glib::clone!(
