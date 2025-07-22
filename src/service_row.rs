@@ -3,16 +3,18 @@ use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
 use crate::service_gobject::ServiceGObject;
-use crate::trust_level::TrustLevel;
 
 mod imp {
+    use std::cell::RefCell;
+
     use glib::Binding;
     use gtk::subclass::prelude::*;
     use gtk::{glib, CompositeTemplate};
-    use std::cell::RefCell;
+
+    use crate::security_icon::SecurityIcon;
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/service_row.ui")]
+    #[template(resource = "/ae/tii/ghaf/controlpanelgui/ui/service_row.ui")]
     pub struct ServiceRow {
         pub name: String,
 
@@ -23,7 +25,7 @@ mod imp {
         #[template_child]
         pub vm_icon: TemplateChild<gtk::Image>,
         #[template_child]
-        pub security_icon: TemplateChild<gtk::Image>,
+        pub security_icon: TemplateChild<SecurityIcon>,
 
         // Vector holding the bindings to properties of `TaskObject`
         pub bindings: RefCell<Vec<Binding>>,
@@ -75,6 +77,13 @@ impl ServiceRow {
 
         let name_property = if is_vm { "display-name" } else { "name" };
 
+        let margin_binding = object
+            .bind_property("is-vm", self, "margin-start")
+            .transform_to(move |binding, is_vm: bool| Some(if is_vm { 0i32 } else { 16 } + if binding.source().and_downcast::<ServiceGObject>().is_some_and(|obj| &obj.vm_name() == "ghaf-host") { 0 } else { 16 }))
+            .sync_create()
+            .build();
+        bindings.push(margin_binding);
+
         let title_binding = object
             .bind_property(name_property, &title, "label")
             //.bidirectional()
@@ -91,9 +100,8 @@ impl ServiceRow {
         bindings.push(subtitle_binding);
 
         let security_binding = object
-            .bind_property("trust-level", &security_icon, "resource")
+            .bind_property("trust-level", &security_icon, "trust-level")
             .sync_create()
-            .transform_to(move |_, trust_level: TrustLevel| Some(trust_level.icon()))
             .build();
         // Save binding
         bindings.push(security_binding);

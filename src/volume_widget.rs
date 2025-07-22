@@ -14,7 +14,7 @@ mod imp {
 
     #[derive(Default, CompositeTemplate, Properties)]
     #[properties(wrapper_type = super::VolumeWidget)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/volume_widget.ui")]
+    #[template(resource = "/ae/tii/ghaf/controlpanelgui/ui/volume_widget.ui")]
     pub struct VolumeWidget {
         #[template_child]
         volume_scale: TemplateChild<Scale>,

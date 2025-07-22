@@ -1,10 +1,9 @@
-use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
+use gtk::{gio, glib};
 
 use crate::service_gobject::ServiceGObject;
-use crate::trust_level::TrustLevel;
-use crate::vm_status::VMStatus;
+use crate::window::ControlPanelGuiWindow;
 
 mod imp {
     use glib::subclass::Signal;
@@ -12,7 +11,7 @@ mod imp {
     use gtk::prelude::*;
     use gtk::subclass::prelude::*;
     use gtk::{
-        glib, Button, CompositeTemplate, Image, Label, MenuButton, Popover, Revealer, Separator,
+        gio, glib, Button, CompositeTemplate, Label, MenuButton, Popover, Revealer, Separator,
         ToggleButton,
     };
     use std::cell::RefCell;
@@ -20,20 +19,41 @@ mod imp {
 
     use crate::audio_settings::AudioSettings;
     use crate::control_action::ControlAction;
+    use crate::plot::Plot;
     use crate::prelude::*;
     use crate::security_icon::SecurityIcon;
+    use crate::serie::Serie;
     use crate::service_gobject::ServiceGObject;
     use crate::settings_action::SettingsAction;
+    use crate::status_icon::StatusIcon;
+
+    pub(super) struct CancelGuard(gio::Cancellable);
+
+    impl Drop for CancelGuard {
+        fn drop(&mut self) {
+            self.0.cancel()
+        }
+    }
+
+    impl From<gio::Cancellable> for CancelGuard {
+        fn from(c: gio::Cancellable) -> Self {
+            Self(c)
+        }
+    }
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/service_settings.ui")]
+    #[template(resource = "/ae/tii/ghaf/controlpanelgui/ui/service_settings.ui")]
     pub struct ServiceSettings {
+        #[template_child]
+        pub resources_info_box: TemplateChild<gtk::Box>,
+        #[template_child]
+        pub memory_plot: TemplateChild<Plot>,
+        #[template_child]
+        pub cpu_plot: TemplateChild<Plot>,
         #[template_child]
         pub name_slot_1: TemplateChild<Label>,
         #[template_child]
         pub name_slot_2: TemplateChild<Label>,
-        #[template_child]
-        pub status_label: TemplateChild<Label>,
         #[template_child]
         pub arrow_button: TemplateChild<ToggleButton>,
         #[template_child]
@@ -41,13 +61,11 @@ mod imp {
         #[template_child]
         pub extra_info: TemplateChild<Label>,
         #[template_child]
-        pub status_icon: TemplateChild<Image>,
+        pub status_icon: TemplateChild<StatusIcon>,
         #[template_child]
         pub details_label: TemplateChild<Label>,
         #[template_child]
         pub security_icon: TemplateChild<SecurityIcon>,
-        #[template_child]
-        pub security_label: TemplateChild<Label>,
         #[template_child]
         pub wireguard_section_separator: TemplateChild<Separator>,
         #[template_child]
@@ -63,8 +81,18 @@ mod imp {
         #[template_child]
         pub popover_menu_2: TemplateChild<Popover>,
 
+        #[template_child]
+        pub cpu_sys_serie: TemplateChild<Serie>,
+        #[template_child]
+        pub cpu_user_serie: TemplateChild<Serie>,
+        #[template_child]
+        pub mem_used_serie: TemplateChild<Serie>,
+        #[template_child]
+        pub mem_needed_serie: TemplateChild<Serie>,
+
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,
+        pub(super) stats_cancel: RefCell<Option<CancelGuard>>,
         pub(super) service: RefCell<Option<ServiceGObject>>,
     }
 
@@ -169,6 +197,14 @@ mod imp {
     } //end #[gtk::template_callbacks]
 
     impl ObjectImpl for ServiceSettings {
+        fn constructed(&self) {
+            // Call "constructed" on parent
+            self.parent_constructed();
+
+            // Setup
+            self.obj().init();
+        }
+
         fn signals() -> &'static [Signal] {
             static SIGNALS: OnceLock<[Signal; 6]> = OnceLock::new();
             SIGNALS.get_or_init(|| {
@@ -216,8 +252,25 @@ impl ServiceSettings {
         glib::Object::builder().build()
     }
 
+    pub fn init(&self) {
+        self.imp()
+            .cpu_plot
+            .set_view(None, None, Some(0.0), Some(1.0));
+        self.imp()
+            .cpu_plot
+            .set_label_format(|f| format!("{pct:.0}%", pct = f * 100.));
+
+        self.imp().memory_plot.set_view(None, None, Some(0.0), None);
+        self.imp()
+            .memory_plot
+            .set_label_format(|f| format!("{mb:.0} MB", mb = f / 1_048_576.));
+    }
+
     #[allow(clippy::too_many_lines)]
     pub fn bind(&self, object: &ServiceGObject) {
+        if self.imp().service.borrow().as_ref() == Some(object) {
+            return;
+        }
         //unbind previous ones
         self.unbind();
         //make new
@@ -225,11 +278,9 @@ impl ServiceSettings {
         let is_vm_or_app = object.is_vm() || object.is_app();
         let arrow_button = self.imp().arrow_button.get();
         let extra_info = self.imp().extra_info.get();
-        let status = self.imp().status_label.get();
         let status_icon = self.imp().status_icon.get();
         let details = self.imp().details_label.get();
         let security_icon = self.imp().security_icon.get();
-        let security_label = self.imp().security_label.get();
         let control_label = self.imp().control_label.get();
         let audio_settings_box = self.imp().audio_settings_box.get();
         let mut bindings = self.imp().bindings.borrow_mut();
@@ -241,12 +292,64 @@ impl ServiceSettings {
         self.imp()
             .wireguard_button
             .set_visible(object.has_wireguard());
+        self.imp().resources_info_box.set_visible(object.is_vm());
 
         //action popover
         if object.is_vm() {
             self.imp()
                 .action_menu_button
                 .set_popover(Some(&self.imp().popover_menu.get()));
+            let c = gio::Cancellable::new();
+            self.imp()
+                .stats_cancel
+                .borrow_mut()
+                .replace(c.clone().into());
+            #[allow(clippy::cast_precision_loss)]
+            glib::spawn_future_local(gio::CancellableFuture::new(
+                glib::clone!(
+                    #[strong(rename_to = settings)]
+                    self,
+                    #[strong]
+                    object,
+                    async move {
+                        let mut i = 1f32;
+                        if let Some(win) = settings.root().and_downcast::<ControlPanelGuiWindow>() {
+                            let stats = win.get_stats(object.vm_name());
+                            while let Ok(stats) = stats.recv().await {
+                                if let Some(process) = stats.process {
+                                    settings.imp().cpu_user_serie.push(
+                                        i,
+                                        process.user_cycles as f32 / process.total_cycles as f32,
+                                    );
+                                    settings.imp().cpu_sys_serie.push(
+                                        i,
+                                        (process.user_cycles + process.sys_cycles) as f32
+                                            / process.total_cycles as f32,
+                                    );
+                                }
+                                if let Some(memory) = stats.memory {
+                                    settings.imp().memory_plot.set_view(
+                                        None,
+                                        None,
+                                        Some(0.0),
+                                        Some(memory.total as f32),
+                                    );
+                                    settings
+                                        .imp()
+                                        .mem_used_serie
+                                        .push(i, (memory.total - memory.free) as f32);
+                                    settings
+                                        .imp()
+                                        .mem_needed_serie
+                                        .push(i, (memory.total - memory.available) as f32);
+                                }
+                                i += 1.;
+                            }
+                        }
+                    }
+                ),
+                c,
+            ));
         } else {
             self.imp()
                 .action_menu_button
@@ -292,17 +395,9 @@ impl ServiceSettings {
             .build();
         bindings.push(extra_info_binding);
 
-        let status_binding = object
-            .bind_property("status", &status, "label")
-            .sync_create()
-            .transform_to(move |_, status: VMStatus| Some::<&'static str>(status.into()))
-            .build();
-        bindings.push(status_binding);
-
         let status_icon_binding = object
-            .bind_property("status", &status_icon, "resource")
+            .bind_property("status", &status_icon, "vm-status")
             .sync_create()
-            .transform_to(move |_, status: VMStatus| Some(status.icon()))
             .build();
         bindings.push(status_icon_binding);
 
@@ -317,17 +412,6 @@ impl ServiceSettings {
             .sync_create()
             .build();
         bindings.push(security_icon_binding);
-
-        let security_label_binding = object
-            .bind_property("trust-level", &security_label, "label")
-            .sync_create()
-            .transform_to(move |_, trust_level: TrustLevel| match trust_level {
-                TrustLevel::Secure => Some("Secure!"),
-                TrustLevel::Warning => Some("Security warning!"),
-                TrustLevel::NotSecure => Some("Security alert!"),
-            })
-            .build();
-        bindings.push(security_label_binding);
 
         //change label
         let controls_title_binding = object
@@ -359,5 +443,12 @@ impl ServiceSettings {
         //clean name slot 2
         self.imp().name_slot_2.set_text("");
         self.imp().service.borrow_mut().take();
+
+        self.imp().cpu_sys_serie.get().clear();
+        self.imp().cpu_user_serie.get().clear();
+        self.imp().mem_used_serie.get().clear();
+        self.imp().mem_needed_serie.get().clear();
+
+        self.imp().stats_cancel.borrow_mut().take();
     }
 }

@@ -1,41 +1,28 @@
-mod add_network_popup;
-mod admin_settings_page;
 mod application;
 mod audio_control;
 mod audio_device_gobject;
 mod audio_settings;
-mod bug_report_settings_page;
-mod confirm_display_settings_popup;
 mod connection_config;
 mod control_action;
 mod data_gobject;
-mod data_provider;
-mod display_settings_page;
 mod error_popup;
-mod github;
-mod info_settings_page;
-mod keyboard_settings_page;
 mod language_region_notify_popup;
 mod language_region_settings_page;
-mod mouse_settings_page;
+mod locale_provider;
 mod plot;
 mod prelude;
 mod security_icon;
-mod security_settings_page;
 mod serie;
 mod service_gobject;
+mod service_model;
 mod service_row;
 mod service_settings;
 mod settings;
 mod settings_action;
-mod settings_gobject;
-mod stats_window;
-mod trust_level;
+mod status_icon;
 mod typed_list_store;
 mod vm_row;
-mod vm_status;
 mod volume_widget;
-mod wifi_settings_page;
 mod window;
 mod wireguard_vms;
 
@@ -45,8 +32,8 @@ use clap::{Parser, ValueEnum};
 use std::path::PathBuf;
 
 use givc_client::endpoint::TlsConfig;
+use gtk::gio;
 use gtk::prelude::*;
-use gtk::{gio, glib};
 use syslog::{BasicLogger, Formatter3164};
 
 use crate::wireguard_vms::initialize_wvm_list;
@@ -176,7 +163,7 @@ fn main() /*-> glib::ExitCode*/
     // application windows, integration with the window manager/compositor, and
     // desktop features such as file opening and single-instance applications.
     let app = ControlPanelGuiApplication::new(
-        "org.gnome.controlpanelgui",
+        "ae.tii.ghaf./controlpanelgui",
         gio::ApplicationFlags::empty(),
         addr,
         port,

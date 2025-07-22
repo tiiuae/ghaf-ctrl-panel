@@ -6,15 +6,10 @@ use gtk::glib;
 #[boxed_type(name = "SettingsAction")]
 #[repr(u8)]
 pub enum SettingsAction {
-    AddNetwork,
-    RemoveNetwork,
     RegionNLanguage {
         locale: String,
         timezone: String,
     },
-    DateNTime,
-    MouseSpeed,
-    KeyboardLayout,
     Speaker {
         id: i32,
         dev_type: AudioDeviceType,
@@ -43,9 +38,6 @@ pub enum SettingsAction {
         dev_type: AudioDeviceType,
         muted: bool,
     },
-    ShowAddNetworkPopup,
-    ShowAddKeyboardPopup,
-    ShowConfirmDisplaySettingsPopup,
     ShowErrorPopup {
         message: String,
     },

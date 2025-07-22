@@ -10,14 +10,12 @@
     <property name="spacing">10</property>
     <child>
       <object class="GtkLabel" id="title_label">
-        <style><class name="normal-text"/></style>
         <property name="halign">start</property>
         <property name="margin-start">10</property>
       </object>
     </child>
     <child>
       <object class="GtkLabel" id="subtitle_label">
-        <style><class name="normal-text"/></style>
         <property name="halign">start</property>
         <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
       </object>
@@ -95,23 +93,6 @@
               <object class="GtkLabel">
                 <property name="halign">start</property>
                 <property name="label">Shutdown</property>
-                <property name="visible">1</property>
-              </object>
-            </child>
-          </object>
-        </child>
-        <child>
-          <object class="GtkButton" id="monitor_button">
-            <signal name="clicked" handler="on_vm_monitor_clicked" swapped="true"/>
-            <style><class name="popover-button"/></style>
-            <property name="vexpand">false</property>
-            <property name="hexpand">true</property>
-            <property name="halign">start</property>
-            <property name="width-request">140</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="halign">start</property>
-                <property name="label">Monitor</property>
                 <property name="visible">1</property>
               </object>
             </child>

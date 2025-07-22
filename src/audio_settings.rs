@@ -27,7 +27,7 @@ mod imp {
     }
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/audio_settings.ui")]
+    #[template(resource = "/ae/tii/ghaf/controlpanelgui/ui/audio_settings.ui")]
     pub struct AudioSettings {
         pub name: String,
 
@@ -277,7 +277,7 @@ impl AudioSettings {
         glib::Object::builder().build()
     }
 
-    pub fn set_audio_devices(&self, devices: ListModel) {
+    pub fn set_audio_devices(&self, devices: impl IsA<ListModel>) {
         //setup factory
         self.setup_factory(AudioDeviceUserType::Mic);
         self.setup_factory(AudioDeviceUserType::Speaker);

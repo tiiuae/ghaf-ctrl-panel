@@ -3,8 +3,6 @@ use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
-use crate::settings_gobject::SettingsGObject;
-
 mod imp {
     use glib::subclass::Signal;
     use glib::Binding;
@@ -15,49 +13,24 @@ mod imp {
     use std::sync::OnceLock;
 
     //use crate::service_gobject::ServiceGObject; will be used in the future
-    use crate::admin_settings_page::AdminSettingsPage;
     use crate::audio_device_gobject::AudioDeviceType;
     use crate::audio_settings::AudioSettings;
-    use crate::bug_report_settings_page::BugReportSettingsPage;
     use crate::control_action::ControlAction;
-    use crate::display_settings_page::DisplaySettingsPage;
-    use crate::info_settings_page::InfoSettingsPage;
-    use crate::keyboard_settings_page::KeyboardSettingsPage;
     use crate::language_region_settings_page::LanguageRegionSettingsPage;
-    use crate::mouse_settings_page::MouseSettingsPage;
-    use crate::security_settings_page::SecuritySettingsPage;
     use crate::service_gobject::ServiceGObject;
     use crate::settings_action::SettingsAction;
-    use crate::wifi_settings_page::WifiSettingsPage;
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/settings.ui")]
+    #[template(resource = "/ae/tii/ghaf/controlpanelgui/ui/settings.ui")]
     pub struct Settings {
         #[template_child]
         pub list_box: TemplateChild<ListBox>,
         #[template_child]
         pub stack: TemplateChild<Stack>,
         #[template_child]
-        pub admin_settings_page: TemplateChild<AdminSettingsPage>,
-        #[template_child]
-        pub info_settings_page: TemplateChild<InfoSettingsPage>,
-        #[template_child]
-        pub security_settings_page: TemplateChild<SecuritySettingsPage>,
-        #[template_child]
-        pub wifi_settings_page: TemplateChild<WifiSettingsPage>,
-        #[template_child]
-        pub keyboard_settings_page: TemplateChild<KeyboardSettingsPage>,
-        #[template_child]
-        pub mouse_settings_page: TemplateChild<MouseSettingsPage>,
-        #[template_child]
         pub audio_settings_page: TemplateChild<AudioSettings>,
         #[template_child]
-        pub display_settings_page: TemplateChild<DisplaySettingsPage>,
-        #[template_child]
         pub language_region_settings_page: TemplateChild<LanguageRegionSettingsPage>,
-        #[template_child]
-        pub bug_report_page: TemplateChild<BugReportSettingsPage>,
-
         //pub vm_model: RefCell<ListModel>,
 
         // Vector holding the bindings to properties of `Object`
@@ -87,16 +60,6 @@ mod imp {
             self.stack
                 .set_visible_child_name(row.widget_name().as_str());
         }
-        #[template_callback]
-        fn on_show_add_network_popup(&self) {
-            let action = SettingsAction::ShowAddNetworkPopup;
-            self.obj().emit_by_name::<()>("settings-action", &[&action]);
-        }
-        #[template_callback]
-        fn on_show_add_new_keyboard_popup(&self) {
-            let action = SettingsAction::ShowAddKeyboardPopup;
-            self.obj().emit_by_name::<()>("settings-action", &[&action]);
-        }
 
         #[template_callback]
         fn on_locale_timezone_default(&self) {
@@ -114,20 +77,6 @@ mod imp {
         #[template_callback]
         fn on_locale_timezone_changed(&self, locale: String, timezone: String) {
             let action = SettingsAction::RegionNLanguage { locale, timezone };
-            self.obj().emit_by_name::<()>("settings-action", &[&action]);
-        }
-
-        #[template_callback]
-        fn on_show_confirm_display_settings_popup(&self) {
-            let action = SettingsAction::ShowConfirmDisplaySettingsPopup;
-            self.obj().emit_by_name::<()>("settings-action", &[&action]);
-        }
-
-        #[template_callback]
-        fn on_show_error_popup(&self) {
-            let action = SettingsAction::ShowErrorPopup {
-                message: "Display settings cannot be set.".into(),
-            };
             self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
 
@@ -257,43 +206,13 @@ impl Settings {
             .set_timezone_model(model, selected);
     }
 
-    pub fn set_vm_model(&self, model: impl IsA<ListModel>) {
-        self.imp().info_settings_page.set_vm_model(model);
-    }
-
     pub fn init(&self) {
-        let this = self.clone();
-        self.imp()
-            .info_settings_page
-            .connect_local("vm-control-action", false, move |values| {
-                //the value[0] is self
-                this.emit_by_name::<()>("vm-control-action", &[&values[1], &values[2]]);
-                None
-            });
-
         if let Some(row) = self.imp().list_box.row_at_index(0) {
             self.imp().list_box.select_row(Some(&row));
         }
     }
 
-    pub fn bind(&self, _settings_object: &SettingsGObject) {
-        //unbind previous ones
-        self.unbind();
-        //make new
-    }
-
-    pub fn unbind(&self) {
-        // Unbind all stored bindings
-        for binding in self.imp().bindings.borrow_mut().drain(..) {
-            binding.unbind();
-        }
-    }
-
-    pub fn restore_default_display_settings(&self) {
-        self.imp().display_settings_page.restore_default();
-    }
-
-    pub fn set_audio_devices(&self, devices: ListModel) {
+    pub fn set_audio_devices(&self, devices: impl IsA<ListModel>) {
         self.imp().audio_settings_page.set_audio_devices(devices);
     }
 }

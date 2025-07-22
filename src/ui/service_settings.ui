@@ -44,27 +44,13 @@
         <property name="vexpand">false</property>
         <property name="hexpand">false</property>
         <child>
-          <object class="GtkImage" id="status_icon">
+          <object class="StatusIcon" id="status_icon">
             <property name="visible">true</property>
             <property name="can_focus">false</property>
             <property name="margin-top">0</property>
             <property name="valign">center</property>
             <property name="vexpand">false</property>
             <property name="hexpand">false</property>
-            <property name="pixel-size">8</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkLabel" id="status_label">
-            <style><class name="normal-text"/></style>
-            <property name="margin-start">10</property>
-            <property name="margin-end">10</property>
-            <property name="margin-top">10</property>
-            <property name="margin-bottom">10</property>
-            <property name="halign">start</property>
-            <property name="valign">center</property>
-            <property name="xalign">0.0</property>
-            <property name="yalign">0.5</property>
           </object>
         </child>
         <child>
@@ -90,7 +76,6 @@
         <property name="reveal-child">false</property>
         <child>
           <object class="GtkLabel" id="extra_info">
-            <style><class name="normal-text"/></style>
             <property name="label">The info about VM in which this app is running</property>
             <property name="margin-start">10</property>
             <property name="margin-end">10</property>
@@ -101,7 +86,6 @@
     </child>
     <child>
       <object class="GtkLabel" id="details_label">
-        <style><class name="normal-text"/></style>
         <property name="margin-start">20</property>
         <property name="margin-end">10</property>
         <property name="margin-top">0</property>
@@ -123,17 +107,102 @@
           <object class="SecurityIcon" id="security_icon">
             <property name="visible">true</property>
             <property name="can_focus">false</property>
-            <property name="width-request">16</property>
             <property name="height-request">20</property>
+            <property name="show-label">true</property>
           </object>
         </child>
         <child>
           <object class="GtkLabel" id="security_label">
-            <style><class name="normal-text"/></style>
             <property name="margin-start">10</property>
             <property name="margin-end">10</property>
             <property name="margin-top">10</property>
             <property name="margin-bottom">10</property>
+            <property name="halign">start</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox" id="resources_info_box">
+        <style><class name="info-box"/></style>
+        <property name="orientation">vertical</property>
+        <property name="vexpand">false</property>
+        <property name="hexpand">false</property>
+        <property name="margin-start">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">10</property>
+        <child>
+          <object class="GtkSeparator"/>
+        </child>
+        <child>
+          <object class="GtkLabel" id="memory_label">
+            <property name="label">Memory usage:</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
+            <property name="halign">start</property>
+          </object>
+        </child>
+        <child>
+          <object class="Plot" id="memory_plot">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="width-request">320</property>
+            <property name="height-request">80</property>
+            <property name="halign">start</property>
+            <child>
+              <object class="Serie" id="mem_used_serie">
+                <property name="color">darkgreen</property>
+              </object>
+            </child>
+            <child>
+              <object class="Serie" id="mem_needed_serie">
+                <property name="color">green</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="cpu_label">
+            <property name="label">CPU usage:</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
+            <property name="halign">start</property>
+          </object>
+        </child>
+        <child>
+          <object class="Plot" id="cpu_plot">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="width-request">320</property>
+            <property name="height-request">80</property>
+            <property name="halign">start</property>
+            <child>
+              <object class="Serie" id="cpu_sys_serie">
+                <property name="color">purple</property>
+              </object>
+            </child>
+            <child>
+              <object class="Serie" id="cpu_user_serie">
+                <property name="color">magenta</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="network_label">
+            <property name="label">Network usage:</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
+            <property name="halign">start</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkProgressBar" id="network_bar">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="width-request">320</property>
+            <property name="height-request">20</property>
             <property name="halign">start</property>
           </object>
         </child>

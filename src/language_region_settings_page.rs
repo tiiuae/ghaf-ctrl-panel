@@ -5,7 +5,6 @@ use gtk::{gio, glib};
 
 use crate::data_gobject::DataGObject;
 use crate::prelude::*;
-use crate::settings_gobject::SettingsGObject;
 
 //+list of supported resolutions/modes ?
 
@@ -22,7 +21,7 @@ mod imp {
     use crate::prelude::*;
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/language_region_settings_page.ui")]
+    #[template(resource = "/ae/tii/ghaf/controlpanelgui/ui/language_region_settings_page.ui")]
     pub struct LanguageRegionSettingsPage {
         #[template_child]
         pub language_switch: TemplateChild<DropDown>,
@@ -111,19 +110,6 @@ impl Default for LanguageRegionSettingsPage {
 impl LanguageRegionSettingsPage {
     pub fn new() -> Self {
         glib::Object::builder().build()
-    }
-
-    pub fn bind(&self, _settings_object: &SettingsGObject) {
-        //unbind previous ones
-        self.unbind();
-        //make new
-    }
-
-    pub fn unbind(&self) {
-        // Unbind all stored bindings
-        for binding in self.imp().bindings.borrow_mut().drain(..) {
-            binding.unbind();
-        }
     }
 
     #[allow(clippy::cast_possible_truncation)]

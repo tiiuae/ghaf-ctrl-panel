@@ -10,7 +10,7 @@ mod imp {
     use std::sync::OnceLock;
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/language_region_notify_popup.ui")]
+    #[template(resource = "/ae/tii/ghaf/controlpanelgui/ui/language_region_notify_popup.ui")]
     pub struct LanguageRegionNotifyPopup {
         // Vector holding the bindings to properties of `Object`
         pub bindings: RefCell<Vec<Binding>>,

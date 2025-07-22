@@ -1,12 +1,10 @@
 use gtk::glib::{self, Object};
 use gtk::prelude::*;
 
-use givc_common::query::QueryResult;
+use givc_common::query::{QueryResult, TrustLevel, VMStatus};
 use givc_common::types::ServiceType;
 
 use crate::prelude::*;
-use crate::trust_level::TrustLevel;
-use crate::vm_status::VMStatus;
 use crate::wireguard_vms::static_contains;
 
 mod imp {
@@ -15,8 +13,7 @@ mod imp {
     use gtk::subclass::prelude::*;
     use std::cell::RefCell;
 
-    use crate::trust_level::TrustLevel;
-    use crate::vm_status::VMStatus;
+    use givc_common::query::{TrustLevel, VMStatus};
 
     #[derive(Default)]
     pub struct ServiceData {
@@ -64,19 +61,19 @@ glib::wrapper! {
 
 impl ServiceGObject {
     pub fn new(
-        name: String,
-        details: String,
+        name: &str,
+        details: &str,
         status: impl Into<VMStatus>,
         trust_level: impl Into<TrustLevel>,
         service_type: ServiceType,
-        vm_name: Option<String>,
+        vm_name: Option<&str>,
     ) -> Self {
         let is_vm = service_type == ServiceType::VM;
         let is_app = service_type == ServiceType::App;
         let status = status.into();
 
         let display_name = if is_vm {
-            vm_name.clone().unwrap_or_default()
+            vm_name.unwrap_or("")
         } else if is_app {
             name.strip_suffix(".service")
                 .and_then(|name| name.rsplit_once('@'))
@@ -85,11 +82,11 @@ impl ServiceGObject {
                         .chars()
                         .by_ref()
                         .all(|c| c.is_ascii_digit())
-                        .then(|| name.to_owned())
+                        .then_some(name)
                 })
-                .unwrap_or_default()
+                .unwrap_or("")
         } else {
-            String::new()
+            ""
         };
 
         debug!(
@@ -98,7 +95,7 @@ impl ServiceGObject {
                 details: {details}, status: {status}",
         );
 
-        let has_wireguard = is_vm && vm_name.as_ref().is_some_and(|s| static_contains(s));
+        let has_wireguard = is_vm && vm_name.is_some_and(static_contains);
 
         Object::builder()
             .property("name", name)
@@ -120,11 +117,21 @@ impl ServiceGObject {
     }
 
     pub fn is_vm_running(&self) -> bool {
-        self.is_vm() && self.status() == VMStatus::Running
+        self.is_vm() && matches!(self.status(), VMStatus::Running)
     }
 
     pub fn is_service(&self) -> bool {
         !self.is_vm() && !self.is_app()
+    }
+
+    pub fn sort_key(&self) -> (bool, String, bool, String) {
+        let vm_name = self.vm_name();
+        (
+            &vm_name != "ghaf-host",
+            self.vm_name(),
+            !self.is_vm(),
+            self.name(),
+        )
     }
 }
 
@@ -141,12 +148,12 @@ impl From<QueryResult> for ServiceGObject {
         }: QueryResult,
     ) -> Self {
         Self::new(
-            name,
-            description,
+            &name,
+            &description,
             status,
             trust_level,
             service_type,
-            vm_name,
+            vm_name.as_deref(),
         )
     }
 }

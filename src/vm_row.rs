@@ -17,7 +17,7 @@ mod imp {
     use crate::service_gobject::ServiceGObject;
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/org/gnome/controlpanelgui/ui/vm_row.ui")]
+    #[template(resource = "/ae/tii/ghaf/controlpanelgui/ui/vm_row.ui")]
     pub struct VMRow {
         #[template_child]
         pub title_label: TemplateChild<Label>,
@@ -73,11 +73,6 @@ mod imp {
         #[template_callback]
         fn on_vm_pause_clicked(&self) {
             self.emit_action(ControlAction::Pause);
-        }
-
-        #[template_callback]
-        fn on_vm_monitor_clicked(&self) {
-            self.emit_action(ControlAction::Monitor);
         }
     } //end #[gtk::template_callbacks]
 
