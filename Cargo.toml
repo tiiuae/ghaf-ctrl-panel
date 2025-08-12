@@ -16,7 +16,7 @@ gtk = { version = "0.9.6", package = "gtk4", features = ["v4_10"] }
 http = "1.0.0"
 log = "0.4.27"
 octocrab = "0.44"
-pangocairo = "0.20.7"
+pangocairo = "0.21.1"
 regex = "1"
 secrecy = { version = "0.10.3", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }
