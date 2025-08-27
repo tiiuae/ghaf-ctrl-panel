@@ -3,7 +3,6 @@
   <gresource prefix="/ae/tii/ghaf/controlpanelgui">
     <file preprocess="xml-stripblanks">ui/window.ui</file>
     <file preprocess="xml-stripblanks">ui/service_row.ui</file>
-    <file preprocess="xml-stripblanks">ui/vm_row.ui</file>
     <file preprocess="xml-stripblanks">ui/service_settings.ui</file>
     <file preprocess="xml-stripblanks">ui/settings.ui</file>
     <file preprocess="xml-stripblanks">ui/audio_settings.ui</file>

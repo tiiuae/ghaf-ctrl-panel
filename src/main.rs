@@ -21,7 +21,6 @@ mod settings;
 mod settings_action;
 mod status_icon;
 mod typed_list_store;
-mod vm_row;
 mod volume_widget;
 mod window;
 mod wireguard_vms;
