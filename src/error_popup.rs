@@ -66,7 +66,9 @@ mod imp {
 
 glib::wrapper! {
 pub struct ErrorPopup(ObjectSubclass<imp::ErrorPopup>)
-@extends gtk::Widget, gtk::Window, @implements gio::ActionGroup, gio::ActionMap;
+    @extends gtk::Widget, gtk::Window, gtk::Box,
+    @implements gio::ActionGroup, gio::ActionMap, gtk::Accessible, gtk::Buildable,
+        gtk::ConstraintTarget, gtk::Native, gtk::Root, gtk::ShortcutManager;
 }
 
 impl Default for ErrorPopup {

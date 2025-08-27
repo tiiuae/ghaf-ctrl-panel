@@ -189,7 +189,7 @@ mod imp {
 glib::wrapper! {
     pub struct Plot(ObjectSubclass<imp::Plot>)
         @extends gtk::Widget, gtk::DrawingArea,
-        @implements gtk::Buildable;
+        @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 impl Default for Plot {

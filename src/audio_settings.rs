@@ -262,7 +262,8 @@ mod imp {
 
 glib::wrapper! {
     pub struct AudioSettings(ObjectSubclass<imp::AudioSettings>)
-        @extends gtk::Widget, gtk::Box;
+        @extends gtk::Widget, gtk::Box,
+        @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 impl Default for AudioSettings {

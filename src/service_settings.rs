@@ -239,7 +239,7 @@ mod imp {
 glib::wrapper! {
 pub struct ServiceSettings(ObjectSubclass<imp::ServiceSettings>)
     @extends gtk::Widget, gtk::Box,
-    @implements gtk::Buildable, gtk::ConstraintTarget;
+    @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 impl Default for ServiceSettings {

@@ -5,18 +5,18 @@ edition = "2021"
 default-run = "ctrl-panel"
 
 [dependencies]
-adw = { version = "0.7.2", package = "libadwaita", features = ["v1_4"] }
+adw = { version = "0.8", package = "libadwaita", features = ["v1_5"] }
 anyhow = "1.0.98"
 async-channel = "2.3.1"
 chrono = "0.4"
 clap = {version = "4.5.37", features = ["derive", "env"] }
 env_logger = "0.11.8"
 futures = "0.3"
-gtk = { version = "0.9.6", package = "gtk4", features = ["v4_10"] }
+gtk = { version = "0.10", package = "gtk4", features = ["v4_18"] }
 http = "1.0.0"
 log = "0.4.27"
 octocrab = "0.44"
-pangocairo = "0.20.7"
+pangocairo = "0.21"
 regex = "1"
 secrecy = { version = "0.10.3", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }
@@ -37,7 +37,7 @@ mock = []
 pedantic = "deny"
 
 [build-dependencies]
-glib-build-tools = "0.20"
+glib-build-tools = "0.21"
 
 [[bin]]
 name = "ctrl-panel"

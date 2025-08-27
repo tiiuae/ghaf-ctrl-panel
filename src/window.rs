@@ -211,7 +211,8 @@ mod imp {
 glib::wrapper! {
     pub struct ControlPanelGuiWindow(ObjectSubclass<imp::ControlPanelGuiWindow>)
         @extends gtk::Widget, gtk::Window, gtk::ApplicationWindow, adw::ApplicationWindow,
-        @implements gio::ActionGroup, gio::ActionMap, gtk::Root;
+        @implements gio::ActionGroup, gio::ActionMap, gtk::Accessible, gtk::Buildable,
+            gtk::ConstraintTarget, gtk::Native, gtk::Root, gtk::ShortcutManager;
 }
 
 impl ControlPanelGuiWindow {
