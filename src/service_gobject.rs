@@ -134,7 +134,7 @@ impl ServiceGObject {
 
     pub fn update(&self, query_result: QueryResult) {
         self.set_property("details", query_result.description);
-        self.set_property("status", VMStatus::from(query_result.status));
+        self.set_property("status", query_result.status);
     }
 
     pub fn is_vm_running(&self) -> bool {

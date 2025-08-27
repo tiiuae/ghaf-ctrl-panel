@@ -79,7 +79,20 @@ impl ServiceRow {
 
         let margin_binding = object
             .bind_property("is-vm", self, "margin-start")
-            .transform_to(move |binding, is_vm: bool| Some(if is_vm { 0i32 } else { 16 } + if binding.source().and_downcast::<ServiceGObject>().is_some_and(|obj| &obj.vm_name() == "ghaf-host") { 0 } else { 16 }))
+            .transform_to(move |binding, is_vm: bool| {
+                Some(
+                    if is_vm { 0i32 } else { 16 }
+                        + if binding
+                            .source()
+                            .and_downcast::<ServiceGObject>()
+                            .is_some_and(|obj| &obj.vm_name() == "ghaf-host")
+                        {
+                            0
+                        } else {
+                            16
+                        },
+                )
+            })
             .sync_create()
             .build();
         bindings.push(margin_binding);

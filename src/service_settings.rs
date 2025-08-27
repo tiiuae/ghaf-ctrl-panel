@@ -32,7 +32,7 @@ mod imp {
 
     impl Drop for CancelGuard {
         fn drop(&mut self) {
-            self.0.cancel()
+            self.0.cancel();
         }
     }
 
