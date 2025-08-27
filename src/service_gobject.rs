@@ -2,7 +2,7 @@ use gtk::glib::{self, Object};
 use gtk::prelude::*;
 
 use givc_common::query::{QueryResult, TrustLevel, VMStatus};
-use givc_common::types::ServiceType;
+use givc_common::types::{ServiceType, VmType};
 
 use crate::prelude::*;
 use crate::wireguard_vms::static_contains;
@@ -14,18 +14,36 @@ mod imp {
     use std::cell::RefCell;
 
     use givc_common::query::{TrustLevel, VMStatus};
+    use givc_common::types::VmType;
 
-    #[derive(Default)]
     pub struct ServiceData {
         pub name: String,         //unique service name, used as id
         pub display_name: String, //user-friendly name
         pub is_vm: bool,
         pub is_app: bool,
         pub vm_name: String, //for apps running in VMs
+        pub vm_type: VmType,
         pub details: String,
         pub status: VMStatus,
         pub trust_level: TrustLevel,
         pub has_wireguard: bool,
+    }
+
+    impl Default for ServiceData {
+        fn default() -> Self {
+            Self {
+                name: String::new(),
+                display_name: String::new(),
+                is_vm: false,
+                is_app: false,
+                vm_name: String::new(),
+                vm_type: VmType::Host,
+                details: String::new(),
+                status: VMStatus::default(),
+                trust_level: TrustLevel::default(),
+                has_wireguard: false,
+            }
+        }
     }
 
     #[derive(Default, Properties)]
@@ -36,6 +54,7 @@ mod imp {
         #[property(name = "is-vm", get, set, type = bool, member = is_vm)]
         #[property(name = "is-app", get, set, type = bool, member = is_app)]
         #[property(name = "vm-name", get, set, type = String, member = vm_name)]
+        #[property(name = "vm-type", get, set, type = VmType, member = vm_type, builder(VmType::Host))]
         #[property(name = "details", get, set, type = String, member = details)]
         #[property(name = "status", get, set, type = VMStatus, member = status, builder(VMStatus::default()))]
         #[property(name = "trust-level", get, set, type = TrustLevel, member = trust_level, builder(TrustLevel::default()))]
@@ -67,6 +86,7 @@ impl ServiceGObject {
         trust_level: impl Into<TrustLevel>,
         service_type: ServiceType,
         vm_name: Option<&str>,
+        vm_type: VmType,
     ) -> Self {
         let is_vm = service_type == ServiceType::VM;
         let is_app = service_type == ServiceType::App;
@@ -103,6 +123,7 @@ impl ServiceGObject {
             .property("is-vm", is_vm)
             .property("is-app", is_app)
             .property("vm-name", vm_name.unwrap_or_default())
+            .property("vm-type", vm_type)
             .property("details", details)
             //for demo
             .property("status", status)
@@ -144,6 +165,7 @@ impl From<QueryResult> for ServiceGObject {
             trust_level,
             service_type,
             vm_name,
+            vm_type,
             ..
         }: QueryResult,
     ) -> Self {
@@ -154,6 +176,7 @@ impl From<QueryResult> for ServiceGObject {
             trust_level,
             service_type,
             vm_name.as_deref(),
+            vm_type,
         )
     }
 }

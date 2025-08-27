@@ -241,7 +241,7 @@ mod imp {
             ServiceGObject: From<T>,
         {
             use givc_common::query::{TrustLevel, VMStatus};
-            use givc_common::types::ServiceType;
+            use givc_common::types::{ServiceType, VmType};
 
             let n = self.services.borrow().len();
             if n == 0 {
@@ -255,6 +255,7 @@ mod imp {
                             TrustLevel::Warning,
                             ServiceType::VM,
                             Some("ghaf-host"),
+                            VmType::Host,
                         ))),
                 );
                 self.services
@@ -280,7 +281,7 @@ mod imp {
         #[cfg(feature = "mock")]
         fn fill_by_mock_data(&self) {
             use givc_common::query::{TrustLevel, VMStatus};
-            use givc_common::types::ServiceType;
+            use givc_common::types::{ServiceType, VmType};
 
             self.extend([
                 ServiceGObject::new(
@@ -290,6 +291,7 @@ mod imp {
                     TrustLevel::NotSecure,
                     ServiceType::VM,
                     Some("zathura-vm"),
+                    VmType::AppVM,
                 ),
                 ServiceGObject::new(
                     "zathura@1.service",
@@ -298,6 +300,7 @@ mod imp {
                     TrustLevel::Secure,
                     ServiceType::App,
                     Some("zathura-vm"),
+                    VmType::AppVM,
                 ),
                 ServiceGObject::new(
                     "chrome@1.service",
@@ -306,6 +309,7 @@ mod imp {
                     TrustLevel::Secure,
                     ServiceType::App,
                     Some("TestVM"),
+                    VmType::AppVM,
                 ),
                 ServiceGObject::new(
                     "appflowy@1.service",
@@ -314,6 +318,16 @@ mod imp {
                     TrustLevel::Secure,
                     ServiceType::Svc,
                     Some("appflowy-vm"),
+                    VmType::AppVM,
+                ),
+                ServiceGObject::new(
+                    "microvm@admin-vm.service",
+                    "AdminVM",
+                    VMStatus::Running,
+                    TrustLevel::Secure,
+                    ServiceType::VM,
+                    Some("admin-vm"),
+                    VmType::AdmVM,
                 ),
             ]);
         }
@@ -338,7 +352,7 @@ mod imp {
         #[allow(clippy::unused_async)]
         async fn reconnect(&self) {
             use givc_common::query::{TrustLevel, VMStatus};
-            use givc_common::types::ServiceType;
+            use givc_common::types::{ServiceType, VmType};
             self.fill_by_mock_data();
 
             glib::spawn_future_local(glib::clone!(
@@ -353,6 +367,7 @@ mod imp {
                         TrustLevel::NotSecure,
                         ServiceType::VM,
                         Some("appflowy-vm"),
+                        VmType::AppVM,
                     )));
                     glib::timeout_future_seconds(3).await;
                     model.imp().extend(Some(ServiceGObject::new(
@@ -362,6 +377,7 @@ mod imp {
                         TrustLevel::Secure,
                         ServiceType::App,
                         Some("zathura-vm"),
+                        VmType::AppVM,
                     )));
                     glib::timeout_future_seconds(3).await;
                     model.imp().extend(Some(ServiceGObject::new(
@@ -371,6 +387,7 @@ mod imp {
                         TrustLevel::Secure,
                         ServiceType::Mgr,
                         None,
+                        VmType::AppVM,
                     )));
                 }
             ));
