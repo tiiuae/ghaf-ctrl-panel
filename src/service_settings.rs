@@ -1,3 +1,4 @@
+use givc_common::types::VmType;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{gio, glib};
@@ -293,6 +294,10 @@ impl ServiceSettings {
             .wireguard_button
             .set_visible(object.has_wireguard());
         self.imp().resources_info_box.set_visible(object.is_vm());
+
+        self.imp()
+            .action_menu_button
+            .set_sensitive(object.vm_type() != VmType::AdmVM);
 
         //action popover
         if object.is_vm() {
