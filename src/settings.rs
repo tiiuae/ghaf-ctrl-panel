@@ -180,7 +180,8 @@ mod imp {
 
 glib::wrapper! {
 pub struct Settings(ObjectSubclass<imp::Settings>)
-    @extends gtk::Widget, gtk::Box;
+    @extends gtk::Widget, gtk::Box,
+    @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 impl Default for Settings {

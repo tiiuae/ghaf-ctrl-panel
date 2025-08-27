@@ -53,7 +53,8 @@ mod imp {
 
 glib::wrapper! {
 pub struct ServiceRow(ObjectSubclass<imp::ServiceRow>)
-    @extends gtk::Widget, gtk::Box;
+    @extends gtk::Widget, gtk::Box,
+    @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 impl Default for ServiceRow {
