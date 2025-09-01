@@ -18,10 +18,9 @@ use givc_client::endpoint::TlsConfig;
 use log::debug;
 
 mod imp {
-    use adw::subclass::prelude::*;
+    use adw::{prelude::*, subclass::prelude::*};
     use gio::ListStore;
     use glib::Properties;
-    use gtk::prelude::*;
     use gtk::CssProvider;
     use gtk::{gdk, gio, glib};
     use std::cell::RefCell;
@@ -201,8 +200,7 @@ mod imp {
 
         fn show_about(&self) {
             let window = self.obj().active_window().unwrap();
-            let about = adw::AboutWindow::builder()
-                .transient_for(&window)
+            let about = adw::AboutDialog::builder()
                 .application_name("Ghaf Control Panel")
                 .application_icon("ae.tii.ghaf./controlpanelgui")
                 .developer_name("dmitry")
@@ -210,7 +208,7 @@ mod imp {
                 .copyright("© 2024 dmitry")
                 .build();
 
-            about.present();
+            about.present(Some(&window));
         }
     }
 

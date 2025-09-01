@@ -86,7 +86,7 @@ pub async fn auth(config: &mut GithubConfig) -> Result<(), Error> {
     // is run in main thread, and use the local variant from there.
     gtk::glib::spawn_future(async move {
         gtk::glib::spawn_future_local(async move {
-            let dlg = adw::MessageDialog::new(gtk::Window::NONE, Some("Github Login"), None);
+            let dlg = adw::AlertDialog::new(Some("Github Login"), None);
             let (cncl_tx, cncl_rx) = async_channel::bounded::<()>(1);
             let _cancel_tx = cancel_tx;
             dlg.set_body(&message);
@@ -95,12 +95,12 @@ pub async fn auth(config: &mut GithubConfig) -> Result<(), Error> {
             dlg.connect_response(None, move |_dlg, _ers| {
                 let _ = cncl_tx.send_blocking(());
             });
-            dlg.present();
+            dlg.present(gtk::Window::NONE);
             futures::select! {
                 _ = rx.recv().fuse() => (),
                 _ = cncl_rx.recv().fuse() => (),
             };
-            dlg.destroy();
+            dlg.force_close();
         });
     });
 

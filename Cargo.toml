@@ -5,7 +5,7 @@ edition = "2021"
 default-run = "ctrl-panel"
 
 [dependencies]
-adw = { version = "0.8", package = "libadwaita", features = ["v1_5"] }
+adw = { version = "0.8", package = "libadwaita", features = ["v1_7"] }
 anyhow = "1.0.98"
 async-channel = "2.3.1"
 chrono = "0.4"
