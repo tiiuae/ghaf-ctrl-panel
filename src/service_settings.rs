@@ -295,9 +295,10 @@ impl ServiceSettings {
             .set_visible(object.has_wireguard());
         self.imp().resources_info_box.set_visible(object.is_vm());
 
-        self.imp()
-            .action_menu_button
-            .set_sensitive(object.vm_type() != VmType::AdmVM);
+        self.imp().action_menu_button.set_sensitive(!matches!(
+            object.vm_type(),
+            VmType::AdmVM | VmType::SysVM | VmType::Host
+        ));
 
         //action popover
         if object.is_vm() {
