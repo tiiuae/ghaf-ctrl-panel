@@ -79,7 +79,9 @@ mod imp {
 
 glib::wrapper! {
 pub struct ConnectionConfig(ObjectSubclass<imp::ConnectionConfig>)
-@extends gtk::Widget, gtk::Window, @implements gio::ActionGroup, gio::ActionMap;
+    @extends gtk::Widget, gtk::Window, gtk::Box,
+    @implements gio::ActionGroup, gio::ActionMap, gtk::Accessible, gtk::Buildable,
+        gtk::ConstraintTarget, gtk::Native, gtk::Root, gtk::ShortcutManager;
 }
 
 impl Default for ConnectionConfig {

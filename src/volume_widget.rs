@@ -129,7 +129,7 @@ mod imp {
 glib::wrapper! {
     pub struct VolumeWidget(ObjectSubclass<imp::VolumeWidget>)
         @extends gtk::Widget, gtk::Box,
-        @implements gtk::Buildable;
+        @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 impl Default for VolumeWidget {

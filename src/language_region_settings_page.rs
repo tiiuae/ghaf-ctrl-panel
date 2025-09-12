@@ -98,7 +98,8 @@ mod imp {
 
 glib::wrapper! {
 pub struct LanguageRegionSettingsPage(ObjectSubclass<imp::LanguageRegionSettingsPage>)
-    @extends gtk::Widget, gtk::Box;
+    @extends gtk::Widget, gtk::Box,
+    @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 impl Default for LanguageRegionSettingsPage {

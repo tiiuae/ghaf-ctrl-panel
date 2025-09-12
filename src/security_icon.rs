@@ -69,7 +69,7 @@ mod imp {
 glib::wrapper! {
     pub struct SecurityIcon(ObjectSubclass<imp::SecurityIcon>)
         @extends gtk::Widget, gtk::Box,
-        @implements gtk::Buildable, gtk::Orientable;
+        @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget, gtk::Orientable;
 }
 
 impl Default for SecurityIcon {
