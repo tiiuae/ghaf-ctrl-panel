@@ -295,10 +295,9 @@ impl ServiceSettings {
             .set_visible(object.has_wireguard());
         self.imp().resources_info_box.set_visible(object.is_vm());
 
-        self.imp().action_menu_button.set_sensitive(!matches!(
-            object.vm_type(),
-            VmType::AdmVM | VmType::SysVM | VmType::Host
-        ));
+        // kluge: Set menu button sensitive before changing its popover menu to avoid menu becoming
+        // insensitive in some scenarios.
+        self.imp().action_menu_button.set_sensitive(true);
 
         //action popover
         if object.is_vm() {
@@ -362,6 +361,10 @@ impl ServiceSettings {
                 .set_popover(Some(&self.imp().popover_menu_2.get()));
         }
 
+        self.imp().action_menu_button.set_sensitive(!matches!(
+            object.vm_type(),
+            VmType::AdmVM | VmType::SysVM | VmType::Host
+        ));
         *self.imp().service.borrow_mut() = Some(object.clone());
 
         if is_vm_or_app {
