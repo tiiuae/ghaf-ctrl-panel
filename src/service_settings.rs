@@ -142,7 +142,7 @@ mod imp {
                 self.obj()
                     .emit_by_name::<()>("control-action", &[&action, &vm]);
             }
-            self.popover_menu.popdown();
+            self.action_menu_button.popdown();
         }
 
         #[template_callback]
@@ -153,13 +153,16 @@ mod imp {
         #[template_callback]
         fn on_shutdown_clicked(&self) {
             self.emit_control_action(ControlAction::Shutdown);
-            self.popover_menu_2.popdown();
         }
 
         #[template_callback]
         fn on_pause_clicked(&self) {
             self.emit_control_action(ControlAction::Pause);
-            self.popover_menu_2.popdown();
+        }
+
+        #[template_callback]
+        fn on_resume_clicked(&self) {
+            self.emit_control_action(ControlAction::Resume);
         }
 
         #[allow(clippy::unused_self)]
