@@ -279,6 +279,12 @@ impl AudioSettings {
     }
 
     pub fn set_audio_devices(&self, devices: impl IsA<ListModel>) {
+        /* Temporarily freeze property notifications to prevent signal handlers
+        from being triggered during audio device initialization for speaker and mic.
+        The guards will automatically thaw notifications when they go out of scope. */
+        let _speaker_guard = self.imp().speaker_select().freeze_notify();
+        let _mic_guard = self.imp().mic_select().freeze_notify();
+
         //setup factory
         self.setup_factory(AudioDeviceUserType::Mic);
         self.setup_factory(AudioDeviceUserType::Speaker);
