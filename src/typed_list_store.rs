@@ -87,6 +87,14 @@ impl<T: IsA<Object>> From<DropDown> for TypedDropDown<T> {
     }
 }
 
+impl<T: IsA<Object>> Deref for TypedDropDown<T> {
+    type Target = DropDown;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 pub trait TypedSelectionWrapperExt<T: IsA<Object>> {
     fn selected_obj(&self) -> Option<T>;
 }
