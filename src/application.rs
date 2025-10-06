@@ -320,7 +320,7 @@ impl ControlPanelGuiApplication {
     }
 
     pub fn perform_setting_action(&self, action: SettingsAction) {
-        eprintln!("Performing settings action... {action:?}");
+        debug!("Performing settings action... {action:?}");
         match action {
             SettingsAction::RegionNLanguage { locale, timezone } => {
                 self.imp().set_locale_timezone(locale, timezone);
