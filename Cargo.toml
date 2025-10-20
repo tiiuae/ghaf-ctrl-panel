@@ -25,7 +25,7 @@ syslog = "7.0.0"
 thiserror = "2.0.12"
 tokio = { version = "1.44", features = ["rt", "time", "macros"] }
 toml = "0.9"
-zbus = "5.6"
+zbus = "5.12"
 
 givc-client = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main" }
 givc-common = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main", features = ["glib"] }
