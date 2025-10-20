@@ -600,7 +600,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.61.1",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -884,13 +884,13 @@ dependencies = [
  "gobject-sys",
  "libc",
  "system-deps",
- "windows-sys 0.61.1",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
 name = "givc-client"
 version = "0.0.1"
-source = "git+https://github.com/tiiuae/ghaf-givc?branch=main#2766afdcd318a969a61075adf2ec763b049cf8f0"
+source = "git+https://github.com/tiiuae/ghaf-givc?branch=main#4ce67ae3d48ecaf99f7ff2e07d5f3daec0b9c915"
 dependencies = [
  "anyhow",
  "async-channel",
@@ -908,7 +908,7 @@ dependencies = [
 [[package]]
 name = "givc-common"
 version = "0.0.1"
-source = "git+https://github.com/tiiuae/ghaf-givc?branch=main#2766afdcd318a969a61075adf2ec763b049cf8f0"
+source = "git+https://github.com/tiiuae/ghaf-givc?branch=main#4ce67ae3d48ecaf99f7ff2e07d5f3daec0b9c915"
 dependencies = [
  "anyhow",
  "glib",
@@ -2112,7 +2112,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.61.1",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -2501,7 +2501,7 @@ dependencies = [
  "getrandom 0.3.3",
  "once_cell",
  "rustix",
- "windows-sys 0.61.1",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
