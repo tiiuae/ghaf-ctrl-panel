@@ -1,8 +1,8 @@
 use gio::{ListModel, ListStore};
 use glib::{Object, SignalHandlerId};
 use gtk::{
-    self, gio, glib, prelude::*, CustomFilter, DropDown, ListItem, SignalListItemFactory,
-    SingleSelection, Widget,
+    self, CustomFilter, DropDown, ListItem, SignalListItemFactory, SingleSelection, Widget, gio,
+    glib, prelude::*,
 };
 use std::ops::Deref;
 

@@ -6,7 +6,7 @@ pub type Formatter = Box<dyn Fn(f32) -> String>;
 mod imp {
     use crate::serie::Serie;
     use glib::{Object, Properties};
-    use gtk::{cairo, glib, prelude::*, subclass::prelude::*, Builder};
+    use gtk::{Builder, cairo, glib, prelude::*, subclass::prelude::*};
     use std::cell::{Cell, RefCell};
 
     #[derive(Default, Properties)]

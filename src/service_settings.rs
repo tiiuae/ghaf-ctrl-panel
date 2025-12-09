@@ -12,8 +12,8 @@ mod imp {
     use gtk::prelude::*;
     use gtk::subclass::prelude::*;
     use gtk::{
-        gio, glib, Button, CompositeTemplate, Label, MenuButton, Popover, Revealer, Separator,
-        ToggleButton,
+        Button, CompositeTemplate, Label, MenuButton, Popover, Revealer, Separator, ToggleButton,
+        gio, glib,
     };
     use std::cell::RefCell;
     use std::sync::OnceLock;

@@ -3,11 +3,11 @@ use gtk::subclass::prelude::*;
 use gtk::{gio, glib};
 
 mod imp {
-    use glib::subclass::Signal;
     use glib::Binding;
+    use glib::subclass::Signal;
     use gtk::prelude::*;
     use gtk::subclass::prelude::*;
-    use gtk::{glib, Button, CompositeTemplate, Entry};
+    use gtk::{Button, CompositeTemplate, Entry, glib};
     use std::cell::RefCell;
     use std::sync::OnceLock;
 
@@ -66,9 +66,11 @@ mod imp {
         fn signals() -> &'static [Signal] {
             static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
             SIGNALS.get_or_init(|| {
-                vec![Signal::builder("new-config-applied")
-                    .param_types([String::static_type(), u32::static_type()])
-                    .build()]
+                vec![
+                    Signal::builder("new-config-applied")
+                        .param_types([String::static_type(), u32::static_type()])
+                        .build(),
+                ]
             })
         }
     }

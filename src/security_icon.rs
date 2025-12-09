@@ -7,7 +7,7 @@ mod imp {
 
     use givc_common::query::TrustLevel;
     use glib::Properties;
-    use gtk::{glib, prelude::*, subclass::prelude::*, Image, Label, Orientation};
+    use gtk::{Image, Label, Orientation, glib, prelude::*, subclass::prelude::*};
 
     #[derive(Default, Properties)]
     #[properties(wrapper_type = super::SecurityIcon)]

@@ -300,7 +300,7 @@ impl AudioControl {
         });
     }
 
-    fn proxy(&self) -> impl std::future::Future<Output = Option<Proxy>> {
+    fn proxy(&self) -> impl Future<Output = Option<Proxy>> + 'static {
         let conn = self.connection.clone();
 
         async move {

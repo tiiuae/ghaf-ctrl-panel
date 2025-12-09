@@ -6,7 +6,7 @@ pub mod prelude {
 }
 
 use clap::Parser;
-use gtk::{gdk, gio, glib, prelude::*, CssProvider};
+use gtk::{CssProvider, gdk, gio, glib, prelude::*};
 
 use crate::prelude::*;
 

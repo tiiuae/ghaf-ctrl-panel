@@ -12,8 +12,8 @@ mod imp {
     use gio::ListModel;
     use gtk::prelude::*;
     use gtk::{
-        gio, glib, CompositeTemplate, Image, ListView, MenuButton, SingleSelection, Stack,
-        ToggleButton,
+        CompositeTemplate, Image, ListView, MenuButton, SingleSelection, Stack, ToggleButton, gio,
+        glib,
     };
 
     use crate::control_action::ControlAction;
@@ -268,10 +268,10 @@ impl ControlPanelGuiWindow {
             async move {
                 let app = win.get_app_ref();
                 loop {
-                    if let Ok(stats) = app.get_stats(vm.clone()).await {
-                        if tx.send(stats).await.is_err() {
-                            break;
-                        }
+                    if let Ok(stats) = app.get_stats(vm.clone()).await
+                        && tx.send(stats).await.is_err()
+                    {
+                        break;
                     }
                     glib::timeout_future_seconds(1).await;
                 }

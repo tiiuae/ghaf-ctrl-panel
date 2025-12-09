@@ -6,7 +6,7 @@ mod imp {
     use glib::{Binding, Properties, SignalHandlerId};
     use gtk::prelude::*;
     use gtk::subclass::prelude::*;
-    use gtk::{glib, CompositeTemplate, Scale, ToggleButton};
+    use gtk::{CompositeTemplate, Scale, ToggleButton, glib};
     use std::cell::{Cell, RefCell};
     use std::sync::OnceLock;
 
