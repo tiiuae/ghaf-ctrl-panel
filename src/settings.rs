@@ -4,11 +4,11 @@ use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
 mod imp {
-    use glib::subclass::Signal;
     use glib::Binding;
+    use glib::subclass::Signal;
     use gtk::prelude::*;
     use gtk::subclass::prelude::*;
-    use gtk::{glib, CompositeTemplate, ListBox, Stack};
+    use gtk::{CompositeTemplate, ListBox, Stack, glib};
     use std::cell::RefCell;
     use std::sync::OnceLock;
 

@@ -1,18 +1,18 @@
 use gio::ListModel;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{gio, glib, CustomFilter, FilterListModel, Label};
+use gtk::{CustomFilter, FilterListModel, Label, gio, glib};
 use imp::AudioDeviceUserType;
 
 use crate::audio_device_gobject::{AudioDeviceGObject, AudioDeviceType};
 use crate::prelude::*;
 
 mod imp {
-    use glib::subclass::Signal;
     use glib::Binding;
+    use glib::subclass::Signal;
     use gtk::prelude::*;
     use gtk::subclass::prelude::*;
-    use gtk::{glib, CompositeTemplate, DropDown};
+    use gtk::{CompositeTemplate, DropDown, glib};
     use std::cell::RefCell;
     use std::sync::OnceLock;
 

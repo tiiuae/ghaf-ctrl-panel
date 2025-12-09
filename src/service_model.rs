@@ -17,7 +17,7 @@ mod imp {
 
     use anyhow::Context;
     use async_channel::Sender;
-    use gio::{subclass::prelude::*, ListModel};
+    use gio::{ListModel, subclass::prelude::*};
     use givc_client::endpoint::TlsConfig;
     use givc_client::{self, AdminClient};
     use givc_common::{address::EndpointAddress, query::Event};

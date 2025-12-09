@@ -7,7 +7,7 @@ mod imp {
     use glib::{Binding, Properties};
     use gtk::prelude::*;
     use gtk::subclass::prelude::*;
-    use gtk::{glib, Box, CheckButton, CompositeTemplate, Entry, Label, TextBuffer, TextView};
+    use gtk::{Box, CheckButton, CompositeTemplate, Entry, Label, TextBuffer, TextView, glib};
     use std::cell::RefCell;
     use std::fmt::Write;
     use std::fs;

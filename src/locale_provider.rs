@@ -50,32 +50,29 @@ impl LocaleProvider {
             .map(str::trim)
             .chain(std::iter::once(""))
         {
-            if line.is_empty() {
-                if let Some((locale, lang, terr)) = locale
+            if line.is_empty()
+                && let Some((locale, lang, terr)) = locale
                     .take()
                     .map(|loc: String| (loc, lang.take(), terr.take()))
-                {
-                    if locale
-                        .chars()
-                        .next()
-                        .is_some_and(|c| c.is_ascii_lowercase())
-                    {
-                        let lang = lang.map_or_else(
-                            || locale.clone(),
-                            |lang| {
-                                if let Some(terr) = terr {
-                                    format!("{lang} ({terr})")
-                                } else {
-                                    lang
-                                }
-                            },
-                        );
-                        locales.push(LanguageRegionEntry {
-                            code: locale,
-                            display: lang,
-                        });
-                    }
-                }
+                && locale
+                    .chars()
+                    .next()
+                    .is_some_and(|c| c.is_ascii_lowercase())
+            {
+                let lang = lang.map_or_else(
+                    || locale.clone(),
+                    |lang| {
+                        if let Some(terr) = terr {
+                            format!("{lang} ({terr})")
+                        } else {
+                            lang
+                        }
+                    },
+                );
+                locales.push(LanguageRegionEntry {
+                    code: locale,
+                    display: lang,
+                });
             }
             if let Some(loc) = line
                 .strip_prefix("locale: ")

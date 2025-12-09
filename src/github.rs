@@ -5,7 +5,7 @@
 use adw::prelude::*;
 use futures::FutureExt;
 use http::header::ACCEPT;
-use octocrab::{models::issues::Issue, Octocrab};
+use octocrab::{Octocrab, models::issues::Issue};
 use secrecy::{ExposeSecret, SecretString};
 use serde::{Deserialize, Serialize, Serializer};
 use std::path::{Path, PathBuf};

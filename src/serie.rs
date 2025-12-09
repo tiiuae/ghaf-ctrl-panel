@@ -1,7 +1,7 @@
 use gtk::{glib, subclass::prelude::*};
 
 mod imp {
-    use glib::{subclass::Signal, Properties};
+    use glib::{Properties, subclass::Signal};
     use gtk::{gdk, glib, prelude::*, subclass::prelude::*};
     use std::cell::{Cell, RefCell};
     use std::collections::VecDeque;

@@ -9,11 +9,11 @@ use crate::prelude::*;
 //+list of supported resolutions/modes ?
 
 mod imp {
-    use glib::subclass::Signal;
     use glib::Binding;
+    use glib::subclass::Signal;
     use gtk::prelude::*;
     use gtk::subclass::prelude::*;
-    use gtk::{glib, CompositeTemplate, DropDown};
+    use gtk::{CompositeTemplate, DropDown, glib};
     use std::cell::RefCell;
     use std::sync::OnceLock;
 

@@ -6,7 +6,7 @@ mod imp {
 
     use givc_common::query::VMStatus;
     use glib::Properties;
-    use gtk::{glib, prelude::*, subclass::prelude::*, Label, Orientation, Picture};
+    use gtk::{Label, Orientation, Picture, glib, prelude::*, subclass::prelude::*};
 
     #[derive(Default, Properties)]
     #[properties(wrapper_type = super::StatusIcon)]
