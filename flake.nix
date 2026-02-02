@@ -107,6 +107,8 @@
              pkgs.pkg-config
              pkgs.protobuf
              pkgs.dbus
+             pkgs.cargo-edit
+             (pkgs.writeShellScriptBin "update-deps" (builtins.readFile ./scripts/update-deps.sh))
           ];
         };
       }) // {
