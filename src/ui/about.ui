@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="AboutPage" parent="GtkBox">
+    <style><class name="info-box"/></style>
+    <property name="orientation">vertical</property>
+    <property name="vexpand">true</property>
+    <property name="hexpand">true</property>
+    <property name="margin-start">24</property>
+    <property name="margin-end">24</property>
+    <property name="margin-top">20</property>
+    <property name="margin-bottom">20</property>
+    <property name="spacing">14</property>
+    <child>
+      <object class="GtkLabel">
+        <property name="label">About this System</property>
+        <style><class name="title"/></style>
+        <property name="halign">start</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkFrame">
+        <property name="hexpand">true</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <property name="margin-start">14</property>
+            <property name="margin-end">14</property>
+            <property name="margin-top">14</property>
+            <property name="margin-bottom">14</property>
+            <child>
+              <object class="GtkLabel" id="ghaf_version_value">
+                <property name="label">Ghaf Version: unknown</property>
+                <property name="halign">start</property>
+                <property name="xalign">0</property>
+                <property name="selectable">true</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="secure_boot_value">
+                <property name="label">Secure Boot: unknown</property>
+                <property name="halign">start</property>
+                <property name="xalign">0</property>
+                <property name="selectable">true</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="disk_encryption_value">
+                <property name="label">Disk Encryption: unknown</property>
+                <property name="halign">start</property>
+                <property name="xalign">0</property>
+                <property name="selectable">true</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparator">
+                <property name="orientation">horizontal</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="yubikey_enrollment_value">
+                <property name="label">YubiKey: unknown</property>
+                <property name="halign">start</property>
+                <property name="xalign">0</property>
+                <property name="selectable">true</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="device_id_value">
+                <property name="label">Device ID: unknown</property>
+                <property name="halign">start</property>
+                <property name="xalign">0</property>
+                <property name="wrap">true</property>
+                <property name="selectable">true</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="vexpand">true</property>
+      </object>
+    </child>
+  </template>
+</interface>

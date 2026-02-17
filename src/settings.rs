@@ -13,6 +13,7 @@ mod imp {
     use std::sync::OnceLock;
 
     //use crate::service_gobject::ServiceGObject; will be used in the future
+    use crate::about::AboutPage;
     use crate::audio_device_gobject::AudioDeviceType;
     use crate::audio_settings::AudioSettings;
     use crate::control_action::ControlAction;
@@ -31,6 +32,8 @@ mod imp {
         pub audio_settings_page: TemplateChild<AudioSettings>,
         #[template_child]
         pub language_region_settings_page: TemplateChild<LanguageRegionSettingsPage>,
+        #[template_child]
+        pub about_page: TemplateChild<AboutPage>,
         //pub vm_model: RefCell<ListModel>,
 
         // Vector holding the bindings to properties of `Object`

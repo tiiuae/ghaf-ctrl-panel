@@ -8,6 +8,13 @@ use gtk::{self, gio, glib};
 use crate::prelude::*;
 use crate::service_gobject::ServiceGObject;
 
+#[derive(Debug, Clone)]
+pub struct HostSysinfoStatus {
+    pub ghaf_version: String,
+    pub secure_boot: String,
+    pub disk_encryption: String,
+}
+
 mod imp {
     #![cfg_attr(feature = "mock", allow(unused_imports, dead_code))]
 
@@ -26,7 +33,7 @@ mod imp {
     use gtk::{gio, glib, prelude::*};
     use tokio::runtime::Builder;
 
-    use super::{StartResponse, StatsResponse};
+    use super::{HostSysinfoStatus, StartResponse, StatsResponse};
 
     use crate::prelude::*;
     use crate::service_gobject::ServiceGObject;
@@ -86,6 +93,7 @@ mod imp {
         Empty,
         Stats(StatsResponse),
         Start(StartResponse),
+        SysinfoStatus(HostSysinfoStatus),
         Error(anyhow::Error),
     }
 
@@ -152,6 +160,27 @@ mod imp {
         }
     }
 
+    impl From<Result<HostSysinfoStatus, anyhow::Error>> for Response {
+        fn from(r: Result<HostSysinfoStatus, anyhow::Error>) -> Response {
+            match r {
+                Ok(r) => Response::SysinfoStatus(r),
+                Err(e) => Response::Error(e),
+            }
+        }
+    }
+
+    impl std::convert::TryFrom<Response> for HostSysinfoStatus {
+        type Error = anyhow::Error;
+
+        fn try_from(r: Response) -> Result<HostSysinfoStatus, Self::Error> {
+            match r {
+                Response::SysinfoStatus(status) => Ok(status),
+                Response::Error(e) => Err(e),
+                _ => anyhow::bail!("Unexpected response"),
+            }
+        }
+    }
+
     type Task = Box<
         dyn for<'a> FnOnce(
                 &'a AdminClient,
@@ -162,6 +191,24 @@ mod imp {
     >;
 
     impl ServiceModel {
+        #[cfg(not(feature = "mock"))]
+        pub(super) async fn get_sysinfo_status_from_host(
+            &self,
+        ) -> Result<HostSysinfoStatus, anyhow::Error> {
+            debug!("ServiceModel: querying host sysinfo status via admin RPC");
+            let sysinfo = self
+                .client_cmd(async move |client| {
+                    let status = client.sysinfo().await?;
+                    Ok(HostSysinfoStatus {
+                        ghaf_version: status.ghaf_version,
+                        secure_boot: status.secure_boot,
+                        disk_encryption: status.disk_encrypted,
+                    })
+                })
+                .await?;
+            Ok(sysinfo)
+        }
+
         pub fn delayed_reconnect(&self) {
             let delay = std::time::Duration::from_millis(100);
             let mut guard = self.reconnect_timeout.borrow_mut();
@@ -502,6 +549,7 @@ mod imp {
             )));
         }
     }
+
 }
 
 glib::wrapper! {
@@ -601,6 +649,11 @@ impl ServiceModel {
             .await
     }
 
+    #[cfg(not(feature = "mock"))]
+    pub async fn get_sysinfo_status_from_host(&self) -> Result<HostSysinfoStatus, anyhow::Error> {
+        self.imp().get_sysinfo_status_from_host().await
+    }
+
     #[cfg(feature = "mock")]
     #[allow(clippy::unused_self)]
     pub fn get_stats(
@@ -625,6 +678,16 @@ impl ServiceModel {
                 ..Default::default()
             })
         }
+    }
+
+    #[cfg(feature = "mock")]
+    #[allow(clippy::unused_self)]
+    pub async fn get_sysinfo_status_from_host(&self) -> Result<HostSysinfoStatus, anyhow::Error> {
+        Ok(HostSysinfoStatus {
+            ghaf_version: "0.0.0-mock".to_string(),
+            secure_boot: "Disabled".to_string(),
+            disk_encryption: "Disabled".to_string(),
+        })
     }
 
     #[allow(clippy::unused_async, clippy::unused_self)]

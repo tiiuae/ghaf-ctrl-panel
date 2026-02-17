@@ -1,4 +1,5 @@
 mod application;
+mod about;
 mod audio_control;
 mod audio_device_gobject;
 mod audio_settings;
