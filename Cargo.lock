@@ -547,6 +547,7 @@ dependencies = [
  "regex",
  "secrecy",
  "serde",
+ "serde_json",
  "strum",
  "syslog",
  "thiserror",
@@ -1145,7 +1146,7 @@ dependencies = [
 [[package]]
 name = "givc-client"
 version = "0.0.1"
-source = "git+https://github.com/vunnyso/ghaf-givc?branch=vs-AddHostCmds#4b154759fbf78de67a0fbc2aee73f912c5be1023"
+source = "git+https://github.com/vunnyso/ghaf-givc?branch=vs-AddHostCmds#dee9a14a6556295c8bebae9e9f4d1476995364ad"
 dependencies = [
  "anyhow",
  "async-channel",
@@ -1164,7 +1165,7 @@ dependencies = [
 [[package]]
 name = "givc-common"
 version = "0.0.1"
-source = "git+https://github.com/vunnyso/ghaf-givc?branch=vs-AddHostCmds#4b154759fbf78de67a0fbc2aee73f912c5be1023"
+source = "git+https://github.com/vunnyso/ghaf-givc?branch=vs-AddHostCmds#dee9a14a6556295c8bebae9e9f4d1476995364ad"
 dependencies = [
  "anyhow",
  "glib",

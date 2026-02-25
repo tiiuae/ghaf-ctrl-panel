@@ -11,8 +11,8 @@ use crate::service_gobject::ServiceGObject;
 #[derive(Debug, Clone)]
 pub struct HostSysinfoStatus {
     pub ghaf_version: String,
-    pub secure_boot: String,
-    pub disk_encryption: String,
+    pub secure_boot: Option<bool>,
+    pub disk_encryption: Option<bool>,
 }
 
 mod imp {
@@ -196,17 +196,15 @@ mod imp {
             &self,
         ) -> Result<HostSysinfoStatus, anyhow::Error> {
             debug!("ServiceModel: querying host sysinfo status via admin RPC");
-            let sysinfo = self
-                .client_cmd(async move |client| {
-                    let status = client.sysinfo().await?;
-                    Ok(HostSysinfoStatus {
-                        ghaf_version: status.ghaf_version,
-                        secure_boot: status.secure_boot,
-                        disk_encryption: status.disk_encrypted,
-                    })
+            self.client_cmd(async move |client| {
+                let status = client.sysinfo().await?;
+                Ok(HostSysinfoStatus {
+                    ghaf_version: status.ghaf_version,
+                    secure_boot: status.secure_boot,
+                    disk_encryption: status.disk_encrypted,
                 })
-                .await?;
-            Ok(sysinfo)
+            })
+            .await
         }
 
         pub fn delayed_reconnect(&self) {
@@ -681,12 +679,12 @@ impl ServiceModel {
     }
 
     #[cfg(feature = "mock")]
-    #[allow(clippy::unused_self)]
+    #[allow(clippy::unused_async, clippy::unused_self)]
     pub async fn get_sysinfo_status_from_host(&self) -> Result<HostSysinfoStatus, anyhow::Error> {
         Ok(HostSysinfoStatus {
             ghaf_version: "0.0.0-mock".to_string(),
-            secure_boot: "Disabled".to_string(),
-            disk_encryption: "Disabled".to_string(),
+            secure_boot: Some(false),
+            disk_encryption: Some(false),
         })
     }
 
