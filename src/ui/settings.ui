@@ -54,6 +54,22 @@
                 </child>
               </object>
             </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="name">about</property>
+                <style><class name="settings-row"/></style>
+                <property name="title">About this System</property>
+                <child type="prefix">
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="resource">/ae/tii/ghaf/controlpanelgui/icons/icon_admin.svg</property>
+                    <property name="width-request">24</property>
+                    <property name="height-request">24</property>
+                  </object>
+                </child>
+              </object>
+            </child>
           </object>
         </child>
       </object> <!-- List of settings -->
@@ -94,6 +110,14 @@
                     <signal name="locale-default" handler="on_locale_timezone_default" swapped="true"/>
                     <signal name="locale-timezone-changed" handler="on_locale_timezone_changed" swapped="true"/>
                   </object>
+                </property>
+              </object>
+            </child>
+            <child> <!-- About view child -->
+              <object class="GtkStackPage">
+                <property name="name">about</property>
+                <property name="child">
+                  <object class="AboutPage" id="about_page"/>
                 </property>
               </object>
             </child>

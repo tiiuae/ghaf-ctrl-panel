@@ -72,9 +72,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.100"
+version = "1.0.102"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a23eb6b1614318a8071c9b2521f36b424b2c83db5eb3a0fead4a6c0809af6e61"
+checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
 
 [[package]]
 name = "arc-swap"
@@ -547,6 +547,7 @@ dependencies = [
  "regex",
  "secrecy",
  "serde",
+ "serde_json",
  "strum",
  "syslog",
  "thiserror",
@@ -1145,7 +1146,7 @@ dependencies = [
 [[package]]
 name = "givc-client"
 version = "0.0.1"
-source = "git+https://github.com/tiiuae/ghaf-givc?branch=main#5731cbae603f1a29737526366a6e931680c3dd84"
+source = "git+https://github.com/vunnyso/ghaf-givc?branch=vs-AddHostCmds#dee9a14a6556295c8bebae9e9f4d1476995364ad"
 dependencies = [
  "anyhow",
  "async-channel",
@@ -1164,7 +1165,7 @@ dependencies = [
 [[package]]
 name = "givc-common"
 version = "0.0.1"
-source = "git+https://github.com/tiiuae/ghaf-givc?branch=main#5731cbae603f1a29737526366a6e931680c3dd84"
+source = "git+https://github.com/vunnyso/ghaf-givc?branch=vs-AddHostCmds#dee9a14a6556295c8bebae9e9f4d1476995364ad"
 dependencies = [
  "anyhow",
  "glib",
