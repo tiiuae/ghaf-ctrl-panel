@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="AboutPage" parent="GtkBox">
+    <style><class name="info-box"/></style>
+    <property name="orientation">vertical</property>
+    <property name="vexpand">true</property>
+    <property name="hexpand">true</property>
+    <property name="margin-start">24</property>
+    <property name="margin-end">24</property>
+    <property name="margin-top">20</property>
+    <property name="margin-bottom">20</property>
+    <property name="spacing">16</property>
+
+    <child>
+      <object class="GtkLabel">
+        <property name="label">About</property>
+        <style><class name="title"/></style>
+        <property name="halign">start</property>
+      </object>
+    </child>
+
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">12</property>
+
+        <!-- Ghaf Information -->
+        <child>
+          <object class="GtkFrame">
+            <property name="hexpand">true</property>
+            <property name="label-xalign">0</property>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">10</property>
+                <property name="margin-start">14</property>
+                <property name="margin-end">14</property>
+                <property name="margin-top">14</property>
+                <property name="margin-bottom">14</property>
+
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">Ghaf Information</property>
+                    <property name="halign">start</property>
+                    <property name="xalign">0</property>
+                    <style><class name="heading"/></style>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkGrid">
+                    <property name="column-spacing">18</property>
+                    <property name="row-spacing">10</property>
+
+                    <!-- Ghaf Version -->
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label">Ghaf Version</property>
+                        <property name="halign">start</property>
+                        <property name="xalign">0</property>
+                        <property name="width-chars">16</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="ghaf_version">
+                        <property name="label">unknown</property>
+                        <property name="halign">start</property>
+                        <property name="xalign">0</property>
+                        <property name="selectable">true</property>
+                        <property name="hexpand">true</property>
+                        <property name="wrap">true</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+
+                    <!-- Device ID -->
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label">Device ID</property>
+                        <property name="halign">start</property>
+                        <property name="xalign">0</property>
+                        <property name="width-chars">16</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">1</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="device_id">
+                        <property name="label">unknown</property>
+                        <property name="halign">start</property>
+                        <property name="xalign">0</property>
+                        <property name="wrap">true</property>
+                        <property name="selectable">true</property>
+                        <property name="hexpand">true</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">1</property>
+                        </layout>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+
+        <!-- Security -->
+        <child>
+          <object class="GtkFrame">
+            <property name="hexpand">true</property>
+            <property name="label-xalign">0</property>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">10</property>
+                <property name="margin-start">14</property>
+                <property name="margin-end">14</property>
+                <property name="margin-top">14</property>
+                <property name="margin-bottom">14</property>
+
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">Security</property>
+                    <property name="halign">start</property>
+                    <property name="xalign">0</property>
+                    <style><class name="heading"/></style>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkGrid">
+                    <property name="column-spacing">18</property>
+                    <property name="row-spacing">10</property>
+
+                    <!-- Secure Boot -->
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label">Secure Boot</property>
+                        <property name="halign">start</property>
+                        <property name="xalign">0</property>
+                        <property name="width-chars">16</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="secure_boot">
+                        <property name="label">unknown</property>
+                        <property name="halign">start</property>
+                        <property name="xalign">0</property>
+                        <property name="use-markup">true</property>
+                        <property name="selectable">true</property>
+                        <property name="hexpand">true</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+
+                    <!-- Disk Encryption -->
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label">Disk Encryption</property>
+                        <property name="halign">start</property>
+                        <property name="xalign">0</property>
+                        <property name="width-chars">16</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">1</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="disk_encryption">
+                        <property name="label">unknown</property>
+                        <property name="halign">start</property>
+                        <property name="xalign">0</property>
+                        <property name="use-markup">true</property>
+                        <property name="selectable">true</property>
+                        <property name="hexpand">true</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">1</property>
+                        </layout>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+
+        <!-- Additional Features -->
+        <child>
+          <object class="GtkFrame">
+            <property name="hexpand">true</property>
+            <property name="label-xalign">0</property>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">10</property>
+                <property name="margin-start">14</property>
+                <property name="margin-end">14</property>
+                <property name="margin-top">14</property>
+                <property name="margin-bottom">14</property>
+
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">Additional Features</property>
+                    <property name="halign">start</property>
+                    <property name="xalign">0</property>
+                    <style><class name="heading"/></style>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkGrid">
+                    <property name="column-spacing">18</property>
+                    <property name="row-spacing">10</property>
+
+                    <!-- YubiKey -->
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label">YubiKey</property>
+                        <property name="halign">start</property>
+                        <property name="xalign">0</property>
+                        <property name="width-chars">16</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="yubikey_enrollment">
+                        <property name="label">unknown</property>
+                        <property name="halign">start</property>
+                        <property name="xalign">0</property>
+                        <property name="selectable">true</property>
+                        <property name="hexpand">true</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class="GtkBox">
+        <property name="vexpand">true</property>
+      </object>
+    </child>
+  </template>
+</interface>
