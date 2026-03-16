@@ -11,6 +11,7 @@ use crate::security_icon::SecurityIcon;
 use crate::serie::Serie;
 use crate::service_gobject::ServiceGObject;
 pub use crate::service_model::StatsResponse;
+pub use crate::service_model::HostSysinfoStatus;
 use crate::settings_action::SettingsAction;
 use crate::status_icon::StatusIcon;
 use crate::volume_widget::VolumeWidget;
@@ -270,6 +271,12 @@ impl ControlPanelGuiApplication {
         vm: String,
     ) -> impl std::future::Future<Output = Result<StatsResponse, anyhow::Error>> + use<'_> {
         self.imp().service_model.get_stats(vm)
+    }
+
+    pub fn get_sysinfo_status_from_host(
+        &self,
+    ) -> impl std::future::Future<Output = Result<HostSysinfoStatus, anyhow::Error>> + use<'_> {
+        self.imp().service_model.get_sysinfo_status_from_host()
     }
 
     pub fn control_service(&self, action: ControlAction, object: ServiceGObject) {
