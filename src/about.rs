@@ -1,3 +1,4 @@
+use anyhow::Context;
 use gtk::glib;
 use gtk::gio;
 use gtk::prelude::*;
@@ -8,8 +9,6 @@ use std::process::Command;
 
 use crate::application::ControlPanelGuiApplication;
 use crate::prelude::*;
-use crate::window::ControlPanelGuiWindow;
-
 mod imp {
     use gtk::prelude::*;
     use gtk::subclass::prelude::*;
@@ -92,9 +91,9 @@ impl Default for AboutPage {
 
 struct SystemStatus {
     ghaf_version: String,
-    secure_boot: String,
-    disk_encryption: String,
-    yubikey_enrollment: String,
+    secure_boot: &'static str,
+    disk_encryption: &'static str,
+    yubikey_enrollment: &'static str,
     device_id: String,
 }
 
@@ -108,10 +107,10 @@ impl AboutPage {
         self.imp().ghaf_version.set_label("loading...");
         self.imp()
             .secure_boot
-            .set_markup(&format_status_loading_markup());
+            .set_markup(format_status_loading_markup());
         self.imp()
             .disk_encryption
-            .set_markup(&format_status_loading_markup());
+            .set_markup(format_status_loading_markup());
         self.imp().yubikey_enrollment.set_label("loading...");
         self.imp().device_id.set_label("loading...");
 
@@ -145,26 +144,23 @@ impl AboutPage {
             self.imp().ghaf_version.set_label("unknown");
             self.imp()
                 .secure_boot
-                .set_markup(&format_optional_bool_status(None));
+                .set_markup(format_optional_bool_status(None));
             self.imp()
                 .disk_encryption
-                .set_markup(&format_optional_bool_status(None));
+                .set_markup(format_optional_bool_status(None));
             self.imp().yubikey_enrollment.set_label("unknown");
             self.imp().device_id.set_label("unknown");
         }
     }
 
     fn get_app_ref(&self) -> Option<ControlPanelGuiApplication> {
-        if let Some(app) = gio::Application::default()
-            .and_then(|app| app.downcast::<ControlPanelGuiApplication>().ok())
-        {
-            return Some(app);
-        }
-
-        self.root()
-            .and_downcast::<ControlPanelGuiWindow>()
-            .and_then(|window| window.application())
+        gio::Application::default()
             .and_downcast::<ControlPanelGuiApplication>()
+            .or_else(|| {
+                self.root()
+                    .and_downcast::<gtk::Window>()
+                    .and_then(|window| window.application().and_downcast())
+            })
     }
 }
 
@@ -187,8 +183,8 @@ async fn fetch_system_status(
                 );
                 return SystemStatus {
                     ghaf_version,
-                    secure_boot: secure_boot.to_string(),
-                    disk_encryption: disk_encryption.to_string(),
+                    secure_boot,
+                    disk_encryption,
                     yubikey_enrollment,
                     device_id,
                 };
@@ -211,14 +207,14 @@ async fn fetch_system_status(
 
     SystemStatus {
         ghaf_version: String::from("unknown"),
-        secure_boot: String::from("unknown"),
-        disk_encryption: String::from("unknown"),
+        secure_boot: "unknown",
+        disk_encryption: "unknown",
         yubikey_enrollment,
         device_id,
     }
 }
 
-async fn fetch_yubikey_enrollment() -> String {
+async fn fetch_yubikey_enrollment() -> &'static str {
     let (tx, rx) = async_channel::bounded(1);
     let worker = std::thread::spawn(move || {
         let _ = tx.send_blocking(detect_yubikey_enrollment_blocking());
@@ -227,22 +223,22 @@ async fn fetch_yubikey_enrollment() -> String {
         Ok(Ok(status)) => status,
         Ok(Err(e)) => {
             warn!("AboutPage: failed to detect YubiKey enrollment: {e}");
-            String::from("unknown")
+            "unknown"
         }
         Err(e) => {
             warn!("AboutPage: failed to receive YubiKey enrollment status: {e}");
-            String::from("unknown")
+            "unknown"
         }
     };
     let _ = worker.join();
     result
 }
 
-fn detect_yubikey_enrollment_blocking() -> Result<String, anyhow::Error> {
+fn detect_yubikey_enrollment_blocking() -> Result<&'static str, anyhow::Error> {
     let users_output = Command::new("homectl")
         .args(["list", "-j"])
         .output()
-        .map_err(|e| anyhow::anyhow!("failed to run `homectl list -j`: {e}"))?;
+        .context("failed to run `homectl list -j`")?;
 
     if !users_output.status.success() {
         anyhow::bail!(
@@ -253,17 +249,17 @@ fn detect_yubikey_enrollment_blocking() -> Result<String, anyhow::Error> {
     }
 
     let users_json: Value = serde_json::from_slice(&users_output.stdout)
-        .map_err(|e| anyhow::anyhow!("failed to parse `homectl list -j` output: {e}"))?;
+        .context("failed to parse `homectl list -j` output")?;
     let users = extract_homectl_usernames(&users_json);
     if users.is_empty() {
-        return Ok(String::from("Not enrolled"));
+        return Ok("Not enrolled");
     }
 
     let inspect_output = Command::new("homectl")
         .args(["inspect", "-j"])
         .args(&users)
         .output()
-        .map_err(|e| anyhow::anyhow!("failed to run `homectl inspect -j` for users {:?}: {e}", users))?;
+        .with_context(|| format!("failed to run `homectl inspect -j` for users {users:?}"))?;
 
     if !inspect_output.status.success() {
         anyhow::bail!(
@@ -280,29 +276,23 @@ fn detect_yubikey_enrollment_blocking() -> Result<String, anyhow::Error> {
         .filter(|line| !line.trim().is_empty())
         .map(serde_json::from_str::<Value>)
         .collect::<Result<_, _>>()
-        .map_err(|e| {
-            anyhow::anyhow!(
-                "failed to parse `homectl inspect -j` output for users {:?}: {e}",
-                users
-            )
-        })?;
+        .with_context(|| format!("failed to parse `homectl inspect -j` output for users {users:?}"))?;
 
     // `homectl inspect -j` returns one JSON object per line. Report enrolled if any
     // listed user has a FIDO2 credential.
     if inspect_records.iter().any(has_fido2_hmac_credential) {
-        return Ok(String::from("Enrolled"));
+        return Ok("Enrolled");
     };
 
-    Ok(String::from("Not enrolled"))
+    Ok("Not enrolled")
 }
 
-fn extract_homectl_usernames(value: &Value) -> Vec<String> {
+fn extract_homectl_usernames(value: &Value) -> Vec<&str> {
     value
         .as_array()
         .into_iter()
         .flat_map(|items| items.iter())
         .filter_map(|item| item.get("name").and_then(Value::as_str))
-        .map(ToOwned::to_owned)
         .collect()
 }
 
@@ -321,14 +311,7 @@ fn has_fido2_hmac_credential(value: &Value) -> bool {
 
 fn detect_device_id() -> String {
     match fs::read_to_string("/etc/common/device-id") {
-        Ok(content) => {
-            let value = content.trim();
-            if value.is_empty() {
-                String::from("unknown")
-            } else {
-                value.to_owned()
-            }
-        }
+        Ok(content) => normalize_status_value(&content),
         Err(e) => {
             warn!("AboutPage: failed to read /etc/common/device-id: {e}");
             String::from("unknown")
