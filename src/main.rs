@@ -1,8 +1,5 @@
 mod application;
 mod about;
-mod audio_control;
-mod audio_device_gobject;
-mod audio_settings;
 mod connection_config;
 mod control_action;
 mod data_gobject;
@@ -22,7 +19,6 @@ mod settings;
 mod settings_action;
 mod status_icon;
 mod typed_list_store;
-mod volume_widget;
 mod window;
 mod wireguard_vms;
 

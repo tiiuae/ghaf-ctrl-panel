@@ -8,7 +8,7 @@ use crate::window::ControlPanelGuiWindow;
 
 mod imp {
     use glib::subclass::Signal;
-    use glib::{Binding, Variant};
+    use glib::Binding;
     use gtk::prelude::*;
     use gtk::subclass::prelude::*;
     use gtk::{
@@ -18,7 +18,6 @@ mod imp {
     use std::cell::RefCell;
     use std::sync::OnceLock;
 
-    use crate::audio_settings::AudioSettings;
     use crate::control_action::ControlAction;
     use crate::plot::Plot;
     use crate::prelude::*;
@@ -71,8 +70,6 @@ mod imp {
         pub wireguard_section_separator: TemplateChild<Separator>,
         #[template_child]
         pub wireguard_button: TemplateChild<Button>,
-        #[template_child]
-        pub audio_settings_box: TemplateChild<AudioSettings>,
         #[template_child]
         pub control_label: TemplateChild<Label>,
         #[template_child]
@@ -161,40 +158,6 @@ mod imp {
             self.emit_control_action(ControlAction::Pause);
             self.popover_menu_2.popdown();
         }
-
-        #[allow(clippy::unused_self)]
-        #[template_callback]
-        fn on_mic_changed(&self, _value: i32) {
-            //debug!("Mic changed: {}", value);
-            //+ new action: VM mic
-        }
-
-        #[allow(clippy::unused_self)]
-        #[template_callback]
-        fn on_speaker_changed(&self, _value: i32) {
-            //debug!("Speaker changed: {}", value);
-            //+ new action: VM speaker
-        }
-
-        #[allow(clippy::unused_self)]
-        #[template_callback]
-        fn on_mic_volume_changed(&self, _value: Variant) {
-            //debug!("Mic volume: {}", value);
-            //+ new action: VM volume
-        }
-
-        #[allow(clippy::unused_self)]
-        #[template_callback]
-        fn on_speaker_volume_changed(&self, _value: Variant) {
-            //debug!("Speaker volume: {}", value);
-            //+ new action: VM volume
-        }
-
-        #[template_callback]
-        fn on_open_advanced_audio_settings(&self) {
-            let action = SettingsAction::OpenAdvancedAudioSettingsWidget;
-            self.obj().emit_by_name::<()>("settings-action", &[&action]);
-        }
     } //end #[gtk::template_callbacks]
 
     impl ObjectImpl for ServiceSettings {
@@ -207,7 +170,7 @@ mod imp {
         }
 
         fn signals() -> &'static [Signal] {
-            static SIGNALS: OnceLock<[Signal; 6]> = OnceLock::new();
+            static SIGNALS: OnceLock<[Signal; 2]> = OnceLock::new();
             SIGNALS.get_or_init(|| {
                 [
                     Signal::builder("control-action")
@@ -215,18 +178,6 @@ mod imp {
                         .build(),
                     Signal::builder("settings-action")
                         .param_types([SettingsAction::static_type()])
-                        .build(),
-                    Signal::builder("vm-mic-changed")
-                        .param_types([u32::static_type()])
-                        .build(),
-                    Signal::builder("vm-speaker-changed")
-                        .param_types([u32::static_type()])
-                        .build(),
-                    Signal::builder("vm-mic-volume-changed")
-                        .param_types([u32::static_type()])
-                        .build(),
-                    Signal::builder("vm-speaker-volume-changed")
-                        .param_types([u32::static_type()])
                         .build(),
                 ]
             })
@@ -283,7 +234,6 @@ impl ServiceSettings {
         let details = self.imp().details_label.get();
         let security_icon = self.imp().security_icon.get();
         let control_label = self.imp().control_label.get();
-        let audio_settings_box = self.imp().audio_settings_box.get();
         let mut bindings = self.imp().bindings.borrow_mut();
 
         //wireguard label/button
@@ -435,13 +385,6 @@ impl ServiceSettings {
             })
             .build();
         bindings.push(controls_title_binding);
-
-        //hide audio settings for services and apps?
-        let audio_settings_visibilty_binding = object
-            .bind_property("is-vm", &audio_settings_box, "visible")
-            .sync_create()
-            .build();
-        bindings.push(audio_settings_visibilty_binding);
     }
 
     pub fn unbind(&self) {
