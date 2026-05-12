@@ -14,8 +14,6 @@ mod imp {
 
     //use crate::service_gobject::ServiceGObject; will be used in the future
     use crate::about::AboutPage;
-    use crate::audio_device_gobject::AudioDeviceType;
-    use crate::audio_settings::AudioSettings;
     use crate::control_action::ControlAction;
     use crate::language_region_settings_page::LanguageRegionSettingsPage;
     use crate::service_gobject::ServiceGObject;
@@ -28,8 +26,6 @@ mod imp {
         pub list_box: TemplateChild<ListBox>,
         #[template_child]
         pub stack: TemplateChild<Stack>,
-        #[template_child]
-        pub audio_settings_page: TemplateChild<AudioSettings>,
         #[template_child]
         pub language_region_settings_page: TemplateChild<LanguageRegionSettingsPage>,
         #[template_child]
@@ -80,64 +76,6 @@ mod imp {
         #[template_callback]
         fn on_locale_timezone_changed(&self, locale: String, timezone: String) {
             let action = SettingsAction::RegionNLanguage { locale, timezone };
-            self.obj().emit_by_name::<()>("settings-action", &[&action]);
-        }
-
-        #[template_callback]
-        fn on_mic_changed(&self, id: i32, dev_type: AudioDeviceType) {
-            let action = SettingsAction::Mic { id, dev_type };
-            self.obj().emit_by_name::<()>("settings-action", &[&action]);
-        }
-
-        #[template_callback]
-        fn on_speaker_changed(&self, id: i32, dev_type: AudioDeviceType) {
-            let action = SettingsAction::Speaker { id, dev_type };
-            self.obj().emit_by_name::<()>("settings-action", &[&action]);
-        }
-
-        #[template_callback]
-        fn on_mic_volume_changed(&self, id: i32, dev_type: AudioDeviceType, volume: i32) {
-            let action = SettingsAction::MicVolume {
-                id,
-                dev_type,
-                volume,
-            };
-            self.obj().emit_by_name::<()>("settings-action", &[&action]);
-        }
-
-        #[template_callback]
-        fn on_mic_mute_changed(&self, id: i32, dev_type: AudioDeviceType, muted: bool) {
-            let action = SettingsAction::MicMute {
-                id,
-                dev_type,
-                muted,
-            };
-            self.obj().emit_by_name::<()>("settings-action", &[&action]);
-        }
-
-        #[template_callback]
-        fn on_speaker_volume_changed(&self, id: i32, dev_type: AudioDeviceType, volume: i32) {
-            let action = SettingsAction::SpeakerVolume {
-                id,
-                dev_type,
-                volume,
-            };
-            self.obj().emit_by_name::<()>("settings-action", &[&action]);
-        }
-
-        #[template_callback]
-        fn on_speaker_mute_changed(&self, id: i32, dev_type: AudioDeviceType, muted: bool) {
-            let action = SettingsAction::SpeakerMute {
-                id,
-                dev_type,
-                muted,
-            };
-            self.obj().emit_by_name::<()>("settings-action", &[&action]);
-        }
-
-        #[template_callback]
-        fn on_open_advanced_audio_settings(&self) {
-            let action = SettingsAction::OpenAdvancedAudioSettingsWidget;
             self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
 
@@ -214,9 +152,5 @@ impl Settings {
         if let Some(row) = self.imp().list_box.row_at_index(0) {
             self.imp().list_box.select_row(Some(&row));
         }
-    }
-
-    pub fn set_audio_devices(&self, devices: impl IsA<ListModel>) {
-        self.imp().audio_settings_page.set_audio_devices(devices);
     }
 }

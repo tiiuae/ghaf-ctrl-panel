@@ -5,14 +5,12 @@
     <file preprocess="xml-stripblanks">ui/service_row.ui</file>
     <file preprocess="xml-stripblanks">ui/service_settings.ui</file>
     <file preprocess="xml-stripblanks">ui/settings.ui</file>
-    <file preprocess="xml-stripblanks">ui/audio_settings.ui</file>
     <file preprocess="xml-stripblanks">ui/language_region_settings_page.ui</file>
     <file preprocess="xml-stripblanks">ui/about.ui</file>
     <file preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
     <file preprocess="xml-stripblanks">ui/connection_config.ui</file>
     <file preprocess="xml-stripblanks">ui/error_popup.ui</file>
     <file preprocess="xml-stripblanks">ui/language_region_notify_popup.ui</file>
-    <file preprocess="xml-stripblanks">ui/volume_widget.ui</file>
     <file>styles/style.css</file>
     <!-- Icons -->
     <file>icons/ghaf_logo.svg</file>
@@ -21,8 +19,6 @@
     <file>icons/icon_app_whatsapp.svg</file>
     <file>icons/icon_clock.svg</file>
     <file>icons/icon_region_location.svg</file>
-    <file>icons/icon_audio.svg</file>
-    <file>icons/icon_admin.svg</file>
     <file>icons/security_well.svg</file>
     <file>icons/security_attention.svg</file>
     <file>icons/security_alert.svg</file>

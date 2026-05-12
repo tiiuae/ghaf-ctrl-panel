@@ -127,13 +127,13 @@ impl AboutPage {
                     async move {
                         let status = fetch_system_status(&app).await;
                         page.imp().ghaf_version.set_label(&status.ghaf_version);
-                        page.imp().secure_boot.set_markup(&status.secure_boot);
+                        page.imp().secure_boot.set_markup(status.secure_boot);
                         page.imp()
                             .disk_encryption
-                            .set_markup(&status.disk_encryption);
+                            .set_markup(status.disk_encryption);
                         page.imp()
                             .yubikey_enrollment
-                            .set_label(&status.yubikey_enrollment);
+                            .set_label(status.yubikey_enrollment);
                         page.imp().device_id.set_label(&status.device_id);
                     }
                 ),
@@ -282,7 +282,7 @@ fn detect_yubikey_enrollment_blocking() -> Result<&'static str, anyhow::Error> {
     // listed user has a FIDO2 credential.
     if inspect_records.iter().any(has_fido2_hmac_credential) {
         return Ok("Enrolled");
-    };
+    }
 
     Ok("Not enrolled")
 }

@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use gio::{ListModel, ListStore};
 use glib::{Object, SignalHandlerId};
 use gtk::{

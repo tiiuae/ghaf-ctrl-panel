@@ -14,7 +14,6 @@ pub use crate::service_model::StatsResponse;
 pub use crate::service_model::HostSysinfoStatus;
 use crate::settings_action::SettingsAction;
 use crate::status_icon::StatusIcon;
-use crate::volume_widget::VolumeWidget;
 use givc_client::endpoint::TlsConfig;
 use log::debug;
 
@@ -26,7 +25,6 @@ mod imp {
     use gtk::{gdk, gio, glib};
     use std::cell::RefCell;
 
-    use crate::audio_control::AudioControl;
     use crate::connection_config::ConnectionConfig;
     use crate::data_gobject::DataGObject;
     use crate::language_region_notify_popup::LanguageRegionNotifyPopup;
@@ -40,7 +38,6 @@ mod imp {
     #[properties(wrapper_type = super::ControlPanelGuiApplication)]
     pub struct ControlPanelGuiApplication {
         pub(super) service_model: ServiceModel,
-        pub(super) audio_control: RefCell<AudioControl>,
 
         #[property(get, set)]
         window: RefCell<Option<ControlPanelGuiWindow>>,
@@ -232,7 +229,6 @@ impl ControlPanelGuiApplication {
         tls_info: Option<(String, TlsConfig)>,
     ) -> Self {
         let _ = DataGObject::static_type();
-        let _ = VolumeWidget::static_type();
         let _ = Plot::static_type();
         let _ = Serie::static_type();
         let _ = SecurityIcon::static_type();
@@ -248,16 +244,6 @@ impl ControlPanelGuiApplication {
         if let Some((addr, tls_info)) = tls_info {
             app.imp().service_model.set_tls_info(addr, tls_info);
         }
-
-        //test dbus service
-        app.imp()
-            .audio_control
-            .borrow()
-            .fetch_audio_devices(glib::clone!(
-                #[strong]
-                app,
-                move |list| app.window().unwrap().set_audio_devices((*list).clone())
-            ));
 
         app
     }
@@ -332,64 +318,6 @@ impl ControlPanelGuiApplication {
             SettingsAction::RegionNLanguage { locale, timezone } => {
                 self.imp().set_locale_timezone(locale, timezone);
             }
-            SettingsAction::Speaker { id, dev_type } => {
-                debug!("Speaker changed: {id}");
-                self.imp()
-                    .audio_control
-                    .borrow()
-                    .set_default_device(id, dev_type as i32);
-            }
-            SettingsAction::SpeakerMute {
-                id,
-                dev_type,
-                muted,
-            } => {
-                debug!("Speaker muted: {id}");
-                self.imp()
-                    .audio_control
-                    .borrow()
-                    .set_device_mute(id, dev_type as i32, muted);
-            }
-            SettingsAction::SpeakerVolume {
-                id,
-                dev_type,
-                volume,
-            } => {
-                debug!("Speaker volume: {volume}");
-                self.imp()
-                    .audio_control
-                    .borrow()
-                    .set_device_volume(id, dev_type as i32, volume);
-            }
-            SettingsAction::Mic { id, dev_type } => {
-                debug!("Mic changed: {id}");
-                self.imp()
-                    .audio_control
-                    .borrow()
-                    .set_default_device(id, dev_type as i32);
-            }
-            SettingsAction::MicMute {
-                id,
-                dev_type,
-                muted,
-            } => {
-                debug!("Mic muted: {id}");
-                self.imp()
-                    .audio_control
-                    .borrow()
-                    .set_device_mute(id, dev_type as i32, muted);
-            }
-            SettingsAction::MicVolume {
-                id,
-                dev_type,
-                volume,
-            } => {
-                debug!("Mic volume: {volume}");
-                self.imp()
-                    .audio_control
-                    .borrow()
-                    .set_device_volume(id, dev_type as i32, volume);
-            }
             SettingsAction::ShowErrorPopup { message } => {
                 let popup = ErrorPopup::new(&message);
                 popup.set_transient_for(self.active_window().as_ref());
@@ -398,12 +326,6 @@ impl ControlPanelGuiApplication {
             }
             SettingsAction::OpenWireGuard { vm } => {
                 self.open_wireguard(&vm);
-            }
-            SettingsAction::OpenAdvancedAudioSettingsWidget => {
-                self.imp()
-                    .audio_control
-                    .borrow()
-                    .open_advanced_settings_widget();
             }
             SettingsAction::CheckForUpdateRequest => {
                 glib::spawn_future_local(glib::clone!(

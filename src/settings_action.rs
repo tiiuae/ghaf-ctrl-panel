@@ -1,4 +1,3 @@
-use crate::audio_device_gobject::AudioDeviceType;
 use crate::service_gobject::ServiceGObject;
 use gtk::glib;
 
@@ -10,41 +9,12 @@ pub enum SettingsAction {
         locale: String,
         timezone: String,
     },
-    Speaker {
-        id: i32,
-        dev_type: AudioDeviceType,
-    },
-    SpeakerVolume {
-        id: i32,
-        dev_type: AudioDeviceType,
-        volume: i32,
-    },
-    SpeakerMute {
-        id: i32,
-        dev_type: AudioDeviceType,
-        muted: bool,
-    },
-    Mic {
-        id: i32,
-        dev_type: AudioDeviceType,
-    },
-    MicVolume {
-        id: i32,
-        dev_type: AudioDeviceType,
-        volume: i32,
-    },
-    MicMute {
-        id: i32,
-        dev_type: AudioDeviceType,
-        muted: bool,
-    },
     ShowErrorPopup {
         message: String,
     },
     OpenWireGuard {
         vm: ServiceGObject,
     },
-    OpenAdvancedAudioSettingsWidget,
     CheckForUpdateRequest,
     UpdateRequest,
 }
