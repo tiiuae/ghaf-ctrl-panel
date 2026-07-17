@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="adw" version="1.0"/>
+  <template class="UpdatePage" parent="GtkBox">
+    <style><class name="info-box"/></style>
+    <property name="orientation">vertical</property>
+    <property name="hexpand">true</property>
+    <property name="vexpand">true</property>
+    <property name="margin-start">24</property>
+    <property name="margin-end">24</property>
+    <property name="margin-top">20</property>
+    <property name="margin-bottom">20</property>
+    <property name="spacing">18</property>
+
+    <child>
+      <object class="GtkStackSwitcher">
+        <property name="stack">update_stack</property>
+        <property name="halign">start</property>
+      </object>
+    </child>
+
+    <child>
+      <object class="GtkStack" id="update_stack">
+        <property name="hexpand">true</property>
+        <property name="vexpand">true</property>
+
+        <child>
+          <object class="GtkStackPage">
+            <property name="name">updates</property>
+            <property name="title">Updates</property>
+            <property name="child">
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">12</property>
+                <property name="hexpand">true</property>
+                <property name="vexpand">true</property>
+
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">12</property>
+                    <property name="halign">fill</property>
+                    <property name="margin-top">8</property>
+                    <property name="margin-bottom">8</property>
+
+                    <child>
+                      <object class="GtkImage" id="ghaf_logo">
+                        <property name="paintable">
+                          <object class="GtkSvg">
+                            <property name="resource">/ae/tii/ghaf/controlpanelgui/icons/ghaf_logo.svg</property>
+                          </object>
+                        </property>
+                        <property name="width-request">280</property>
+                        <property name="height-request">280</property>
+                        <property name="halign">center</property>
+                        <property name="pixel-size">280</property>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="GtkGrid">
+                        <property name="column-spacing">18</property>
+                        <property name="row-spacing">10</property>
+
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Current version</property>
+                            <property name="halign">start</property>
+                            <property name="xalign">0</property>
+                            <property name="width-chars">14</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">0</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="current_version">
+                            <property name="label">unknown</property>
+                            <property name="halign">start</property>
+                            <property name="xalign">0</property>
+                            <property name="selectable">true</property>
+                            <property name="hexpand">true</property>
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">0</property>
+                            </layout>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">10</property>
+                    <property name="vexpand">true</property>
+
+                    <child>
+                      <object class="AdwStatusPage" id="checking_box">
+                        <property name="paintable">
+                          <object class="AdwSpinnerPaintable">
+                            <property name="widget">checking_box</property>
+                          </object>
+                        </property>
+                        <property name="visible">false</property>
+                        <property name="title">Checking for updates</property>
+                        <property name="description">Contacting the update service.</property>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="AdwStatusPage" id="no_updates_box">
+                        <property name="visible">false</property>
+                        <property name="title">You are up to date</property>
+                        <property name="description">No updates are available right now.</property>
+                        <property name="icon-name">emblem-ok-symbolic</property>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="AdwStatusPage" id="install_finished_box">
+                        <property name="visible">false</property>
+                        <property name="title">Installation finished</property>
+                        <property name="description">Reboot the system to finish applying the update.</property>
+                        <property name="icon-name">system-reboot-symbolic</property>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="GtkBox" id="update_details_box">
+                        <property name="visible">false</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">12</property>
+
+                        <child>
+                          <object class="GtkGrid">
+                            <property name="column-spacing">18</property>
+                            <property name="row-spacing">10</property>
+
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label">New version</property>
+                                <property name="halign">start</property>
+                                <property name="xalign">0</property>
+                                <property name="width-chars">14</property>
+                                <layout>
+                                  <property name="column">0</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="available_version">
+                                <property name="label">Not checked</property>
+                                <property name="halign">start</property>
+                                <property name="xalign">0</property>
+                                <property name="selectable">true</property>
+                                <property name="hexpand">true</property>
+                                <layout>
+                                  <property name="column">1</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+
+                        <child>
+                          <object class="GtkLabel" id="download_size">
+                            <property name="label">Download size: unknown</property>
+                            <property name="halign">start</property>
+                            <property name="xalign">0</property>
+                            <property name="wrap">true</property>
+                          </object>
+                        </child>
+
+                        <child>
+                          <object class="GtkProgressBar" id="operation_progress">
+                            <property name="visible">false</property>
+                            <property name="hexpand">true</property>
+                            <property name="show-text">true</property>
+                            <property name="text">0%</property>
+                          </object>
+                        </child>
+
+                        <child>
+                          <object class="GtkFrame">
+                            <child>
+                              <object class="GtkScrolledWindow">
+                                <property name="hexpand">true</property>
+                                <property name="vexpand">true</property>
+                                <property name="min-content-height">180</property>
+                                <property name="hscrollbar-policy">GTK_POLICY_NEVER</property>
+                                <child>
+                                  <object class="GtkTextView">
+                                    <property name="editable">false</property>
+                                    <property name="cursor-visible">false</property>
+                                    <property name="wrap-mode">word</property>
+                                    <property name="left-margin">6</property>
+                                    <property name="right-margin">6</property>
+                                    <property name="top-margin">6</property>
+                                    <property name="bottom-margin">6</property>
+                                    <property name="buffer">
+                                      <object class="GtkTextBuffer" id="changelog_buffer">
+                                        <property name="text">Press "Check for updates" to query the host release notes.</property>
+                                      </object>
+                                    </property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="GtkBox">
+                        <property name="vexpand">true</property>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">8</property>
+
+                        <child>
+                          <object class="GtkSeparator"/>
+                        </child>
+
+                        <child>
+                          <object class="GtkBox">
+                            <property name="orientation">horizontal</property>
+                            <property name="spacing">10</property>
+
+                            <child>
+                              <object class="GtkButton" id="check_button">
+                                <property name="label">Check for updates</property>
+                                <property name="halign">start</property>
+                                <style><class name="settings-button"/></style>
+                                <signal name="clicked" handler="on_check_for_updates_clicked" swapped="true"/>
+                              </object>
+                            </child>
+
+                            <child>
+                              <object class="GtkButton" id="download_button">
+                                <property name="label">Fetch update</property>
+                                <property name="halign">start</property>
+                                <style><class name="settings-button"/></style>
+                                <signal name="clicked" handler="on_download_clicked" swapped="true"/>
+                              </object>
+                            </child>
+
+                            <child>
+                              <object class="GtkButton" id="update_button">
+                                <property name="label">Install update</property>
+                                <property name="visible">false</property>
+                                <property name="halign">start</property>
+                                <style><class name="settings-button"/></style>
+                                <signal name="clicked" handler="on_update_clicked" swapped="true"/>
+                              </object>
+                            </child>
+
+                            <child>
+                              <object class="GtkBox">
+                                <property name="hexpand">true</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </property>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkStackPage">
+            <property name="name">server</property>
+            <property name="title">Update server</property>
+            <property name="child">
+              <object class="GtkBox">
+                <style><class name="info-box"/></style>
+                <property name="orientation">vertical</property>
+                <property name="spacing">18</property>
+                <property name="hexpand">true</property>
+                <property name="vexpand">true</property>
+                <property name="margin-top">8</property>
+                <property name="margin-bottom">8</property>
+
+                <child>
+                  <object class="GtkGrid">
+                    <property name="column-spacing">18</property>
+                    <property name="row-spacing">10</property>
+                    <property name="halign">fill</property>
+
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label">Server address</property>
+                        <property name="halign">start</property>
+                        <property name="xalign">0</property>
+                        <property name="width-chars">14</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="update_server_address">
+                        <property name="hexpand">true</property>
+                        <property name="placeholder-text">updates.example.com/repository</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="GtkCheckButton" id="update_server_insecure">
+                        <property name="label">Insecure connection</property>
+                        <property name="tooltip-text">Skip transport security checks for this server</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">1</property>
+                        </layout>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label">Authentication</property>
+                        <property name="halign">start</property>
+                        <property name="xalign">0</property>
+                        <property name="width-chars">14</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">2</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkDropDown" id="update_server_auth_mode">
+                        <property name="hexpand">true</property>
+                        <property name="model">
+                          <object class="GtkStringList">
+                            <items>
+                              <item>No authentication</item>
+                              <item>User / password</item>
+                              <item>OAuth</item>
+                            </items>
+                          </object>
+                        </property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">2</property>
+                        </layout>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkStack" id="update_server_auth_stack">
+                    <property name="hexpand">true</property>
+                    <property name="vexpand">true</property>
+
+                    <child>
+                      <object class="GtkStackPage">
+                        <property name="name">anonymous</property>
+                        <property name="title">No authentication</property>
+			<property name="child">
+                          <object class="GtkLabel"></object>
+                        </property>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="GtkStackPage">
+                        <property name="name">userpass</property>
+                        <property name="title">User / password</property>
+                        <property name="child">
+                          <object class="GtkGrid">
+                            <property name="column-spacing">18</property>
+                            <property name="row-spacing">10</property>
+
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label">Username</property>
+                                <property name="halign">start</property>
+                                <property name="xalign">0</property>
+                                <property name="width-chars">14</property>
+                                <layout>
+                                  <property name="column">0</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="update_server_username">
+                                <property name="hexpand">true</property>
+                                <layout>
+                                  <property name="column">1</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label">Password</property>
+                                <property name="halign">start</property>
+                                <property name="xalign">0</property>
+                                <property name="width-chars">14</property>
+                                <layout>
+                                  <property name="column">0</property>
+                                  <property name="row">1</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="update_server_password">
+                                <property name="hexpand">true</property>
+                                <property name="visibility">false</property>
+                                <property name="input-purpose">password</property>
+                                <layout>
+                                  <property name="column">1</property>
+                                  <property name="row">1</property>
+                                </layout>
+                              </object>
+                            </child>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="GtkStackPage">
+                        <property name="name">oauth</property>
+                        <property name="title">OAuth</property>
+                        <property name="child">
+                          <object class="GtkBox">
+                            <property name="orientation">vertical</property>
+                            <property name="spacing">12</property>
+
+                            <child>
+                              <object class="GtkButton" id="update_server_oauth_button">
+                                <property name="label">Start OAuth flow</property>
+                                <property name="halign">start</property>
+                                <style><class name="settings-button"/></style>
+                                <signal name="clicked" handler="on_start_oauth_clicked" swapped="true"/>
+                              </object>
+                            </child>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

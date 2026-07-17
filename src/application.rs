@@ -10,8 +10,9 @@ use crate::plot::Plot;
 use crate::security_icon::SecurityIcon;
 use crate::serie::Serie;
 use crate::service_gobject::ServiceGObject;
-pub use crate::service_model::StatsResponse;
 pub use crate::service_model::HostSysinfoStatus;
+use crate::service_model::ServiceModel;
+pub use crate::service_model::StatsResponse;
 use crate::settings_action::SettingsAction;
 use crate::status_icon::StatusIcon;
 use givc_client::endpoint::TlsConfig;
@@ -252,6 +253,10 @@ impl ControlPanelGuiApplication {
         self.imp().service_model.clone().upcast()
     }
 
+    pub fn get_service_model(&self) -> ServiceModel {
+        self.imp().service_model.clone()
+    }
+
     pub fn get_stats(
         &self,
         vm: String,
@@ -313,7 +318,7 @@ impl ControlPanelGuiApplication {
     }
 
     pub fn perform_setting_action(&self, action: SettingsAction) {
-        debug!("Performing settings action... {action:?}");
+        debug!("Performing settings action...");
         match action {
             SettingsAction::RegionNLanguage { locale, timezone } => {
                 self.imp().set_locale_timezone(locale, timezone);
@@ -327,15 +332,44 @@ impl ControlPanelGuiApplication {
             SettingsAction::OpenWireGuard { vm } => {
                 self.open_wireguard(&vm);
             }
-            SettingsAction::CheckForUpdateRequest => {
+            SettingsAction::CheckForUpdateRequest {
+                reference,
+                auth_mode,
+                insecure,
+            } => {
                 glib::spawn_future_local(glib::clone!(
                     #[strong(rename_to = app)]
                     self,
-                    async move { app.imp().service_model.check_for_update().await }
+                    async move {
+                        app.imp()
+                            .service_model
+                            .check_for_update(reference, auth_mode, insecure)
+                            .await
+                    }
+                ));
+            }
+            SettingsAction::DownloadUpdateRequest {
+                reference,
+                auth_mode,
+                insecure,
+            } => {
+                glib::spawn_future_local(glib::clone!(
+                    #[strong(rename_to = app)]
+                    self,
+                    async move {
+                        app.imp()
+                            .service_model
+                            .download_update(reference, auth_mode, insecure)
+                            .await
+                    }
                 ));
             }
             SettingsAction::UpdateRequest => {
-                self.imp().service_model.update_request();
+                glib::spawn_future_local(glib::clone!(
+                    #[strong(rename_to = app)]
+                    self,
+                    async move { app.imp().service_model.update_request().await }
+                ));
             }
         }
     }

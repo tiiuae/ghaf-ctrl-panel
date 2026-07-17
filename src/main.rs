@@ -1,5 +1,6 @@
-mod application;
 mod about;
+mod app_config;
+mod application;
 mod connection_config;
 mod control_action;
 mod data_gobject;
@@ -19,6 +20,8 @@ mod settings;
 mod settings_action;
 mod status_icon;
 mod typed_list_store;
+mod update;
+mod update_state;
 mod window;
 mod wireguard_vms;
 

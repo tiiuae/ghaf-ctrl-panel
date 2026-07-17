@@ -1,3 +1,4 @@
+#![allow(clippy::needless_pass_by_value)]
 use gtk::gio::ListModel;
 use gtk::glib;
 use gtk::prelude::*;
@@ -18,6 +19,7 @@ mod imp {
     use crate::language_region_settings_page::LanguageRegionSettingsPage;
     use crate::service_gobject::ServiceGObject;
     use crate::settings_action::SettingsAction;
+    use crate::update::UpdatePage;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/ae/tii/ghaf/controlpanelgui/ui/settings.ui")]
@@ -28,6 +30,8 @@ mod imp {
         pub stack: TemplateChild<Stack>,
         #[template_child]
         pub language_region_settings_page: TemplateChild<LanguageRegionSettingsPage>,
+        #[template_child]
+        pub update_page: TemplateChild<UpdatePage>,
         #[template_child]
         pub about_page: TemplateChild<AboutPage>,
         //pub vm_model: RefCell<ListModel>,
@@ -80,8 +84,12 @@ mod imp {
         }
 
         #[template_callback]
-        fn on_check_for_update_request(&self) {
-            let action = SettingsAction::CheckForUpdateRequest;
+        fn on_check_for_update_request(&self, action: SettingsAction) {
+            self.obj().emit_by_name::<()>("settings-action", &[&action]);
+        }
+
+        #[template_callback]
+        fn on_download_update_request(&self, action: SettingsAction) {
             self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
 

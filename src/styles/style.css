@@ -230,7 +230,7 @@ dropdown contents row label {
 
 /*Scale slider styling*/
 scale {
-  padding: 1px;
+  padding: 5px;
 }
 
 scale trough,
@@ -241,7 +241,7 @@ scale trough highlight {
   background-image: none;
 }
 
-scale trough slider {
+scale slider {
   background-color: #FFFFFF;
   /*min-width: 20px;
   min-height: 20px;*/
@@ -489,4 +489,33 @@ plot {
 statswindow box, statswindow.box {
   background-color: #1D1D1D;
   color: #ffffff;
+}
+
+/* Alert dialog styling */
+alertdialog {
+  background-color: #1D1D1D;
+  color: #FFFFFF;
+}
+
+alertdialog label {
+  color: #FFFFFF;
+}
+
+alertdialog button {
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 5px;
+  color: #FFFFFF;
+}
+
+alertdialog button:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: #FFFFFF;
+}
+
+alertdialog button:disabled {
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: lightgray;
 }
