@@ -11,6 +11,7 @@
     <file preprocess="xml-stripblanks">ui/connection_config.ui</file>
     <file preprocess="xml-stripblanks">ui/error_popup.ui</file>
     <file preprocess="xml-stripblanks">ui/language_region_notify_popup.ui</file>
+    <file preprocess="xml-stripblanks">ui/update.ui</file>
     <file>styles/style.css</file>
     <!-- Icons -->
     <file>icons/ghaf_logo.svg</file>

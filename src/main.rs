@@ -1,5 +1,6 @@
-mod application;
 mod about;
+mod app_config;
+mod application;
 mod connection_config;
 mod control_action;
 mod data_gobject;
@@ -19,8 +20,13 @@ mod settings;
 mod settings_action;
 mod status_icon;
 mod typed_list_store;
+mod update;
+mod update_state;
 mod window;
 mod wireguard_vms;
+
+#[cfg(feature = "test-automation")]
+mod test_automation;
 
 use self::application::ControlPanelGuiApplication;
 use self::window::ControlPanelGuiWindow;
@@ -87,11 +93,11 @@ fn initialize_logger(args: &Args) {
     let log_level = args.log_level.to_level_filter();
     match args.log_output {
         LogOutput::Stdout => {
-            // You can set the level in code here
             Builder::new()
-                .filter_level(log_level) // Set to Debug level in code
+                .target(env_logger::Target::Stderr)
+                .filter_level(log_level)
                 .init();
-            debug!("Logging to stdout");
+            debug!("Logging to stderr");
         }
         LogOutput::Syslog => {
             debug!("Logging to syslog");

@@ -1,5 +1,6 @@
 {
   "nodes": {
+
     "crane": {
       "locked": {
         "lastModified": 1787326676,
@@ -33,6 +34,23 @@
         "type": "github"
       }
     },
+    "ghaf-givc": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1788768022,
+        "narHash": "sha256-kOJ6iEM7muNZRLnSMwOJBg6WHJfsbduzGzDveE3lsnE=",
+        "ref": "update-gui",
+        "rev": "98c6ae9c237db9a01c9d88e9adb2c2ed588adf85",
+        "revCount": 1151,
+        "type": "git",
+        "url": "https://github.com/slakkala/ghaf-givc"
+      },
+      "original": {
+        "ref": "update-gui",
+        "type": "git",
+        "url": "https://github.com/slakkala/ghaf-givc"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1787814960,
@@ -53,6 +71,7 @@
       "inputs": {
         "crane": "crane",
         "flake-utils": "flake-utils",
+        "ghaf-givc": "ghaf-givc",
         "nixpkgs": "nixpkgs"
       }
     },

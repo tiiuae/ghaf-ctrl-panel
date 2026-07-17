@@ -10,8 +10,9 @@ use crate::plot::Plot;
 use crate::security_icon::SecurityIcon;
 use crate::serie::Serie;
 use crate::service_gobject::ServiceGObject;
-pub use crate::service_model::StatsResponse;
 pub use crate::service_model::HostSysinfoStatus;
+use crate::service_model::ServiceModel;
+pub use crate::service_model::StatsResponse;
 use crate::settings_action::SettingsAction;
 use crate::status_icon::StatusIcon;
 use givc_client::endpoint::TlsConfig;
@@ -67,6 +68,9 @@ mod imp {
         // tries to launch a "second instance" of the application. When they try
         // to do that, we'll just present any existing window.
         fn activate(&self) {
+            info!("application activated!");
+            #[cfg(feature = "test-automation")]
+            info!("test-automation enabled");
             let application = self.obj();
             //load CSS styles
             Self::load_css();
@@ -106,7 +110,13 @@ mod imp {
             };
 
             // Ask the window manager/compositor to present the window
+            info!("Presenting window");
             window.present();
+
+            #[cfg(feature = "test-automation")]
+            info!("Setting up test automation");
+            #[cfg(feature = "test-automation")]
+            crate::test_automation::setup(&self.obj());
         }
     }
 
@@ -252,6 +262,10 @@ impl ControlPanelGuiApplication {
         self.imp().service_model.clone().upcast()
     }
 
+    pub fn get_service_model(&self) -> ServiceModel {
+        self.imp().service_model.clone()
+    }
+
     pub fn get_stats(
         &self,
         vm: String,
@@ -313,7 +327,7 @@ impl ControlPanelGuiApplication {
     }
 
     pub fn perform_setting_action(&self, action: SettingsAction) {
-        debug!("Performing settings action... {action:?}");
+        debug!("Performing settings action...");
         match action {
             SettingsAction::RegionNLanguage { locale, timezone } => {
                 self.imp().set_locale_timezone(locale, timezone);
@@ -327,15 +341,44 @@ impl ControlPanelGuiApplication {
             SettingsAction::OpenWireGuard { vm } => {
                 self.open_wireguard(&vm);
             }
-            SettingsAction::CheckForUpdateRequest => {
+            SettingsAction::CheckForUpdateRequest {
+                reference,
+                auth_mode,
+                insecure,
+            } => {
                 glib::spawn_future_local(glib::clone!(
                     #[strong(rename_to = app)]
                     self,
-                    async move { app.imp().service_model.check_for_update().await }
+                    async move {
+                        app.imp()
+                            .service_model
+                            .check_for_update(reference, auth_mode, insecure)
+                            .await
+                    }
+                ));
+            }
+            SettingsAction::DownloadUpdateRequest {
+                reference,
+                auth_mode,
+                insecure,
+            } => {
+                glib::spawn_future_local(glib::clone!(
+                    #[strong(rename_to = app)]
+                    self,
+                    async move {
+                        app.imp()
+                            .service_model
+                            .download_update(reference, auth_mode, insecure)
+                            .await
+                    }
                 ));
             }
             SettingsAction::UpdateRequest => {
-                self.imp().service_model.update_request();
+                glib::spawn_future_local(glib::clone!(
+                    #[strong(rename_to = app)]
+                    self,
+                    async move { app.imp().service_model.update_request().await }
+                ));
             }
         }
     }

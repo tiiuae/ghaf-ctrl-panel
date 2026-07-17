@@ -1,3 +1,4 @@
+mod app_config;
 mod bug_report_settings_page;
 mod github;
 

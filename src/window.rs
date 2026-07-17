@@ -94,7 +94,7 @@ mod imp {
         }
 
         #[template_callback]
-        fn switch_to_settings_view(&self) {
+        pub(super) fn switch_to_settings_view(&self) {
             if self.stack.visible_child_name() != Some("settings_view".into()) {
                 self.stack.set_visible_child_name("settings_view");
             }

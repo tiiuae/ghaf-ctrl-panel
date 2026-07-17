@@ -7,8 +7,8 @@ use crate::service_gobject::ServiceGObject;
 use crate::window::ControlPanelGuiWindow;
 
 mod imp {
-    use glib::subclass::Signal;
     use glib::Binding;
+    use glib::subclass::Signal;
     use gtk::prelude::*;
     use gtk::subclass::prelude::*;
     use gtk::{
@@ -26,7 +26,6 @@ mod imp {
     use crate::service_gobject::ServiceGObject;
     use crate::settings_action::SettingsAction;
     use crate::status_icon::StatusIcon;
-
     pub(super) struct CancelGuard(gio::Cancellable);
 
     impl Drop for CancelGuard {
@@ -83,6 +82,7 @@ mod imp {
         pub cpu_sys_serie: TemplateChild<Serie>,
         #[template_child]
         pub cpu_user_serie: TemplateChild<Serie>,
+
         #[template_child]
         pub mem_used_serie: TemplateChild<Serie>,
         #[template_child]
@@ -262,7 +262,7 @@ impl ServiceSettings {
             #[allow(clippy::cast_precision_loss)]
             glib::spawn_future_local(gio::CancellableFuture::new(
                 glib::clone!(
-                    #[strong(rename_to = settings)]
+                    #[weak(rename_to = settings)]
                     self,
                     #[strong]
                     object,

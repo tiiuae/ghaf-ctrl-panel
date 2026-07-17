@@ -7,6 +7,10 @@
     crane.url = "github:ipetkov/crane";
 
     flake-utils.url = "github:numtide/flake-utils";
+
+    ghaf-givc = {
+      url = "git+https://github.com/slakkala/ghaf-givc?ref=update-gui";
+    };
   };
 
   outputs =
@@ -15,6 +19,7 @@
       nixpkgs,
       crane,
       flake-utils,
+      ghaf-givc,
       ...
     }:
     flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" ] (
@@ -77,11 +82,28 @@
               --prefix PATH : ${lib.makeBinPath [ pkgs.zenity ]}
           '';
         });
+
+        ctrlPanelTestAutomation = craneLib.buildPackage (commonArgs // {
+          inherit cargoArtifacts;
+          cargoExtraArgs = "--features test-automation";
+          postFixup = ''
+            wrapProgram $out/bin/ctrl-panel \
+              --prefix PATH : ${lib.makeBinPath [ pkgs.glibc ]} \
+              --prefix PATH : ${lib.makeBinPath [ pkgs.dmidecode ]} \
+              --prefix PATH : ${lib.makeBinPath [ pkgs.zenity ]}
+          '';
+        });
+
+        guiIntegrationTest = import ./nix/gui-integration-test.nix {
+          inherit pkgs lib crane system ghaf-givc;
+          ctrlPanel = ctrlPanelTestAutomation;
+        };
       in
       {
         checks = {
           # Build the crate as part of `nix flake check` for convenience
           inherit my-crate;
+          gui-integration = guiIntegrationTest;
         };
 
         packages = {
