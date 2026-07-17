@@ -40,6 +40,22 @@
             </child>
             <child>
               <object class="AdwActionRow">
+                <property name="name">update</property>
+                <style><class name="settings-row"/></style>
+                <property name="title">System update</property>
+                <child type="prefix">
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="resource">/ae/tii/ghaf/controlpanelgui/icons/ghaf_logo.svg</property>
+                    <property name="width-request">24</property>
+                    <property name="height-request">24</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
                 <property name="name">about</property>
                 <style><class name="settings-row"/></style>
                 <property name="title">About</property>
@@ -77,6 +93,18 @@
                   <object class="LanguageRegionSettingsPage" id="language_region_settings_page">
                     <signal name="locale-default" handler="on_locale_timezone_default" swapped="true"/>
                     <signal name="locale-timezone-changed" handler="on_locale_timezone_changed" swapped="true"/>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child> <!-- System update view child -->
+              <object class="GtkStackPage">
+                <property name="name">update</property>
+                <property name="child">
+                  <object class="UpdatePage" id="update_page">
+                    <signal name="check-for-update-request" handler="on_check_for_update_request" swapped="true"/>
+                    <signal name="download-update-request" handler="on_download_update_request" swapped="true"/>
+                    <signal name="install-update-request" handler="on_update_request" swapped="true"/>
                   </object>
                 </property>
               </object>

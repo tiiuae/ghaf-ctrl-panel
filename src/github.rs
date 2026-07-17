@@ -7,12 +7,10 @@ use futures::FutureExt;
 use http::header::ACCEPT;
 use octocrab::{Octocrab, models::issues::Issue};
 use secrecy::{ExposeSecret, SecretString};
-use serde::{Deserialize, Serialize, Serializer};
-use std::path::{Path, PathBuf};
-use std::{env, time::Duration};
+use std::time::Duration;
 use thiserror::Error as ThisError;
 
-use crate::prelude::*;
+use crate::app_config::{self, GithubConfig};
 
 #[derive(ThisError, Debug)]
 pub enum Error {
@@ -27,6 +25,8 @@ pub enum Error {
     Var(#[from] std::env::VarError),
     #[error(transparent)]
     Channel(#[from] async_channel::RecvError),
+    #[error(transparent)]
+    AppConfig(#[from] app_config::Error),
     #[error(transparent)]
     TomlDe(#[from] toml::de::Error),
     #[error(transparent)]
@@ -43,25 +43,9 @@ impl std::fmt::Display for Error {
     }
 }
 
-#[allow(clippy::ref_option)]
-fn expose<S>(t: &Option<SecretString>, s: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    s.serialize_str(t.as_ref().unwrap().expose_secret())
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct GithubConfig {
-    #[serde(skip_serializing_if = "Option::is_none", serialize_with = "expose")]
-    pub token: Option<SecretString>,
-    pub owner: String,
-    pub repo: String,
-}
-
 pub async fn auth(config: &mut GithubConfig) -> Result<(), Error> {
     let client_id = std::env::var("GITHUB_CLIENT_ID")?.into();
-    let timeout = Duration::from_secs(60);
+    let timeout = Duration::from_mins(1);
 
     let crab = octocrab::Octocrab::builder()
         .base_uri("https://github.com")?
@@ -116,23 +100,8 @@ pub async fn auth(config: &mut GithubConfig) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn get_config_path() -> PathBuf {
-    let variable_name = "GITHUB_CONFIG";
-    let variable = env::var_os(variable_name);
-
-    if let Some(val) = variable {
-        PathBuf::from(val)
-    } else {
-        warn!("Missing environment variable: {variable_name}");
-        Path::new(&env::var_os("HOME").unwrap_or_else(|| "/home/ghaf".into()))
-            .join(".config/ctrl-panel/config.toml")
-    }
-}
-
 pub fn load_config() -> Result<GithubConfig, Error> {
-    let path = get_config_path();
-
-    Ok(toml::from_str(&std::fs::read_to_string(path)?)?)
+    Ok(app_config::load_config()?.github)
 }
 
 pub async fn create_github_issue(title: String, content: String) -> Result<Issue, Error> {
@@ -145,7 +114,6 @@ pub async fn create_github_issue(title: String, content: String) -> Result<Issue
     match send_issue(&config, &title, issue_body).await {
         Err(_e) => {
             auth(&mut config).await?;
-            let config = load_config()?;
             send_issue(&config, &title, issue_body).await
         }
         ok => ok,
@@ -153,14 +121,12 @@ pub async fn create_github_issue(title: String, content: String) -> Result<Issue
 }
 
 async fn send_issue(config: &GithubConfig, title: &str, body: &str) -> Result<Issue, Error> {
+    if config.token.expose_secret().is_empty() {
+        return Err(Error::NotAuthenticated);
+    }
+
     let octocrab = Octocrab::builder()
-        .personal_token(
-            config
-                .token
-                .as_ref()
-                .ok_or(Error::NotAuthenticated)?
-                .clone(),
-        )
+        .personal_token(config.token.clone())
         .build()?;
     Ok(octocrab
         .issues(&config.owner, &config.repo)
@@ -172,10 +138,10 @@ async fn send_issue(config: &GithubConfig, title: &str, body: &str) -> Result<Is
 
 #[inline]
 fn set_key(config: &mut GithubConfig, token: SecretString) -> Result<(), Error> {
-    config.token = Some(token);
-    let path = get_config_path();
-
-    std::fs::write(&path, toml::to_string(config)?.as_bytes())?;
+    config.token = token;
+    let mut app_config = app_config::load_config().unwrap_or_default();
+    app_config.github = config.clone();
+    app_config::save_config(&app_config)?;
 
     Ok(())
 }

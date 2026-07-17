@@ -1,6 +1,6 @@
 use anyhow::Context;
-use gtk::glib;
 use gtk::gio;
+use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use serde_json::Value;
@@ -164,9 +164,7 @@ impl AboutPage {
     }
 }
 
-async fn fetch_system_status(
-    app: &ControlPanelGuiApplication,
-) -> SystemStatus {
+async fn fetch_system_status(app: &ControlPanelGuiApplication) -> SystemStatus {
     const MAX_ATTEMPTS: usize = 6;
     const RETRY_DELAY_SECS: u32 = 1;
     let yubikey_enrollment = fetch_yubikey_enrollment().await;
@@ -276,7 +274,9 @@ fn detect_yubikey_enrollment_blocking() -> Result<&'static str, anyhow::Error> {
         .filter(|line| !line.trim().is_empty())
         .map(serde_json::from_str::<Value>)
         .collect::<Result<_, _>>()
-        .with_context(|| format!("failed to parse `homectl inspect -j` output for users {users:?}"))?;
+        .with_context(|| {
+            format!("failed to parse `homectl inspect -j` output for users {users:?}")
+        })?;
 
     // `homectl inspect -j` returns one JSON object per line. Report enrolled if any
     // listed user has a FIDO2 credential.
@@ -300,7 +300,9 @@ fn has_fido2_hmac_credential(value: &Value) -> bool {
     match value {
         Value::Object(obj) => {
             if let Some(field) = obj.get("fido2HmacCredential") {
-                return field.as_array().is_some_and(|credentials| !credentials.is_empty());
+                return field
+                    .as_array()
+                    .is_some_and(|credentials| !credentials.is_empty());
             }
             obj.values().any(has_fido2_hmac_credential)
         }
