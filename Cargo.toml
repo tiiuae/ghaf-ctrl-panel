@@ -9,11 +9,11 @@ adw = { version = "0.9", package = "libadwaita", features = ["v1_7"] }
 anyhow = "1.0"
 async-channel = "2.5"
 chrono = "0.4"
-clap = {version = "4.5.56", features = ["derive", "env"] }
+clap = {version = "4.6.4", features = ["derive", "env"] }
 env_logger = "0.11"
 futures = "0.3"
 gtk = { version = "0.11", package = "gtk4", features = ["v4_18"] }
-http = "1.4"
+http = "1.5"
 log = "0.4"
 octocrab = "0.49"
 pangocairo = "0.22"
@@ -24,9 +24,9 @@ serde = { version = "1.0", features = ["derive"] }
 strum = { version = "0.28", features = ["derive"] }
 syslog = "7.0"
 thiserror = "2.0"
-tokio = { version = "1.49", features = ["rt", "time", "macros"] }
+tokio = { version = "1.53", features = ["rt", "time", "macros"] }
 toml = "1"
-zbus = "5.13"
+zbus = "5.18"
 
 givc-client = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main" }
 givc-common = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main", features = ["glib"] }
