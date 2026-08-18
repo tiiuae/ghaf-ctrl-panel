@@ -191,12 +191,11 @@ async fn fetch_system_status(
             }
             Err(e) => {
                 let message = e.to_string();
-                let is_not_connected = message.contains("Not connected");
                 warn!(
                     "AboutPage: ghaf-host sysinfo query failed (attempt {attempt}/{MAX_ATTEMPTS}): {message}"
                 );
 
-                if !is_not_connected || attempt == MAX_ATTEMPTS {
+                if attempt == MAX_ATTEMPTS {
                     break;
                 }
 
