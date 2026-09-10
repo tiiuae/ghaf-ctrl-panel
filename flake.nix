@@ -8,6 +8,11 @@
 
     flake-utils.url = "github:numtide/flake-utils";
 
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     ghaf-givc = {
       url = "git+https://github.com/slakkala/ghaf-givc?ref=update-gui";
     };
@@ -19,6 +24,7 @@
       nixpkgs,
       crane,
       flake-utils,
+      treefmt-nix,
       ghaf-givc,
       ...
     }:
@@ -28,6 +34,14 @@
         pkgs = nixpkgs.legacyPackages.${system};
 
         inherit (pkgs) lib;
+
+        treefmtEval = treefmt-nix.lib.evalModule pkgs {
+          projectRootFile = "flake.nix";
+
+          programs.nixfmt.enable = true;
+          programs.rustfmt.enable = true;
+          programs.taplo.enable = true;
+        };
 
         craneLib = crane.mkLib pkgs;
 
@@ -41,21 +55,22 @@
           strictDeps = true;
 
           nativeBuildInputs = [
-             pkgs.pkg-config
-             pkgs.glib
-             pkgs.protobuf
-             pkgs.wrapGAppsHook4
-             pkgs.dbus
+            pkgs.pkg-config
+            pkgs.glib
+            pkgs.protobuf
+            pkgs.wrapGAppsHook4
+            pkgs.dbus
           ];
           buildInputs = [
             # Add additional build inputs here
-             pkgs.glib
-             pkgs.cairo
-             pkgs.pango
-             pkgs.gtk4
-             pkgs.libadwaita
-             pkgs.dbus
-          ] ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
+            pkgs.glib
+            pkgs.cairo
+            pkgs.pango
+            pkgs.gtk4
+            pkgs.libadwaita
+            pkgs.dbus
+          ]
+          ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
             # Additional darwin specific inputs can be set here
             pkgs.libiconv
           ];
@@ -70,32 +85,44 @@
 
         # Build the actual crate itself, reusing the dependency
         # artifacts from above.
-        my-crate = craneLib.buildPackage (commonArgs // {
-          inherit cargoArtifacts;
-          postUnpack = ''
-            find .
-          '';
-          postFixup = ''
-            wrapProgram $out/bin/ctrl-panel \
-              --prefix PATH : ${lib.makeBinPath [ pkgs.glibc ]} \
-              --prefix PATH : ${lib.makeBinPath [ pkgs.dmidecode ]} \
-              --prefix PATH : ${lib.makeBinPath [ pkgs.zenity ]}
-          '';
-        });
+        my-crate = craneLib.buildPackage (
+          commonArgs
+          // {
+            inherit cargoArtifacts;
+            postUnpack = ''
+              find .
+            '';
+            postFixup = ''
+              wrapProgram $out/bin/ctrl-panel \
+                --prefix PATH : ${lib.makeBinPath [ pkgs.glibc ]} \
+                --prefix PATH : ${lib.makeBinPath [ pkgs.dmidecode ]} \
+                --prefix PATH : ${lib.makeBinPath [ pkgs.zenity ]}
+            '';
+          }
+        );
 
-        ctrlPanelTestAutomation = craneLib.buildPackage (commonArgs // {
-          inherit cargoArtifacts;
-          cargoExtraArgs = "--features test-automation";
-          postFixup = ''
-            wrapProgram $out/bin/ctrl-panel \
-              --prefix PATH : ${lib.makeBinPath [ pkgs.glibc ]} \
-              --prefix PATH : ${lib.makeBinPath [ pkgs.dmidecode ]} \
-              --prefix PATH : ${lib.makeBinPath [ pkgs.zenity ]}
-          '';
-        });
+        ctrlPanelTestAutomation = craneLib.buildPackage (
+          commonArgs
+          // {
+            inherit cargoArtifacts;
+            cargoExtraArgs = "--features test-automation";
+            postFixup = ''
+              wrapProgram $out/bin/ctrl-panel \
+                --prefix PATH : ${lib.makeBinPath [ pkgs.glibc ]} \
+                --prefix PATH : ${lib.makeBinPath [ pkgs.dmidecode ]} \
+                --prefix PATH : ${lib.makeBinPath [ pkgs.zenity ]}
+            '';
+          }
+        );
 
         guiIntegrationTest = import ./nix/gui-integration-test.nix {
-          inherit pkgs lib crane system ghaf-givc;
+          inherit
+            pkgs
+            lib
+            crane
+            system
+            ghaf-givc
+            ;
           ctrlPanel = ctrlPanelTestAutomation;
         };
       in
@@ -103,8 +130,11 @@
         checks = {
           # Build the crate as part of `nix flake check` for convenience
           inherit my-crate;
+          treefmt = treefmtEval.config.build.check self;
           gui-integration = guiIntegrationTest;
         };
+
+        formatter = treefmtEval.config.build.wrapper;
 
         packages = {
           default = my-crate;
@@ -123,19 +153,22 @@
 
           # Extra inputs can be added here; cargo and rustc are provided by default.
           packages = [
-             pkgs.glib
-             pkgs.gtk4
-             pkgs.libadwaita
-             pkgs.pkg-config
-             pkgs.protobuf
-             pkgs.dbus
-             pkgs.cargo-edit
-             (pkgs.writeShellScriptBin "update-deps" (builtins.readFile ./scripts/update-deps.sh))
+            pkgs.glib
+            pkgs.gtk4
+            pkgs.libadwaita
+            pkgs.pkg-config
+            pkgs.protobuf
+            pkgs.dbus
+            pkgs.cargo-edit
+            treefmtEval.config.build.wrapper
+            (pkgs.writeShellScriptBin "update-deps" (builtins.readFile ./scripts/update-deps.sh))
           ];
         };
-      }) // {
-        overlays.default = final: prev: {
-          ctrl-panel = self.packages.${prev.stdenv.hostPlatform.system}.default;
-        };
+      }
+    )
+    // {
+      overlays.default = final: prev: {
+        ctrl-panel = self.packages.${prev.stdenv.hostPlatform.system}.default;
       };
+    };
 }

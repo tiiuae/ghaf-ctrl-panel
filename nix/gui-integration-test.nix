@@ -1,4 +1,11 @@
-{ pkgs, lib, crane, ctrlPanel, system, ghaf-givc }:
+{
+  pkgs,
+  lib,
+  crane,
+  ctrlPanel,
+  system,
+  ghaf-givc,
+}:
 let
   ghafGivcSrc = ghaf-givc.outPath;
 
@@ -25,7 +32,9 @@ let
   adminModule = import (ghafGivcSrc + "/nixos/modules/admin.nix") { self = givcSelf; };
   hostModule = import (ghafGivcSrc + "/nixos/modules/host.nix") { self = givcSelf; };
   sysvmModule = import (ghafGivcSrc + "/nixos/modules/sysvm.nix") { self = givcSelf; };
-  otaUpdateServerModule = import (ghafGivcSrc + "/nixos/modules/update-server.nix") { self = givcSelf; };
+  otaUpdateServerModule = import (ghafGivcSrc + "/nixos/modules/update-server.nix") {
+    self = givcSelf;
+  };
 
   adminAddr = {
     name = "admin-vm";
@@ -91,14 +100,18 @@ let
     touch /tmp/ctrl-panel-started
   '';
 
+  swayConfig = pkgs.writeText "ctrl-panel-test-sway-config" ''
+    set $mod Mod1
+    default_border none
+    seat * xcursor_theme default 24
+    bindsym $mod+Shift+e exit
+  '';
+
   updateServerKey = "${ghafGivcSrc}/nixos/tests/snakeoil/nix-serve.key";
 in
 let
   runNixOSTest =
-    if pkgs ? testers && pkgs.testers ? runNixOSTest then
-      pkgs.testers.runNixOSTest
-    else
-      pkgs.nixosTest;
+    if pkgs ? testers && pkgs.testers ? runNixOSTest then pkgs.testers.runNixOSTest else pkgs.nixosTest;
 in
 runNixOSTest {
   name = "ctrl-panel-gui-integration";
@@ -535,13 +548,7 @@ runNixOSTest {
         programs.bash.loginShellInit = ''
           if [ "$(tty)" = "/dev/tty1" ]; then
             set -e
-            mkdir -p ~/.config/sway
-            cat > ~/.config/sway/config <<'EOF'
-set $mod Mod1
-default_border none
-seat * xcursor_theme default 24
-bindsym $mod+Shift+e exit
-EOF
+            install -Dm644 ${swayConfig} ~/.config/sway/config
             sway --validate
             sway
           fi
