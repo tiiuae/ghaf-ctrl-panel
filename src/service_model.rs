@@ -721,7 +721,7 @@ mod imp {
         }
 
         #[cfg(feature = "mock")]
-        #[allow(clippy::unused_async)]
+        #[allow(clippy::unused_async, clippy::unused_async_trait_impl)]
         pub(super) async fn start_update_server_oauth_flow(&self) -> Result<(), anyhow::Error> {
             info!("ServiceModel: mocked update-server OAuth flow requested");
             Ok(())
@@ -1105,12 +1105,11 @@ impl ServiceModel {
     }
 
     fn set_update_error(&self, error: &anyhow::Error) {
-        self.imp()
-            .update_state_with_notifications_frozen(|state| {
-                state.set_activity(UpdateActivity::Error {
-                    error: error.to_string(),
-                });
+        self.imp().update_state_with_notifications_frozen(|state| {
+            state.set_activity(UpdateActivity::Error {
+                error: error.to_string(),
             });
+        });
     }
 
     pub async fn start_update_server_oauth_flow(&self) -> Result<(), anyhow::Error> {
@@ -1151,7 +1150,7 @@ impl ServiceModel {
             .await
     }
 
-    #[allow(clippy::unused_async)]
+    #[allow(clippy::unused_async, clippy::unused_async_trait_impl)]
     pub async fn restart_service(
         &self,
         _obj: &ServiceGObject,

@@ -111,10 +111,10 @@ pub async fn create_github_issue(title: String, content: String) -> Result<Issue
         .split_once("\n\nAttachment:")
         .map_or(content.as_str(), |(a, _)| a);
 
-    match send_issue(&config, &title, issue_body).await {
+    match Box::pin(send_issue(&config, &title, issue_body)).await {
         Err(_e) => {
             auth(&mut config).await?;
-            send_issue(&config, &title, issue_body).await
+            Box::pin(send_issue(&config, &title, issue_body)).await
         }
         ok => ok,
     }
@@ -128,12 +128,14 @@ async fn send_issue(config: &GithubConfig, title: &str, body: &str) -> Result<Is
     let octocrab = Octocrab::builder()
         .personal_token(config.token.clone())
         .build()?;
-    Ok(octocrab
-        .issues(&config.owner, &config.repo)
-        .create(title)
-        .body(body.to_string())
-        .send()
-        .await?)
+    Ok(Box::pin(
+        octocrab
+            .issues(&config.owner, &config.repo)
+            .create(title)
+            .body(body.to_string())
+            .send(),
+    )
+    .await?)
 }
 
 #[inline]

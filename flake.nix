@@ -13,8 +13,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    ghaf-givc = {
-      url = "git+https://github.com/slakkala/ghaf-givc?ref=update-gui";
+    givc = {
+      url = "git+https://github.com/tiiuae/ghaf-givc?rev=c895849f68e648071356ffc8a21622d91f990cb6";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.crane.follows = "crane";
+      inputs.treefmt-nix.follows = "treefmt-nix";
     };
   };
 
@@ -25,7 +28,7 @@
       crane,
       flake-utils,
       treefmt-nix,
-      ghaf-givc,
+      givc,
       ...
     }:
     flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" ] (
@@ -121,7 +124,7 @@
             lib
             crane
             system
-            ghaf-givc
+            givc
             ;
           ctrlPanel = ctrlPanelTestAutomation;
         };

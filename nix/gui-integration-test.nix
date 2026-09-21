@@ -4,10 +4,10 @@
   crane,
   ctrlPanel,
   system,
-  ghaf-givc,
+  givc,
 }:
 let
-  ghafGivcSrc = ghaf-givc.outPath;
+  ghafGivcSrc = givc.outPath;
 
   givcAdminPkg = import (ghafGivcSrc + "/nixos/packages/givc-admin.nix") {
     inherit lib pkgs crane;
