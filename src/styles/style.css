@@ -8,10 +8,6 @@
 }
 */
 
-.adw-header-bar>windowhandle>box>*>label {
-  color: #1D1D1D;
-}
-
 /*Header toggle buttons*/
 .header-toggle-button {
   background-color: #F15025;
