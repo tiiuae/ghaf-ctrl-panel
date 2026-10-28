@@ -13,7 +13,6 @@
 //! - `set-text <id> <value>`         set the `text` property (entries)
 //! - `select <id> <index>`           set the `selected` property (drop-downs)
 //! - `activate <action>`             activate a `gio::Action`
-//! - `set-locale-timezone <locale> <tz>` `SettingsAction` emitter (kept as-is)
 //! - `get <id> <property>`           gets a `property` as string
 //!
 //! Any other token that matches a registered application action is activated;
@@ -29,7 +28,6 @@ use gtk::prelude::*;
 use log::{debug, error, info, warn};
 
 use crate::application::ControlPanelGuiApplication;
-use crate::settings_action::SettingsAction;
 
 pub fn setup(app: &ControlPanelGuiApplication) {
     let Some(socket_path) = std::env::var_os("CTRL_PANEL_AUTOMATION_SOCKET") else {
@@ -117,17 +115,6 @@ fn handle_command(
         "activate" => {
             let action = args.next().context("activate: missing action name")?;
             app.activate_action(action, None);
-            return Ok(None);
-        }
-        "set-locale-timezone" => {
-            let locale = args.next().context("set-locale-timezone: missing locale")?;
-            let timezone = args
-                .next()
-                .context("set-locale-timezone: missing timezone")?;
-            app.perform_setting_action(SettingsAction::RegionNLanguage {
-                locale: locale.to_string(),
-                timezone: timezone.to_string(),
-            });
             return Ok(None);
         }
         _ => {}

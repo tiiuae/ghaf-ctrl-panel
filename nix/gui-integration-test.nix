@@ -476,20 +476,6 @@ runNixOSTest {
     guivm =
       { pkgs, config, ... }:
       let
-        mockLocalectl = pkgs.writeShellScriptBin "localectl" ''
-          #!${pkgs.runtimeShell}
-          printf 'localectl %s\n' "$*" >> /tmp/guivm-locale-calls
-        '';
-
-        mockTimedatectl = pkgs.writeShellScriptBin "timedatectl" ''
-          #!${pkgs.runtimeShell}
-          printf 'timedatectl %s\n' "$*" >> /tmp/guivm-locale-calls
-        '';
-
-        mockSystemctl = pkgs.writeShellScriptBin "systemctl" ''
-          #!${pkgs.runtimeShell}
-          printf 'systemctl %s\n' "$*" >> /tmp/guivm-locale-calls
-        '';
       in
       {
         imports = [
@@ -554,9 +540,6 @@ runNixOSTest {
           fi
         '';
         systemd.services."givc-${guiAddr.name}".path = lib.mkForce [
-          mockLocalectl
-          mockTimedatectl
-          mockSystemctl
           config.system.path
         ];
         givc.sysvm = {
@@ -640,8 +623,5 @@ runNixOSTest {
       # the GUI VM over its memory budget.
       # guivm.succeed("echo 'click update_button' | nc -NU /tmp/ctrl-panel-automation.sock")
       # netvm.wait_until_succeeds("grep -q '^image install --manifest /persist/sysupdate/manifest.json$' /tmp/netvm-ota-update-calls")
-      guivm.succeed("echo 'set-locale-timezone en_US.utf8 Europe/Helsinki' | nc -NU /tmp/ctrl-panel-automation.sock")
-      guivm.wait_until_succeeds("grep -q '^localectl set-locale LANG=en_US.utf8$' /tmp/guivm-locale-calls")
-      guivm.wait_until_succeeds("grep -q '^timedatectl set-timezone Europe/Helsinki$' /tmp/guivm-locale-calls")
     '';
 }

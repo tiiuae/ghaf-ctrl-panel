@@ -1,22 +1,8 @@
 #![allow(dead_code)]
 use gio::{ListModel, ListStore};
 use glib::{Object, SignalHandlerId};
-use gtk::{
-    self, CustomFilter, DropDown, ListItem, SignalListItemFactory, SingleSelection, Widget, gio,
-    glib, prelude::*,
-};
+use gtk::{self, ListItem, SignalListItemFactory, SingleSelection, Widget, gio, glib, prelude::*};
 use std::ops::Deref;
-
-#[allow(dead_code)]
-pub trait CustomFilterExt {
-    fn typed<T: IsA<Object>, F: Fn(&T) -> bool + 'static>(f: F) -> Self;
-}
-
-impl CustomFilterExt for CustomFilter {
-    fn typed<T: IsA<Object>, F: for<'a> Fn(&'a T) -> bool + 'static>(f: F) -> Self {
-        CustomFilter::new(move |obj| obj.downcast_ref().is_some_and(&f))
-    }
-}
 
 #[allow(dead_code)]
 pub trait TypedListModelExt<T: IsA<Object>>: IsA<ListModel> {
@@ -53,49 +39,6 @@ pub trait SingleSelectionExt: IsA<SingleSelection> {
 
 impl<L: IsA<SingleSelection>> SingleSelectionExt for L {}
 
-pub trait DropDownExt: IsA<DropDown> {
-    fn selected_obj<T: IsA<Object>>(&self) -> Option<T> {
-        self.upcast_ref().selected_item().and_downcast()
-    }
-}
-
-impl<D: IsA<DropDown>> DropDownExt for D {}
-
-pub struct TypedDropDown<T: IsA<Object>>(DropDown, std::marker::PhantomData<T>);
-
-impl<T: IsA<Object>> TypedDropDown<T> {
-    pub fn selected_obj(&self) -> Option<T> {
-        self.0.selected_obj()
-    }
-
-    pub fn model(&self) -> Option<TypedListWrapper<ListModel, T>> {
-        Some(self.0.model()?.wrap())
-    }
-
-    pub fn set_model<L: IsA<ListModel>>(&self, model: &TypedListWrapper<L, T>) {
-        self.0.set_model(Some(&model.0));
-    }
-
-    #[allow(clippy::cast_possible_truncation)]
-    pub fn set_selected(&self, idx: usize) {
-        self.0.set_selected(idx as u32);
-    }
-}
-
-impl<T: IsA<Object>> From<DropDown> for TypedDropDown<T> {
-    fn from(ddown: DropDown) -> Self {
-        Self(ddown, std::marker::PhantomData)
-    }
-}
-
-impl<T: IsA<Object>> Deref for TypedDropDown<T> {
-    type Target = DropDown;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
 pub trait TypedSelectionWrapperExt<T: IsA<Object>> {
     fn selected_obj(&self) -> Option<T>;
 }
@@ -105,22 +48,6 @@ impl<T: IsA<Object>, L: IsA<SingleSelection> + IsA<ListModel>> TypedSelectionWra
 {
     fn selected_obj(&self) -> Option<T> {
         SingleSelectionExt::selected_obj::<T>(&**self)
-    }
-}
-
-#[allow(dead_code)]
-pub trait TypedStoreWrapperExt<T: IsA<Object>> {
-    fn retain<F: Fn(&T) -> bool>(&self, f: F);
-    fn append(&self, item: &T);
-}
-
-impl<T: IsA<Object>> TypedStoreWrapperExt<T> for TypedListWrapper<ListStore, T> {
-    fn retain<F: Fn(&T) -> bool>(&self, f: F) {
-        self.0.retain(|o| o.downcast_ref().is_some_and(&f));
-    }
-
-    fn append(&self, item: &T) {
-        self.0.append(item);
     }
 }
 
@@ -177,18 +104,6 @@ pub type TypedListModel<T> = TypedListWrapper<ListModel, T>;
 impl<T: IsA<Object>> From<TypedListStore<T>> for TypedListModel<T> {
     fn from(store: TypedListStore<T>) -> Self {
         store.0.upcast::<ListModel>().wrap()
-    }
-}
-
-#[allow(dead_code)]
-pub trait TypedListStoreExt<T: IsA<Object>> {
-    fn new() -> Self;
-}
-
-#[allow(dead_code)]
-impl<T: IsA<Object>> TypedListStoreExt<T> for TypedListStore<T> {
-    fn new() -> Self {
-        ListStore::new::<T>().wrap()
     }
 }
 

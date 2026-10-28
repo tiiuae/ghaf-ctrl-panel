@@ -1182,18 +1182,6 @@ impl ServiceModel {
             .await
     }
 
-    pub async fn set_locale(&self, locale: String) -> Result<(), anyhow::Error> {
-        self.imp()
-            .client_cmd(async |client| client.set_locale(locale).await)
-            .await
-    }
-
-    pub async fn set_timezone(&self, timezone: String) -> Result<(), anyhow::Error> {
-        self.imp()
-            .client_cmd(async |client| client.set_timezone(timezone).await)
-            .await
-    }
-
     #[cfg(not(feature = "mock"))]
     pub async fn reboot(&self) -> Result<(), anyhow::Error> {
         self.imp()

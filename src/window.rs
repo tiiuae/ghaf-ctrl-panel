@@ -1,5 +1,4 @@
 use adw::subclass::prelude::*;
-use gio::ListModel;
 use gtk::prelude::*;
 use gtk::{gio, glib};
 
@@ -278,11 +277,4 @@ impl ControlPanelGuiWindow {
     }
 
     //pub API
-    pub fn set_locale_model(&self, model: impl IsA<ListModel>, selected: Option<usize>) {
-        self.imp().settings_box.set_locale_model(model, selected);
-    }
-
-    pub fn set_timezone_model(&self, model: impl IsA<ListModel>, selected: Option<usize>) {
-        self.imp().settings_box.set_timezone_model(model, selected);
-    }
 }

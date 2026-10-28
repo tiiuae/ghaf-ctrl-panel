@@ -20,16 +20,12 @@ use log::debug;
 
 mod imp {
     use adw::{prelude::*, subclass::prelude::*};
-    use gio::ListStore;
     use glib::Properties;
     use gtk::CssProvider;
     use gtk::{gdk, gio, glib};
     use std::cell::RefCell;
 
     use crate::connection_config::ConnectionConfig;
-    use crate::data_gobject::DataGObject;
-    use crate::language_region_notify_popup::LanguageRegionNotifyPopup;
-    use crate::locale_provider::{LanguageRegionData, LocaleProvider};
     use crate::prelude::*;
     use crate::service_model::ServiceModel;
 
@@ -80,31 +76,6 @@ mod imp {
             } else {
                 let window = ControlPanelGuiWindow::new(&*application);
 
-                glib::spawn_future_local(glib::clone!(
-                    #[strong]
-                    window,
-                    async move {
-                        let LanguageRegionData {
-                            languages,
-                            current_language,
-                            timezones,
-                            current_timezone,
-                        } = LocaleProvider::get_timezone_locale_info().await;
-
-                        let index = current_language
-                            .and_then(|cur| languages.iter().position(|lang| lang.code == cur));
-                        let model: ListStore =
-                            languages.into_iter().map(DataGObject::from).collect();
-                        window.set_locale_model(model, index);
-
-                        let index = current_timezone
-                            .and_then(|cur| timezones.iter().position(|tz| tz.code == cur));
-                        let model: ListStore =
-                            timezones.into_iter().map(DataGObject::from).collect();
-                        window.set_timezone_model(model, index);
-                    }
-                ));
-
                 self.obj().set_window(&window);
                 window.upcast()
             };
@@ -132,28 +103,6 @@ mod imp {
                 &provider,
                 gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
             );
-        }
-
-        pub fn set_locale_timezone(&self, locale: String, timezone: String) {
-            let popup = LanguageRegionNotifyPopup::new();
-            popup.set_transient_for(self.obj().active_window().as_ref());
-            popup.set_modal(true);
-            glib::spawn_future_local(glib::clone!(
-                #[strong(rename_to = app)]
-                self.obj(),
-                async move {
-                    let locset = app.imp().service_model.set_locale(locale);
-                    if let Err(err) = locset.await {
-                        warn!("Locale setting failed: {err}");
-                    }
-                    let tzset = app.imp().service_model.set_timezone(timezone);
-                    if let Err(err) = tzset.await {
-                        warn!("Timezone setting failed: {err}");
-                    }
-
-                    popup.present();
-                }
-            ));
         }
 
         fn build_action<F: Fn(&Self) + 'static>(
@@ -329,9 +278,6 @@ impl ControlPanelGuiApplication {
     pub fn perform_setting_action(&self, action: SettingsAction) {
         debug!("Performing settings action...");
         match action {
-            SettingsAction::RegionNLanguage { locale, timezone } => {
-                self.imp().set_locale_timezone(locale, timezone);
-            }
             SettingsAction::ShowErrorPopup { message } => {
                 let popup = ErrorPopup::new(&message);
                 popup.set_transient_for(self.active_window().as_ref());

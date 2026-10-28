@@ -1,7 +1,5 @@
 #![allow(clippy::needless_pass_by_value)]
-use gtk::gio::ListModel;
 use gtk::glib;
-use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
 mod imp {
@@ -16,7 +14,6 @@ mod imp {
     //use crate::service_gobject::ServiceGObject; will be used in the future
     use crate::about::AboutPage;
     use crate::control_action::ControlAction;
-    use crate::language_region_settings_page::LanguageRegionSettingsPage;
     use crate::service_gobject::ServiceGObject;
     use crate::settings_action::SettingsAction;
     use crate::update::UpdatePage;
@@ -28,8 +25,6 @@ mod imp {
         pub list_box: TemplateChild<ListBox>,
         #[template_child]
         pub stack: TemplateChild<Stack>,
-        #[template_child]
-        pub language_region_settings_page: TemplateChild<LanguageRegionSettingsPage>,
         #[template_child]
         pub update_page: TemplateChild<UpdatePage>,
         #[template_child]
@@ -62,25 +57,6 @@ mod imp {
         fn on_settings_row_selected(&self, row: &gtk::ListBoxRow) {
             self.stack
                 .set_visible_child_name(row.widget_name().as_str());
-        }
-
-        #[template_callback]
-        fn on_locale_timezone_default(&self) {
-            let action = SettingsAction::RegionNLanguage {
-                locale: "en_US.utf8".into(),
-                timezone: "UTC".into(),
-            };
-            self.obj().emit_by_name::<()>("settings-action", &[&action]);
-            self.language_region_settings_page
-                .locale_select_find(|obj| obj.name() == "en_US.utf8");
-            self.language_region_settings_page
-                .timezone_select_find(|obj| obj.name() == "UTC");
-        }
-
-        #[template_callback]
-        fn on_locale_timezone_changed(&self, locale: String, timezone: String) {
-            let action = SettingsAction::RegionNLanguage { locale, timezone };
-            self.obj().emit_by_name::<()>("settings-action", &[&action]);
         }
 
         #[template_callback]
@@ -142,18 +118,6 @@ impl Default for Settings {
 impl Settings {
     pub fn new() -> Self {
         glib::Object::builder().build()
-    }
-
-    pub fn set_locale_model(&self, model: impl IsA<ListModel>, selected: Option<usize>) {
-        self.imp()
-            .language_region_settings_page
-            .set_locale_model(model, selected);
-    }
-
-    pub fn set_timezone_model(&self, model: impl IsA<ListModel>, selected: Option<usize>) {
-        self.imp()
-            .language_region_settings_page
-            .set_timezone_model(model, selected);
     }
 
     pub fn init(&self) {

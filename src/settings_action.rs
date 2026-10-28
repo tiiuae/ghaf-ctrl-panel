@@ -18,10 +18,6 @@ pub enum UpdateServerAuthMode {
 #[boxed_type(name = "SettingsAction")]
 #[repr(u8)]
 pub enum SettingsAction {
-    RegionNLanguage {
-        locale: String,
-        timezone: String,
-    },
     ShowErrorPopup {
         message: String,
     },
