@@ -118,15 +118,18 @@ pub fn load_config() -> Result<AppConfig, Error> {
 pub fn save_config(config: &AppConfig) -> Result<(), Error> {
     use std::fs::Permissions;
     use std::io::Write;
-    use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
+    use std::os::unix::fs::{DirBuilderExt, OpenOptionsExt, PermissionsExt};
 
     const OWNER_RW: u32 = 0o600;
     const OWNER_RWX: u32 = 0o700;
 
     let path = get_config_path();
     if let Some(parent) = path.parent() {
-        std::fs::create_dir_all(&parent)?;
-        let _ = std::fs::set_permissions(&parent, Permissions::from_mode(OWNER_RWX));
+        std::fs::DirBuilder::new()
+            .recursive(true)
+            .mode(OWNER_RWX)
+            .create(parent)?;
+        let _ = std::fs::set_permissions(parent, Permissions::from_mode(OWNER_RWX));
     }
     let mut file = std::fs::OpenOptions::new()
         .write(true)
