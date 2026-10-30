@@ -44,10 +44,9 @@
                 <style><class name="settings-row"/></style>
                 <property name="title">About</property>
                 <child type="prefix">
-                  <object class="GtkImage">
+                  <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="resource">/ae/tii/ghaf/controlpanelgui/icons/icon_admin.svg</property>
                     <property name="width-request">24</property>
                     <property name="height-request">24</property>
                   </object>
