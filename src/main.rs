@@ -3,7 +3,6 @@ mod app_config;
 mod application;
 mod connection_config;
 mod control_action;
-mod data_gobject;
 mod error_popup;
 mod plot;
 mod prelude;

@@ -4,7 +4,6 @@ use gtk::prelude::*;
 use gtk::{gio, glib};
 
 use crate::control_action::ControlAction;
-use crate::data_gobject::DataGObject;
 use crate::error_popup::ErrorPopup;
 use crate::plot::Plot;
 use crate::security_icon::SecurityIcon;
@@ -187,7 +186,6 @@ impl ControlPanelGuiApplication {
         port: u16,
         tls_info: Option<(String, TlsConfig)>,
     ) -> Self {
-        let _ = DataGObject::static_type();
         let _ = Plot::static_type();
         let _ = Serie::static_type();
         let _ = SecurityIcon::static_type();
