@@ -40,7 +40,7 @@
                   <object class="GtkButton" id="local_button">
                     <property name="label">Import from local drive…</property>
                     <property name="halign">start</property>
-                    <signal name="clicked" handler="on_local_update_clicked" swapped="no"/>
+                    <signal name="clicked" handler="on_local_update_clicked" swapped="true"/>
                   </object>
                 </child>
                 <child>
@@ -48,7 +48,7 @@
                     <property name="label">Cancel import</property>
                     <property name="visible">false</property>
                     <property name="halign">start</property>
-                    <signal name="clicked" handler="on_cancel_import_clicked" swapped="no"/>
+                    <signal name="clicked" handler="on_cancel_import_clicked" swapped="true"/>
                   </object>
                 </child>
 
