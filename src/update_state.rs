@@ -11,6 +11,10 @@ pub enum UpdateActivity {
         progress: f64,
     },
     Downloaded,
+    Importing {
+        phase: String,
+        progress: f64,
+    },
     Installing {
         progress: f64,
     },

@@ -14,6 +14,7 @@
 //! - `select <id> <index>`           set the `selected` property (drop-downs)
 //! - `activate <action>`             activate a `gio::Action`
 //! - `get <id> <property>`           gets a `property` as string
+//! - `import-local <manifest>`      import a bundle without a native file chooser
 //!
 //! Any other token that matches a registered application action is activated;
 //! unknown commands are only logged.
@@ -112,6 +113,17 @@ fn handle_command(
     let verb = args.next().context("empty command")?;
 
     match verb {
+        "import-local" => {
+            let path = args
+                .next()
+                .context("import-local: missing manifest")?
+                .into();
+            let model = app.get_service_model();
+            glib::spawn_future_local(async move {
+                let _ = model.import_local_update(path).await;
+            });
+            return Ok(None);
+        }
         "activate" => {
             let action = args.next().context("activate: missing action name")?;
             app.activate_action(action, None);

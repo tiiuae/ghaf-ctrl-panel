@@ -193,8 +193,22 @@ runNixOSTest {
           ]
           EOF
               ;;
+            image)
+              test "$2" = local
+              case "$3" in
+                prepare) cat >/tmp/local-metadata ;;
+                accept)
+                  touch /tmp/local-verifying
+                  while [ ! -f /tmp/allow-local-accept ]; do sleep 0.1; done
+                  ;;
+                install) touch /tmp/local-installed; exit 0 ;;
+                discard-admission) exit 0 ;;
+                *) exit 1 ;;
+              esac
+              echo '{"id":"0123456789abcdef0123456789abcdef","version":"3.0.0","target":"test-target","generation":3,"files":[{"name":"root.raw","size":3},{"name":"verity.raw","size":3},{"name":"kernel.efi","size":3}]}'
+              ;;
             *)
-              echo "hostvm ota-update only supports get: $*" >&2
+              echo "unexpected host command: $*" >&2
               exit 1
               ;;
           esac
@@ -231,14 +245,17 @@ runNixOSTest {
             ota-update = mockOtaUpdate;
           })
         ];
-        systemd.services."givc-${hostAddr.name}".path = lib.mkForce [
-          mockGhafVersion
-          mockBootctl
-          mockLsblk
-          config.system.path
-          mockOtaUpdate
-          pkgs.openssh
-        ];
+        systemd.services."givc-${hostAddr.name}" = {
+          environment.GHAF_LOCAL_UPDATE_ROLE = "host";
+          path = lib.mkForce [
+            mockOtaUpdate
+            mockGhafVersion
+            mockBootctl
+            mockLsblk
+            config.system.path
+            pkgs.openssh
+          ];
+        };
         environment.systemPackages = [ pkgs.curl ];
         givc.host = {
           enable = true;
@@ -330,6 +347,16 @@ runNixOSTest {
             image)
               shift
               case "$1" in
+                local)
+                  case "$2" in
+                    receive)
+                      IFS= read -r metadata
+                      cat >/tmp/local-received-bytes
+                      ;;
+                    discard-received) ;;
+                    *) exit 1 ;;
+                  esac
+                  ;;
                 install)
                   exit 0
                   ;;
@@ -456,11 +483,14 @@ runNixOSTest {
             ota-update = mockOtaUpdate;
           })
         ];
-        systemd.services."givc-${netAddr.name}".path = lib.mkForce [
-          config.system.path
-          pkgs.dbus
-          mockOtaUpdate
-        ];
+        systemd.services."givc-${netAddr.name}" = {
+          environment.GHAF_LOCAL_UPDATE_ROLE = "receiver";
+          path = lib.mkForce [
+            mockOtaUpdate
+            config.system.path
+            pkgs.dbus
+          ];
+        };
         givc.sysvm = {
           enable = true;
           network = {
@@ -482,7 +512,7 @@ runNixOSTest {
           sysvmModule
           (ghafGivcSrc + "/nixos/tests/snakeoil/gen-test-certs.nix")
         ];
-        virtualisation.memorySize = 1024;
+        virtualisation.memorySize = 2048;
         givc-tls-test = {
           name = guiAddr.name;
           addresses = guiAddr.addr;
@@ -618,10 +648,33 @@ runNixOSTest {
 
       guivm.succeed("echo 'click download_button' | nc -NU /tmp/ctrl-panel-automation.sock")
       netvm.wait_until_succeeds("grep -q '^registry --output jsonl pull mock-repository:ghaf-updates --destination /persist/sysupdate --validate$' /tmp/netvm-ota-update-calls")
-      # Keep install automation available, but do not run it in the default
-      # integration test for now: the install-finished dialog currently pushes
-      # the GUI VM over its memory budget.
-      # guivm.succeed("echo 'click update_button' | nc -NU /tmp/ctrl-panel-automation.sock")
-      # netvm.wait_until_succeeds("grep -q '^image install --manifest /persist/sysupdate/manifest.json$' /tmp/netvm-ota-update-calls")
+      expect_ui("get update_button visible", "OK TRUE")
+      expect_ui("get local_button sensitive", "OK TRUE")
+
+      with subtest("local update buttons invoke their template callbacks"):
+          expect_ui("click local_button", "OK")
+          guivm.sleep(2)
+          guivm.send_key("esc")
+          expect_ui("click cancel_import_button", "OK")
+
+      with subtest("offline import remains unavailable for install until host verification"):
+          netvm.succeed("systemctl stop nginx ota-update-server")
+          guivm.succeed("mkdir /tmp/ssd; printf '{}' >/tmp/ssd/manifest.json; head -c 64 /dev/zero >/tmp/ssd/manifest.json.sig; printf abc >/tmp/ssd/root.raw; printf def >/tmp/ssd/verity.raw; printf ghi >/tmp/ssd/kernel.efi")
+          guivm.succeed("echo 'import-local /tmp/ssd/manifest.json' | nc -NU /tmp/ctrl-panel-automation.sock")
+          hostvm.wait_for_file("/tmp/local-verifying", timeout=60)
+          expect_ui("get update_button visible", "OK FALSE")
+          expect_ui("get local_button sensitive", "OK FALSE")
+          expect_ui("get cancel_import_button visible", "OK TRUE")
+          assert netvm.succeed("cat /tmp/local-received-bytes") == "abcdefghi"
+          guivm.succeed("rm -rf /tmp/ssd")
+          hostvm.succeed("touch /tmp/allow-local-accept")
+          expect_ui("get available_version label", "OK 3.0.0")
+          expect_ui("get update_button visible", "OK TRUE")
+          expect_ui("get update_button sensitive", "OK TRUE")
+          expect_ui("get cancel_import_button visible", "OK FALSE")
+          guivm.succeed("echo 'click update_button' | nc -NU /tmp/ctrl-panel-automation.sock")
+          hostvm.wait_for_file("/tmp/local-installed")
+          netvm.fail("test -f /tmp/local-installed")
+          expect_ui("get current_version label", "OK mock-ghaf-version")
     '';
 }

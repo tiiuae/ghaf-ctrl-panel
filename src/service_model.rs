@@ -35,7 +35,9 @@ mod imp {
     use givc_client::endpoint::TlsConfig;
     use givc_client::{self, AdminClient};
     #[cfg(not(feature = "mock"))]
-    use givc_common::pb::update::{AvailableUpdate, RegistryPullResult};
+    use givc_common::pb::update::{
+        AvailableUpdate, LocalCandidate, LocalImportResponse, RegistryPullResult,
+    };
     use givc_common::{address::EndpointAddress, query::Event};
     use glib::JoinHandle;
     use glib::{Object, Properties, SourceId};
@@ -62,6 +64,9 @@ mod imp {
         selected_update_reference: RefCell<Option<String>>,
         #[cfg(not(feature = "mock"))]
         downloaded_manifest_path: RefCell<Option<String>>,
+        #[cfg(not(feature = "mock"))]
+        local_candidate: RefCell<Option<String>>,
+        pub(super) local_import_cancel: RefCell<Option<async_channel::Sender<()>>>,
 
         #[property(set = ServiceModel::set_address, get)]
         address: RefCell<String>,
@@ -117,7 +122,48 @@ mod imp {
         RegistryChangelog(String),
         #[cfg(not(feature = "mock"))]
         RegistryPullResult(RegistryPullResult),
+        #[cfg(not(feature = "mock"))]
+        LocalCandidate(LocalCandidate),
+        #[cfg(not(feature = "mock"))]
+        LocalState(LocalImportResponse),
         Error(anyhow::Error),
+    }
+
+    #[cfg(not(feature = "mock"))]
+    impl From<Result<LocalImportResponse, anyhow::Error>> for Response {
+        fn from(value: Result<LocalImportResponse, anyhow::Error>) -> Self {
+            value.map_or_else(Response::Error, Response::LocalState)
+        }
+    }
+    #[cfg(not(feature = "mock"))]
+    impl TryFrom<Response> for LocalImportResponse {
+        type Error = anyhow::Error;
+        fn try_from(value: Response) -> Result<Self, Self::Error> {
+            match value {
+                Response::LocalState(state) => Ok(state),
+                Response::Error(error) => Err(error),
+                _ => anyhow::bail!("Unexpected response"),
+            }
+        }
+    }
+
+    #[cfg(not(feature = "mock"))]
+    impl From<Result<LocalCandidate, anyhow::Error>> for Response {
+        fn from(value: Result<LocalCandidate, anyhow::Error>) -> Self {
+            value.map_or_else(Response::Error, Response::LocalCandidate)
+        }
+    }
+
+    #[cfg(not(feature = "mock"))]
+    impl TryFrom<Response> for LocalCandidate {
+        type Error = anyhow::Error;
+        fn try_from(value: Response) -> Result<Self, Self::Error> {
+            match value {
+                Response::LocalCandidate(candidate) => Ok(candidate),
+                Response::Error(error) => Err(error),
+                _ => anyhow::bail!("Unexpected response"),
+            }
+        }
     }
 
     impl From<Result<(), anyhow::Error>> for Response {
@@ -471,6 +517,7 @@ mod imp {
         #[cfg(not(feature = "mock"))]
         fn set_downloaded_manifest_path(&self, manifest_path: Option<String>) {
             *self.downloaded_manifest_path.borrow_mut() = manifest_path;
+            *self.local_candidate.borrow_mut() = None;
         }
 
         #[cfg(not(feature = "mock"))]
@@ -1028,14 +1075,172 @@ mod imp {
         }
 
         #[cfg(not(feature = "mock"))]
+        pub(super) async fn import_local_update(
+            &self,
+            manifest: std::path::PathBuf,
+        ) -> Result<(), anyhow::Error> {
+            let cache = glib::user_data_dir().join("ctrl-panel/local-candidate");
+            if let Ok(id) = std::fs::read_to_string(&cache) {
+                self.client_cmd(async move |client| client.discard_local_candidate(id).await)
+                    .await?;
+                std::fs::remove_file(cache)?;
+            }
+            self.set_downloaded_manifest_path(None);
+            self.set_selected_update_reference(None);
+            self.update_state_with_notifications_frozen(|state| {
+                state.set_available_version(String::new());
+                state.set_changelog(String::new());
+                state.set_activity(UpdateActivity::Importing {
+                    phase: "Checking bundle".into(),
+                    progress: 0.0,
+                });
+            });
+            let (tx, rx) =
+                async_channel::bounded::<givc_common::pb::update::LocalImportResponse>(2);
+            let model = self.obj().clone();
+            let updater = glib::spawn_future_local(async move {
+                while let Ok(event) = rx.recv().await {
+                    model.imp().update_state_with_notifications_frozen(|state| {
+                        if let Some(candidate) = event.candidate {
+                            state.set_available_version(candidate.version);
+                            state.set_download_size_bytes(event.total);
+                            state.set_changelog(format!(
+                                "Target: {}\nGeneration: {}",
+                                candidate.target, candidate.generation
+                            ));
+                        }
+                        let phase = match event.phase.as_str() {
+                            "admitted" | "receiving" => "Copying from local drive",
+                            "received" => "Copy complete — drive can be removed",
+                            "verifying" => "Preparing and verifying update",
+                            "ready" => "Verified update ready",
+                            _ => "Checking bundle",
+                        };
+                        #[allow(clippy::cast_precision_loss)]
+                        let progress = if event.total == 0 {
+                            0.0
+                        } else {
+                            event.completed as f64 / event.total as f64
+                        };
+                        state.set_activity(UpdateActivity::Importing {
+                            phase: phase.into(),
+                            progress,
+                        });
+                    });
+                }
+            });
+            let (cancel_tx, cancel_rx) = async_channel::bounded::<()>(1);
+            *self.local_import_cancel.borrow_mut() = Some(cancel_tx);
+            let result: Result<LocalCandidate, anyhow::Error> = self
+                .client_cmd(async move |client| {
+                    tokio::select! {
+                        result = client.import_local_update(&manifest, async move |event| { let _ = tx.send(event).await; }) => result,
+                        _ = cancel_rx.recv() => anyhow::bail!("Local update import cancelled"),
+                    }
+                })
+                .await;
+            let _ = updater.await;
+            self.local_import_cancel.borrow_mut().take();
+            let candidate = result?;
+            let state_dir = glib::user_data_dir().join("ctrl-panel");
+            std::fs::create_dir_all(&state_dir)?;
+            std::fs::write(state_dir.join("local-candidate"), &candidate.id)?;
+            *self.local_candidate.borrow_mut() = Some(candidate.id);
+            self.update_state_with_notifications_frozen(|state| {
+                state.set_available_version(candidate.version);
+                state.set_changelog(format!(
+                    "Verified signed update\nTarget: {}\nGeneration: {}",
+                    candidate.target, candidate.generation
+                ));
+                state.set_activity(UpdateActivity::Downloaded);
+            });
+            Ok(())
+        }
+
+        #[cfg(not(feature = "mock"))]
+        pub(super) async fn restore_local_update(&self) -> Result<(), anyhow::Error> {
+            if matches!(
+                self.update_state.activity(),
+                UpdateActivity::Downloading { .. } | UpdateActivity::Importing { .. }
+            ) {
+                return Ok(());
+            }
+            let cache = glib::user_data_dir().join("ctrl-panel/local-candidate");
+            let id = match std::fs::read_to_string(&cache) {
+                Ok(id) => id,
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(()),
+                Err(error) => return Err(error.into()),
+            };
+            let response: LocalImportResponse = self
+                .client_cmd(async move |client| client.local_candidate_state(id).await)
+                .await?;
+            let candidate = response.candidate.context("host returned no candidate")?;
+            if response.phase == "accepted" {
+                std::fs::remove_file(cache)?;
+                self.set_downloaded_manifest_path(None);
+                self.update_state_with_notifications_frozen(|state| {
+                    state.set_available_version(String::new());
+                    state.set_changelog(String::new());
+                    state.set_download_size_bytes(0);
+                    state.set_activity(UpdateActivity::Idle);
+                });
+                return Ok(());
+            }
+            *self.local_candidate.borrow_mut() = Some(candidate.id);
+            self.update_state_with_notifications_frozen(|state| {
+                state.set_available_version(candidate.version);
+                state.set_changelog(format!(
+                    "Verified signed update\nTarget: {}\nGeneration: {}",
+                    candidate.target, candidate.generation
+                ));
+                state.set_activity(match response.phase.as_str() {
+                    "ready" => UpdateActivity::Downloaded,
+                    "installing" => UpdateActivity::Installing { progress: 0.0 },
+                    "restart-required" => UpdateActivity::Installed,
+                    "trial" => UpdateActivity::Error {
+                        error: "Update is running; boot health checks have not accepted it yet."
+                            .into(),
+                    },
+                    "rolled-back" => UpdateActivity::Error {
+                        error: "The update was not accepted. The system booted another generation."
+                            .into(),
+                    },
+                    "interrupted" | "failed" => UpdateActivity::Error {
+                        error: "Installation did not complete. Import the update again to retry."
+                            .into(),
+                    },
+                    _ => UpdateActivity::Error {
+                        error: "Unknown update state reported by host".into(),
+                    },
+                });
+            });
+            Ok(())
+        }
+
+        #[cfg(feature = "mock")]
+        pub(super) async fn restore_local_update(&self) -> Result<(), anyhow::Error> {
+            Ok(())
+        }
+
+        #[cfg(feature = "mock")]
+        pub(super) async fn import_local_update(
+            &self,
+            _manifest: std::path::PathBuf,
+        ) -> Result<(), anyhow::Error> {
+            anyhow::bail!("Local updates require a connected Ghaf system");
+        }
+
+        #[cfg(not(feature = "mock"))]
         pub(super) async fn apply_update(&self) -> Result<(), anyhow::Error> {
             if !matches!(self.update_state.activity(), UpdateActivity::Downloaded) {
                 anyhow::bail!("update package is not ready");
             }
 
-            let Some(manifest_path) = self.downloaded_manifest_path.borrow().clone() else {
-                anyhow::bail!("downloaded update manifest is missing");
-            };
+            let manifest_path = self.downloaded_manifest_path.borrow().clone();
+            let candidate = self.local_candidate.borrow().clone();
+            if manifest_path.is_none() && candidate.is_none() {
+                anyhow::bail!("update package is missing");
+            }
             let installed_version = self.update_state.available_version();
             if installed_version.is_empty() {
                 anyhow::bail!("update package is not ready");
@@ -1046,7 +1251,15 @@ mod imp {
             });
 
             let result = self
-                .client_cmd(async move |client| client.image_install(manifest_path).await)
+                .client_cmd(async move |client| {
+                    if let Some(id) = candidate {
+                        client.install_local_candidate(id).await
+                    } else {
+                        client
+                            .image_install(manifest_path.expect("checked update source"))
+                            .await
+                    }
+                })
                 .await;
 
             match result {
@@ -1054,7 +1267,7 @@ mod imp {
                     self.set_selected_update_reference(None);
                     self.set_downloaded_manifest_path(None);
                     self.update_state_with_notifications_frozen(|state| {
-                        state.set_current_version(installed_version.clone());
+                        // The running version changes only after a successful reboot.
                         state.set_available_version(String::new());
                         state.set_changelog(String::new());
                         state.set_download_size_bytes(0);
@@ -1268,6 +1481,29 @@ impl ServiceModel {
     ) -> Result<(), anyhow::Error> {
         self.imp()
             .download_update(reference, auth_mode, insecure)
+            .await
+            .inspect_err(|err| self.set_update_error(err))
+    }
+
+    pub fn cancel_local_import(&self) {
+        if let Some(cancel) = self.imp().local_import_cancel.borrow().as_ref() {
+            let _ = cancel.try_send(());
+        }
+    }
+
+    pub async fn restore_local_update(&self) -> Result<(), anyhow::Error> {
+        self.imp()
+            .restore_local_update()
+            .await
+            .inspect_err(|err| self.set_update_error(err))
+    }
+
+    pub async fn import_local_update(
+        &self,
+        manifest: std::path::PathBuf,
+    ) -> Result<(), anyhow::Error> {
+        self.imp()
+            .import_local_update(manifest)
             .await
             .inspect_err(|err| self.set_update_error(err))
     }

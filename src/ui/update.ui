@@ -37,6 +37,23 @@
                 <property name="vexpand">true</property>
 
                 <child>
+                  <object class="GtkButton" id="local_button">
+                    <property name="label">Import from local drive…</property>
+                    <property name="halign">start</property>
+                    <signal name="clicked" handler="on_local_update_clicked" swapped="true"/>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="cancel_import_button">
+                    <property name="label">Cancel import</property>
+                    <property name="visible">false</property>
+                    <property name="halign">start</property>
+                    <signal name="clicked" handler="on_cancel_import_clicked" swapped="true"/>
+                  </object>
+                </child>
+
+
+                <child>
                   <object class="GtkBox">
                     <property name="orientation">vertical</property>
                     <property name="spacing">12</property>
@@ -171,7 +188,7 @@
 
                         <child>
                           <object class="GtkLabel" id="download_size">
-                            <property name="label">Download size: unknown</property>
+                            <property name="label">Update size: unknown</property>
                             <property name="halign">start</property>
                             <property name="xalign">0</property>
                             <property name="wrap">true</property>
