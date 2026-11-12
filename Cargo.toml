@@ -28,8 +28,8 @@ tokio = { version = "1.54", features = ["rt", "time", "macros"] }
 toml = "1"
 zbus = "6.2"
 
-givc-client = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main" }
-givc-common = { git = "https://github.com/tiiuae/ghaf-givc", branch = "main", features = [
+givc-client = { git = "https://github.com/tiiuae/ghaf-givc", rev = "dfee44088c5ae73af6b53560ab7a7a871d29f44a" }
+givc-common = { git = "https://github.com/tiiuae/ghaf-givc", rev = "dfee44088c5ae73af6b53560ab7a7a871d29f44a", features = [
   "glib",
 ] }
 

@@ -101,6 +101,10 @@ mod imp {
         #[template_child]
         pub check_button: TemplateChild<Button>,
         #[template_child]
+        pub local_button: TemplateChild<Button>,
+        #[template_child]
+        pub cancel_import_button: TemplateChild<Button>,
+        #[template_child]
         pub download_button: TemplateChild<Button>,
         #[template_child]
         pub update_button: TemplateChild<Button>,
@@ -163,6 +167,31 @@ mod imp {
             let action = self.obj().build_check_for_update_action();
             self.obj()
                 .emit_by_name::<()>("check-for-update-request", &[&action]);
+        }
+
+        #[template_callback]
+        fn on_local_update_clicked(&self) {
+            let Some(app) = self.obj().get_app_ref() else {
+                return;
+            };
+            glib::spawn_future_local(async move {
+                let dialog = gtk::FileDialog::builder()
+                    .title("Select signed update manifest on local drive")
+                    .modal(true)
+                    .build();
+                if let Ok(file) = dialog.open_future(app.active_window().as_ref()).await
+                    && let Some(path) = file.path()
+                {
+                    let _ = app.get_service_model().import_local_update(path).await;
+                }
+            });
+        }
+
+        #[template_callback]
+        fn on_cancel_import_clicked(&self) {
+            if let Some(app) = self.obj().get_app_ref() {
+                app.get_service_model().cancel_local_import();
+            }
         }
 
         #[template_callback]
@@ -371,6 +400,7 @@ impl UpdatePage {
         imp.check_button.set_widget_state(WidgetState::Invisible);
         imp.update_details_box.set_visible(update_available);
         imp.update_button.set_visible(update_available);
+        imp.update_button.set_sensitive(update_available);
     }
 
     fn set_installing_state(&self, update_available: bool) {
@@ -438,6 +468,7 @@ impl UpdatePage {
                         let status = fetch_system_status(&app).await;
                         app.get_service_model()
                             .set_update_current_version(status.ghaf_version);
+                        let _ = app.get_service_model().restore_local_update().await;
                         page.apply_idle_state();
                     }
                 ),
@@ -651,9 +682,9 @@ impl UpdatePage {
                 .sync_create()
                 .transform_to(|_, bytes: u64| {
                     Some(if bytes == 0 {
-                        "Download size: unknown".to_string()
+                        "Update size: unknown".to_string()
                     } else {
-                        format!("Download size: {}", format_bytes(bytes))
+                        format!("Update size: {}", format_bytes(bytes))
                     })
                 })
                 .build(),
@@ -674,6 +705,21 @@ impl UpdatePage {
                 self.set_downloading_state(update_available, progress);
             }
             UpdateActivity::Downloaded => self.set_downloaded_state(update_available),
+            UpdateActivity::Importing {
+                ref phase,
+                progress,
+            } => {
+                self.reset_transient_update_ui();
+                imp.check_button.set_sensitive(false);
+                imp.update_details_box.set_visible(true);
+                imp.operation_progress.set_visible(true);
+                imp.operation_progress
+                    .set_fraction(progress.clamp(0.0, 1.0));
+                imp.operation_progress.set_text(Some(phase));
+                if phase == "Preparing and verifying update" {
+                    self.start_operation_progress_activity();
+                }
+            }
             UpdateActivity::Installing { progress: _ } => {
                 self.set_installing_state(update_available);
             }
@@ -687,6 +733,15 @@ impl UpdatePage {
             self.present_install_finished_dialog();
         }
 
+        imp.local_button.set_sensitive(!matches!(
+            activity,
+            UpdateActivity::Checking
+                | UpdateActivity::Downloading { .. }
+                | UpdateActivity::Importing { .. }
+                | UpdateActivity::Installing { .. }
+        ));
+        imp.cancel_import_button
+            .set_visible(matches!(activity, UpdateActivity::Importing { .. }));
         *imp.last_activity.borrow_mut() = activity;
     }
 
@@ -698,7 +753,7 @@ impl UpdatePage {
         imp.check_button.set_sensitive(true);
         imp.download_button.set_sensitive(true);
         imp.update_button.set_sensitive(true);
-        imp.download_size.set_label("Download size: unknown");
+        imp.download_size.set_label("Update size: unknown");
     }
 
     fn present_install_finished_dialog(&self) {

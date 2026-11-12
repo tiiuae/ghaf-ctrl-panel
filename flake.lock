@@ -23,11 +23,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1768818222,
-        "narHash": "sha256-460jc0+CZfyaO8+w8JNtlClB2n4ui1RbHfPTLkpwhU8=",
+        "lastModified": 1791918082,
+        "narHash": "sha256-oN9JrhRfHa7MUTdUq+11dHn7u0Z4WfEA4mhzBq0/zoQ=",
         "owner": "numtide",
         "repo": "devshell",
-        "rev": "255a2b1725a20d060f566e4755dbf571bbbb5f76",
+        "rev": "9e29c63dde99a2d80c94b3d024c9768c01544558",
         "type": "github"
       },
       "original": {
@@ -76,11 +76,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787559586,
-        "narHash": "sha256-onL0VLf9vPllmT0H/OlURIU5r5t5WIEl7t4tVNKT0Nw=",
+        "lastModified": 1790898470,
+        "narHash": "sha256-zTwuwezD0w3hpga6a6P8emidzAZFyWqlNeRBlpWOOl8=",
         "owner": "hercules-ci",
         "repo": "flake-parts",
-        "rev": "9d0d87172c374f89da73c1cfe6d81ae62feac1f1",
+        "rev": "024633cd702b10285db5cb19b40ad48d2399ba60",
         "type": "github"
       },
       "original": {
@@ -164,11 +164,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788015051,
-        "narHash": "sha256-xy/wfKCR+bVYXzl4iKJnxmhtSuzeyARmzI6auYcgUXg=",
+        "lastModified": 1790750631,
+        "narHash": "sha256-2jChZikcnI6+vFacvlEGWKYyp4urfTyogK5JNJSq+9Y=",
         "owner": "tiiuae",
         "repo": "ghafpkgs",
-        "rev": "c6c2a9f36642cb29c9db1f0c361620f3777eff16",
+        "rev": "b45de259054ea773cbd664127e240aa4b1af1aa4",
         "type": "github"
       },
       "original": {
@@ -222,16 +222,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1789371278,
-        "narHash": "sha256-KLLIwEDxesrGpyaegcE0skQKlue965jiaOC2g7okttQ=",
+        "lastModified": 1794477458,
+        "narHash": "sha256-XEIrO6wn5rFiLE2qkfp10h+Q8KYD9Dqk71YtBl5X3Ks=",
         "ref": "refs/heads/main",
-        "rev": "c895849f68e648071356ffc8a21622d91f990cb6",
-        "revCount": 1153,
+        "rev": "dfee44088c5ae73af6b53560ab7a7a871d29f44a",
+        "revCount": 1205,
         "type": "git",
         "url": "https://github.com/tiiuae/ghaf-givc"
       },
       "original": {
-        "rev": "c895849f68e648071356ffc8a21622d91f990cb6",
+        "rev": "dfee44088c5ae73af6b53560ab7a7a871d29f44a",
         "type": "git",
         "url": "https://github.com/tiiuae/ghaf-givc"
       }
@@ -261,11 +261,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787424939,
-        "narHash": "sha256-O2tBn84NNuHrnqNVxx/XqsXwfYvS1YwBh+7CBnbCYsk=",
+        "lastModified": 1791909798,
+        "narHash": "sha256-VAhpCOmrun/KXimYfR8NM88bciKCui7CqHHhThSzgag=",
         "owner": "cachix",
         "repo": "pre-commit-hooks.nix",
-        "rev": "809414f0cdadf82cf11b06c2b29ba9b3168b3297",
+        "rev": "1ba1dbfe28738c9a71c266be6efa5b89e75491a9",
         "type": "github"
       },
       "original": {
