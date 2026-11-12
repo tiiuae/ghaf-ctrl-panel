@@ -651,6 +651,12 @@ runNixOSTest {
       expect_ui("get update_button visible", "OK TRUE")
       expect_ui("get local_button sensitive", "OK TRUE")
 
+      with subtest("local update buttons invoke their template callbacks"):
+          expect_ui("click local_button", "OK")
+          guivm.sleep(2)
+          guivm.send_key("esc")
+          expect_ui("click cancel_import_button", "OK")
+
       with subtest("offline import remains unavailable for install until host verification"):
           netvm.succeed("systemctl stop nginx ota-update-server")
           guivm.succeed("mkdir /tmp/ssd; printf '{}' >/tmp/ssd/manifest.json; head -c 64 /dev/zero >/tmp/ssd/manifest.json.sig; printf abc >/tmp/ssd/root.raw; printf def >/tmp/ssd/verity.raw; printf ghi >/tmp/ssd/kernel.efi")
