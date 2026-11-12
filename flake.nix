@@ -14,7 +14,7 @@
     };
 
     givc = {
-      url = "git+https://github.com/tiiuae/ghaf-givc?rev=c895849f68e648071356ffc8a21622d91f990cb6";
+      url = "git+https://github.com/tiiuae/ghaf-givc?rev=dfee44088c5ae73af6b53560ab7a7a871d29f44a";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.crane.follows = "crane";
       inputs.treefmt-nix.follows = "treefmt-nix";
@@ -56,6 +56,16 @@
         commonArgs = {
           inherit src;
           strictDeps = true;
+          # Keep the GUI client and service tests on the same GIVC input.
+          postPatch = ''
+            mkdir -p .cargo
+            cat >> .cargo/config.toml <<'EOF'
+            [patch."https://github.com/tiiuae/ghaf-givc"]
+            givc-client = { path = "${givc}/crates/client" }
+            givc-common = { path = "${givc}/crates/common" }
+            EOF
+            sed -i '/^source = "git+https:\/\/github.com\/tiiuae\/ghaf-givc?/d' Cargo.lock
+          '';
 
           nativeBuildInputs = [
             pkgs.pkg-config
