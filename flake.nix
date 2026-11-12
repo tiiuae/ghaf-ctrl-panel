@@ -14,7 +14,7 @@
     };
 
     givc = {
-      url = "git+https://github.com/tiiuae/ghaf-givc?rev=dfee44088c5ae73af6b53560ab7a7a871d29f44a";
+      url = "git+https://github.com/tiiuae/ghaf-givc?rev=2ac4b3342067e3899552bd0429456c8a970d0f05";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.crane.follows = "crane";
       inputs.treefmt-nix.follows = "treefmt-nix";

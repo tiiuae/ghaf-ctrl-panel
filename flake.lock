@@ -222,16 +222,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1794477458,
-        "narHash": "sha256-XEIrO6wn5rFiLE2qkfp10h+Q8KYD9Dqk71YtBl5X3Ks=",
+        "lastModified": 1794481675,
+        "narHash": "sha256-f4Ay7AfatW9i6DPD3b766/WcadkV9VXA5d9wGp2koVk=",
         "ref": "refs/heads/main",
-        "rev": "dfee44088c5ae73af6b53560ab7a7a871d29f44a",
-        "revCount": 1205,
+        "rev": "2ac4b3342067e3899552bd0429456c8a970d0f05",
+        "revCount": 1206,
         "type": "git",
         "url": "https://github.com/tiiuae/ghaf-givc"
       },
       "original": {
-        "rev": "dfee44088c5ae73af6b53560ab7a7a871d29f44a",
+        "rev": "2ac4b3342067e3899552bd0429456c8a970d0f05",
         "type": "git",
         "url": "https://github.com/tiiuae/ghaf-givc"
       }
