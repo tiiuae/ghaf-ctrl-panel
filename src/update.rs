@@ -1,4 +1,5 @@
 use adw::prelude::*;
+use givc_common::pb::update::LocalUpdatePhase;
 use gtk::gio;
 use gtk::glib;
 use gtk::subclass::prelude::*;
@@ -715,8 +716,17 @@ impl UpdatePage {
                 imp.operation_progress.set_visible(true);
                 imp.operation_progress
                     .set_fraction(progress.clamp(0.0, 1.0));
-                imp.operation_progress.set_text(Some(phase));
-                if phase == "Preparing and verifying update" {
+                let label = match phase {
+                    LocalUpdatePhase::Admitted | LocalUpdatePhase::Receiving => {
+                        "Copying from local drive"
+                    }
+                    LocalUpdatePhase::Received => "Copy complete — drive can be removed",
+                    LocalUpdatePhase::Verifying => "Preparing and verifying update",
+                    LocalUpdatePhase::Ready => "Verified update ready",
+                    _ => "Checking bundle",
+                };
+                imp.operation_progress.set_text(Some(label));
+                if *phase == LocalUpdatePhase::Verifying {
                     self.start_operation_progress_activity();
                 }
             }
@@ -733,13 +743,7 @@ impl UpdatePage {
             self.present_install_finished_dialog();
         }
 
-        imp.local_button.set_sensitive(!matches!(
-            activity,
-            UpdateActivity::Checking
-                | UpdateActivity::Downloading { .. }
-                | UpdateActivity::Importing { .. }
-                | UpdateActivity::Installing { .. }
-        ));
+        imp.local_button.set_sensitive(!activity.is_active());
         imp.cancel_import_button
             .set_visible(matches!(activity, UpdateActivity::Importing { .. }));
         *imp.last_activity.borrow_mut() = activity;
