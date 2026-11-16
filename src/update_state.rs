@@ -1,3 +1,4 @@
+use givc_common::pb::update::LocalUpdatePhase;
 use gtk::glib::{self, Object};
 
 #[derive(Debug, Clone, PartialEq, Default, glib::Boxed)]
@@ -12,7 +13,7 @@ pub enum UpdateActivity {
     },
     Downloaded,
     Importing {
-        phase: String,
+        phase: LocalUpdatePhase,
         progress: f64,
     },
     Installing {
@@ -22,6 +23,18 @@ pub enum UpdateActivity {
     Error {
         error: String,
     },
+}
+
+impl UpdateActivity {
+    pub fn is_active(&self) -> bool {
+        matches!(
+            self,
+            Self::Checking
+                | Self::Downloading { .. }
+                | Self::Importing { .. }
+                | Self::Installing { .. }
+        )
+    }
 }
 
 mod imp {

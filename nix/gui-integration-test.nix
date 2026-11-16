@@ -202,7 +202,8 @@ runNixOSTest {
                   while [ ! -f /tmp/allow-local-accept ]; do sleep 0.1; done
                   ;;
                 install) touch /tmp/local-installed; exit 0 ;;
-                discard-admission) exit 0 ;;
+                discard-admission) touch /tmp/local-host-cleaned; exit 0 ;;
+                recover-host) exit 0 ;;
                 *) exit 1 ;;
               esac
               echo '{"id":"0123456789abcdef0123456789abcdef","version":"3.0.0","target":"test-target","generation":3,"files":[{"name":"root.raw","size":3},{"name":"verity.raw","size":3},{"name":"kernel.efi","size":3}]}'
@@ -245,8 +246,9 @@ runNixOSTest {
             ota-update = mockOtaUpdate;
           })
         ];
+        givc.host.capabilities.update.localRole = "host";
         systemd.services."givc-${hostAddr.name}" = {
-          environment.GHAF_LOCAL_UPDATE_ROLE = "host";
+
           path = lib.mkForce [
             mockOtaUpdate
             mockGhafVersion
@@ -353,7 +355,8 @@ runNixOSTest {
                       IFS= read -r metadata
                       cat >/tmp/local-received-bytes
                       ;;
-                    discard-received) ;;
+                    discard-received) touch /tmp/local-net-cleaned ;;
+                    recover-received) ;;
                     *) exit 1 ;;
                   esac
                   ;;
@@ -483,8 +486,9 @@ runNixOSTest {
             ota-update = mockOtaUpdate;
           })
         ];
+        givc.sysvm.capabilities.update.localRole = "receiver";
         systemd.services."givc-${netAddr.name}" = {
-          environment.GHAF_LOCAL_UPDATE_ROLE = "receiver";
+
           path = lib.mkForce [
             mockOtaUpdate
             config.system.path
@@ -666,6 +670,14 @@ runNixOSTest {
           expect_ui("get local_button sensitive", "OK FALSE")
           expect_ui("get cancel_import_button visible", "OK TRUE")
           assert netvm.succeed("cat /tmp/local-received-bytes") == "abcdefghi"
+          expect_ui("click cancel_import_button", "OK")
+          hostvm.wait_for_file("/tmp/local-host-cleaned", timeout=30)
+          netvm.wait_for_file("/tmp/local-net-cleaned", timeout=30)
+          expect_ui("get local_button sensitive", "OK TRUE")
+          hostvm.succeed("rm /tmp/local-verifying")
+          guivm.succeed("echo 'import-local /tmp/ssd/manifest.json' | nc -NU /tmp/ctrl-panel-automation.sock")
+          hostvm.wait_for_file("/tmp/local-verifying", timeout=60)
+          expect_ui("get local_button sensitive", "OK FALSE")
           guivm.succeed("rm -rf /tmp/ssd")
           hostvm.succeed("touch /tmp/allow-local-accept")
           expect_ui("get available_version label", "OK 3.0.0")
