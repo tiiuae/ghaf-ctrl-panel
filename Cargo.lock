@@ -881,7 +881,7 @@ dependencies = [
 [[package]]
 name = "givc-client"
 version = "0.0.1"
-source = "git+https://github.com/tiiuae/ghaf-givc?branch=main#538dcd427d70392c4e6509535443eea952de4be8"
+source = "git+https://github.com/tiiuae/ghaf-givc?rev=685e12e1f2c6a90285ee78daec6b145a10fd6f7a#685e12e1f2c6a90285ee78daec6b145a10fd6f7a"
 dependencies = [
  "anyhow",
  "async-channel",
@@ -900,11 +900,12 @@ dependencies = [
 [[package]]
 name = "givc-common"
 version = "0.0.1"
-source = "git+https://github.com/tiiuae/ghaf-givc?branch=main#538dcd427d70392c4e6509535443eea952de4be8"
+source = "git+https://github.com/tiiuae/ghaf-givc?rev=685e12e1f2c6a90285ee78daec6b145a10fd6f7a#685e12e1f2c6a90285ee78daec6b145a10fd6f7a"
 dependencies = [
  "anyhow",
  "glib",
  "prost",
+ "rustix",
  "serde",
  "strum",
  "tokio-vsock",
