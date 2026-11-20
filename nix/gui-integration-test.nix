@@ -196,7 +196,13 @@ runNixOSTest {
             image)
               test "$2" = local
               case "$3" in
-                prepare) cat >/tmp/local-metadata ;;
+                prepare)
+                  cat >/tmp/local-metadata
+                  if [ -f /tmp/local-reject ]; then
+                    cat /tmp/local-reject >&2
+                    exit 1
+                  fi
+                  ;;
                 accept)
                   touch /tmp/local-verifying
                   while [ ! -f /tmp/allow-local-accept ]; do sleep 0.1; done
@@ -626,6 +632,7 @@ runNixOSTest {
       hostvm.wait_until_succeeds("grep -q 'ghaf-version' /tmp/host-sysinfo-calls")
       hostvm.wait_until_succeeds("grep -q 'bootctl status' /tmp/host-sysinfo-calls")
       hostvm.wait_until_succeeds("grep -q 'lsblk -rno TYPE' /tmp/host-sysinfo-calls")
+      guivm.succeed("echo 'select list_box 0' | nc -NU /tmp/ctrl-panel-automation.sock")
 
       netvm.succeed("echo -n mock-ghaf-version > /tmp/netvm-ota-newest-version")
       guivm.succeed("echo 'click check_button' | nc -NU /tmp/ctrl-panel-automation.sock")
@@ -661,9 +668,29 @@ runNixOSTest {
           guivm.send_key("esc")
           expect_ui("click cancel_import_button", "OK")
 
+      netvm.succeed("systemctl stop nginx ota-update-server")
+      guivm.succeed("mkdir /tmp/ssd; printf '{}' >/tmp/ssd/manifest.json; head -c 64 /dev/zero >/tmp/ssd/manifest.json.sig; printf abc >/tmp/ssd/root.raw; printf def >/tmp/ssd/verity.raw; printf ghi >/tmp/ssd/kernel.efi")
+
+      with subtest("invalid local imports explain how to recover"):
+          guivm.succeed("printf '\\377' >/tmp/ssd/not-a-manifest.bin")
+          guivm.succeed("echo 'import-local /tmp/ssd/not-a-manifest.bin' | nc -NU /tmp/ctrl-panel-automation.sock")
+          expect_ui("get error_label label", "OK This file is not a valid update manifest. Select the .manifest or manifest.json file in the signed update folder.")
+          expect_ui("get update_button visible", "OK FALSE")
+          expect_ui("get local_button sensitive", "OK TRUE")
+
+          for rejection, message in [
+              ("manifest Ed25519 signature verification failed", "The update signature could not be verified. Obtain a complete, unmodified update signed for this device, then import it again."),
+              ("update generation 3 is not newer than accepted generation 3", "This update is the same generation as, or older than, the installed system. Select an update with a higher generation."),
+          ]:
+              hostvm.succeed(f"echo '{rejection}' > /tmp/local-reject")
+              guivm.succeed("echo 'import-local /tmp/ssd/manifest.json' | nc -NU /tmp/ctrl-panel-automation.sock")
+              expect_ui("get error_label label", f"OK {message}")
+              expect_ui("get update_button visible", "OK FALSE")
+              expect_ui("get local_button sensitive", "OK TRUE")
+          guivm.screenshot("local-update-recovery")
+          hostvm.succeed("rm /tmp/local-reject")
+
       with subtest("offline import remains unavailable for install until host verification"):
-          netvm.succeed("systemctl stop nginx ota-update-server")
-          guivm.succeed("mkdir /tmp/ssd; printf '{}' >/tmp/ssd/manifest.json; head -c 64 /dev/zero >/tmp/ssd/manifest.json.sig; printf abc >/tmp/ssd/root.raw; printf def >/tmp/ssd/verity.raw; printf ghi >/tmp/ssd/kernel.efi")
           guivm.succeed("echo 'import-local /tmp/ssd/manifest.json' | nc -NU /tmp/ctrl-panel-automation.sock")
           hostvm.wait_for_file("/tmp/local-verifying", timeout=60)
           expect_ui("get update_button visible", "OK FALSE")
