@@ -176,8 +176,13 @@ mod imp {
                 return;
             };
             glib::spawn_future_local(async move {
+                let filter = gtk::FileFilter::new();
+                filter.set_name(Some("Update manifests"));
+                filter.add_pattern("*.manifest");
+                filter.add_pattern("*.json");
                 let dialog = gtk::FileDialog::builder()
                     .title("Select signed update manifest on local drive")
+                    .filters(&gio::ListStore::from_iter([filter]))
                     .modal(true)
                     .build();
                 if let Ok(file) = dialog.open_future(app.active_window().as_ref()).await

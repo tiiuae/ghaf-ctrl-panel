@@ -1546,7 +1546,14 @@ impl ServiceModel {
         self.imp()
             .import_local_update(manifest)
             .await
-            .inspect_err(|err| self.set_update_error(err))
+            .inspect_err(|err| {
+                error!("Local update import failed: {err:#}");
+                self.imp().update_state_with_notifications_frozen(|state| {
+                    state.set_activity(UpdateActivity::Error {
+                        error: local_import_error_message(err),
+                    });
+                });
+            })
     }
 
     pub async fn update_request(&self) -> Result<(), anyhow::Error> {
@@ -1554,6 +1561,31 @@ impl ServiceModel {
             .apply_update()
             .await
             .inspect_err(|err| self.set_update_error(err))
+    }
+}
+
+fn local_import_error_message(error: &anyhow::Error) -> String {
+    // Host verification errors cross the RPC boundary as text.
+    let details = format!("{error:#}");
+    if error.downcast_ref::<std::string::FromUtf8Error>().is_some()
+        || details.contains("Deserializing manifest")
+    {
+        "This file is not a valid update manifest. Select the .manifest or manifest.json file in the signed update folder.".into()
+    } else if details.contains("manifest Ed25519 signature verification failed")
+        || details.contains("detached signature must contain 64 bytes")
+        || details.contains("Ed25519 signature must be exactly 64 bytes")
+    {
+        "The update signature could not be verified. Obtain a complete, unmodified update signed for this device, then import it again.".into()
+    } else if details.contains("update generation ")
+        && details.contains(" is not newer than accepted generation ")
+    {
+        "This update is the same generation as, or older than, the installed system. Select an update with a higher generation.".into()
+    } else if details == "Local update import cancelled" {
+        "Import cancelled. Select the update manifest to try again.".into()
+    } else {
+        format!(
+            "Could not import the update. Check that the complete update folder is available, then try again.\n\n{details}"
+        )
     }
 }
 
