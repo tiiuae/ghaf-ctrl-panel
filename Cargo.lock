@@ -881,7 +881,7 @@ dependencies = [
 [[package]]
 name = "givc-client"
 version = "0.0.1"
-source = "git+https://github.com/tiiuae/ghaf-givc?rev=661af67e7d9347ee21c4ff116ea6c1ede08f48f9#661af67e7d9347ee21c4ff116ea6c1ede08f48f9"
+source = "git+https://github.com/tiiuae/ghaf-givc?rev=fda3ebde14b16311cfb36d79fd649387cf341585#fda3ebde14b16311cfb36d79fd649387cf341585"
 dependencies = [
  "anyhow",
  "async-channel",
@@ -900,7 +900,7 @@ dependencies = [
 [[package]]
 name = "givc-common"
 version = "0.0.1"
-source = "git+https://github.com/tiiuae/ghaf-givc?rev=661af67e7d9347ee21c4ff116ea6c1ede08f48f9#661af67e7d9347ee21c4ff116ea6c1ede08f48f9"
+source = "git+https://github.com/tiiuae/ghaf-givc?rev=fda3ebde14b16311cfb36d79fd649387cf341585#fda3ebde14b16311cfb36d79fd649387cf341585"
 dependencies = [
  "anyhow",
  "glib",
